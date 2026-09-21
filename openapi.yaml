@@ -1,0 +1,1698 @@
+openapi: 3.1.0
+info:
+  title: Filmmaker Portfolio API
+  version: 1.0.0
+  description: |
+    REST API contract for the V1 filmmaker portfolio modular monolith.
+    Public visitors do not have accounts. Admin authentication and private-project
+    access are separate security contexts.
+servers:
+  - url: /api/v1
+    description: Same-origin application API
+
+tags:
+  - name: Auth
+  - name: Projects
+  - name: Public Projects
+  - name: Blocks
+  - name: Block Media
+  - name: Media
+
+paths:
+  /auth/login:
+    post:
+      tags: [Auth]
+      operationId: loginAdmin
+      summary: Authenticate an admin
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminLoginRequest'
+      responses:
+        '200':
+          description: Authenticated. Server sets a secure HTTPOnly admin session cookie.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUserEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      operationId: logoutAdmin
+      summary: End the current admin session
+      security:
+        - adminSession: []
+      responses:
+        '204':
+          description: Logged out
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      operationId: getCurrentAdmin
+      summary: Return the current admin
+      security:
+        - adminSession: []
+      responses:
+        '200':
+          description: Current admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUserEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /projects:
+    get:
+      tags: [Projects]
+      operationId: listAdminProjects
+      summary: List projects for the CMS
+      security:
+        - adminSession: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/ProjectStatus'
+        - name: visibility
+          in: query
+          schema:
+            $ref: '#/components/schemas/ProjectVisibility'
+        - name: search
+          in: query
+          schema:
+            type: string
+            maxLength: 200
+      responses:
+        '200':
+          description: Paginated project list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectSummaryCollectionEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags: [Projects]
+      operationId: createProject
+      summary: Create a draft project
+      security:
+        - adminSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProjectRequest'
+      responses:
+        '201':
+          description: Project created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectDetailEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Slug already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /projects/order:
+    put:
+      tags: [Projects]
+      operationId: reorderProjects
+      summary: Atomically replace project display ordering
+      description: |
+        Reassigns `display_position` for every project in the payload inside a
+        single database transaction, as contiguous integers from 0 in array
+        order.
+
+        This is the only write path for `display_position`; it is deliberately
+        not settable through `PATCH /projects/{projectId}`, so that reordering
+        can never degrade into one HTTP mutation per moved row. See ADR-0002.
+
+        Display order is maintained across all non-soft-deleted projects
+        regardless of status. Public listings filter that ordered set; they do
+        not maintain a separate order.
+      security:
+        - adminSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReorderProjectsRequest'
+      responses:
+        '204':
+          description: Project display order updated transactionally
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Payload is incomplete or references unknown or soft-deleted projects
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /projects/featured/order:
+    put:
+      tags: [Projects]
+      operationId: reorderFeaturedProjects
+      summary: Atomically replace featured project ordering
+      description: |
+        Reassigns `featured_position` for every project in the payload inside a
+        single database transaction, as contiguous integers from 0 in array
+        order.
+
+        Every project in the payload must already have `isFeatured = true`, and
+        the payload must contain all of them. This is the only write path for
+        `featured_position`. See ADR-0002.
+
+        Toggling `isFeatured` remains a `PATCH /projects/{projectId}` operation;
+        a newly featured project is appended to the end of the featured order.
+      security:
+        - adminSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReorderFeaturedProjectsRequest'
+      responses:
+        '204':
+          description: Featured project order updated transactionally
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Payload is incomplete or contains projects that are not featured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /projects/{projectId}:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    get:
+      tags: [Projects]
+      operationId: getAdminProject
+      summary: Get a project including draft blocks and media
+      security:
+        - adminSession: []
+      responses:
+        '200':
+          description: Project
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectDetailEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [Projects]
+      operationId: updateProject
+      summary: Partially update project metadata
+      security:
+        - adminSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProjectRequest'
+      responses:
+        '200':
+          description: Updated project
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectDetailEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Slug or state conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    delete:
+      tags: [Projects]
+      operationId: softDeleteProject
+      summary: Soft-delete a project and archive it
+      security:
+        - adminSession: []
+      responses:
+        '204':
+          description: Project soft-deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /projects/{projectId}/publish:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    post:
+      tags: [Projects]
+      operationId: publishProject
+      summary: Validate and publish a project
+      security:
+        - adminSession: []
+      responses:
+        '200':
+          description: Published project
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectDetailEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /projects/{projectId}/unpublish:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    post:
+      tags: [Projects]
+      operationId: unpublishProject
+      summary: Return a published project to draft
+      security:
+        - adminSession: []
+      responses:
+        '200':
+          description: Draft project
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectDetailEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Project cannot be unpublished from its current state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /projects/{projectId}/archive:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    post:
+      tags: [Projects]
+      operationId: archiveProject
+      summary: Archive a project without deleting it
+      security:
+        - adminSession: []
+      responses:
+        '200':
+          description: Archived project
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectDetailEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /projects/{projectId}/password:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    put:
+      tags: [Projects]
+      operationId: setProjectPassword
+      summary: Set or replace the project password
+      security:
+        - adminSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetProjectPasswordRequest'
+      responses:
+        '204':
+          description: Password updated
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    delete:
+      tags: [Projects]
+      operationId: removeProjectPassword
+      summary: Remove the project password
+      description: Only allowed when the project is not PRIVATE.
+      security:
+        - adminSession: []
+      responses:
+        '204':
+          description: Password removed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: A private project must keep a password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /public/projects:
+    get:
+      tags: [Public Projects]
+      operationId: listPublicProjects
+      summary: List published, non-deleted, PUBLIC projects
+      description: |
+        Returns only projects satisfying all of:
+
+            status = 'PUBLISHED' AND deleted_at IS NULL AND visibility = 'PUBLIC'
+
+        PRIVATE projects are never enumerated here in V1 — not even as locked
+        placeholders. No field of a PRIVATE project, including its cover media,
+        short description, year or category, may appear in this response before
+        project access has been verified.
+
+        A PRIVATE project is reachable only through its direct project URL,
+        where the visitor supplies the project password. See ADR-0003.
+
+        Results are ordered by `displayPosition` ascending.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - name: featured
+          in: query
+          schema:
+            type: boolean
+        - name: category
+          in: query
+          schema:
+            type: string
+            maxLength: 120
+      responses:
+        '200':
+          description: Public project summaries. PRIVATE projects are excluded entirely.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicProjectSummaryCollectionEnvelope'
+
+  /public/projects/{slug}:
+    parameters:
+      - $ref: '#/components/parameters/ProjectSlug'
+    get:
+      tags: [Public Projects]
+      operationId: getPublicProject
+      summary: Get a published project by slug
+      description: |
+        PUBLIC projects are returned directly. PRIVATE projects require a valid
+        project-access cookie previously granted by the access endpoint.
+
+        This is the only way to reach a PRIVATE project in V1: the visitor must
+        already hold the direct URL, because PRIVATE projects are not
+        enumerated by GET /public/projects (ADR-0003). Without a valid access
+        cookie the response is 403 and carries no project content.
+      security: []
+      responses:
+        '200':
+          description: Public project detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicProjectEnvelope'
+        '403':
+          description: |
+            Private project is locked. The body carries the error envelope only —
+            no title, cover, description, blocks or media. The client should
+            present the password prompt and call
+            POST /public/projects/{slug}/access.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /public/projects/{slug}/access:
+    parameters:
+      - $ref: '#/components/parameters/ProjectSlug'
+    post:
+      tags: [Public Projects]
+      operationId: unlockPrivateProject
+      summary: Verify a private-project password and grant temporary access
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectAccessRequest'
+      responses:
+        '204':
+          description: Access granted; server sets a signed HTTPOnly project-access cookie.
+        '401':
+          description: Incorrect project password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /projects/{projectId}/blocks:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    post:
+      tags: [Blocks]
+      operationId: createBlock
+      summary: Add a block to a project
+      security:
+        - adminSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBlockRequest'
+      responses:
+        '201':
+          description: Block created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /projects/{projectId}/blocks/order:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    put:
+      tags: [Blocks]
+      operationId: reorderBlocks
+      summary: Atomically replace block ordering for a project
+      security:
+        - adminSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReorderBlocksRequest'
+      responses:
+        '204':
+          description: Block order updated transactionally
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Payload contains blocks outside the target project or is incomplete
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /blocks/{blockId}:
+    parameters:
+      - $ref: '#/components/parameters/BlockId'
+    patch:
+      tags: [Blocks]
+      operationId: updateBlock
+      summary: Update block configuration
+      security:
+        - adminSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBlockRequest'
+      responses:
+        '200':
+          description: Updated block
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    delete:
+      tags: [Blocks]
+      operationId: deleteBlock
+      summary: Delete a block and its block-media references
+      security:
+        - adminSession: []
+      responses:
+        '204':
+          description: Block deleted; Media Library assets remain intact
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /blocks/{blockId}/media:
+    parameters:
+      - $ref: '#/components/parameters/BlockId'
+    post:
+      tags: [Block Media]
+      operationId: addMediaToBlock
+      summary: Add a Media Library asset to a block
+      security:
+        - adminSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddBlockMediaRequest'
+      responses:
+        '201':
+          description: Block media created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockMediaEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /blocks/{blockId}/media/order:
+    parameters:
+      - $ref: '#/components/parameters/BlockId'
+    put:
+      tags: [Block Media]
+      operationId: reorderBlockMedia
+      summary: Atomically replace media ordering inside a block
+      security:
+        - adminSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReorderBlockMediaRequest'
+      responses:
+        '204':
+          description: Media order updated transactionally
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Payload contains media references outside the target block or is incomplete
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /blocks/{blockId}/media/{blockMediaId}:
+    parameters:
+      - $ref: '#/components/parameters/BlockId'
+      - $ref: '#/components/parameters/BlockMediaId'
+    patch:
+      tags: [Block Media]
+      operationId: updateBlockMedia
+      summary: Update per-use media presentation configuration
+      security:
+        - adminSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBlockMediaRequest'
+      responses:
+        '200':
+          description: Block media updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockMediaEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    delete:
+      tags: [Block Media]
+      operationId: removeMediaFromBlock
+      summary: Remove a media reference from a block
+      security:
+        - adminSession: []
+      responses:
+        '204':
+          description: Reference removed; Media Library asset remains intact
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /media:
+    get:
+      tags: [Media]
+      operationId: listMedia
+      summary: List Media Library assets
+      security:
+        - adminSession: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - name: type
+          in: query
+          schema:
+            $ref: '#/components/schemas/MediaType'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/MediaStatus'
+        - name: search
+          in: query
+          schema:
+            type: string
+            maxLength: 200
+      responses:
+        '200':
+          description: Paginated media list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaCollectionEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /media/uploads:
+    post:
+      tags: [Media]
+      operationId: createMediaUpload
+      summary: Create a media record and authorize a direct-to-storage upload
+      security:
+        - adminSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMediaUploadRequest'
+      responses:
+        '201':
+          description: Upload authorization created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaUploadAuthorizationEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '413':
+          description: File exceeds configured size limit
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /media/{mediaId}/complete:
+    parameters:
+      - $ref: '#/components/parameters/MediaId'
+    post:
+      tags: [Media]
+      operationId: completeMediaUpload
+      summary: Verify/finalize an uploaded media object
+      security:
+        - adminSession: []
+      responses:
+        '200':
+          description: Media finalized or processing started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Upload object is missing or cannot be finalized from current state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /media/external:
+    post:
+      tags: [Media]
+      operationId: createExternalMedia
+      summary: Register an external Vimeo/YouTube-style video
+      security:
+        - adminSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateExternalMediaRequest'
+      responses:
+        '201':
+          description: External media created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /media/{mediaId}:
+    parameters:
+      - $ref: '#/components/parameters/MediaId'
+    patch:
+      tags: [Media]
+      operationId: updateMedia
+      summary: Update editable media metadata
+      security:
+        - adminSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMediaRequest'
+      responses:
+        '200':
+          description: Updated media
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    delete:
+      tags: [Media]
+      operationId: softDeleteMedia
+      summary: Soft-delete an unused media asset
+      security:
+        - adminSession: []
+      responses:
+        '204':
+          description: Media soft-deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Media is referenced by a project cover or block
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+components:
+  securitySchemes:
+    adminSession:
+      type: apiKey
+      in: cookie
+      name: portfolio_admin_session
+      description: Secure HTTPOnly admin session cookie.
+
+  parameters:
+    ProjectId:
+      name: projectId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ProjectSlug:
+      name: slug
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+        maxLength: 200
+    BlockId:
+      name: blockId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    BlockMediaId:
+      name: blockMediaId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    MediaId:
+      name: mediaId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PageSize:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+  responses:
+    Unauthorized:
+      description: Authentication is missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    ValidationError:
+      description: Request or domain validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    RateLimited:
+      description: Too many requests
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds until retry is allowed, when known.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+
+  schemas:
+    ProjectStatus:
+      type: string
+      enum: [DRAFT, PUBLISHED, ARCHIVED]
+
+    ProjectVisibility:
+      type: string
+      enum: [PUBLIC, PRIVATE]
+
+    BlockType:
+      type: string
+      enum: [HERO, TEXT, IMAGE, VIDEO, GRID, GALLERY, SPACER]
+
+    MediaType:
+      type: string
+      enum: [IMAGE, VIDEO, EXTERNAL_VIDEO]
+
+    MediaStatus:
+      type: string
+      enum: [UPLOADING, PROCESSING, READY, FAILED]
+
+    Error:
+      type: object
+      additionalProperties: false
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: [object, 'null']
+          additionalProperties: true
+
+    ErrorEnvelope:
+      type: object
+      additionalProperties: false
+      required: [error]
+      properties:
+        error:
+          $ref: '#/components/schemas/Error'
+
+    PaginationMeta:
+      type: object
+      additionalProperties: false
+      required: [page, pageSize, total]
+      properties:
+        page:
+          type: integer
+          minimum: 1
+        pageSize:
+          type: integer
+          minimum: 1
+        total:
+          type: integer
+          minimum: 0
+
+    AdminLoginRequest:
+      type: object
+      additionalProperties: false
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 320
+        password:
+          type: string
+          minLength: 8
+          maxLength: 200
+
+    AdminUser:
+      type: object
+      additionalProperties: false
+      required: [id, email, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: [string, 'null']
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        lastLoginAt:
+          type: [string, 'null']
+          format: date-time
+
+    AdminUserEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/AdminUser'
+
+    ProjectCredit:
+      type: object
+      additionalProperties: false
+      required: [role, name]
+      properties:
+        role:
+          type: string
+          maxLength: 120
+        name:
+          type: string
+          maxLength: 200
+
+    Media:
+      type: object
+      additionalProperties: false
+      required: [id, type, status, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          $ref: '#/components/schemas/MediaType'
+        status:
+          $ref: '#/components/schemas/MediaStatus'
+        url:
+          type: [string, 'null']
+          format: uri
+        thumbnailUrl:
+          type: [string, 'null']
+          format: uri
+        externalProvider:
+          type: [string, 'null']
+        externalUrl:
+          type: [string, 'null']
+          format: uri
+        filename:
+          type: [string, 'null']
+        originalFilename:
+          type: [string, 'null']
+        mimeType:
+          type: [string, 'null']
+        width:
+          type: [integer, 'null']
+          minimum: 1
+        height:
+          type: [integer, 'null']
+          minimum: 1
+        durationMs:
+          type: [integer, 'null']
+          minimum: 0
+        fileSizeBytes:
+          type: [integer, 'null']
+          minimum: 0
+        altText:
+          type: [string, 'null']
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    MediaEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/Media'
+
+    MediaCollectionEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Media'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    BlockMedia:
+      type: object
+      additionalProperties: false
+      required: [id, position, config, media, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        position:
+          type: integer
+          minimum: 0
+        config:
+          type: object
+          additionalProperties: true
+        media:
+          $ref: '#/components/schemas/Media'
+        createdAt:
+          type: string
+          format: date-time
+
+    BlockMediaEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/BlockMedia'
+
+    ProjectBlock:
+      type: object
+      additionalProperties: false
+      required: [id, type, position, config, media, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          $ref: '#/components/schemas/BlockType'
+        position:
+          type: integer
+          minimum: 0
+        config:
+          type: object
+          additionalProperties: true
+        media:
+          type: array
+          items:
+            $ref: '#/components/schemas/BlockMedia'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    BlockEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/ProjectBlock'
+
+    ProjectSummary:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - title
+        - slug
+        - status
+        - visibility
+        - isFeatured
+        - displayPosition
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        slug:
+          type: string
+        shortDescription:
+          type: [string, 'null']
+        year:
+          type: [integer, 'null']
+        category:
+          type: [string, 'null']
+        status:
+          $ref: '#/components/schemas/ProjectStatus'
+        visibility:
+          $ref: '#/components/schemas/ProjectVisibility'
+        cover:
+          oneOf:
+            - $ref: '#/components/schemas/Media'
+            - type: 'null'
+        isFeatured:
+          type: boolean
+        featuredPosition:
+          type: [integer, 'null']
+          minimum: 0
+        displayPosition:
+          type: integer
+          minimum: 0
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ProjectDetail:
+      allOf:
+        - $ref: '#/components/schemas/ProjectSummary'
+        - type: object
+          required: [credits, blocks]
+          properties:
+            description:
+              type: [string, 'null']
+            client:
+              type: [string, 'null']
+            credits:
+              type: array
+              items:
+                $ref: '#/components/schemas/ProjectCredit'
+            seoTitle:
+              type: [string, 'null']
+            seoDescription:
+              type: [string, 'null']
+            publishedAt:
+              type: [string, 'null']
+              format: date-time
+            hasPassword:
+              type: boolean
+              description: Admin-only derived flag. Password hashes are never returned.
+            blocks:
+              type: array
+              items:
+                $ref: '#/components/schemas/ProjectBlock'
+
+    ProjectDetailEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/ProjectDetail'
+
+    ProjectSummaryCollectionEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectSummary'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    PublicProjectSummary:
+      type: object
+      additionalProperties: false
+      description: |
+        A PUBLIC, PUBLISHED, non-deleted project as seen by an anonymous
+        visitor. PRIVATE projects are never represented by this schema in V1;
+        they are excluded from the public listing entirely (ADR-0003).
+
+        The former `requiresPassword` flag was removed: with PRIVATE projects
+        excluded, it could only ever be `false`. Re-introducing it is the
+        forward path if the deferred "locked card" feature is approved.
+      required: [id, title, slug, isFeatured, displayPosition]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        slug:
+          type: string
+        shortDescription:
+          type: [string, 'null']
+        year:
+          type: [integer, 'null']
+        category:
+          type: [string, 'null']
+        cover:
+          oneOf:
+            - $ref: '#/components/schemas/Media'
+            - type: 'null'
+        isFeatured:
+          type: boolean
+        displayPosition:
+          type: integer
+          minimum: 0
+
+    PublicProjectSummaryCollectionEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicProjectSummary'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    PublicProject:
+      type: object
+      additionalProperties: false
+      required: [id, title, slug, credits, cover, blocks]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        slug:
+          type: string
+        shortDescription:
+          type: [string, 'null']
+        description:
+          type: [string, 'null']
+        year:
+          type: [integer, 'null']
+        category:
+          type: [string, 'null']
+        client:
+          type: [string, 'null']
+        credits:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectCredit'
+        cover:
+          oneOf:
+            - $ref: '#/components/schemas/Media'
+            - type: 'null'
+        blocks:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectBlock'
+
+    PublicProjectEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/PublicProject'
+
+    CreateProjectRequest:
+      type: object
+      additionalProperties: false
+      required: [title, slug]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 200
+          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+        shortDescription:
+          type: [string, 'null']
+          maxLength: 500
+        description:
+          type: [string, 'null']
+        year:
+          type: [integer, 'null']
+          minimum: 1900
+          maximum: 2100
+        category:
+          type: [string, 'null']
+          maxLength: 120
+        client:
+          type: [string, 'null']
+          maxLength: 200
+        credits:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectCredit'
+          default: []
+        visibility:
+          $ref: '#/components/schemas/ProjectVisibility'
+        coverMediaId:
+          type: [string, 'null']
+          format: uuid
+
+    UpdateProjectRequest:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 200
+          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+        shortDescription:
+          type: [string, 'null']
+          maxLength: 500
+        description:
+          type: [string, 'null']
+        year:
+          type: [integer, 'null']
+          minimum: 1900
+          maximum: 2100
+        category:
+          type: [string, 'null']
+          maxLength: 120
+        client:
+          type: [string, 'null']
+          maxLength: 200
+        credits:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectCredit'
+        visibility:
+          $ref: '#/components/schemas/ProjectVisibility'
+        coverMediaId:
+          type: [string, 'null']
+          format: uuid
+        isFeatured:
+          type: boolean
+          description: |
+            Toggles featured status only. Ordering is not settable here —
+            `displayPosition` and `featuredPosition` are written exclusively by
+            PUT /projects/order and PUT /projects/featured/order. See ADR-0002.
+        seoTitle:
+          type: [string, 'null']
+          maxLength: 200
+        seoDescription:
+          type: [string, 'null']
+          maxLength: 500
+
+    ReorderProjectsRequest:
+      type: object
+      additionalProperties: false
+      required: [projectIds]
+      properties:
+        projectIds:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            format: uuid
+          description: |
+            The complete set of non-soft-deleted project IDs, in the desired
+            display order. `display_position` is reassigned as contiguous
+            integers from 0. A partial set is rejected with 409.
+
+    ReorderFeaturedProjectsRequest:
+      type: object
+      additionalProperties: false
+      required: [projectIds]
+      properties:
+        projectIds:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            format: uuid
+          description: |
+            The complete set of project IDs with `isFeatured = true`, in the
+            desired featured order. `featured_position` is reassigned as
+            contiguous integers from 0. A partial set, or any project that is
+            not featured, is rejected with 409.
+
+    SetProjectPasswordRequest:
+      type: object
+      additionalProperties: false
+      required: [password]
+      properties:
+        password:
+          type: string
+          minLength: 8
+          maxLength: 200
+
+    ProjectAccessRequest:
+      type: object
+      additionalProperties: false
+      required: [password]
+      properties:
+        password:
+          type: string
+          minLength: 1
+          maxLength: 200
+
+    CreateBlockRequest:
+      type: object
+      additionalProperties: false
+      required: [type, position]
+      properties:
+        type:
+          $ref: '#/components/schemas/BlockType'
+        position:
+          type: integer
+          minimum: 0
+        config:
+          type: object
+          additionalProperties: true
+          default: {}
+
+    UpdateBlockRequest:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        config:
+          type: object
+          additionalProperties: true
+
+    ReorderBlocksRequest:
+      type: object
+      additionalProperties: false
+      required: [blockIds]
+      properties:
+        blockIds:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            format: uuid
+
+    AddBlockMediaRequest:
+      type: object
+      additionalProperties: false
+      required: [mediaId, position]
+      properties:
+        mediaId:
+          type: string
+          format: uuid
+        position:
+          type: integer
+          minimum: 0
+        config:
+          type: object
+          additionalProperties: true
+          default: {}
+
+    UpdateBlockMediaRequest:
+      type: object
+      additionalProperties: false
+      required: [config]
+      properties:
+        config:
+          type: object
+          additionalProperties: true
+
+    ReorderBlockMediaRequest:
+      type: object
+      additionalProperties: false
+      required: [blockMediaIds]
+      properties:
+        blockMediaIds:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            format: uuid
+
+    CreateMediaUploadRequest:
+      type: object
+      additionalProperties: false
+      required: [filename, mimeType, fileSizeBytes]
+      properties:
+        filename:
+          type: string
+          minLength: 1
+          maxLength: 500
+        mimeType:
+          type: string
+          minLength: 1
+          maxLength: 255
+        fileSizeBytes:
+          type: integer
+          minimum: 1
+        altText:
+          type: [string, 'null']
+
+    MediaUploadAuthorization:
+      type: object
+      additionalProperties: false
+      required: [mediaId, uploadUrl, expiresAt]
+      properties:
+        mediaId:
+          type: string
+          format: uuid
+        uploadUrl:
+          type: string
+          format: uri
+        uploadMethod:
+          type: string
+          enum: [PUT, POST]
+          default: PUT
+        headers:
+          type: object
+          additionalProperties:
+            type: string
+          description: Headers the browser must send directly to object storage.
+        expiresAt:
+          type: string
+          format: date-time
+
+    MediaUploadAuthorizationEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/MediaUploadAuthorization'
+
+    CreateExternalMediaRequest:
+      type: object
+      additionalProperties: false
+      required: [provider, url]
+      properties:
+        provider:
+          type: string
+          enum: [vimeo, youtube]
+        url:
+          type: string
+          format: uri
+        altText:
+          type: [string, 'null']
+
+    UpdateMediaRequest:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        altText:
+          type: [string, 'null']

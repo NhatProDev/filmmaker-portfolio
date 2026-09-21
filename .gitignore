@@ -1,0 +1,66 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+
+# Next.js
+.next/
+out/
+build/
+dist/
+next-env.d.ts
+
+# Environment — never commit real secrets (CLAUDE.md §16)
+.env
+.env.*
+!.env.example
+
+# Testing / coverage
+coverage/
+.nyc_output/
+
+# Caches
+.turbo/
+.swc/
+*.tsbuildinfo
+.eslintcache
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# Office lock files (the human description is a .docx)
+~$*
+
+# Vercel
+.vercel
+
+# Deliberately NOT ignored:
+#   docs/human-description/references/*.png   tier-2 design authority (CLAUDE.md §21)
+#   docs/human-description/description.source.docx   signed-off source of record
+#   db/migrations/*.sql                       persistence contract
+
+docs/human-description/references/*.png
+
+docs/human-description/references/*.png

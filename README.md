@@ -1,0 +1,96 @@
+# Filmmaker Portfolio V1
+
+A professional filmmaker portfolio: public site (Home, Art Works, About Me,
+Contact), public and password-protected project pages, and an admin CMS with a
+block-based project builder.
+
+**Status: planning and contracts only.** There is no application code yet.
+Next.js has not been bootstrapped and no dependencies are installed. The
+governance documents, REST contract and database schema are complete and
+approved; implementation has not begun.
+
+## Repository map
+
+```text
+CLAUDE.md                     Engineering governance. Read this first.
+README.md                     This file.
+openapi.yaml                  Canonical REST contract (OpenAPI 3.1).
+
+db/
+  schema.ts                   Canonical Drizzle/PostgreSQL schema.
+  migrations/
+    0001_initial.sql          Initial SQL migration.
+
+docs/
+  human-description/
+    description.md            Human product intent.
+    description.source.docx   Signed-off source of record for the above.
+    references/               User-provided visual references.
+      INDEX.md                What each reference demonstrates, and its scope.
+  design/
+    guidelines/               External design guidance. Empty by instruction.
+  architecture/
+    decisions/                Approved ADRs. See its README.
+
+scripts/                      Operational scripts. seed-admin.ts is reserved.
+src/                          Application code. Does not exist yet.
+```
+
+## Precedence
+
+Two separate ladders, both defined in `CLAUDE.md`. They answer different
+questions and neither overrides the other.
+
+- **Engineering** — CLAUDE.md §22. `CLAUDE.md` › approved ADRs › `openapi.yaml`
+  › `db/schema.ts` and migrations › implementation code.
+- **Visual design** — CLAUDE.md §21. Approved design specification ›
+  user-provided visual references › human product intent › external design
+  guidelines.
+
+Do not silently change a higher-precedence artifact to make implementation
+easier. Contract changes require approval — see CLAUDE.md §20.
+
+The locked V1 technology and architecture choices live in **CLAUDE.md §3** and
+are deliberately not repeated here; a second copy would drift.
+
+## Reading order
+
+1. `CLAUDE.md` — in full.
+2. `docs/architecture/decisions/` — the approved ADRs.
+3. `openapi.yaml` and `db/schema.ts` for the area you are working on.
+4. `docs/human-description/description.md` and
+   `docs/human-description/references/INDEX.md` before any UI work.
+
+## Implementation sequence
+
+Not yet started. When it begins:
+
+1. Initialise the Next.js / TypeScript application in `src/`.
+2. Configure PostgreSQL + Drizzle. `drizzle.config.ts` points at `./db/schema.ts`
+   with `out: './db/migrations'` (ADR-0001).
+3. Apply migrations and confirm schema parity.
+4. Authentication and Project CRUD as the first API vertical slice.
+5. Project Builder, Media, and Private Project Access in later slices.
+6. CMS UI only after the corresponding domain/API behaviour works.
+7. Public site UI only after the design specification is approved — it does not
+   exist yet, and per architect decision Q13 it will not be authored until the
+   external design guideline has been imported and reviewed alongside the
+   visual references.
+
+## Schema parity
+
+`db/schema.ts` is the canonical model definition.
+
+`db/migrations/0001_initial.sql` is a hand-authored equivalent for review and
+bootstrap. Once the repository is initialised with a pinned Drizzle version, use
+Drizzle Kit to generate subsequent migrations from schema changes rather than
+hand-editing migration history.
+
+The two are currently in agreement: same five enums, five tables, all columns,
+nine check constraints and thirteen indexes. There is no automated parity check
+yet, so this must be re-verified whenever either file changes.
+
+## Version control
+
+This repository is **not yet under version control**. Git is not installed on
+the current machine. See the restructure report for remediation.

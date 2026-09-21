@@ -659,10 +659,10 @@ reference wins and the guideline is set aside for that decision.
 
 | Tier | Source | Location | Status |
 |---|---|---|---|
-| 1 | Approved design specification | `docs/design/` | **Does not exist yet.** Not to be authored until tier 4 is imported and reviewed alongside tier 2. |
-| 2 | User-provided visual references | `docs/human-description/references/` | Present. See `references/INDEX.md`. |
+| 1 | Approved design specification | `docs/design/` | **No approved specification exists yet — Tier 1 is currently empty.** `docs/design/design-direction.md` exists with status **Draft — Pending Design Exploration**. It is an **input to** Claude Design exploration, not its conclusion, and it does **not** carry Tier 1 binding authority until explicit Project Owner / Software Architect approval. `design-system.md` and `page-specifications.md` do not exist yet. |
+| 2 | User-provided visual references | `docs/human-description/references/` | Present. See `references/INDEX.md`. Image files are local-only, not in Git. |
 | 3 | Human product intent | `docs/human-description/description.md` | Present. Source of record is `description.source.docx`. |
-| 4 | External/general design guidelines | `docs/design/guidelines/` | **Empty by instruction.** Do not invent contents. An external frontend-design guideline will be imported later. |
+| 4 | External/general design guidelines | `docs/design/guidelines/frontend-design/` | **Imported.** Anthropic frontend-design skill: `SKILL.md`, `LICENSE.md`, `SOURCE.md`. Advisory only. |
 
 ### Reference scope limits
 

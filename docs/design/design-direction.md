@@ -436,17 +436,27 @@ neither is new. **They are not merged**, and must not be.
 - justified mixed-aspect rows (reference 3; the brief's "Pixieset" cue)
 - horizontal media strips (reference 5, layout only)
 - slideshows
+- **video grids / video walls** — many videos flowing in columns per breakpoint
 - native-aspect media sequences
 - any presentation where media keeps its own proportions and the container adapts
+
+GALLERY may hold **image and video together**. The presentation mode decides
+whether mixing is sensible, not whether it is permitted (ADR-0008).
 
 **GRID owns** — deliberate composition:
 
 - deliberate column composition with unequal spans
 - mixed text and media in one composition
 - asymmetric responsive layout
+- **manually composed video frames** — several videos placed at chosen spans,
+  alone or mixed with stills and text
 
 The distinction is *flow* versus *composition*. GALLERY arranges a sequence of
 media by rule; GRID places specific items in specific places.
+
+This holds for video specifically. Three videos composed at deliberate spans is
+a **GRID**. Twenty videos flowing four-per-row is a **GALLERY video wall**. They
+may look similar; they are authored differently, and they are not merged.
 
 ### GRID is a responsive composition container
 
@@ -569,11 +579,26 @@ Media is the subject (A1), presented natively (A6).
 
 Behaviour is locked by context:
 
-| Context | Behaviour |
-|---|---|
-| Home hero | Autoplay, **muted**, loop |
-| Main project films | **Click-to-play**, normal audio, visible controls |
-| Preview / background video | Autoplay muted, where appropriate |
+Playback is one of three modes (ADR-0008). Every other flag derives from the
+mode, so a surface cannot be half-configured.
+
+| Mode | Context | Behaviour |
+|---|---|---|
+| `CLICK_TO_PLAY` | Main project films | Real controls, real transport, audio available |
+| `AUTOPLAY_VISIBLE` | **Video walls, grids, work previews, media-heavy Home** | Muted, looping, inline; plays when in view, pauses when not |
+| `AUTOPLAY_ALWAYS` | **Standalone ambient video only** — e.g. the Home hero | Muted, looping, always running |
+
+`AUTOPLAY_VISIBLE` is the default for any surface with more than one video —
+walls, grids, strips, and VIDEO children of a GRID.
+
+**`AUTOPLAY_ALWAYS` is restricted by context.** It is available only to a
+standalone ambient video block, never inside a GRID, never on a GALLERY, and
+never on a `VIDEO_GRID` item. A multi-video surface uses `AUTOPLAY_VISIBLE` or
+`CLICK_TO_PLAY`.
+
+The design consequence: a composition cannot be built from many
+always-running videos. If a surface holds more than one video, its motion is
+tied to what the visitor is actually looking at.
 
 Sound is never initiated without a deliberate act by the visitor. A project film
 is a screening, so it gets real controls and a real transport — reference 4 shows
@@ -581,7 +606,28 @@ a visible transport bar and a plain circular play affordance. Autoplay surfaces
 are ambient and always silent.
 
 Every autoplaying surface must respect `prefers-reduced-motion` (A10) and must
-degrade to a still frame.
+degrade to a still frame. Autoplay may also simply be **refused** by the browser;
+the poster frame is the design, not a failure state, and every autoplay surface
+must be composed so its still frame is worth looking at.
+
+### Designing a video wall
+
+A wall of moving images is the most direct expression of A1 — media is the work.
+It is also the easiest way to lose §2's composed, unhurried tone.
+
+The wall must read as **a contact sheet in motion**, not a feed:
+
+- **Silent, always.** Motion without sound stays ambient rather than demanding.
+- **Uniform cell geometry, varied content.** The grid is the calm; the footage is
+  the incident. Cells do not animate, lift, scale or shadow on hover — the
+  restraint in A2 applies to the container even when the contents move.
+- **Column counts fall at narrower breakpoints.** A four-column wall on a phone
+  is neither readable nor affordable.
+- **The wall is one element in a composition**, not the page. A3 still applies:
+  a page whose every section is a moving wall has no hierarchy left.
+
+A wall of autoplaying videos must still feel **designed** — never a generic
+social feed, media dashboard or asset browser.
 
 ## 10. Light / dark page philosophy
 
@@ -612,6 +658,27 @@ This is the site's signature structural move.
 ## 11. Motion philosophy
 
 **One orchestrated moment beats scattered effects.**
+
+### Content motion is not interface motion
+
+This section governs **interface** motion — transitions, reveals, hover states,
+entrances. It does not govern **playing media**.
+
+A wall of autoplaying videos is not a violation of restraint. The footage *is*
+the work (A1); moving is what it does. The restraint budget this section
+protects is spent on chrome, not on content.
+
+The two must not be confused in either direction:
+
+- Playing media does **not** license animated interface around it. A video wall
+  sits in a still container — no hover lift, no scale, no shadow, no staggered
+  entrance. The grid holds still so the footage can move.
+- The interface budget is **not** enlarged by a page being media-heavy. If
+  anything it shrinks: with twenty moving cells on screen, any additional
+  interface motion is noise.
+
+Silence is what keeps this true. Ambient video is muted always (§9), so motion
+stays atmospheric rather than demanding.
 
 - **One signature transition or reveal**, used consistently, owns the site's
   sense of motion. The light-to-dark project entry is the leading candidate.
@@ -704,6 +771,8 @@ Any of these in public UI is a defect. They are not matters of taste here.
 - Floating pill navigation and SaaS-style sticky chrome
 - Badge/pill/chip components used as ornament
 - Dashboard framing, stat tiles, KPI rows, feature-grid marketing sections
+- A video wall that reads as a social feed, media dashboard or asset browser
+- Hover lift, scale, shadow or staggered entrance on video tiles (§11)
 
 ### Generated-design tells
 
@@ -728,6 +797,9 @@ Any of these in public UI is a defect. They are not matters of taste here.
 - Arbitrary custom CSS, external font URLs, or uploaded font injection (§5)
 - A visitor-facing light/dark toggle (§10)
 - Autoplaying audio (§9)
+- `AUTOPLAY_ALWAYS` on anything but a standalone ambient video — never inside a
+  GRID, on a GALLERY, or on a `VIDEO_GRID` item (§9)
+- An autoplay surface whose poster frame was never considered (§9)
 - A private-project gate presented as account login (§12)
 
 **Two entries are deliberately absent from this list.** Accent used as a large
@@ -765,6 +837,10 @@ guideline (advisory).
 | Home is composer-driven, not a fixed template (§8) | Locked Product Owner requirement; ADR-0007 | ADR |
 | Light browse / dark project (§10) | Refs 1, 2, 3 light; ref 4 dark | 2 |
 | Video transport + click-to-play (§9) | Ref 4 shows transport bar and play affordance | 2 |
+| Three playback modes; autoplay always muted (§9) | Locked Product Owner requirement; ADR-0008 | ADR |
+| GALLERY `VIDEO_GRID` video walls; GRID owns manual video composition (§8) | Locked Product Owner requirement; ADR-0008 | ADR |
+| A video wall must not read as a social feed (§9, §14) | Locked Product Owner requirement; description.md "not like a SaaS product" | ADR, 3 |
+| Content motion is not interface motion (§11) | This document, reconciling A1 and A2 with multi-video surfaces | — |
 | One bold move, restraint elsewhere (A3, §1) | Ref 1 wordmark; ref 4 video; SKILL.md "spend your boldness in one place" | 2, 4 |
 | One signature motion moment (§11) | SKILL.md; refs show no scattered motion | 4, 2 |
 | Flexible project pages, not one template (§8) | description.md "flexible enough to tell different visual stories" | 3 |
@@ -891,8 +967,20 @@ interface. The composer's own interface is out of scope here.
 ### Media
 
 25. **Gallery row-height and gutter behaviour** for justified rows.
-26. **Video poster-frame treatment** and the loading state for autoplay surfaces.
+26. **Video poster-frame treatment** and the loading state for autoplay
+    surfaces — including what a tile looks like when autoplay is refused, and
+    what a reduced-motion wall looks like. The poster is a design surface, not a
+    fallback nobody drew.
 27. **Cover-frame selection guidance** for the CMS.
+28. **Video wall composition** — cell aspect-ratio behaviour (`CONTAIN` vs
+    `COVER`), gap, and the column counts per breakpoint. Desktop 4 / tablet 2 /
+    mobile 1–2 is the starting assumption, not a decision.
+29. **The `VIDEO_GRID` column maximum.** A bound must exist — column count is the
+    one admin control that directly multiplies decode load. Exploration proposes
+    the number at which a wall stops reading as composition.
+30. **How a wall ends.** Whether a video wall is finite, paginated, or scrolls —
+    and what signals "no more", given that a feed-like infinite surface is an
+    anti-pattern (§14).
 
 ---
 

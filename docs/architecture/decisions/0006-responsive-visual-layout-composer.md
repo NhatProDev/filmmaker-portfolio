@@ -7,6 +7,17 @@
 - **Related:** ADR-0002 (ordering), ADR-0005 (insertion), ADR-0007 (page ownership)
 - **Affects:** CLAUDE.md §2, §3, §6, §7, §13, §14, §17, §19, §20 · `openapi.yaml` (deferred) · `db/schema.ts` (deferred)
 - **Change class:** Builder model change (CLAUDE.md §20)
+- **Extended by:** [ADR-0008](0008-multi-video-composition-and-playback-model.md)
+
+> **Extension notice.** ADR-0008 extends this document without contradicting it.
+> The GALLERY presentation list in §6 below is **not closed**: ADR-0008 adds a
+> fourth mode, `VIDEO_GRID`, for multi-video walls, and defines the video
+> playback state model that §6 left unspecified.
+>
+> This document's decisions stand unchanged, including the GRID/GALLERY
+> flow-versus-composition distinction, which ADR-0008 reaffirms. GRID children
+> may already be VIDEO blocks, so manual video composition needed no new
+> capability here.
 
 ## Problem
 

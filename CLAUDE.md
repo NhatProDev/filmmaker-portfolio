@@ -68,6 +68,9 @@ A private project is unlocked with a project-specific password; that password is
   drag-and-drop + responsive grid layout
 - Layout grid: logical 12-column desktop model; no pixel coordinates
 - Breakpoints: a fixed set (desktop, tablet, mobile); admins cannot create new ones
+- Video playback: one discriminated mode (CLICK_TO_PLAY / AUTOPLAY_VISIBLE /
+  AUTOPLAY_ALWAYS); autoplay is always muted; derived flags are never inputs
+- Video concurrency: system-bounded, not administrator-configurable
 - Absolute-position / Figma-style freeform canvas: out of V1 scope
 
 These last two lines are distinct and must not be collapsed. V1 **does** support
@@ -466,6 +469,13 @@ Browser/API
 
 Media deletion must fail with `409 MEDIA_IN_USE` while referenced by a project cover or block.
 
+The in-use check inspects **relational** references only. A media id hidden in a
+`config` object is invisible to it, which is one reason §6 forbids putting media
+relationships in JSON. Poster frames therefore come from `media.thumbnail_url`,
+not from a config-held id (§13, ADR-0008). If administrator-selected posters are
+added later they must be relational, and this check must be extended to cover
+them.
+
 Deleting a block deletes only the `block_media` references, not the Media Library asset.
 
 Storage provider logic belongs behind an infrastructure abstraction; domain services should not depend on Cloudinary/S3-specific response shapes.
@@ -532,10 +542,103 @@ This is what makes deliberately asymmetric editorial composition possible.
 
 Do not merge them. They are different semantics.
 
-- **GALLERY** — media flow: justified mixed-aspect rows, horizontal strips,
-  slideshows, native-aspect presentation, reorderable media.
-- **GRID** — deliberate composition: columns, unequal spans, asymmetry, mixed
-  text and media, controlled responsive placement.
+- **GALLERY** — **automatic** media flow: a rule arranges an ordered sequence.
+- **GRID** — **deliberate manual** composition: specific items placed in
+  specific places.
+
+GALLERY presentation modes (semantics locked, names may be refined):
+
+```text
+JUSTIFIED_ROWS    HORIZONTAL_STRIP    SLIDESHOW    VIDEO_GRID
+```
+
+`VIDEO_GRID` is a multi-video wall — a column flow configured per breakpoint,
+for example 4 / 2 / 1 columns across desktop / tablet / mobile. **Do not merge
+`VIDEO_GRID` with GRID**, and do not add a block type for it. See ADR-0008.
+
+GALLERY may contain **IMAGE and VIDEO together**. The presentation mode decides
+whether mixing is sensible, not whether it is permitted.
+
+### Multi-video composition
+
+Both capabilities exist and must remain distinct:
+
+- **Manual video layouts belong to GRID.** A GRID may contain multiple VIDEO
+  children alongside IMAGE and TEXT, each with its own span and placement. This
+  needs no new block type — it already follows from the composer model.
+- **Automatic video flow belongs to GALLERY / `VIDEO_GRID`.**
+
+### Video playback contract
+
+Playback is **one discriminated mode**, not a set of booleans:
+
+```text
+CLICK_TO_PLAY      AUTOPLAY_VISIBLE      AUTOPLAY_ALWAYS
+```
+
+| Mode | Use for |
+|---|---|
+| `CLICK_TO_PLAY` | Primary project film; anything where audio is intended |
+| `AUTOPLAY_VISIBLE` | **Default for every multi-video surface** — walls, grids, previews |
+| `AUTOPLAY_ALWAYS` | **Exceptional, standalone ambient video only** — e.g. a single Home hero |
+
+`autoplay`, `muted`, `playsInline`, `preload` and `pauseWhenOffscreen` are
+**derived from the mode and are never configuration inputs**. This makes invalid
+states unrepresentable rather than merely invalid.
+
+Configuration precedence:
+
+```text
+per-item override (block_media.config)
+  > block default (project_blocks.config)
+    > mode default (system)
+```
+
+**`AUTOPLAY_ALWAYS` is restricted by context, not by count.** It is permitted
+only on a small standalone ambient surface — a single Home hero, or a standalone
+ambient VIDEO block.
+
+It **must not** be used:
+
+- by a VIDEO item **inside a GRID**
+- by a **GALLERY**, in any presentation mode
+- by **`VIDEO_GRID` items**
+- as an **inherited block or gallery default** for a multi-item media surface
+
+Multi-video compositions use `AUTOPLAY_VISIBLE` or `CLICK_TO_PLAY`. The rule is
+decidable from the block's container alone — never by counting videos on a page.
+
+**`EXTERNAL_VIDEO` media supports `CLICK_TO_PLAY` only.** Provider iframes give
+no reliable control over autoplay, muting, pausing or posters.
+
+### Autoplay safety
+
+- Muted by default and **forced** muted in both autoplay modes.
+- `playsInline` always.
+- **No public page may initiate audible playback.** Audio requires a deliberate
+  user act.
+- Autoplay is a request that may be **refused**; a refused autoplay falls back
+  to the poster frame, never a blank tile.
+- `prefers-reduced-motion` yields a deterministic still — paused poster or cover
+  image, not a slowed loop.
+- Poster frames come from `media.thumbnail_url`. **Never store a media id in
+  `config`** — §6 forbids it and it defeats the `MEDIA_IN_USE` guard in §12.
+
+### Video performance
+
+- Off-screen videos must not keep consuming playback resources in
+  `AUTOPLAY_VISIBLE`.
+- A video grid must not naïvely autoplay or decode an unbounded number of videos.
+- Performance must remain acceptable on desktop **and** mobile.
+- `VIDEO_GRID` column counts are bounded by validation at every breakpoint, and
+  must fall at narrower breakpoints.
+
+The runtime strategy is *visible: play · near viewport: prepare · far: pause and
+release*. **The mechanism is deliberately unspecified** — `IntersectionObserver`
+is an implementation detail and is not locked into the architecture.
+
+**Concurrency is a system constant, not an administrator setting.** Do not
+expose a configurable concurrency or preload budget in V1.
 
 ### Responsive model
 
@@ -623,6 +726,16 @@ Validate at minimum:
 - breakpoint keys against the closed set (desktop, tablet, mobile)
 - nesting depth: a GRID may not contain a GRID or a GALLERY (§13)
 - that block configuration carries no colour or typeface values (§13)
+- GALLERY presentation mode against the closed mode set (§13)
+- `VIDEO_GRID` column counts, bounded, at every breakpoint
+- `playback.mode` against the closed enum; reject `controls` unless
+  `CLICK_TO_PLAY`; reject any autoplay mode on `EXTERNAL_VIDEO` media
+- `AUTOPLAY_ALWAYS` only on a standalone ambient VIDEO block — reject it on any
+  VIDEO with a parent, on any GALLERY default, and on any `VIDEO_GRID` item.
+  Validate from the block's container, not by counting videos per page.
+- **reject** `autoplay`, `muted`, `playsInline` and `pauseWhenOffscreen` as
+  inputs — they are derived (ADR-0008). Accepting and ignoring them is worse
+  than rejecting them.
 
 `position` bounds cannot be validated by the request schema alone — the upper
 bound `N` depends on current database state. Zod enforces `integer >= 0` at the
@@ -704,6 +817,19 @@ Minimum critical tests:
     references, and copies no Media Library asset (ADR-0006).
 18. Hidden blocks never appear in public responses (ADR-0006).
 19. Changing the theme does not modify any block configuration row (§13).
+20. No public page ever initiates audible playback; autoplay modes are always
+    muted (ADR-0008).
+21. `CLICK_TO_PLAY` cannot be combined with autoplay, and `controls` is rejected
+    outside `CLICK_TO_PLAY` (ADR-0008).
+22. An autoplay mode on `EXTERNAL_VIDEO` media is rejected (ADR-0008).
+23. Under `prefers-reduced-motion`, autoplay surfaces render a still poster and
+    start no playback (ADR-0008).
+24. A refused autoplay falls back to the poster frame, not a blank tile
+    (ADR-0008).
+25. Hidden blocks neither preload nor decode video (ADR-0006, ADR-0008).
+26. `AUTOPLAY_ALWAYS` is rejected on a VIDEO inside a GRID, on a GALLERY
+    default, and on a `VIDEO_GRID` item — and cannot be inherited into a
+    multi-item surface (ADR-0008).
 
 ---
 

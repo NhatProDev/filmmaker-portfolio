@@ -586,12 +586,12 @@ mode, so a surface cannot be half-configured.
 |---|---|---|
 | `CLICK_TO_PLAY` | Main project films | Real controls, real transport, audio available |
 | `AUTOPLAY_VISIBLE` | **Video walls, grids, work previews, media-heavy Home** | Muted, looping, inline; plays when in view, pauses when not |
-| `AUTOPLAY_ALWAYS` | **Standalone ambient video only** — e.g. the Home hero | Muted, looping, always running |
+| `AUTOPLAY_AMBIENT` | **Standalone ambient video only** — e.g. the Home hero | Muted, looping, always running |
 
 `AUTOPLAY_VISIBLE` is the default for any surface with more than one video —
 walls, grids, strips, and VIDEO children of a GRID.
 
-**`AUTOPLAY_ALWAYS` is restricted by context.** It is available only to a
+**`AUTOPLAY_AMBIENT` is restricted by context.** It is available only to a
 standalone ambient video block, never inside a GRID, never on a GALLERY, and
 never on a `VIDEO_GRID` item. A multi-video surface uses `AUTOPLAY_VISIBLE` or
 `CLICK_TO_PLAY`.
@@ -797,7 +797,7 @@ Any of these in public UI is a defect. They are not matters of taste here.
 - Arbitrary custom CSS, external font URLs, or uploaded font injection (§5)
 - A visitor-facing light/dark toggle (§10)
 - Autoplaying audio (§9)
-- `AUTOPLAY_ALWAYS` on anything but a standalone ambient video — never inside a
+- `AUTOPLAY_AMBIENT` on anything but a standalone ambient video — never inside a
   GRID, on a GALLERY, or on a `VIDEO_GRID` item (§9)
 - An autoplay surface whose poster frame was never considered (§9)
 - A private-project gate presented as account login (§12)

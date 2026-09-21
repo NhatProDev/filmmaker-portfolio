@@ -21,11 +21,18 @@ write a new one that supersedes it, and mark the old one `Superseded by NNNN`.
 | [0005](0005-insert-at-position-semantics.md) | `position` optional on create; omitted appends, in-range inserts and shifts siblings right, out-of-range is 422 | Approved |
 | [0006](0006-responsive-visual-layout-composer.md) | Responsive Visual Layout Composer: GRID becomes a 12-column composition container, one level of block nesting, fixed desktop/tablet/mobile breakpoints with mobile safe-stacking | Approved — extended by 0008 |
 | [0007](0007-page-owned-block-compositions.md) | Blocks may be owned by a `pages` singleton so Home is composer-driven; one shared block model, not a parallel table | Approved |
-| [0008](0008-multi-video-composition-and-playback-model.md) | Multi-video surfaces: GALLERY gains `VIDEO_GRID`; playback is one discriminated mode (`CLICK_TO_PLAY` / `AUTOPLAY_VISIBLE` / `AUTOPLAY_ALWAYS`) with derived flags; forced-muted autoplay; system-bounded concurrency | Approved |
+| [0008](0008-multi-video-composition-and-playback-model.md) | Multi-video surfaces: GALLERY gains `VIDEO_GRID`; playback is one discriminated mode (`CLICK_TO_PLAY` / `AUTOPLAY_VISIBLE` / `AUTOPLAY_AMBIENT`) with derived flags; forced-muted autoplay; system-bounded concurrency | Approved |
 
-All eight were approved on 2026-09-21.
+| [0009](0009-administrator-selected-poster-media.md) | Administrator-selected posters are a V1 requirement, held relationally as `media.poster_media_id` and covered by `MEDIA_IN_USE` | Approved |
 
-**Schema note.** ADR-0006 and ADR-0007 both specify deferred schema work that is
-**not yet applied**. `db/schema.ts`, `db/migrations/` and `openapi.yaml` are
-unchanged as of their approval — they are incomplete with respect to these ADRs,
-not contradicted by them. See each ADR's "Deferred schema work" section.
+ADRs 0001–0008 were approved on 2026-09-21; ADR-0009 on 2026-09-22.
+
+**Schema note.** ADR-0006, ADR-0007 and ADR-0009 each specify deferred schema
+work that is **not yet applied**. `db/schema.ts`, `db/migrations/` and
+`openapi.yaml` are unchanged as of their approval — they are incomplete with
+respect to these ADRs, not contradicted by them. See each ADR's "Deferred schema
+work" section.
+
+**Apply all three in one migration.** They touch the same two tables
+(`project_blocks`, `media`); splitting them would mean three passes over one
+coherent change set.

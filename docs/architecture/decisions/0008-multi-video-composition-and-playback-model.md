@@ -88,7 +88,7 @@ other is generated from a rule plus an ordered list.
 A single required discriminator:
 
 ```text
-CLICK_TO_PLAY      AUTOPLAY_VISIBLE      AUTOPLAY_ALWAYS
+CLICK_TO_PLAY      AUTOPLAY_VISIBLE      AUTOPLAY_AMBIENT
 ```
 
 Every autoplay-related flag is **derived from the mode, not stored**:
@@ -97,7 +97,7 @@ Every autoplay-related flag is **derived from the mode, not stored**:
 |---|---|---|---|---|---|---|
 | `CLICK_TO_PLAY` | no | no | yes | n/a | **yes** | no |
 | `AUTOPLAY_VISIBLE` | yes | **forced** | yes | **yes** | no | yes |
-| `AUTOPLAY_ALWAYS` | yes | **forced** | yes | no | no | yes |
+| `AUTOPLAY_AMBIENT` | yes | **forced** | yes | **may** | no | yes |
 
 This makes the forbidden combinations **unrepresentable** rather than merely
 invalid: there is no way to express `CLICK_TO_PLAY + autoplay`, and no way to
@@ -123,9 +123,33 @@ the conflicting-boolean problem this model exists to remove.
 - `AUTOPLAY_VISIBLE` — **the default for every multi-video surface**: video
   grids, walls, work previews, background previews, horizontal video strips,
   VIDEO children of a GRID, media-heavy Home compositions.
-- `AUTOPLAY_ALWAYS` — exceptional, standalone ambient video only.
+- `AUTOPLAY_AMBIENT` — exceptional, standalone ambient video only.
 
-### `AUTOPLAY_ALWAYS` is restricted by context, not by count
+#### `AUTOPLAY_AMBIENT` — approved semantics
+
+**Renamed from `AUTOPLAY_ALWAYS`** by Project Owner / Architect decision on
+2026-09-22. The old name asserted behaviour the surface should not have and
+would have misled implementation.
+
+Semantics:
+
+- **standalone ambient surface only** — the context restriction below is
+  unchanged by the rename
+- starts automatically
+- muted
+- plays inline
+- **may suspend and release resources when sufficiently off-screen**
+
+The last point is the substantive change. `AUTOPLAY_AMBIENT` is *permitted* to
+suspend off-screen where `AUTOPLAY_VISIBLE` is *required* to. Design-exploration
+evidence found that an off-screen hero held a decode slot and bought nothing; a
+mode literally named "always" would have forbidden the fix.
+
+`AUTOPLAY_VISIBLE` and `CLICK_TO_PLAY` are unchanged. This is a rename plus a
+relaxation of one derived flag; the structural placement rules below carry over
+untouched.
+
+### `AUTOPLAY_AMBIENT` is restricted by context, not by count
 
 An earlier formulation of this rule — "never the default on a page containing
 many videos" — was **unenforceable**. It required counting videos per page,
@@ -135,7 +159,7 @@ saved, and it left the boundary to judgement.
 It is replaced by a **structural rule about where the mode may appear**, which
 is decidable from the block being validated alone:
 
-`AUTOPLAY_ALWAYS` is permitted **only** on a small standalone ambient surface —
+`AUTOPLAY_AMBIENT` is permitted **only** on a small standalone ambient surface —
 a single Home hero, or a standalone ambient VIDEO block.
 
 It **must not** be used:
@@ -150,10 +174,10 @@ appropriate.
 
 This is machine-validatable: the container is known when the block is validated.
 A VIDEO block with a parent, or any playback default on a GALLERY, is rejected
-if its mode is `AUTOPLAY_ALWAYS` — no page-wide analysis required.
+if its mode is `AUTOPLAY_AMBIENT` — no page-wide analysis required.
 
 The restriction also holds through **inheritance**. A GALLERY cannot set
-`AUTOPLAY_ALWAYS` as its default and have items inherit it, because the default
+`AUTOPLAY_AMBIENT` as its default and have items inherit it, because the default
 itself is rejected at the container.
 
 ### 4. Where playback configuration lives
@@ -349,7 +373,7 @@ Deferred and specified, should they later be wanted:
 2. **Reject `controls` unless `mode = CLICK_TO_PLAY`.** Do not silently ignore
    it.
 3. **Reject any autoplay mode on `EXTERNAL_VIDEO` media** (§8).
-4. **Reject `AUTOPLAY_ALWAYS` outside a standalone ambient VIDEO block** — that
+4. **Reject `AUTOPLAY_AMBIENT` outside a standalone ambient VIDEO block** — that
    is, on any VIDEO with a parent block, on any GALLERY default, and on any
    `VIDEO_GRID` item. Validate from the block's container, never by counting
    videos on a page.

@@ -69,7 +69,7 @@ A private project is unlocked with a project-specific password; that password is
 - Layout grid: logical 12-column desktop model; no pixel coordinates
 - Breakpoints: a fixed set (desktop, tablet, mobile); admins cannot create new ones
 - Video playback: one discriminated mode (CLICK_TO_PLAY / AUTOPLAY_VISIBLE /
-  AUTOPLAY_ALWAYS); autoplay is always muted; derived flags are never inputs
+  AUTOPLAY_AMBIENT); autoplay is always muted; derived flags are never inputs
 - Video concurrency: system-bounded, not administrator-configurable
 - Absolute-position / Figma-style freeform canvas: out of V1 scope
 
@@ -471,10 +471,36 @@ Media deletion must fail with `409 MEDIA_IN_USE` while referenced by a project c
 
 The in-use check inspects **relational** references only. A media id hidden in a
 `config` object is invisible to it, which is one reason §6 forbids putting media
-relationships in JSON. Poster frames therefore come from `media.thumbnail_url`,
-not from a config-held id (§13, ADR-0008). If administrator-selected posters are
-added later they must be relational, and this check must be extended to cover
-them.
+relationships in JSON.
+
+### Poster frames
+
+Administrator-selected poster media is a **V1 requirement** (ADR-0009).
+
+```text
+poster_media_id  →  thumbnail_url  →  empty media well
+```
+
+The poster is a property of the **asset**, held relationally as
+`media.poster_media_id`, never as an id inside `config`. A poster reference
+**participates in `MEDIA_IN_USE`**: an image used as a poster cannot be deleted.
+The in-use check must query poster references as well as covers and block media.
+
+### Baked-in letterbox
+
+Some source assets carry letterbox bars baked into the frame — 2.34:1 or 2.0:1
+content inside a 16:9 file. Under `COVER` these render as black bars *inside* the
+composed frame.
+
+**The production ingestion/media pipeline must solve this structurally.**
+One-off CSS scaling is not an acceptable production solution and must not ship.
+
+**The method is unresolved and requires analysis** — detect-and-strip at
+ingestion, or store an active-area crop per asset. Do not choose without it; the
+choice changes what the CMS must show the administrator.
+
+Whichever method is chosen must apply **identically to a poster and its video**,
+or the poster-to-video swap produces a visible scale jump (ADR-0009 §5).
 
 Deleting a block deletes only the `block_media` references, not the Media Library asset.
 
@@ -573,14 +599,14 @@ Both capabilities exist and must remain distinct:
 Playback is **one discriminated mode**, not a set of booleans:
 
 ```text
-CLICK_TO_PLAY      AUTOPLAY_VISIBLE      AUTOPLAY_ALWAYS
+CLICK_TO_PLAY      AUTOPLAY_VISIBLE      AUTOPLAY_AMBIENT
 ```
 
 | Mode | Use for |
 |---|---|
 | `CLICK_TO_PLAY` | Primary project film; anything where audio is intended |
 | `AUTOPLAY_VISIBLE` | **Default for every multi-video surface** — walls, grids, previews |
-| `AUTOPLAY_ALWAYS` | **Exceptional, standalone ambient video only** — e.g. a single Home hero |
+| `AUTOPLAY_AMBIENT` | **Exceptional, standalone ambient video only** — e.g. a single Home hero |
 
 `autoplay`, `muted`, `playsInline`, `preload` and `pauseWhenOffscreen` are
 **derived from the mode and are never configuration inputs**. This makes invalid
@@ -594,7 +620,7 @@ per-item override (block_media.config)
     > mode default (system)
 ```
 
-**`AUTOPLAY_ALWAYS` is restricted by context, not by count.** It is permitted
+**`AUTOPLAY_AMBIENT` is restricted by context, not by count.** It is permitted
 only on a small standalone ambient surface — a single Home hero, or a standalone
 ambient VIDEO block.
 
@@ -621,8 +647,9 @@ no reliable control over autoplay, muting, pausing or posters.
   to the poster frame, never a blank tile.
 - `prefers-reduced-motion` yields a deterministic still — paused poster or cover
   image, not a slowed loop.
-- Poster frames come from `media.thumbnail_url`. **Never store a media id in
-  `config`** — §6 forbids it and it defeats the `MEDIA_IN_USE` guard in §12.
+- Poster frames resolve `poster_media_id → thumbnail_url → empty well` (§12,
+  ADR-0009). **Never store a media id in `config`** — §6 forbids it and it
+  defeats the `MEDIA_IN_USE` guard in §12.
 
 ### Video performance
 
@@ -730,7 +757,7 @@ Validate at minimum:
 - `VIDEO_GRID` column counts, bounded, at every breakpoint
 - `playback.mode` against the closed enum; reject `controls` unless
   `CLICK_TO_PLAY`; reject any autoplay mode on `EXTERNAL_VIDEO` media
-- `AUTOPLAY_ALWAYS` only on a standalone ambient VIDEO block — reject it on any
+- `AUTOPLAY_AMBIENT` only on a standalone ambient VIDEO block — reject it on any
   VIDEO with a parent, on any GALLERY default, and on any `VIDEO_GRID` item.
   Validate from the block's container, not by counting videos per page.
 - **reject** `autoplay`, `muted`, `playsInline` and `pauseWhenOffscreen` as
@@ -827,9 +854,15 @@ Minimum critical tests:
 24. A refused autoplay falls back to the poster frame, not a blank tile
     (ADR-0008).
 25. Hidden blocks neither preload nor decode video (ADR-0006, ADR-0008).
-26. `AUTOPLAY_ALWAYS` is rejected on a VIDEO inside a GRID, on a GALLERY
+26. `AUTOPLAY_AMBIENT` is rejected on a VIDEO inside a GRID, on a GALLERY
     default, and on a `VIDEO_GRID` item — and cannot be inherited into a
     multi-item surface (ADR-0008).
+27. An image referenced as a poster cannot be deleted — the in-use check covers
+    `media.poster_media_id` and returns `409 MEDIA_IN_USE` (ADR-0009).
+28. A poster target must be an `IMAGE` with `status = READY`, and no asset may
+    be its own poster (ADR-0009).
+29. Poster resolution falls back `poster_media_id → thumbnail_url → empty well`
+    (ADR-0009).
 
 ---
 

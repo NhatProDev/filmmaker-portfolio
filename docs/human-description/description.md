@@ -81,10 +81,36 @@ contracts, and implementation details … should take precedence") is a statemen
 about the **engineering** precedence order in CLAUDE.md §22. It does **not**
 lower this document beneath external design guidelines. See CLAUDE.md §21.
 
-### Open item recorded against this document
+### Notes recorded against this document
 
-This document lists **"asymmetric layout presets"** as a layout block. It is not
-a block type. Per **ADR-0004**, asymmetric layouts are expressed as `GRID` block
-configuration presets. The canonical block types are `HERO`, `TEXT`, `IMAGE`,
-`VIDEO`, `GRID`, `GALLERY`, `SPACER`. The intent is preserved; the mechanism
-differs.
+These notes clarify how the author's intent is realised. They do not amend the
+text above, which remains verbatim.
+
+**1. "Asymmetric layout presets" is not a block type.** Per **ADR-0004**,
+asymmetric layouts are expressed as `GRID` block configuration. The canonical
+block types are `HERO`, `TEXT`, `IMAGE`, `VIDEO`, `GRID`, `GALLERY`, `SPACER`.
+The intent is preserved; the mechanism differs.
+
+**2. The builder is a Responsive Visual Layout Composer.** A later Product Owner
+requirement (**ADR-0006**) expanded the builder beyond a sequential block list
+with fixed presets. `GRID` is now a responsive 12-column composition container,
+so the administrator can compose asymmetric editorial layouts without a
+developer adding a preset first.
+
+This **strengthens** rather than contradicts the intent above:
+
+- *"use image/video grids similar in spirit to Squarespace or Pixieset"* —
+  Squarespace's grid composition is exactly this model. The cue anticipated it.
+  Pixieset's justified mixed-aspect rows are the `GALLERY` block.
+- *"The V1 builder should NOT be a fully free-form visual editor"* — **still
+  true and still enforced.** The composer uses a logical column grid, never
+  absolute pixel positioning. CLAUDE.md §13 keeps the two ideas explicitly
+  separate: flexible responsive composition is supported; a freeform
+  absolute-position canvas is not.
+- *"Project pages should be flexible enough to tell different visual stories
+  instead of using one fixed template"* — this is the requirement the composer
+  exists to satisfy.
+
+**3. Home is composer-driven too.** Per **ADR-0007**, the Home page is composed
+from the same blocks rather than hard-coded, so the administrator can rearrange
+it without code changes.

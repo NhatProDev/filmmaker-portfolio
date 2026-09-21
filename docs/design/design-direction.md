@@ -429,26 +429,115 @@ contrast-validation method are reserved for `design-system.md`.
 ### GALLERY vs GRID
 
 Block ownership is locked. Both are existing block types under CLAUDE.md §13;
-neither is new.
+neither is new. **They are not merged**, and must not be.
 
-**GALLERY owns** — native-aspect media presentation:
+**GALLERY owns** — media-flow presentation:
 
 - justified mixed-aspect rows (reference 3; the brief's "Pixieset" cue)
 - horizontal media strips (reference 5, layout only)
 - slideshows
+- native-aspect media sequences
 - any presentation where media keeps its own proportions and the container adapts
 
-**GRID owns** — intentionally composed columns:
+**GRID owns** — deliberate composition:
 
-- deliberate column compositions
-- **asymmetric editorial presets**, per ADR-0004
+- deliberate column composition with unequal spans
+- mixed text and media in one composition
+- asymmetric responsive layout
 
-ADR-0004 stands unchanged: asymmetric layouts are `GRID` configuration presets,
-not a new block type. The canonical block list remains `HERO, TEXT, IMAGE,
-VIDEO, GRID, GALLERY, SPACER`. The **enumerated preset list is still reserved**
-(§16) — ADR-0004 deferred it to this specification, and this specification
-defers it to exploration, because it needs to be drawn and tested rather than
-listed.
+The distinction is *flow* versus *composition*. GALLERY arranges a sequence of
+media by rule; GRID places specific items in specific places.
+
+### GRID is a responsive composition container
+
+**GRID is not limited to a closed list of presets.** Per **ADR-0006**, it is a
+**responsive composition container** using constrained grid placement.
+
+- The administrator may **visually compose custom layouts** — column start,
+  column span, alignment, gaps, width mode — without a developer adding a preset
+  first.
+- **Presets may exist as convenient starting points**, not as the only permitted
+  configurations.
+- Composition remains **validated and structured**. Placement is checked against
+  an explicit schema; it is never a free-form object.
+- It is **not arbitrary absolute-position layout**. Placement is logical and
+  column-based, never pixel coordinates.
+
+ADR-0004's core decision is unchanged and reaffirmed: asymmetric layouts are
+`GRID` **configuration**, not a new block type. The canonical block list remains
+`HERO, TEXT, IMAGE, VIDEO, GRID, GALLERY, SPACER`. What ADR-0006 replaced is the
+*mechanism* — a closed **placement schema** in place of a closed **preset enum**.
+Validation was not relaxed; it was redirected.
+
+A GRID composes ordered child blocks, nested exactly one level deep (a GRID
+contains no GRID and no GALLERY). This is what lets a single composition hold
+both an image and a text column — reference 4's project panel is exactly that
+shape.
+
+Design consequence: **a composition no longer has to be named before it can be
+used.** Exploration may draw any arrangement the grid can express, rather than
+choosing from a list. Preset starting points are a convenience to be proposed
+afterwards, not a gate beforehand.
+
+### Responsive composition
+
+Composition is authored once and behaves predictably at three fixed sizes
+(ADR-0006). This is a design principle, not only an implementation detail — a
+composition that cannot degrade gracefully is not finished.
+
+- **Desktop** may use deliberate asymmetric composition. This is where the
+  editorial character lives (A4).
+- **Tablet** may derive from the desktop composition, or simplify it.
+- **Mobile** defaults to **safe, readable stacking** — full width, in document
+  order — unless a composition explicitly overrides it.
+
+**The design must not depend on absolute pixel coordinates.** Placement is
+expressed in logical columns, so a composition remains meaningful at sizes it was
+not drawn at.
+
+Mobile stacking is the default precisely so that neglect produces a *readable*
+page rather than a broken one. A composition that only works at one width is a
+defect, not a style. This is the design-side statement of §13.
+
+### Home is composer-driven, not a fixed template
+
+Per **ADR-0007**, Home is composed from the same blocks as a project page. This
+has a direct consequence for design exploration.
+
+**The Claude Design Home concept is not a fixed Home template.** Whatever
+arrangement exploration arrives at — hero, featured work, gallery, about teaser,
+video, text, grid — is a **composition**, not a page structure. The
+administrator must be able to **reorder, remove, duplicate, replace or
+reconfigure** any of those sections through the CMS, with no source-code change.
+
+So a Home of:
+
+```text
+Hero → Featured Work → Gallery → About teaser
+```
+
+must be rearrangeable into, for example:
+
+```text
+Hero → About → Full-width video → Asymmetric image grid → Featured work strip
+```
+
+without a developer.
+
+**The visual concept defines a design language, not a permanent page
+structure.** Exploration's job is to establish how these blocks look, relate and
+sequence — the rhythm, the hierarchy, the transitions — not to fix the sequence
+itself. Any section drawn for Home must survive being moved, removed or
+duplicated, because it will be.
+
+A corollary worth stating: **no block may depend on its neighbours to make
+sense.** A section that only reads correctly when it follows a specific other
+section is not composer-safe and must be redesigned.
+
+Project detail pages are composer-driven on the same terms, and may differ from
+project to project. **Art Works** remains data-driven and gallery-oriented,
+**About Me** remains content-file managed, and **Contact** remains static
+(ADR-0007, CLAUDE.md §13).
 
 **Reference 5 contributes layout and interaction only.** Admitted: the
 full-bleed horizontal strip of equal-size portrait cards, clipped at both
@@ -581,6 +670,10 @@ without apologising or being vague.
 
 **Preserve hierarchy and identity; do not reproduce desktop overlap literally.**
 
+This section is the mobile half of the three-breakpoint model in §8 "Responsive
+composition": desktop composes deliberately, tablet derives or simplifies, and
+mobile safe-stacks unless explicitly overridden.
+
 - **Identity survives; execution adapts.** The oversized display gesture, the
   media-first ratio and the light/dark model all persist. The specific overlap
   geometry does not.
@@ -666,7 +759,10 @@ guideline (advisory).
 | Hairline rules as structural device (§8) | Ref 2's intersecting outlined frames | 2 |
 | Justified mixed-aspect rows → GALLERY (§8) | Ref 3; description.md "Pixieset" | 2, 3 |
 | Horizontal clipped card strip → GALLERY (§8) | Ref 5, layout/interaction only (architect Q2) | 2 |
-| Asymmetric presets → GRID, not a block type (§8) | Ref 4 composition; ref 2 collage; ADR-0004 | 2, ADR |
+| Asymmetric composition → GRID configuration, not a block type (§8) | Ref 4 composition; ref 2 collage; ADR-0004 | 2, ADR |
+| GRID is a responsive composition container, not a closed preset list (§8) | Locked Product Owner requirement; ADR-0006 | ADR |
+| Desktop asymmetric → tablet derives → mobile safe-stacks (§8, §13) | ADR-0006; no reference evidence (all captures are desktop) | ADR |
+| Home is composer-driven, not a fixed template (§8) | Locked Product Owner requirement; ADR-0007 | ADR |
 | Light browse / dark project (§10) | Refs 1, 2, 3 light; ref 4 dark | 2 |
 | Video transport + click-to-play (§9) | Ref 4 shows transport bar and play affordance | 2 |
 | One bold move, restraint elsewhere (A3, §1) | Ref 1 wordmark; ref 4 video; SKILL.md "spend your boldness in one place" | 2, 4 |
@@ -677,15 +773,47 @@ guideline (advisory).
 | Writing: active voice, CTA names outcome, errors explain (§12) | SKILL.md writing guidance; uncontested by refs | 4 |
 
 Rules with **no reference support**, established by this document or by the
-architect: the theme customization model (§5), the video behaviour matrix (§9),
-the absence of a visitor light/dark toggle (§10), navigation restraint (§12),
-the private-project interstitial (§12), and mobile philosophy (§13). All five
+architect: the theme customization model (§5), the composer architecture and its
+responsive model (§8, ADR-0006), Home composability (§8, ADR-0007), the video
+behaviour matrix (§9), the absence of a visitor light/dark toggle (§10),
+navigation restraint (§12), the private-project interstitial (§12), and mobile
+philosophy (§13). All five
 references are desktop captures containing no site chrome, so navigation,
 mobile, Home and Contact have no visual evidence whatsoever.
 
 ## 16. Decisions reserved for Claude Design exploration
 
 Open by intent. Exploration must **compose and test** these, not infer them.
+
+### How exploration output is evaluated
+
+Every visual concept is judged on **two dimensions**, not one. A concept must
+pass both.
+
+**A. Visual quality.** Does it satisfy §1–§3 — media-first, editorial,
+cinematic, deliberate hierarchy, restrained chrome — and does it read as this
+filmmaker's identity rather than a default?
+
+**B. Composability.** Can the composition be represented by the **responsive
+visual layout composer**? Concretely:
+
+- Does it decompose into the seven canonical block types?
+- Does its arrangement express in logical column placement — start, span,
+  alignment, gap, width mode — rather than pixel coordinates?
+- Does it respect one level of GRID nesting, with no GRID or GALLERY inside a
+  GRID?
+- Does it degrade to readable mobile stacking, or does it need an explicit
+  mobile override?
+- Do its sections survive being reordered, removed or duplicated (§8)?
+
+A beautiful concept that cannot be composed is **not shippable**, because it
+would have to be hard-coded — which the locked requirement forbids. A concept
+that fails B should be adjusted until it passes, or its composer gap raised
+explicitly as an architecture question under CLAUDE.md §20.
+
+**This does not mean exploration designs the CMS UI.** Dimension B is a
+constraint on the *public* composition, not a brief to design the admin
+interface. The composer's own interface is out of scope here.
 
 ### Typography
 
@@ -724,10 +852,16 @@ Open by intent. Exploration must **compose and test** these, not infer them.
 
 ### Layout and composition
 
-13. **The `GRID` asymmetric preset list.** Deferred by ADR-0004 to this
-    document, and deferred again here because it must be drawn and tested.
-    Each preset needs a name, a composition, and responsive behaviour.
-14. **Home.** No reference exists. Composition entirely open, within §3.
+13. **`GRID` preset starting points.** No longer a gating list — ADR-0006 lets
+    the administrator compose custom placements directly, so exploration is not
+    blocked on naming compositions. What is still worth producing is a small set
+    of **convenient starting points**: recurring asymmetric arrangements, each
+    with a composition and its tablet/mobile behaviour. Proposed after the
+    compositions are drawn, not before.
+14. **Home — an opening composition, not a template.** No reference exists.
+    Exploration proposes a default arrangement and, more importantly, the design
+    language its sections share, since the administrator will rearrange them
+    (§8). Every section must stand alone when moved, removed or duplicated.
 15. **Contact.** No reference exists. Static per architect decision Q10.
 16. **Where the reference-5 horizontal strip is used** — featured work on Home,
     related projects on a project page, or a `GALLERY` presentation mode.

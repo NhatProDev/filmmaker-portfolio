@@ -30,7 +30,10 @@ Professional filmmaker portfolio with:
 - Admin CMS
 - Project CRUD
 - Media Library
-- Block-based drag-and-drop Project Builder
+- Responsive Visual Layout Composer (block-based, grid-composed, drag-and-drop)
+
+The composer is how the administrator builds both project pages and the Home
+page without a developer. See §13.
 
 Public visitors do not have accounts and never need to log in.
 
@@ -61,7 +64,15 @@ A private project is unlocked with a project-specific password; that password is
 - Public user accounts: none
 - Project deletion: soft delete
 - Media deletion: soft delete
-- Full free-form Squarespace-style canvas: out of V1 scope
+- Page building: Responsive Visual Layout Composer — structured data + visual
+  drag-and-drop + responsive grid layout
+- Layout grid: logical 12-column desktop model; no pixel coordinates
+- Breakpoints: a fixed set (desktop, tablet, mobile); admins cannot create new ones
+- Absolute-position / Figma-style freeform canvas: out of V1 scope
+
+These last two lines are distinct and must not be collapsed. V1 **does** support
+flexible responsive visual composition. V1 **does not** support a freeform
+absolute-position canvas. See §13 and ADR-0006.
 
 Do not split the V1 backend into independent Express/NestJS/microservices without explicit approval.
 
@@ -217,6 +228,16 @@ PROJECT N:1 MEDIA (optional cover)
 
 Do not move canonical media relationships into JSON config.
 
+Grid placement (column start, span, alignment, per-breakpoint overrides) **is**
+presentation configuration and belongs in `config`, under an explicitly
+validated schema per block type (§14) — never as a free-form object.
+
+Structural relationships are **not** configuration. Block nesting and page
+ownership are relational, not JSON. The composer therefore requires two schema
+additions that are specified but **not yet applied**: a self-referencing parent
+for block nesting, and a page owner so Home can be composed. See ADR-0006 and
+ADR-0007. Do not implement either by embedding ids in `config`.
+
 A `PRIVATE` project must have a password hash.
 
 Project visibility and publication status are separate concepts.
@@ -259,9 +280,31 @@ Four collections are reorderable:
 ```text
 projects (display order)      PUT /api/v1/projects/order
 projects (featured order)     PUT /api/v1/projects/featured/order
-blocks within a project       PUT /api/v1/projects/{projectId}/blocks/order
+blocks within a container     PUT /api/v1/projects/{projectId}/blocks/order
 media within a block          PUT /api/v1/blocks/{blockId}/media/order
 ```
+
+### Ordering scope under the composer
+
+The composer introduces **one** new ordering concept, and only one: block
+ordering is scoped to a **container**, not to a project.
+
+```text
+container = the page or project root, OR a parent GRID block
+```
+
+`position` remains a contiguous integer sequence from 0 **within its container**.
+Two blocks may share `position` 0 if they sit in different containers.
+
+Everything else is unchanged. Media ordering within a block is unaffected.
+
+**Grid placement is not ordering.** `colStart` controls where an item sits
+visually; `position` controls document order. `position` determines DOM order,
+which is also keyboard/screen-reader order and the mobile stacking order. Do not
+conflate them, and do not derive one from the other.
+
+The reorder endpoint's completeness rule (ADR-0002) becomes "the complete set of
+blocks **in the target container**". See ADR-0006.
 
 Reordering projects, blocks or media must use one API request and one database
 transaction.
@@ -429,9 +472,20 @@ Storage provider logic belongs behind an infrastructure abstraction; domain serv
 
 ---
 
-## 13. Project Builder Rules
+## 13. Layout Composer Rules
 
-V1 supports structured blocks:
+V1 ships a **Responsive Visual Layout Composer**. The administrator composes
+public pages visually, without code.
+
+The model is:
+
+```text
+structured data  +  visual drag-and-drop  +  responsive grid layout
+```
+
+It is **not** arbitrary pixel positioning and **not** a Figma-style canvas.
+
+### Block types
 
 - HERO
 - TEXT
@@ -442,15 +496,104 @@ V1 supports structured blocks:
 - SPACER
 
 This list is closed. Do not add a block type to satisfy a layout requirement.
+There are no arbitrary-HTML, custom-code or embed blocks in V1.
 
-**Asymmetric layouts are `GRID` configuration, not a block type.** The human
-description lists "asymmetric layout presets" among its layout blocks; that
-intent is satisfied by named layout presets inside `GRID.config`, validated per
-block type under §14. See ADR-0004.
+### Composer capabilities
 
-V1 grid/layout behavior is constrained and responsive.
+The composer must support, at minimum:
 
-Do not implement arbitrary absolute-position canvas editing, overlapping objects, or complex per-breakpoint free positioning.
+- create block
+- delete block
+- duplicate block
+- drag to reorder blocks
+- hide / show block
+- configure block presentation
+
+### GRID — responsive column composition
+
+**GRID is no longer limited to a closed set of named presets.** It is a
+responsive column-composition container. This supersedes the preset-only
+constraint in ADR-0004; see ADR-0006.
+
+- Placement uses a **logical column system**, never pixel coordinates.
+- **12 columns** is the desktop conceptual model.
+- A GRID contains ordered **child blocks**. Each child declares its own
+  placement: column start, column span, order, alignment, vertical alignment,
+  gap, width mode, and full-bleed/contained behaviour where applicable.
+- Children may be leaf blocks (HERO, TEXT, IMAGE, VIDEO, SPACER). **A GRID may
+  not contain a GRID or a GALLERY.** Nesting depth is exactly one level.
+- **Presets remain available as starting points, not as the only permitted
+  configurations.** An administrator may compose an arbitrary valid column
+  arrangement without a developer adding a preset.
+
+This is what makes deliberately asymmetric editorial composition possible.
+
+### GALLERY stays distinct from GRID
+
+Do not merge them. They are different semantics.
+
+- **GALLERY** — media flow: justified mixed-aspect rows, horizontal strips,
+  slideshows, native-aspect presentation, reorderable media.
+- **GRID** — deliberate composition: columns, unequal spans, asymmetry, mixed
+  text and media, controlled responsive placement.
+
+### Responsive model
+
+Composition may be complex and asymmetric on desktop and must remain readable
+everywhere.
+
+- A fixed set of breakpoints: **desktop, tablet, mobile**. Administrators cannot
+  create new breakpoints.
+- **Desktop** carries the explicit composition.
+- **Tablet** derives from desktop unless explicitly overridden.
+- **Mobile** falls back to safe stacking — full-width, in `position` order —
+  unless explicitly overridden.
+- Derivation is **deterministic**. Never store arbitrary x/y pixel positions as
+  the canonical layout model.
+
+**A layout authored on desktop must never be broken or unreadable on mobile.**
+Safe mobile stacking is the default precisely so this cannot happen by neglect.
+
+### Page scope
+
+- **Project detail** — composer-driven. Compositions may differ from project to
+  project. This flexibility is a core product requirement.
+- **Home** — composer-driven. Home is **not** a hard-coded template. Any Home
+  design explored in Claude Design is a visual concept expressed as composer
+  data, and the administrator must be able to reorder, replace, remove,
+  duplicate or reconfigure its blocks without code changes. See ADR-0007.
+- **Art Works** — data-driven and gallery-oriented. It may expose presentation
+  options; do not turn it into a free page builder.
+- **About Me** — content-file managed (§19). Do not silently convert it into a
+  CMS page builder. A small presentation configuration is permitted only if the
+  composer architecture genuinely requires it.
+- **Contact** — static (§19).
+
+### Layout and theme are orthogonal
+
+Layout composition and the theme system are separate concerns and must not be
+mixed.
+
+- **Theme** controls typography and palette.
+- **Composer** controls block order, composition, spans, alignment, media
+  arrangement and responsive behaviour.
+
+Block configuration must not contain colour or typeface values, and theme tokens
+must not contain layout values. **Changing typography or palette must never
+rewrite page layout data.**
+
+### Out of scope for the composer
+
+- unrestricted absolute x/y positioning
+- pixel-level canvas placement
+- Figma-style freeform canvas
+- arbitrary z-index editing
+- arbitrary CSS editing
+- arbitrary custom HTML or JavaScript
+- arbitrary breakpoint creation
+- arbitrary external font injection
+
+The goal is high creative freedom **inside a safe responsive system**.
 
 The public portfolio visual quality takes priority over making the CMS look visually elaborate.
 
@@ -476,6 +619,10 @@ Validate at minimum:
 - external video URLs/providers
 - reorder payload ownership and completeness
 - insertion `position` bounds against the current sibling count (§7)
+- grid placement: `colStart >= 1`, `colSpan >= 1`, `colStart + colSpan <= 13`
+- breakpoint keys against the closed set (desktop, tablet, mobile)
+- nesting depth: a GRID may not contain a GRID or a GALLERY (§13)
+- that block configuration carries no colour or typeface values (§13)
 
 `position` bounds cannot be validated by the request schema alone — the upper
 bound `N` depends on current database state. Zod enforces `integer >= 0` at the
@@ -548,6 +695,15 @@ Minimum critical tests:
     from 0, for both blocks and block media (ADR-0005).
 13. Insertion with `position > N` or `position < 0` returns `422` and commits
     nothing — no partially shifted siblings (ADR-0005).
+14. A grid child whose placement exceeds the 12-column bound is rejected
+    (ADR-0006).
+15. A block authored with desktop-only placement still renders as a readable
+    full-width stack at mobile (ADR-0006).
+16. A GRID cannot be nested inside a GRID or a GALLERY (ADR-0006).
+17. Duplicating a block deep-copies its children and its `block_media`
+    references, and copies no Media Library asset (ADR-0006).
+18. Hidden blocks never appear in public responses (ADR-0006).
+19. Changing the theme does not modify any block configuration row (§13).
 
 ---
 
@@ -579,7 +735,10 @@ Do not implement unless explicitly requested:
 - comments/social features
 - realtime collaboration
 - multi-role admin permissions
-- full free-form Squarespace editor
+- absolute-position / Figma-style freeform canvas editor
+- arbitrary z-index editing, arbitrary CSS, arbitrary custom HTML or JavaScript
+- arbitrary breakpoint creation
+- arbitrary-HTML, custom-code or embed block types
 - revision/version history
 - microservices
 - Contact form API, persistence table, email provider, or spam system
@@ -610,7 +769,10 @@ The following are contract changes and require explicit approval:
 - changing PostgreSQL/Drizzle
 - changing private-project authentication model
 - adding public user accounts
-- replacing block-based builder with a free-form canvas
+- replacing the block-based composer with an absolute-position freeform canvas
+- adding a block type, or adding arbitrary-HTML/custom-code blocks
+- changing the logical column count or the fixed breakpoint set
+- changing the composer's responsive derivation rules (§13)
 
 For a proposed change, write:
 

@@ -1,10 +1,25 @@
 # ADR-0004 — Asymmetric layouts are GRID configuration, not a block type
 
-- **Status:** Approved
+- **Status:** Approved — **partially amended by [ADR-0006](0006-responsive-visual-layout-composer.md)**
 - **Date:** 2026-09-21
 - **Decided by:** Project Owner / Software Architect
 - **Affects:** CLAUDE.md §13 · `block_type` enum · `project_blocks.config`
 - **Change class:** Resolves a conflict between human product intent and locked architecture
+
+> **Amendment notice.** ADR-0006 supersedes exactly one clause of this document:
+> **implementation constraint 1**, which required `GRID.config` to be validated
+> against a *closed enum of preset names*. GRID is now a responsive
+> column-composition container, and presets are starting points rather than the
+> only permitted configurations.
+>
+> **Everything else here stands and is reaffirmed** — most importantly the core
+> decision that asymmetric layouts are `GRID` configuration and **not** a new
+> block type, the closed seven-type block list, and constraint 1's underlying
+> principle that `GRID.config` must never be a free-form object. ADR-0006
+> replaces the closed *preset enum* with a closed *placement schema*; it does not
+> relax validation.
+>
+> The text below is preserved unedited as the record of the original decision.
 
 ## Problem
 

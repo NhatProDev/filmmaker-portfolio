@@ -56,11 +56,14 @@ ehthumbs.db
 # Vercel
 .vercel
 
+# Local-only design references — intentionally NOT version-controlled.
+# These are required local design inputs and carry tier-2 design authority
+# (CLAUDE.md §21), but the image files themselves are held locally rather than
+# in Git. docs/human-description/references/INDEX.md is the tracked manifest
+# describing them; a fresh clone must restore these images manually.
+docs/human-description/references/*.png
+
 # Deliberately NOT ignored:
-#   docs/human-description/references/*.png   tier-2 design authority (CLAUDE.md §21)
+#   docs/human-description/references/INDEX.md       tracked manifest
 #   docs/human-description/description.source.docx   signed-off source of record
-#   db/migrations/*.sql                       persistence contract
-
-docs/human-description/references/*.png
-
-docs/human-description/references/*.png
+#   db/migrations/*.sql                              persistence contract

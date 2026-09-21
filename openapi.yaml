@@ -512,6 +512,16 @@ paths:
       tags: [Blocks]
       operationId: createBlock
       summary: Add a block to a project
+      description: |
+        `position` is optional. Omitting it appends the block to the end.
+
+        Supplying a `position` in `0..N` (where N is the current block count)
+        inserts at that position and shifts existing blocks at or after it one
+        place to the right. The bounds check, the shift and the insert all occur
+        in one transaction, so a failed insert leaves no shifted siblings
+        committed and block positions stay contiguous from 0.
+
+        `position > N` returns 422. See ADR-0005.
       security:
         - adminSession: []
       requestBody:
@@ -614,6 +624,19 @@ paths:
       tags: [Block Media]
       operationId: addMediaToBlock
       summary: Add a Media Library asset to a block
+      description: |
+        `position` is optional. Omitting it appends the media to the end.
+
+        Supplying a `position` in `0..N` (where N is the current media count for
+        the block) inserts at that position and shifts existing items at or
+        after it one place to the right. The bounds check, the shift and the
+        insert all occur in one transaction, so a failed insert leaves no
+        shifted siblings committed and positions stay contiguous from 0.
+
+        `position > N` returns 422. See ADR-0005.
+
+        This adds a reference to an existing Media Library asset; it does not
+        upload or copy the asset.
       security:
         - adminSession: []
       requestBody:
@@ -1552,13 +1575,25 @@ components:
     CreateBlockRequest:
       type: object
       additionalProperties: false
-      required: [type, position]
+      required: [type]
       properties:
         type:
           $ref: '#/components/schemas/BlockType'
         position:
           type: integer
           minimum: 0
+          description: |
+            Optional. Omit to append to the end of the project's blocks.
+
+            Let N be the number of blocks already in the project. A value in
+            0..N inserts at that position and shifts every block at or after it
+            one place to the right, inside a single transaction. N appends.
+
+            A value greater than N is rejected with 422 — it is not clamped and
+            not silently appended. Clients that mean "append" omit the field.
+
+            Positions remain contiguous from 0 after every insert.
+            See ADR-0005.
         config:
           type: object
           additionalProperties: true
@@ -1589,7 +1624,7 @@ components:
     AddBlockMediaRequest:
       type: object
       additionalProperties: false
-      required: [mediaId, position]
+      required: [mediaId]
       properties:
         mediaId:
           type: string
@@ -1597,6 +1632,18 @@ components:
         position:
           type: integer
           minimum: 0
+          description: |
+            Optional. Omit to append to the end of the block's media.
+
+            Let N be the number of media items already in the block. A value in
+            0..N inserts at that position and shifts every item at or after it
+            one place to the right, inside a single transaction. N appends.
+
+            A value greater than N is rejected with 422 — it is not clamped and
+            not silently appended. Clients that mean "append" omit the field.
+
+            Positions remain contiguous from 0 after every insert.
+            See ADR-0005.
         config:
           type: object
           additionalProperties: true

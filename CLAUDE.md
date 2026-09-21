@@ -54,11 +54,13 @@ A private project is unlocked with a project-specific password; that password is
 - Database naming: snake_case
 - Project page architecture: block based
 - Ordering: integer `position`, updated transactionally
+- Insertion: `position` optional; omitted appends; supplied inserts and shifts siblings right
 - Media: reusable Media Library
 - Large uploads: browser-to-object-storage using signed upload authorization
 - Private project access: password verification on server + signed HTTPOnly cookie
 - Public user accounts: none
 - Project deletion: soft delete
+- Media deletion: soft delete
 - Full free-form Squarespace-style canvas: out of V1 scope
 
 Do not split the V1 backend into independent Express/NestJS/microservices without explicit approval.
@@ -252,7 +254,7 @@ V1 uses integer positions:
 0, 1, 2, 3, ...
 ```
 
-Three collections are reorderable:
+Four collections are reorderable:
 
 ```text
 projects (display order)      PUT /api/v1/projects/order
@@ -269,6 +271,32 @@ Do not make one HTTP mutation for every moved row.
 `projects.display_position` and `projects.featured_position` are therefore **not
 writable through `PATCH /api/v1/projects/{projectId}`**. The ordering endpoints
 are their only write path. See ADR-0002.
+
+### Insertion semantics
+
+These rules govern creation, not reordering. They apply to:
+
+```text
+POST /api/v1/projects/{projectId}/blocks     siblings = blocks of that project
+POST /api/v1/blocks/{blockId}/media          siblings = block_media of that block
+```
+
+Let `N` be the number of existing siblings **before** the insert.
+
+- `position` is **optional**.
+- **Omitted** means append to the end — equivalent to `position = N`.
+- `position` in `0..N` inserts at that position. `position = N` appends.
+- Every existing sibling at `position >= p` **shifts right by one**.
+- The insert and the shift happen in **one database transaction**.
+- Final positions must be **contiguous from 0**, with no gaps and no duplicates.
+- `position < 0` or `position > N` returns **`422 VALIDATION_ERROR`**.
+
+A `position` beyond the end is an error, not a silent append. Clients that mean
+"append" omit the field.
+
+An insert that fails must leave no shifted siblings committed, per §15.
+
+See ADR-0005.
 
 Do not introduce LexoRank/fractional indexing in V1 unless a demonstrated concurrency/performance need exists.
 
@@ -447,6 +475,12 @@ Validate at minimum:
 - upload MIME type and size
 - external video URLs/providers
 - reorder payload ownership and completeness
+- insertion `position` bounds against the current sibling count (§7)
+
+`position` bounds cannot be validated by the request schema alone — the upper
+bound `N` depends on current database state. Zod enforces `integer >= 0` at the
+HTTP boundary; the service enforces `position <= N` inside the insert
+transaction and raises `VALIDATION_ERROR` (422) when it is exceeded.
 
 Never trust a client-supplied project ID to imply ownership/authorization.
 
@@ -456,12 +490,19 @@ Never trust a client-supplied project ID to imply ownership/authorization.
 
 Use database transactions for operations that must be atomic, including:
 
+- project reorder (display and featured)
 - block reorder
 - block-media reorder
+- block insertion at a position, with the sibling shift
+- block-media insertion at a position, with the sibling shift
 - publish validation + state transition
 - multi-record archive/delete workflows
 
 A failed reorder must not leave partial positions committed.
+
+A failed insert must not leave shifted siblings committed. Bounds checking, the
+shift and the insert all occur inside the same transaction, so a concurrent
+insert cannot invalidate the bound between check and write.
 
 ---
 
@@ -502,6 +543,11 @@ Minimum critical tests:
 10. Public DTOs do not leak internal fields.
 11. `displayPosition` and `featuredPosition` are rejected by
     `PATCH /projects/{projectId}` (ADR-0002).
+12. Insertion with `position` omitted appends to the end; insertion with an
+    in-range `position` shifts siblings right and leaves positions contiguous
+    from 0, for both blocks and block media (ADR-0005).
+13. Insertion with `position > N` or `position < 0` returns `422` and commits
+    nothing — no partially shifted siblings (ADR-0005).
 
 ---
 

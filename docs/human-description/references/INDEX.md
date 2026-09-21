@@ -11,6 +11,30 @@ authored until the external frontend-design guideline has been imported into
 
 ---
 
+## The image files are not in version control
+
+> **If you are reading this in a fresh clone, the images described below are not
+> present. You must restore them manually before doing any UI work.**
+
+- The reference `.png` files are **intentionally not version-controlled**. They
+  are excluded by `.gitignore`
+  (`docs/human-description/references/*.png`).
+- They are **required local design inputs**, not optional extras. They hold
+  tier-2 design authority under CLAUDE.md §21 and outrank human product intent.
+- **This file is the version-controlled manifest** that describes them. It is
+  tracked; the images are not. The descriptions below are the only record of the
+  references that travels with the repository.
+- **A fresh clone will require the reference images to be restored manually**,
+  from wherever the owner keeps them, into this directory, under the exact
+  filenames listed below. The filenames are load-bearing — CLAUDE.md §21 refers
+  to `5. horizontal-card-layout.png` by name when scoping what may be inherited
+  from it.
+
+Do not treat a missing image as permission to proceed without it, and do not
+substitute a different reference. If an image is missing, ask the owner for it.
+
+---
+
 ## Status of references 1–4 — visual direction, not a spec
 
 Architect decision (Q3): references 1–4 are **visual direction / moodboard**
@@ -115,6 +139,8 @@ Renamed from `5..png` (malformed filename, no subject label) per Q2.
 
 ## Handling notes
 
+- The five `.png` files are **local-only** and excluded from Git. See
+  "The image files are not in version control" above.
 - All five files are **screenshots**, not production assets. Three carry an
   "Activate Windows" watermark. None may be used as site imagery.
 - `1. About me.png` renders a personal email address in-image. Review before

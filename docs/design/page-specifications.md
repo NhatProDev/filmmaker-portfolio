@@ -252,9 +252,10 @@ hover/focus affordance given that hover lift is forbidden · mobile composition.
 > `Project Detail Directions.dc.html` as exploration record only. Reference 4
 > continues to apply.
 >
-> The composition is **blocked from specification** by one architecture question
-> (bounded HERO overlay content, §3.9), one carried media question (poster/film
-> `fit`, §3.9), and mobile, which is identified and not designed.
+> The bounded HERO title-overlay **capability is approved** (ADR-0010); its
+> visual use here remains candidate. The composition still carries one open
+> media question (poster/film `fit`, §3.9) and mobile, which is identified and
+> not designed.
 
 ### 3.1 Purpose
 
@@ -298,7 +299,7 @@ be *read* sits below it.
 
 | # | Block | Configuration |
 |---|---|---|
-| 1 | **HERO / VIDEO** | Film-first, full bleed, `CLICK_TO_PLAY`. **Bounded title overlay is candidate evidence only — the architecture is unresolved (§3.9 item 1).** The prototype also builds the legal alternative: the title as a TEXT block below the hero. |
+| 1 | **HERO / VIDEO** | Film-first, full bleed, `CLICK_TO_PLAY`. Bounded title overlay — **capability approved** (ADR-0010), **visual treatment candidate**. Title resolves from `projects.title`, never authored. The prototype also builds the legal alternative: the title as a TEXT block below the hero. |
 | 2 | **GRID** | Metadata list + project statement |
 | 3 | **GALLERY `JUSTIFIED_ROWS`** | Supporting stills, native aspect, full bleed |
 | 4 | **GRID** | One supporting video, `AUTOPLAY_VISIBLE`, + caption |
@@ -356,28 +357,34 @@ wall, editorial text section, media caption.
 A PRIVATE project is reachable only by direct URL. Without a valid access cookie
 the response is `403` carrying **no project content** — no title, cover,
 description, blocks or media (ADR-0003). See §6.
-
 ### 3.9 Unresolved
 
-Two items now **block specification** and are raised, not applied.
+One item still **blocks specification**. The HERO-overlay architecture question
+that previously sat here has been **resolved by ADR-0010** and is recorded below
+as settled.
 
-**1. Bounded HERO overlay content — [ARCHITECTURE QUESTION].** 1B v2's defining
-idea places the project's name inside the opening frame, so the frame handed off
-by the light-to-dark transition already carries it. The prototype builds **both**
-answers and switches between them with `titleMode`:
+**1. Bounded HERO title overlay — [CAPABILITY APPROVED, ADR-0010].** 1B v2's
+defining idea places the project's name inside the opening frame, so the frame
+handed off by the light-to-dark transition already carries it. The prototype
+built **both** answers and switched between them with `titleMode`:
 
-- **A — HERO with bounded overlay content** (prototype default). Title on the
-  page's own 12 columns, anchored bottom-left, one text role, derived scrim,
-  overlay and affordance clearing themselves when the film starts.
-  **Not expressible in the current contract** — CLAUDE.md §13 gives HERO no
-  overlay-content concept, and ADR-0006's placement vocabulary positions blocks
-  *in a grid*, not *within another block's frame*.
+- **A — HERO with bounded overlay content** (prototype default).
+  **Now approved as an architecture capability** (ADR-0010): intra-block
+  presentation, not nesting and not the deferred GRID inter-child overlap
+  primitive. The title resolves from `projects.title` and is **never authored in
+  block config**. Configuration is closed — anchor from a closed enum plus the
+  existing 12-column placement. Scrim, typography, colour, z-order and dismissal
+  are derived. Valid on an `IMAGE` HERO or a `CLICK_TO_PLAY` video HERO only.
+  Dismissal is defined against **media activation**, not an observed playback
+  event.
 - **B — TEXT block immediately after the HERO** (`titleMode: stacked`).
-  **Legal today, no contract change.** Costs the transition: the flown frame
-  lands on an anonymous rectangle and the title arrives as a separate event.
+  **Still legal**, unchanged. Costs the transition: the flown frame lands on an
+  anonymous rectangle and the title arrives as a separate event.
 
-The prototype's default is **not** the decision. Resolving this requires a
-governance ruling; no ADR has been written.
+**What remains candidate here is the visual treatment, not the capability** —
+the anchor and column placement chosen for this page, and the narrow-width
+stacked fallback, which ADR-0010 requires the system to derive but leaves to
+mobile design validation. The prototype's default is evidence, not the design.
 
 **2. Poster / film `fit` mismatch — [CARRIED MEDIA QUESTION].** The hero poster
 renders `COVER` and the film plays `CONTAIN`, so pressing play reframes. This
@@ -386,6 +393,9 @@ films under `CONTAIN` — the Project Detail hero is both at once. The prototype
 records a **proposed reading, not applied**: a `CLICK_TO_PLAY` poster should
 inherit the film's `fit`. Coupled to the unresolved letterbox method
 (`design-system.md` §16 item 1) and the deferred focal point (§7.6).
+
+**ADR-0010 deliberately did not decide this** — it fixes no relationship between
+idle framing and playback framing.
 
 ### 3.10 Pending visual exploration **[PENDING VISUAL EXPLORATION]**
 
@@ -593,11 +603,12 @@ Hold on every page regardless of exploration status.
 2. **Explore the four pending pages.** Art Works and About Me hold reference
    evidence that has never been taken into exploration; Contact and the Private
    Project Gate have no evidence at all.
-3. **Rule on the bounded HERO overlay question** (§3.9 item 1). Project Detail's
-   candidate composition cannot be specified until it is answered, and option B
-   is available today if the answer is no.
+3. **Validate the HERO overlay's narrow-width fallback.** The capability is
+   approved (ADR-0010) and requires the system to derive a stacked presentation;
+   the breakpoint and its visual treatment still need mobile design validation
+   (§3.9 item 1).
 4. **Resolve the poster / film `fit` contract** (§3.9 item 2) together with the
-   letterbox method — the two are coupled.
+   letterbox method — the two are coupled. ADR-0010 deliberately left it open.
 5. **Resolve the letterbox method** (`design-system.md` §16 item 1) — it is an
    approved requirement with an unresolved method and it changes what the CMS
    must show.

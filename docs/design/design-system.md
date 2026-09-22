@@ -462,6 +462,10 @@ GRID
 An overlap primitive — two children on one row with overlapping column ranges
 and a bounded two-layer stacking order — is **deferred**. Not a V1 blocker.
 
+**ADR-0010 does not reopen this.** The bounded HERO title overlay it approves is
+*intra-block* — one block, its own frame, a system-fixed two-layer order. This
+deferral covers *inter-child* overlap between GRID siblings, and stands.
+
 ---
 
 ## 6. GRID vs GALLERY **[INVARIANT]**
@@ -923,7 +927,7 @@ Carried forward. **Do not close these by inference during implementation.**
 | 9 | **Art Works, About, Contact, Private Gate** — not visually designed. Project Detail now has a candidate (1B v2). | **Pending design exploration** |
 | 10 | **GALLERY narrow-width behaviour per presentation mode** — `VIDEO_GRID` has column counts; `JUSTIFIED_ROWS`, `HORIZONTAL_STRIP` and `SLIDESHOW` have none. The automatic grid-child stack does not reach them (§11.5). | **Proposed amendment, not applied** |
 | 11 | **Display coefficient as a preset property** — `13.3cqw` is tuned to one face; face substitution changes clipping without anyone authoring it (§1.4). | **Proposed amendment, not applied** |
-| 12 | **Bounded HERO overlay content** — required by the Project Detail 1B v2 candidate; not expressible in the current contract. No ADR written. | **Architecture question, open** |
+| 12 | **Bounded HERO overlay content** — the *capability* is approved (ADR-0010): intra-block, title from `projects.title`, closed config, dismissal on media activation, `CLICK_TO_PLAY` or IMAGE only. Its **visual use on Project Detail remains candidate**, and the narrow-width stacked treatment awaits mobile validation. | **Capability approved; visual use candidate** |
 
 ---
 

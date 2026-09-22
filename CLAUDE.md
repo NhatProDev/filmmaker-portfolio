@@ -545,6 +545,34 @@ The composer must support, at minimum:
 - hide / show block
 - configure block presentation
 
+### HERO — bounded title overlay
+
+A **project-owned** HERO may carry a bounded title overlay inside its own frame
+(ADR-0010). This is **intra-block presentation**, not nesting and not the
+deferred GRID inter-child overlap primitive. HERO remains a leaf block.
+
+- The title resolves from **`projects.title`**. It is **never authored in block
+  config**, and no other text may be placed in the overlay.
+- An optional navigation line (e.g. "Back to Works") is **system/route-derived**.
+- Placement uses a closed anchor enum plus the existing 12-column vocabulary.
+- **Scrim, typography, colour, z-order, dismissal and the responsive fallback
+  are derived by the system**, never authored.
+- Valid only on an `IMAGE` HERO or a `CLICK_TO_PLAY` video HERO. **Not valid on
+  `AUTOPLAY_AMBIENT` or `AUTOPLAY_VISIBLE`.**
+- Dismissal is defined against **media activation** — the user act that starts
+  the media — never against an observed playback event. For `EXTERNAL_VIDEO`
+  the overlay is dismissed *before* handing off to the provider embed.
+- On an `IMAGE` HERO there is no activation; the overlay remains visible.
+- The overlay must never obstruct the play affordance, native or provider
+  transport, or any focus target. The navigation line needs a visible focus
+  state.
+- At narrow widths the system **derives** a stacked presentation — HERO, then
+  title and navigation in document flow. A second mobile composition must not be
+  stored in config.
+
+No body copy, no second text region, no arbitrary HTML, no z-index authoring, no
+coordinates.
+
 ### GRID — responsive column composition
 
 **GRID is no longer limited to a closed set of named presets.** It is a
@@ -763,6 +791,18 @@ Validate at minimum:
 - **reject** `autoplay`, `muted`, `playsInline` and `pauseWhenOffscreen` as
   inputs — they are derived (ADR-0008). Accepting and ignoring them is worse
   than rejecting them.
+- HERO overlay configuration as a **closed object** with
+  `additionalProperties: false` (ADR-0010): `anchor` against its closed enum,
+  column placement against the same `colStart`/`colSpan` bounds as grid
+  placement
+- **reject any authored title or text field** in HERO overlay configuration —
+  the title resolves from `projects.title`, and a title in `config` is a defect,
+  not an alternative encoding (ADR-0010)
+- **reject** a HERO overlay on a non-HERO block, on a HERO that is not
+  project-owned, and on any video HERO whose playback mode is not
+  `CLICK_TO_PLAY` — including both autoplay modes (ADR-0010)
+- **reject** authored scrim, colour, typeface, opacity, z-index and coordinate
+  values in HERO overlay configuration — all are derived (ADR-0010)
 
 `position` bounds cannot be validated by the request schema alone — the upper
 bound `N` depends on current database state. Zod enforces `integer >= 0` at the

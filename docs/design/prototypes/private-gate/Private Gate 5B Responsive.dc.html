@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..600;1,6..72,200..500&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --surface:#F7F3EC; --ink:#16120E; --accent:#C4361C; --muted:#6C6862; --rule:#E2DCD2;
+  --surface-dark:#0C0A08; --ink-dark:#EDE7DD;
+  --font-display:'Marcellus',Georgia,serif; --font-body:'Newsreader',Georgia,serif; --font-ui:'Newsreader',Georgia,serif;
+  --display-track:-0.005em;
+}
+body{margin:0;background:#E6E1D8}
+a{color:inherit;text-decoration:none}
+a:hover{color:var(--accent)}
+input,button{font:inherit;color:inherit}
+</style>
+</helmet>
+<div ref="{{ rootRef }}" style="font-family:var(--font-body);color:var(--ink);padding:56px 48px 120px">
+
+  <div style="max-width:78ch;margin-bottom:38px">
+    <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
+      <span style="font-family:var(--font-ui);font-size:12px;letter-spacing:0.18em;text-transform:uppercase;background:var(--ink);color:var(--surface);padding:4px 9px">5B responsive</span>
+      <h1 style="margin:0;font-family:var(--font-display);font-size:30px;letter-spacing:var(--display-track);text-transform:uppercase">Private gate — narrow and constrained viewports</h1>
+    </div>
+    <p style="margin:14px 0 0;font-size:17px;line-height:1.7">The same candidate, rendered at six real viewports. Each frame is its own visible viewport — the keyboard-open frames are short because the keyboard has taken the rest, so what you see is what the visitor can reach without scrolling. Every frame runs the full state machine; the <em>state</em> switch drives all six at once. The desktop file is untouched.</p>
+    <p style="margin:12px 0 0;font-size:15px;line-height:1.7;color:var(--muted)">Derivations are computed from each frame's own width and height — nothing is authored per device.</p>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:56px">
+    <sc-for list="{{ frames }}" as="f" hint-placeholder-count="6">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;max-width:430px">
+          <span style="font-family:var(--font-ui);font-size:11px;letter-spacing:0.16em;text-transform:uppercase;background:var(--ink);color:var(--surface);padding:3px 8px">{{ f.tag }}</span>
+          <span style="font-size:14px;color:var(--muted)">{{ f.label }}</span>
+        </div>
+
+        <div data-frame="" data-key="{{ f.key }}" data-kb="{{ f.kb }}" style="position:relative;width:{{ f.wpx }};height:{{ f.hpx }};background:var(--surface);color:var(--ink);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 0 0 1px #D6D0C5">
+          <div data-veil="" style="position:absolute;inset:0;background:var(--surface-dark);opacity:0;pointer-events:none;transition:opacity 260ms linear;z-index:4"></div>
+
+          <header data-chrome="" style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:18px 24px 0">
+            <a href="#top" style="font-family:var(--font-ui);font-size:11px;letter-spacing:0.2em;text-transform:uppercase">Nguyen Khanh Nhat</a>
+            <nav data-nav="" style="display:flex;gap:20px;font-size:15px">
+              <a href="#top">Works</a><a href="#top">About</a><a href="#top">Contact</a>
+            </nav>
+          </header>
+
+          <section data-content="" style="display:flex;flex-direction:column;flex:1;min-height:0;padding:0 24px;overflow-y:auto;transition:opacity 260ms linear">
+            <div data-datum="" style="height:1px;background:var(--rule);margin-bottom:20px"></div>
+            <div data-spine="" style="container-type:inline-size">
+              <span style="display:block;font-family:var(--font-ui);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted)">Private project</span>
+              <h2 data-heading="" style="margin:14px 0 0;font-family:var(--font-display);line-height:1.1;letter-spacing:var(--display-track)">This work is password protected.</h2>
+              <p data-lede="" style="margin:14px 0 0;font-size:16px;line-height:1.7;max-width:44ch;color:var(--muted)">Enter the access password you were given. It applies to this work only, and is not an account.</p>
+
+              <form data-gate-form="" style="margin-top:28px">
+                <label for="pw-{{ f.key }}" style="display:block;font-family:var(--font-ui);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted)">Access password</label>
+                <div data-field="" style="width:min(max(240px,22ch),100%)">
+                  <input data-input="" id="pw-{{ f.key }}" name="project-access" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style-focus="outline:2px solid #16120E" style="width:100%;margin-top:10px;padding:9px 0;background:transparent;border:0;border-bottom:1px solid var(--ink);font-size:18px;letter-spacing:0.06em;color:var(--ink);outline-offset:5px">
+                  <div style="display:flex;justify-content:flex-end;margin-top:7px">
+                    <button data-reveal="" type="button" aria-pressed="false" style-focus="outline:2px solid #16120E" style="background:none;border:0;padding:0;font-size:13px;color:var(--muted);cursor:pointer;border-bottom:1px solid var(--rule);outline-offset:4px">Show</button>
+                  </div>
+                </div>
+                <p data-error="" role="alert" style="display:none;margin:14px 0 0;border-top:1px solid var(--accent);padding-top:9px;max-width:40ch;font-size:14px;line-height:1.55;color:var(--accent)">That password does not open this work. Check it and try again.</p>
+                <div data-actions="" style="display:flex;align-items:baseline;gap:24px;margin-top:22px">
+                  <button data-submit="" type="submit" style-focus="outline:2px solid #16120E" style="background:none;border:0;padding:0 0 3px;border-bottom:1px solid var(--ink);font-size:16px;cursor:pointer;outline-offset:5px">Enter</button>
+                  <a data-escape="" href="#top" style-focus="outline:2px solid #16120E" style="font-size:15px;color:var(--muted);outline-offset:4px">Back to works</a>
+                </div>
+              </form>
+            </div>
+            <div data-tail="" style="flex:1;min-height:0"></div>
+            <p data-foot="" style="margin:20px 0 18px;font-size:12px;color:var(--muted)">Access is granted for this work only.</p>
+          </section>
+        </div>
+
+        <div data-frame-readout="" data-for="{{ f.key }}" style="display:none;max-width:430px;font-family:var(--font-ui);font-size:11px;line-height:1.65;color:#3A362F;white-space:pre-wrap"></div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;live&quot;,&quot;idle&quot;,&quot;focused&quot;,&quot;submitting&quot;,&quot;invalid&quot;,&quot;rateLimited&quot;,&quot;handoff&quot;],&quot;default&quot;:&quot;invalid&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;States&quot;},&quot;stubResult&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;invalid&quot;,&quot;rateLimited&quot;,&quot;handoff&quot;],&quot;default&quot;:&quot;invalid&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;States&quot;},&quot;motion&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;reduced&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Review&quot;},&quot;review&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Review&quot;}}">
+class Component extends DCLogic {
+  FRAMES = [
+    { key: "t768", tag: "768", label: "768 × 1024 — tablet, normal height", w: 768, h: 1024, kb: "0" },
+    { key: "w430", tag: "430", label: "430 × 932 — normal height", w: 430, h: 932, kb: "0" },
+    { key: "k430", tag: "430 kb", label: "430 × 596 — keyboard open", w: 430, h: 596, kb: "1" },
+    { key: "w390", tag: "390", label: "390 × 844 — normal height", w: 390, h: 844, kb: "0" },
+    { key: "k390", tag: "390 kb", label: "390 × 400 — keyboard open", w: 390, h: 400, kb: "1" },
+    { key: "k375", tag: "375 kb", label: "375 × 307 — keyboard open, worst case", w: 375, h: 307, kb: "1" }
+  ];
+  MESSAGES = {
+    invalid: "That password does not open this work. Check it and try again.",
+    rateLimited: "Too many attempts. Please wait and try again."
+  };
+
+  opt(k, d) { const o = window.__gr || {}; return o[k] !== undefined ? o[k] : (this.props[k] !== undefined ? this.props[k] : d); }
+
+  renderVals() {
+    return {
+      frames: this.FRAMES.map((f) => Object.assign({}, f, { wpx: f.w + "px", hpx: f.h + "px" })),
+      rootRef: (el) => { this.root = el; }
+    };
+  }
+
+  componentDidMount() {
+    window.__grc = this;
+    this.mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    this.mqHandler = () => this.refresh();
+    this.mq.addEventListener("change", this.mqHandler);
+    setTimeout(() => this.refresh(), 0);
+    setTimeout(() => this.refresh(), 800);
+  }
+
+  componentDidUpdate() { setTimeout(() => this.refresh(), 0); }
+  componentWillUnmount() { if (this.mq) this.mq.removeEventListener("change", this.mqHandler); }
+
+  refresh() {
+    [["derive", () => this.derive()], ["wire", () => this.wire()], ["state", () => this.applyForced()], ["audit", () => this.audit()]]
+      .forEach(([n, f]) => { try { f(); } catch (e) { console.error("[gate responsive] " + n + ":", e); } });
+  }
+
+  frames() { return Array.from(this.root ? this.root.querySelectorAll("[data-frame]") : []); }
+  reduced() { return this.opt("motion", "auto") === "reduced" || (this.mq && this.mq.matches); }
+
+  // Every derivation below is computed from the frame's own box. Nothing is
+  // authored per device, and none of it changes the page's meaning or order.
+  derive() {
+    this.frames().forEach((g) => {
+      const w = g.clientWidth, h = g.clientHeight;
+      const tight = h < 620;                 // keyboard open, or a short window
+      // 430, not 360: a 390×400 viewport measured a 11px clearance under the
+      // error state — technically reachable, effectively on the edge. The tier
+      // has to start above the tallest failing case, not at the shortest device.
+      const squeezed = h < 430;              // small phone with the keyboard up
+      const narrow = w <= 430;
+
+      const edge = narrow ? 24 : 32;
+      const content = g.querySelector("[data-content]");
+      content.style.padding = "0 " + edge + "px";
+      // Constrained height abandons vertical centring: the form must start at
+      // the top so the field, message and Enter all stay above the keyboard.
+      content.style.justifyContent = tight ? "flex-start" : "center";
+      g.querySelector("[data-tail]").style.display = tight ? "none" : "block";
+      g.querySelector("[data-datum]").style.marginBottom = squeezed ? "10px" : (tight ? "14px" : "20px");
+      content.style.paddingTop = squeezed ? "10px" : (tight ? "14px" : "0");
+
+      // Bounded heading: never larger than the desktop 46px, never smaller than
+      // 26px, tracking the spine in between.
+      const spine = g.querySelector("[data-spine]").clientWidth;
+      const head = Math.max(26, Math.min(46, Math.round(spine * 0.082)));
+      g.querySelector("[data-heading]").style.fontSize = (squeezed ? 21 : tight ? Math.max(24, head - 4) : head) + "px";
+
+      const lede = g.querySelector("[data-lede]");
+      lede.style.display = tight && h < 380 ? "none" : "block";
+      lede.style.marginTop = tight ? "10px" : "14px";
+      lede.style.fontSize = narrow ? "15px" : "16px";
+
+      const form = g.querySelector("[data-gate-form]");
+      form.style.marginTop = squeezed ? "12px" : (tight ? "18px" : "28px");
+      g.querySelector("[data-actions]").style.marginTop = squeezed ? "12px" : (tight ? "16px" : "22px");
+      g.querySelector("[data-foot]").style.display = tight ? "none" : "block";
+
+      // The gate has one job. Below 430 the public nav is noise competing with
+      // the only control on the page; the escape route lives in the form and is
+      // never removed.
+      g.querySelector("[data-nav]").style.display = narrow ? "none" : "flex";
+      g.querySelector("[data-chrome]").style.padding = (squeezed ? 10 : tight ? 12 : 18) + "px " + edge + "px 0";
+
+      const t = this.reduced() ? "none" : "opacity 260ms linear";
+      g.querySelector("[data-veil]").style.transition = t;
+      content.style.transition = t;
+    });
+  }
+
+  wire() {
+    this.frames().forEach((g) => {
+      if (g.dataset.wired) return;
+      g.dataset.wired = "1";
+      const input = g.querySelector("[data-input]");
+      const reveal = g.querySelector("[data-reveal]");
+      g.querySelector("[data-gate-form]").addEventListener("submit", (e) => { e.preventDefault(); this.submit(g); });
+      input.addEventListener("input", () => {
+        if (g.dataset.state === "invalid" || g.dataset.state === "rateLimited") this.set(g, "idle", { keep: true });
+      });
+      reveal.addEventListener("click", () => {
+        const shown = input.type === "text";
+        input.type = shown ? "password" : "text";
+        reveal.textContent = shown ? "Show" : "Hide";
+        reveal.setAttribute("aria-pressed", String(!shown));
+        input.focus();
+      });
+      this.set(g, "idle");
+    });
+  }
+
+  submit(g) {
+    if (g.dataset.state === "submitting" || g.dataset.state === "handoff") return;
+    this.set(g, "submitting");
+    clearTimeout(g._t);
+    g._t = setTimeout(() => this.set(g, this.opt("stubResult", "invalid")), 900);
+  }
+
+  set(g, state, o) {
+    g.dataset.state = state;
+    const input = g.querySelector("[data-input]");
+    const btn = g.querySelector("[data-submit]");
+    const err = g.querySelector("[data-error]");
+    const showErr = state === "invalid" || state === "rateLimited";
+    const busy = state === "submitting";
+
+    err.textContent = state === "rateLimited" ? this.MESSAGES.rateLimited : this.MESSAGES.invalid;
+    err.style.display = showErr ? "block" : "none";
+    input.setAttribute("aria-invalid", state === "invalid" ? "true" : "false");
+    if (showErr) input.setAttribute("aria-describedby", err.id || (err.id = "err-" + g.dataset.key));
+    else input.removeAttribute("aria-describedby");
+    input.style.borderBottomColor = showErr ? "var(--accent)" : "var(--ink)";
+    input.readOnly = busy || state === "handoff";
+
+    btn.textContent = busy ? "Checking…" : "Enter";
+    btn.disabled = busy || state === "handoff";
+    btn.setAttribute("aria-busy", busy ? "true" : "false");
+    btn.style.opacity = busy ? "0.62" : "1";
+
+    g.querySelector("[data-veil]").style.opacity = state === "handoff" ? "1" : "0";
+    g.querySelector("[data-content]").style.opacity = state === "handoff" ? "0" : "1";
+
+    if (state === "focused") input.focus({ preventScroll: true });
+    if (showErr && !(o && o.keep)) input.focus({ preventScroll: true });
+    this.audit();
+  }
+
+  applyForced() {
+    const s = this.opt("state", "live");
+    if (s === this._forced) return;
+    const prev = this._forced;
+    this._forced = s;
+    this.frames().forEach((g) => {
+      clearTimeout(g._t);
+      const input = g.querySelector("[data-input]");
+      input.readOnly = false;
+      g.querySelector("[data-submit]").disabled = false;
+      if (s === "live") { if (prev === undefined) return; input.value = ""; this.set(g, "idle", { keep: true }); return; }
+      if (s === "idle") input.value = "";
+      else if (!input.value) input.value = "••••••••";
+      this.set(g, s, { keep: true });
+    });
+  }
+
+  // The question that decides this page: with the keyboard open, is Enter still
+  // on screen without scrolling — in every state, including the one where an
+  // error has just pushed it down?
+  audit() {
+    const on = this.opt("review", false);
+    this.frames().forEach((g) => {
+      const out = this.root.querySelector('[data-frame-readout][data-for="' + g.dataset.key + '"]');
+      if (!out) return;
+      if (!on) { out.style.display = "none"; return; }
+      out.style.display = "block";
+      const box = g.getBoundingClientRect();
+      const btn = g.querySelector("[data-submit]").getBoundingClientRect();
+      const field = g.querySelector("[data-field]").getBoundingClientRect();
+      const err = g.querySelector("[data-error]");
+      const errVisible = getComputedStyle(err).display !== "none";
+      const reach = Math.round(box.bottom - btn.bottom);
+      const content = g.querySelector("[data-content]");
+      const scrolls = content.scrollHeight > content.clientHeight + 1;
+      out.textContent = [
+        g.clientWidth + "×" + g.clientHeight + " · " + g.dataset.state + (errVisible ? " · message shown" : ""),
+        "Enter " + (reach >= 0 ? "reachable, " + reach + "px above the fold" : "OFF SCREEN by " + Math.abs(reach) + "px") + (scrolls ? " · content scrolls" : " · no scroll needed"),
+        "field " + Math.round(field.width) + "px (" + Math.round((field.width / (g.clientWidth - (g.clientWidth <= 430 ? 48 : 64))) * 100) + "% of measure) · heading " + getComputedStyle(g.querySelector("[data-heading]")).fontSize,
+        "nav " + (getComputedStyle(g.querySelector("[data-nav]")).display === "none" ? "hidden · escape in form" : "shown") + " · aria-invalid " + g.querySelector("[data-input]").getAttribute("aria-invalid")
+      ].join("\n");
+    });
+  }
+}
+
+</script>
+</body>
+</html>

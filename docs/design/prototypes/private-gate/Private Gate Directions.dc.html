@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..600;1,6..72,200..500&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --surface:#F7F3EC; --ink:#16120E; --accent:#C4361C; --muted:#6C6862; --rule:#E2DCD2;
+  --surface-dark:#0C0A08; --ink-dark:#EDE7DD; --muted-dark:#97938C; --rule-dark:#2B2926;
+  --font-display:'Marcellus',Georgia,serif; --font-body:'Newsreader',Georgia,serif; --font-ui:'Newsreader',Georgia,serif;
+  --display-track:-0.005em; --edge:56px; --gut:20px;
+}
+body{margin:0;background:#E6E1D8}
+a{color:inherit;text-decoration:none}
+a:hover{color:var(--accent)}
+input,button{font:inherit;color:inherit}
+</style>
+</helmet>
+<div ref="{{ rootRef }}" style="font-family:var(--font-body);color:var(--ink);padding:56px 48px 120px">
+
+  <div style="max-width:76ch;margin-bottom:36px">
+    <h1 style="margin:0;font-family:var(--font-display);font-size:30px;letter-spacing:var(--display-track);text-transform:uppercase">Private project gate — two directions</h1>
+    <p style="margin:14px 0 0;font-size:17px;line-height:1.7">One password field, nothing else. Neither gate renders, fetches or derives any project data — there is no project object in this prototype at all. Use the <em>state</em> tweak to drive both gates through idle, focused, submitting, invalid and handoff, or type and submit to run the sequence live. No authentication logic is prototyped: the submit path is a timed stub that always fails.</p>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:72px">
+
+    <div id="5a" style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
+        <span style="font-family:var(--font-ui);font-size:12px;letter-spacing:0.18em;text-transform:uppercase;background:var(--ink);color:var(--surface);padding:4px 9px">5A</span>
+        <span style="font-family:var(--font-display);font-size:22px;letter-spacing:var(--display-track)">Projection room</span>
+        <span style="font-size:15px;color:var(--muted)">The dark before the film. Already in the environment the project will open into.</span>
+      </div>
+
+      <div data-gate="5a" data-page="" style="position:relative;width:1440px;height:900px;background:var(--surface-dark);color:var(--ink-dark);display:flex;flex-direction:column;overflow:hidden">
+        <div data-veil="" style="position:absolute;inset:0;background:var(--surface-dark);opacity:0;pointer-events:none;transition:opacity 240ms linear;z-index:4"></div>
+
+        <header style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:baseline;padding:30px var(--edge) 0">
+          <span style="grid-column:1/6;font-family:var(--font-ui);font-size:12px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted-dark)">Nguyen Khanh Nhat</span>
+        </header>
+
+        <section data-content="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-content:center;flex:1;padding:0 var(--edge);transition:opacity 240ms linear">
+          <span style="grid-column:1/8;font-family:var(--font-ui);font-size:12px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted-dark)">Private project</span>
+          <h2 style="grid-column:1/8;margin:22px 0 0;font-family:var(--font-display);font-size:52px;line-height:1.06;letter-spacing:var(--display-track)">This work is password protected.</h2>
+          <p style="grid-column:1/6;margin:20px 0 0;font-size:17px;line-height:1.74;color:var(--muted-dark)">Enter the access password you were given. It applies to this work only.</p>
+
+          <form data-gate-form="" style="grid-column:1/6;margin-top:46px">
+            <label data-label="" for="pw-5a" style="display:block;font-family:var(--font-ui);font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted-dark)">Access password</label>
+            <input data-input="" id="pw-5a" style-focus="outline:2px solid #EDE7DD" name="project-access-password" type="password" autocomplete="current-password" style="width:100%;margin-top:12px;padding:10px 0;background:transparent;border:0;border-bottom:1px solid var(--rule-dark);font-size:21px;letter-spacing:0.04em;color:var(--ink-dark);outline-offset:6px">
+            <p data-error="" role="alert" style="display:none;margin:16px 0 0;border-top:1px solid var(--accent);padding-top:10px;font-size:15px;line-height:1.6;color:var(--ink-dark)">That password does not open this work. Check it and try again.</p>
+            <div style="display:flex;align-items:baseline;gap:28px;margin-top:26px">
+              <button data-submit="" type="submit" style-focus="outline:2px solid #EDE7DD" style="background:none;border:0;padding:0 0 3px;border-bottom:1px solid var(--ink-dark);font-size:17px;cursor:pointer;outline-offset:6px">Enter</button>
+              <a data-escape="" href="#5a" style-focus="outline:2px solid #EDE7DD" style="font-size:16px;color:var(--muted-dark);outline-offset:4px">Back to works</a>
+            </div>
+          </form>
+        </section>
+
+        <footer style="padding:0 var(--edge) 40px;font-size:13px;color:var(--muted-dark)">Access is granted for this work only and is not an account.</footer>
+      </div>
+    </div>
+
+    <div id="5b" style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
+        <span style="font-family:var(--font-ui);font-size:12px;letter-spacing:0.18em;text-transform:uppercase;background:var(--ink);color:var(--surface);padding:4px 9px">5B</span>
+        <span style="font-family:var(--font-display);font-size:22px;letter-spacing:var(--display-track)">Editorial access</span>
+        <span style="font-size:15px;color:var(--muted)">A page of the same publication that happens to ask for a password.</span>
+      </div>
+
+      <div data-gate="5b" data-page="" style="position:relative;width:1440px;height:900px;background:var(--surface);color:var(--ink);display:flex;flex-direction:column;overflow:hidden">
+        <div data-veil="" style="position:absolute;inset:0;background:var(--surface-dark);opacity:0;pointer-events:none;transition:opacity 260ms linear;z-index:4"></div>
+
+        <header style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:baseline;padding:30px var(--edge) 0">
+          <a href="#5b" style="grid-column:1/6;font-family:var(--font-ui);font-size:12px;letter-spacing:0.22em;text-transform:uppercase">Nguyen Khanh Nhat</a>
+          <nav style="grid-column:7/13;display:flex;justify-content:flex-end;gap:34px;font-size:16px">
+            <a href="#5b">Works</a><a href="#5b">About</a><a href="#5b">Contact</a>
+          </nav>
+        </header>
+
+        <section data-content="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-content:center;flex:1;padding:0 var(--edge);transition:opacity 260ms linear">
+          <div style="grid-column:1/13;height:1px;background:var(--rule);margin-bottom:30px"></div>
+
+          <div style="grid-column:1/7">
+            <span style="display:block;font-family:var(--font-ui);font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted)">Private project</span>
+            <h2 style="margin:22px 0 0;font-family:var(--font-display);font-size:46px;line-height:1.08;letter-spacing:var(--display-track)">This work is password protected.</h2>
+            <p style="margin:20px 0 0;font-size:17px;line-height:1.74;max-width:44ch;color:var(--muted)">Enter the access password you were given. It applies to this work only, and is not an account.</p>
+          </div>
+
+          <form data-gate-form="" style="grid-column:8/12">
+            <label data-label="" for="pw-5b" style="display:block;font-family:var(--font-ui);font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted)">Access password</label>
+            <input data-input="" id="pw-5b" style-focus="outline:2px solid #16120E" name="project-access-password" type="password" autocomplete="current-password" style="width:100%;margin-top:12px;padding:10px 0;background:transparent;border:0;border-bottom:1px solid var(--ink);font-size:20px;letter-spacing:0.04em;color:var(--ink);outline-offset:6px">
+            <div style="display:flex;justify-content:flex-end;margin-top:8px">
+              <button data-reveal="" type="button" aria-pressed="false" style-focus="outline:2px solid #16120E" style="background:none;border:0;padding:0;font-size:13px;color:var(--muted);cursor:pointer;border-bottom:1px solid var(--rule);outline-offset:4px">Show</button>
+            </div>
+            <p data-error="" role="alert" style="display:none;margin:16px 0 0;border-top:1px solid var(--accent);padding-top:10px;font-size:15px;line-height:1.6;color:var(--accent)">That password does not open this work. Check it and try again.</p>
+            <div style="display:flex;align-items:baseline;gap:28px;margin-top:28px">
+              <button data-submit="" type="submit" style-focus="outline:2px solid #16120E" style="background:none;border:0;padding:0 0 3px;border-bottom:1px solid var(--ink);font-size:17px;cursor:pointer;outline-offset:6px">Enter</button>
+              <a data-escape="" href="#5b" style-focus="outline:2px solid #16120E" style="font-size:16px;color:var(--muted);outline-offset:4px">Back to works</a>
+            </div>
+          </form>
+        </section>
+
+        <footer style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);padding:0 var(--edge) 40px">
+          <span style="grid-column:1/8;font-size:13px;color:var(--muted)">Access is granted for this work only.</span>
+        </footer>
+      </div>
+    </div>
+  </div>
+
+  <div data-readout="" style="display:none;margin-top:28px;font-family:var(--font-ui);font-size:12px;line-height:1.75;color:#3A362F;white-space:pre-wrap"></div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;live&quot;,&quot;idle&quot;,&quot;focused&quot;,&quot;submitting&quot;,&quot;invalid&quot;,&quot;handoff&quot;],&quot;default&quot;:&quot;live&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;States&quot;},&quot;stubResult&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;invalid&quot;,&quot;granted&quot;],&quot;default&quot;:&quot;invalid&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;States&quot;},&quot;review&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Review&quot;}}">
+class Component extends DCLogic {
+  opt(k, d) { const o = window.__gt || {}; return o[k] !== undefined ? o[k] : (this.props[k] !== undefined ? this.props[k] : d); }
+
+  renderVals() { return { rootRef: (el) => { this.root = el; } }; }
+
+  componentDidMount() {
+    window.__gtc = this;
+    setTimeout(() => this.refresh(), 0);
+    setTimeout(() => this.refresh(), 700);
+  }
+
+  componentDidUpdate() { setTimeout(() => this.refresh(), 0); }
+
+  refresh() {
+    [["wire", () => this.wire()], ["state", () => this.applyForced()], ["audit", () => this.audit()]]
+      .forEach(([n, f]) => { try { f(); } catch (e) { console.error("[gate] " + n + ":", e); } });
+  }
+
+  gates() { return Array.from(this.root ? this.root.querySelectorAll("[data-gate]") : []); }
+
+  wire() {
+    this.gates().forEach((g) => {
+      if (g.dataset.wired) return;
+      g.dataset.wired = "1";
+      const form = g.querySelector("[data-gate-form]");
+      const input = g.querySelector("[data-input]");
+      const reveal = g.querySelector("[data-reveal]");
+      form.addEventListener("submit", (e) => { e.preventDefault(); this.submit(g); });
+      // Typing clears the error but never re-validates: the client has no idea
+      // whether a password is right, and must not imply that it does.
+      input.addEventListener("input", () => { if (g.dataset.state === "invalid") this.setState_(g, "idle", { keep: true }); });
+      if (reveal) {
+        reveal.addEventListener("click", () => {
+          const shown = input.type === "text";
+          input.type = shown ? "password" : "text";
+          reveal.textContent = shown ? "Show" : "Hide";
+          reveal.setAttribute("aria-pressed", String(!shown));
+          input.focus();
+        });
+      }
+      this.setState_(g, "idle");
+    });
+  }
+
+  // Visual/state contract only. No credential is compared, stored or sent;
+  // the timer stands in for a server round trip that always denies.
+  submit(g) {
+    if (g.dataset.state === "submitting" || g.dataset.state === "handoff") return;
+    this.setState_(g, "submitting");
+    clearTimeout(g._t);
+    g._t = setTimeout(() => {
+      if (this.opt("stubResult", "invalid") === "granted") this.setState_(g, "handoff");
+      else this.setState_(g, "invalid");
+    }, 900);
+  }
+
+  setState_(g, state, o) {
+    g.dataset.state = state;
+    const input = g.querySelector("[data-input]");
+    const btn = g.querySelector("[data-submit]");
+    const err = g.querySelector("[data-error]");
+    const content = g.querySelector("[data-content]");
+    const veil = g.querySelector("[data-veil]");
+    const invalid = state === "invalid";
+    const busy = state === "submitting";
+
+    err.style.display = invalid ? "block" : "none";
+    input.setAttribute("aria-invalid", invalid ? "true" : "false");
+    if (invalid) input.setAttribute("aria-describedby", err.id || (err.id = input.id + "-error"));
+    else input.removeAttribute("aria-describedby");
+    input.style.borderBottomColor = invalid ? "var(--accent)" : (g.dataset.gate === "5a" ? "var(--rule-dark)" : "var(--ink)");
+    // readOnly, not disabled: disabling the field during submit drops keyboard
+    // focus to the document and the visitor loses their place.
+    input.readOnly = busy || state === "handoff";
+
+    btn.textContent = busy ? "Checking…" : "Enter";
+    btn.disabled = busy || state === "handoff";
+    btn.setAttribute("aria-busy", busy ? "true" : "false");
+    btn.style.opacity = busy ? "0.62" : "1";
+    btn.style.cursor = busy ? "default" : "pointer";
+
+    // Handoff: no celebration, no metadata — the surface simply becomes the
+    // environment the project opens into.
+    veil.style.opacity = state === "handoff" ? "1" : "0";
+    content.style.opacity = state === "handoff" ? "0" : "1";
+
+    if (state === "focused") input.focus();
+    if (invalid && !(o && o.keep)) input.focus();
+    this.audit();
+  }
+
+  // The state switch must be reversible: submitting and handoff are terminal
+  // by design (readOnly field, disabled submit, guarded handler), so returning
+  // to "live" has to actively hand the gates back rather than simply stop
+  // forcing them. Only act on a transition, or a genuine live interaction in
+  // progress would be wiped on every refresh().
+  applyForced() {
+    const s = this.opt("state", "live");
+    const prev = this._forced;
+    if (s === prev) return;
+    this._forced = s;
+    if (s === "live") {
+      if (prev === undefined) return;
+      this.gates().forEach((g) => {
+        clearTimeout(g._t);
+        const input = g.querySelector("[data-input]");
+        input.value = "";
+        input.readOnly = false;
+        g.querySelector("[data-submit]").disabled = false;
+        this.setState_(g, "idle", { keep: true });
+      });
+      return;
+    }
+    this.gates().forEach((g) => {
+      clearTimeout(g._t);
+      const input = g.querySelector("[data-input]");
+      input.readOnly = false;
+      g.querySelector("[data-submit]").disabled = false;
+      if (s === "idle") input.value = "";
+      else if (!input.value) input.value = "••••••••";
+      this.setState_(g, s, { keep: s !== "focused" });
+    });
+  }
+
+  audit() {
+    const el = this.root && this.root.querySelector("[data-readout]");
+    if (!el) return;
+    if (!this.opt("review", false)) { el.style.display = "none"; return; }
+    el.style.display = "block";
+    const text = this.root.querySelector("[data-page]") ? Array.from(this.root.querySelectorAll("[data-gate]")).map((g) => g.innerText).join(" ") : "";
+    const leak = ["title", "client", "runtime", "synopsis", "credit", "year"].filter((w) => new RegExp("\\b" + w, "i").test(text));
+    el.textContent = [
+      "states        " + this.gates().map((g) => g.dataset.gate + ":" + g.dataset.state).join("  ·  "),
+      "media         " + this.root.querySelectorAll("[data-gate] img, [data-gate] video").length + " elements · no poster, no still, no frame",
+      "project data  none requested, none rendered, none derived — the prototype has no project object",
+      "disclosure    " + (leak.length ? "⚠ " + leak.join(", ") : "no project-identifying vocabulary in rendered copy"),
+      "credentials   nothing compared, stored or transmitted · stub result: " + this.opt("stubResult", "invalid"),
+      "semantics     type=password · autocomplete=current-password · persistent <label for> · role=alert error · aria-invalid · aria-busy"
+    ].join("\n");
+  }
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..600;1,6..72,200..500&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --surface:#F7F3EC; --ink:#16120E; --accent:#C4361C; --muted:#6C6862; --rule:#E2DCD2;
+  --surface-dark:#0C0A08; --ink-dark:#EDE7DD;
+  --font-display:'Marcellus',Georgia,serif; --font-body:'Newsreader',Georgia,serif; --font-ui:'Newsreader',Georgia,serif;
+  --display-track:-0.005em; --edge:56px; --gut:20px;
+}
+body{margin:0;background:#E6E1D8}
+a{color:inherit;text-decoration:none}
+a:hover{color:var(--accent)}
+input,button{font:inherit;color:inherit}
+</style>
+</helmet>
+<div ref="{{ rootRef }}" style="font-family:var(--font-body);color:var(--ink);padding:56px 48px 120px">
+
+  <div style="max-width:76ch;margin-bottom:34px">
+    <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
+      <span style="font-family:var(--font-ui);font-size:12px;letter-spacing:0.18em;text-transform:uppercase;background:var(--ink);color:var(--surface);padding:4px 9px">5B v2</span>
+      <h1 style="margin:0;font-family:var(--font-display);font-size:30px;letter-spacing:var(--display-track);text-transform:uppercase">Editorial access</h1>
+    </div>
+    <p style="margin:14px 0 0;font-size:17px;line-height:1.7">Refinement of <a href="#5b" style="border-bottom:1px solid #CFC8BC">5b</a>. The field moves onto the reading spine at a deliberate 22ch measure, a rate-limited state joins the contract, and the handoff respects reduced motion. Six states on the <em>state</em> switch; typing and submitting still runs live. No project data exists in this prototype, and no credential is compared or stored.</p>
+  </div>
+
+  <div data-gate="5b" data-page="" style="position:relative;width:1440px;height:900px;background:var(--surface);color:var(--ink);display:flex;flex-direction:column;overflow:hidden">
+    <div data-veil="" style="position:absolute;inset:0;background:var(--surface-dark);opacity:0;pointer-events:none;transition:opacity 260ms linear;z-index:4"></div>
+
+    <header style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:baseline;padding:30px var(--edge) 0">
+      <a href="#top" style="grid-column:1/6;font-family:var(--font-ui);font-size:12px;letter-spacing:0.22em;text-transform:uppercase">Nguyen Khanh Nhat</a>
+      <nav style="grid-column:7/13;display:flex;justify-content:flex-end;gap:34px;font-size:16px">
+        <a href="#top">Works</a><a href="#top">About</a><a href="#top">Contact</a>
+      </nav>
+    </header>
+
+    <section data-content="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-content:center;flex:1;padding:0 var(--edge);transition:opacity 260ms linear">
+      <div style="grid-column:1/13;height:1px;background:var(--rule);margin-bottom:34px"></div>
+
+      <div data-spine="" style="grid-column:1/7">
+        <span style="display:block;font-family:var(--font-ui);font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted)">Private project</span>
+        <h2 style="margin:22px 0 0;font-family:var(--font-display);font-size:46px;line-height:1.08;letter-spacing:var(--display-track)">This work is password protected.</h2>
+        <p style="margin:20px 0 0;font-size:17px;line-height:1.74;max-width:44ch;color:var(--muted)">Enter the access password you were given. It applies to this work only, and is not an account.</p>
+
+        <form data-gate-form="" style="margin-top:46px">
+          <label data-label="" for="pw-gate" style="display:block;font-family:var(--font-ui);font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted)">Access password</label>
+
+          <div data-field="" style="width:22ch;min-width:270px">
+            <input data-input="" id="pw-gate" name="project-access" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style-focus="outline:2px solid #16120E" style="width:100%;margin-top:12px;padding:10px 0;background:transparent;border:0;border-bottom:1px solid var(--ink);font-size:20px;letter-spacing:0.06em;color:var(--ink);outline-offset:6px">
+            <div style="display:flex;justify-content:flex-end;margin-top:8px">
+              <button data-reveal="" type="button" aria-pressed="false" style-focus="outline:2px solid #16120E" style="background:none;border:0;padding:0;font-size:13px;color:var(--muted);cursor:pointer;border-bottom:1px solid var(--rule);outline-offset:4px">Show</button>
+            </div>
+          </div>
+
+          <p data-error="" role="alert" style="display:none;margin:18px 0 0;border-top:1px solid var(--accent);padding-top:10px;max-width:40ch;font-size:15px;line-height:1.6;color:var(--accent)">That password does not open this work. Check it and try again.</p>
+
+          <div style="display:flex;align-items:baseline;gap:28px;margin-top:28px">
+            <button data-submit="" type="submit" style-focus="outline:2px solid #16120E" style="background:none;border:0;padding:0 0 3px;border-bottom:1px solid var(--ink);font-size:17px;cursor:pointer;outline-offset:6px">Enter</button>
+            <a data-escape="" href="#top" style-focus="outline:2px solid #16120E" style="font-size:16px;color:var(--muted);outline-offset:4px">Back to works</a>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <footer style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);padding:0 var(--edge) 40px">
+      <span style="grid-column:1/8;font-size:13px;color:var(--muted)">Access is granted for this work only.</span>
+    </footer>
+  </div>
+
+  <div data-readout="" style="display:none;margin-top:28px;font-family:var(--font-ui);font-size:12px;line-height:1.75;color:#3A362F;white-space:pre-wrap"></div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;live&quot;,&quot;idle&quot;,&quot;focused&quot;,&quot;submitting&quot;,&quot;invalid&quot;,&quot;rateLimited&quot;,&quot;handoff&quot;],&quot;default&quot;:&quot;live&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;States&quot;},&quot;stubResult&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;invalid&quot;,&quot;rateLimited&quot;,&quot;handoff&quot;],&quot;default&quot;:&quot;invalid&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;States&quot;},&quot;motion&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;reduced&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Review&quot;},&quot;review&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Review&quot;}}">
+class Component extends DCLogic {
+  MESSAGES = {
+    invalid: "That password does not open this work. Check it and try again.",
+    rateLimited: "Too many attempts. Please wait and try again."
+  };
+
+  opt(k, d) { const o = window.__g2 || {}; return o[k] !== undefined ? o[k] : (this.props[k] !== undefined ? this.props[k] : d); }
+
+  renderVals() { return { rootRef: (el) => { this.root = el; } }; }
+
+  componentDidMount() {
+    window.__g2c = this;
+    this.mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    this.mqHandler = () => this.applyMotion();
+    this.mq.addEventListener("change", this.mqHandler);
+    setTimeout(() => this.refresh(), 0);
+    setTimeout(() => this.refresh(), 700);
+  }
+
+  componentDidUpdate() { setTimeout(() => this.refresh(), 0); }
+  componentWillUnmount() { if (this.mq) this.mq.removeEventListener("change", this.mqHandler); }
+
+  refresh() {
+    [["motion", () => this.applyMotion()], ["wire", () => this.wire()], ["state", () => this.applyForced()], ["audit", () => this.audit()]]
+      .forEach(([n, f]) => { try { f(); } catch (e) { console.error("[gate 5b] " + n + ":", e); } });
+  }
+
+  gate() { return this.root && this.root.querySelector("[data-gate]"); }
+
+  reduced() { return this.opt("motion", "auto") === "reduced" || (this.mq && this.mq.matches); }
+
+  // The fade is decoration on top of a state change, never the carrier of it.
+  // Under reduced motion the handoff is instantaneous and reads identically.
+  applyMotion() {
+    const g = this.gate();
+    if (!g) return;
+    const t = this.reduced() ? "none" : "opacity 260ms linear";
+    g.querySelector("[data-veil]").style.transition = t;
+    g.querySelector("[data-content]").style.transition = t;
+  }
+
+  wire() {
+    const g = this.gate();
+    if (!g || g.dataset.wired) return;
+    g.dataset.wired = "1";
+    const input = g.querySelector("[data-input]");
+    const reveal = g.querySelector("[data-reveal]");
+    g.querySelector("[data-gate-form]").addEventListener("submit", (e) => { e.preventDefault(); this.submit(); });
+    input.addEventListener("input", () => {
+      // Clears the visible error only. The client cannot know whether a
+      // password is correct and must never imply that it is checking.
+      if (g.dataset.state === "invalid" || g.dataset.state === "rateLimited") this.set("idle", { keep: true });
+    });
+    reveal.addEventListener("click", () => {
+      const shown = input.type === "text";
+      input.type = shown ? "password" : "text";
+      reveal.textContent = shown ? "Show" : "Hide";
+      reveal.setAttribute("aria-pressed", String(!shown));
+      input.focus();
+    });
+    this.set("idle");
+  }
+
+  // Visual contract only: nothing is compared, stored or transmitted, and the
+  // stub decides the outcome. Rate limiting is enforced server-side in
+  // production — the client never counts attempts.
+  submit() {
+    const g = this.gate();
+    if (!g || g.dataset.state === "submitting" || g.dataset.state === "handoff") return;
+    this.set("submitting");
+    clearTimeout(this._t);
+    this._t = setTimeout(() => this.set(this.opt("stubResult", "invalid")), 900);
+  }
+
+  set(state, o) {
+    const g = this.gate();
+    if (!g) return;
+    g.dataset.state = state;
+    const input = g.querySelector("[data-input]");
+    const btn = g.querySelector("[data-submit]");
+    const err = g.querySelector("[data-error]");
+    const content = g.querySelector("[data-content]");
+    const veil = g.querySelector("[data-veil]");
+    const showErr = state === "invalid" || state === "rateLimited";
+    const busy = state === "submitting";
+
+    err.textContent = state === "rateLimited" ? this.MESSAGES.rateLimited : this.MESSAGES.invalid;
+    err.style.display = showErr ? "block" : "none";
+    // Both failure messages are field-level and identically generic; neither
+    // reveals attempt counts, thresholds, or whether a project exists.
+    input.setAttribute("aria-invalid", state === "invalid" ? "true" : "false");
+    if (showErr) input.setAttribute("aria-describedby", err.id || (err.id = "pw-gate-error"));
+    else input.removeAttribute("aria-describedby");
+    input.style.borderBottomColor = showErr ? "var(--accent)" : "var(--ink)";
+    input.readOnly = busy || state === "handoff";
+
+    btn.textContent = busy ? "Checking…" : "Enter";
+    btn.disabled = busy || state === "handoff";
+    btn.setAttribute("aria-busy", busy ? "true" : "false");
+    btn.style.opacity = busy ? "0.62" : "1";
+    btn.style.cursor = busy ? "default" : "pointer";
+
+    veil.style.opacity = state === "handoff" ? "1" : "0";
+    content.style.opacity = state === "handoff" ? "0" : "1";
+
+    if (state === "focused") input.focus();
+    if (showErr && !(o && o.keep)) input.focus();
+    this.audit();
+  }
+
+  // Reversible by construction: submitting and handoff lock the field, so
+  // returning to "live" must hand the gate back rather than stop forcing it.
+  applyForced() {
+    const s = this.opt("state", "live");
+    if (s === this._forced) return;
+    const prev = this._forced;
+    this._forced = s;
+    const g = this.gate();
+    if (!g) return;
+    clearTimeout(this._t);
+    const input = g.querySelector("[data-input]");
+    input.readOnly = false;
+    g.querySelector("[data-submit]").disabled = false;
+    if (s === "live") {
+      if (prev === undefined) return;
+      input.value = "";
+      this.set("idle", { keep: true });
+      return;
+    }
+    if (s === "idle") input.value = "";
+    else if (!input.value) input.value = "••••••••";
+    this.set(s, { keep: s !== "focused" });
+  }
+
+  audit() {
+    const el = this.root && this.root.querySelector("[data-readout]");
+    if (!el) return;
+    if (!this.opt("review", false)) { el.style.display = "none"; return; }
+    el.style.display = "block";
+    const g = this.gate();
+    const input = g.querySelector("[data-input]");
+    const field = g.querySelector("[data-field]");
+    const text = g.innerText;
+    const leak = ["title", "client", "runtime", "synopsis", "credit", "year", "poster"].filter((w) => new RegExp("\\b" + w, "i").test(text));
+    el.textContent = [
+      "state          " + g.dataset.state + "   (switch: " + this.opt("state", "live") + " · stub: " + this.opt("stubResult", "invalid") + ")",
+      "media          " + g.querySelectorAll("img, video, svg, picture").length + " elements · nothing project-derived",
+      "project data   none requested, rendered or derived — no project object exists in this prototype",
+      "disclosure     " + (leak.length ? "⚠ " + leak.join(", ") : "no project-identifying vocabulary in rendered copy"),
+      "field          " + Math.round(field.getBoundingClientRect().width) + "px (22ch, min 270px) · " + Math.round((field.getBoundingClientRect().width / g.querySelector("[data-spine]").getBoundingClientRect().width) * 100) + "% of the spine",
+      "autocomplete   " + input.getAttribute("autocomplete") + " · name=" + input.getAttribute("name") + " · deliberately not a credential (see §5)",
+      "aria           invalid=" + input.getAttribute("aria-invalid") + " · describedby=" + (input.getAttribute("aria-describedby") || "—") + " · busy=" + g.querySelector("[data-submit]").getAttribute("aria-busy"),
+      "motion         " + (this.reduced() ? "reduced · handoff is instantaneous" : "fade 260ms · state does not depend on it")
+    ].join("\n");
+  }
+}
+
+</script>
+</body>
+</html>

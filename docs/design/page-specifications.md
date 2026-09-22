@@ -24,11 +24,11 @@ does not pretend otherwise.
 | **Project Detail** | **VISUALLY EXPLORED** | ✅ candidate (1B v2) | ✅ ref 4 | A proposed composition, block by block |
 | **About Me** | **VISUALLY EXPLORED** | ✅ candidate (3B v2) | ✅ refs 1, 2 | A proposed composition, section by section |
 | **Contact** | **VISUALLY EXPLORED** | ✅ candidate (4B v2) | ✗ none | A proposed composition, element by element |
-| **Private Project Gate** | **STRUCTURALLY SPECIFIED** | ✗ | ✗ none | An access contract and a stated design tension; no composition |
+| **Private Project Gate** | **VISUALLY EXPLORED** | ✅ candidate (5B v2) | ✗ none | A proposed composition with six states |
 
-**Five pages are VISUALLY EXPLORED — Home, Art Works, Project Detail, About Me
-and Contact.** None is approved. **The Private Project Gate is the only page with
-no exploration.**
+**All six pages are now VISUALLY EXPLORED.** None is approved. Every page has a
+candidate recorded in `docs/design/prototypes/`, and every prototype states in
+its own header that it approves nothing.
 
 ### What each grade permits
 
@@ -49,11 +49,12 @@ design for its page is the specific failure this table exists to prevent.
 `docs/design/prototypes/`, and every prototype states in its own header that it
 approves nothing. None has Project Owner / Architect approval.
 
-Worth noting how the evidence now sits: **every page carrying reference evidence
-has been explored**, and two pages — Home and Contact — were explored with no
-reference evidence at all. Exploration and reference evidence have met on three
-of the six pages. **Only the Private Project Gate remains unexplored**, and it
-has no reference either.
+Worth noting how the evidence now sits: exploration has reached all six pages,
+but **reference evidence has not**. Three pages — Home, Contact and the Private
+Project Gate — were explored with no visual reference at all, so their
+candidates rest on exploration alone. The other three combine both. **Exploration
+coverage is not the same as evidence coverage**, and the difference matters when
+judging how much weight a candidate carries.
 
 **For every page below VISUALLY EXPLORED, this document defines constraints
 only.** Where a visual composition is not yet determined it is marked
@@ -977,8 +978,19 @@ Whether Contact is a page or a section of About.
 
 ## 6. Private Project Gate
 
-> **Maturity: STRUCTURALLY SPECIFIED.** No exploration, no reference. **Visual design has not begun.**
-> **[PENDING VISUAL EXPLORATION]**
+> **Maturity: VISUALLY EXPLORED.** Candidate composition **5B v2**, **not approved**.
+>
+> Evidence: `docs/design/prototypes/private-gate/Private Gate 5B v2.dc.html` and
+> `private-gate-5b-v2.md`. Sibling directions 5A and 5B v1 are retained in
+> `Private Gate Directions.dc.html` as exploration record only. No visual
+> reference exists for this page.
+>
+> Exploring it required **no new architecture**. The existing project-access
+> contract already carries the whole flow (§6.2).
+>
+> The gate's theme environment was **resolved in favour of this candidate** on
+> 2026-09-22 (§6.3). Remaining blockers are responsive validation and the
+> engineering / security questions in §6.9 — none is a visual-design blocker.
 
 ### 6.1 Purpose
 
@@ -992,44 +1004,241 @@ visitor arrives with the URL. Without a valid access cookie, `GET` returns `403`
 with an error envelope and **no project content**. The visitor submits the
 password; the server verifies and sets a signed HTTPOnly cookie.
 
-**[INVARIANT]** This is **not account authentication.** There is no account.
+```text
+project-access password
+  → server-side verification
+    → signed HTTPOnly project-access cookie
+      → protected Project Detail
+```
+
+**[INVARIANT]** This is **project access, not identity authentication.** There
+is no account, no user record and no reusable session.
+
+**[INVARIANT]** It is **separate from admin authentication** and shares nothing
+with it — not the cookie, not the session, not the verification path.
 
 Forbidden: "Sign in" · a username or email field · "Forgot password" · "Create
 account" · any account framing whatsoever.
 
 ### 6.3 Theme environment **[INVARIANT]**
 
-**Dark** — the gate inherits the environment of the project it guards. The
-visitor is already at the cinema door.
+**Resolved by Project Owner decision, 2026-09-22**, in favour of the candidate
+and the hard non-disclosure rule.
 
-### 6.4 Design intent **[DEFAULT]**
+**Superseded and no longer valid:** *"the gate inherits the environment of the
+project it guards."* That rule conflicted conceptually with the stronger
+pre-authorization non-disclosure invariant (§6.5) — **a protected project's
+environment is itself project-derived presentation**, and exposing it before
+access is verified discloses something about the work being guarded.
 
-**A title card, not a login screen.** The project's own environment, a single
-field, a plain instruction.
+#### Pre-authorization **[INVARIANT]**
 
-**[INVARIANT]** It must reveal nothing about the project it guards beyond what
-the visitor already has — no title, cover, description or credits before access
-is verified.
+The gate uses a **route-independent, non-project-derived editorial surface.**
 
-This creates a genuine and unresolved design tension: the gate must feel like it
-belongs to a specific project while being forbidden from showing anything about
-that project. **[PENDING VISUAL EXPLORATION]**
+**[DEFAULT]** The V1 candidate uses the **light public surface**.
 
-### 6.5 Constraints
+**[INVARIANT]** Before authorization the gate **must not inherit** any of the
+protected project's:
+
+- colour
+- media or imagery
+- theme
+- typography variation
+- any other project-derived presentation
+
+**[INVARIANT]** The visual output must remain **non-disclosive**. Two visitors
+holding URLs to two different private projects must not be able to tell the
+gates apart.
+
+#### Authorized handoff **[INVARIANT]**
+
+**Only after successful authorization** may the experience transition into the
+protected Project Detail environment.
+
+**[DEFAULT]** The selected 5B v2 candidate uses the existing **light → dark
+handoff** — the site's established transition into a project, arriving from a
+page rather than from a clicked frame.
+
+**[INVARIANT]** **Project Detail owns all project-specific presentation after
+authorization** (§3). The gate contributes only the transition out of its own
+surface, and prefetches nothing.
+
+### 6.4 Candidate composition — 5B v2 **[DEFAULT — candidate, not a template]**
+
+Recorded from `docs/design/prototypes/private-gate/Private Gate 5B v2.dc.html`
+and its review record `private-gate-5b-v2.md`.
+
+**The core idea: editorial access.** The gate is visually and editorially part
+of the public site — the same datum rule, spine, type and palette as About and
+Contact — and it is emphatically **not a login screen**.
+
+| # | Element | Notes |
+|---|---|---|
+| 1 | **Public site chrome + escape route** | Identity mark and nav. *Back to works* is an ordinary keyboard-reachable link. |
+| 2 | **`PRIVATE PROJECT` hierarchy** | Tracked caps marker, then a display line: *"This work is password protected."* |
+| 3 | **Private-access explanation** | Generic copy stating the password applies to this work only **and is not an account** |
+| 4 | **Persistent password label** | A real `<label for>` — never a placeholder standing in for a label |
+| 5 | **One project-access password field** | ~22ch on the reading spine, so it does not read as a search bar |
+| 6 | **Show / Hide control** | A real `<button type="button">` with `aria-pressed` |
+| 7 | **Enter action** | A real `<button type="submit">` |
+| 8 | **Closing line** | *"Access is granted for this work only."* |
+
+**No project-specific content appears anywhere before authorization** — see
+§6.5.
+
+#### This is project access, not identity authentication **[INVARIANT]**
+
+The candidate carries this in its own copy, not merely in its structure: the
+explanatory line states the password **"is not an account."** The field is
+`name="project-access"` — deliberately **not** `…password` — so nothing in the
+DOM presents it as an account credential.
+
+#### This is a candidate arrangement, not a universal template
+
+The current desktop composition is **candidate evidence**, not a fixed template
+and not an approved specification.
+
+### 6.5 Non-disclosure **[INVARIANT — hard]**
+
+**Before authorization the gate exposes zero project metadata.** This is not a
+guideline and admits no exception.
+
+**Independently audited against the prototype markup**, not taken on report:
+
+| Forbidden before authorization | Verified |
+|---|---|
+| Title · synopsis · category · project-specific copy | **Absent** — every rendered string is route-independent |
+| Image · poster · thumbnail · video · frame | **Zero** `img`, `video`, `svg`, `picture`, `source`, `canvas`, `iframe` elements; zero `background-image`; zero `url(`; zero `media/` references |
+| Client · year · runtime · credits | **Absent** |
+| Project-derived colour | **Absent** — the palette is the site's own, fixed |
+| Protected-project theme inheritance | **Absent** — the surface is route-independent (§6.3) |
+
+**No project object exists in the prototype**, and no project-specific media
+dependency exists. There is no path by which project data could reach the
+render.
+
+The prototype enforces this with a **live vocabulary scan** over rendered text
+on every state change, flagging any of *title, client, runtime, synopsis, credit,
+year, poster* if it ever appears.
+
+**[INVARIANT]** Both failure messages are identically generic, and **neither
+confirms that a project exists at the route.**
+
+**[INVARIANT]** The handoff reveals no project metadata before authorization
+completes — nothing is prefetched.
+
+### 6.6 The six visual states **[DEFAULT]**
+
+| State | Contract |
+|---|---|
+| **Idle** | Empty field on a hairline, Enter available, no message |
+| **Focused** | Visible focus outline; the persistent label remains |
+| **Submitting** | Enter reads *Checking…*, `aria-busy="true"`; the field is **`readOnly`, never `disabled`**, so focus is kept; repeat submits are ignored at the handler |
+| **Invalid** | Generic message, `aria-invalid="true"`, `aria-describedby` wired, value preserved, focus returned |
+| **Rate limited** | Generic message in the same slot with the same treatment. **`aria-invalid` stays `false`** — the password was not judged wrong, the request was not judged at all |
+| **Handoff** | Content out, surface to near-black, field and submit locked. No success message, no celebration, no metadata |
+
+**[INVARIANT]** **The client never validates the password.** Typing after a
+failure clears the visible message and returns to idle **without re-validating**
+and without implying anything was checked.
+
+**[INVARIANT]** **The client never counts attempts and never enforces rate
+limiting.** Rate limiting is a server concern; this is only a visual contract for
+a server response.
+
+**[INVARIANT]** Rate-limit feedback is **generic**: no attempt count, no
+threshold, no countdown, no hint about password correctness or project existence.
+
+**[INVARIANT]** Duplicate submission is prevented both semantically and visually
+— the handler returns early while submitting or handing off.
+
+### 6.7 Accessibility and autocomplete **[INVARIANT]**
+
+- Real `<form>`, `<input type="password">`, `<button type="submit">`.
+- **Persistent visible label** bound by `for`/`id`. A placeholder never stands in
+  for a label.
+- The message carries `role="alert"` and is associated by `aria-describedby` in
+  both failure states, removed otherwise.
+- `aria-invalid` distinguishes the two failures honestly — `true` on invalid,
+  `false` on rate limited.
+- **Show / Hide is a real button** with `aria-pressed`, a label that changes, and
+  focus returned to the field.
+- Focus is a visible outline on every control, **never colour alone**.
+- `autocapitalize`, `autocorrect` and `spellcheck` are **off** — a password typed
+  on a phone must not be auto-capitalised or corrected.
+- **Reduced motion makes the handoff immediate** and the state remains fully
+  legible. Motion is never load-bearing.
+
+#### `autocomplete="off"` **[DEFAULT]**
+
+The candidate records `autocomplete="off"` with `name="project-access"`.
+
+**The reasoning is behavioural, not merely semantic.** `current-password` is
+defined as the password for *the account identified by the username field* —
+there is no account and no username field here. More decisively: **several
+private projects share one origin and each has a different password.** A password
+manager keyed by origin would treat them as one credential and overwrite it each
+time a different project is opened — actively harmful to a client holding two.
+`new-password` was rejected separately, as it invites generation offers for a
+password the visitor was given and cannot choose.
+
+**Caveat, recorded as implementation behaviour and not a design blocker:** Chrome
+and Safari apply heuristics to password inputs and may still offer to save
+regardless of `off`. The design does not depend on the hint being honoured — it
+must simply not *request* credential treatment.
+
+**This is not account authentication, and `off` must not be reinterpreted as
+such.**
+
+### 6.8 Constraints
 
 **[INVARIANT]** Rate-limited (`429`) · password never logged in plaintext ·
 private projects emit `noindex, nofollow` · errors explain what to do next
 without apologising or being vague.
 
-### 6.6 States
+### 6.9 Unresolved
 
-| State | Behaviour |
-|---|---|
-| **Locked** | The gate. Password field, plain instruction. |
-| **Wrong password** | `401`. **[PENDING]** — must say what to do next, in the interface's voice, without apology. |
-| **Rate limited** | `429`, with `Retry-After` when known. **[PENDING]** |
-| **Unlocked** | Access cookie set; the project renders normally. **[PENDING]** — whether the transition plays here is undesigned. |
-| **Not found** | `404`. Must not disclose whether a private project exists at that slug. |
+#### Responsive **[PENDING VISUAL EXPLORATION]**
+
+**Mobile and tablet remain pending visual validation.** Recorded, not solved:
+
+1. **Soft-keyboard overlap — the sharpest risk.** Content is vertically centred;
+   with a keyboard open the field, message and *Enter* can all sit beneath it.
+2. **Loss of vertical centring at constrained heights.** Centring almost
+   certainly has to give way to top-aligned flow.
+3. **Field width.** The minimum measure is close to a small phone's usable width
+   and may need revisiting.
+4. **Error wrapping**, which pushes the actions down while the keyboard is open.
+5. **Nav compression** — full navigation on a page whose job is one field.
+6. **Heading scaling** — fixed rather than container-relative, unlike the rest of
+   the candidate set.
+7. **Show control placement**, which may want to sit inline with the label at
+   narrow widths.
+
+#### Engineering / security questions — **not visual-design blockers**
+
+Carried forward without invented answers. **None is a Design decision**, and the
+visual contract does not depend on any particular answer:
+
+1. **Unknown-route vs private-route HTTP and routing behaviour.** The gate
+   deliberately cannot tell a visitor whether they found a real private project
+   or an unknown protected route; whether that holds end to end is a routing and
+   status-code policy decision.
+2. **Enumeration resistance.**
+3. **Rate-limit thresholds** — window, per-IP vs per-route.
+4. **Whether `Retry-After` is surfaced.** If a real countdown is ever provided
+   the message slot can carry it; the design assumes none.
+5. **Project-access cookie scope and lifetime.**
+6. **Response timing parity between invalid and rate-limited outcomes.** The two
+   are visually identical by design; engineering should confirm the *timing* does
+   not leak what the copy withholds.
+
+#### Design conflicts
+
+**None open.** The theme-environment conflict was resolved on 2026-09-22 in
+favour of a route-independent pre-auth surface (§6.3). **No visual-design
+blocker remains** — what is left is responsive validation and the engineering /
+security questions above.
 
 ---
 
@@ -1039,7 +1248,7 @@ Hold on every page regardless of exploration status.
 
 | | |
 |---|---|
-| **Theme** | Light on Home, Art Works, About, Contact. Dark on Project Detail and the gate. No visitor toggle. Polarity fixed. |
+| **Theme** | Light on Home, Art Works, About and Contact. **The pre-auth Private Gate is light** — a route-independent surface that inherits nothing from the project it guards (§6.3). **Authorized Project Detail is dark**, and owns all project-specific presentation. No visitor toggle. Polarity fixed. |
 | **Chrome** | Navigation and footer are site chrome, outside the composer, on the same 12 columns as content. |
 | **Media** | No card chrome. Full bleed by default. Native aspect except `VIDEO_GRID` and `HORIZONTAL_STRIP`. |
 | **Video** | Never audible without user action. Multi-video surfaces are `AUTOPLAY_VISIBLE`. `AUTOPLAY_AMBIENT` only on a standalone ambient surface. |
@@ -1055,8 +1264,8 @@ Hold on every page regardless of exploration status.
 
 1. **Approve or amend** `design-direction.md`, `design-system.md` and this
    document. All three are Draft.
-2. **Explore the Private Project Gate** — the last unexplored page, and the only
-   one with neither exploration nor reference evidence.
+2. **Validate the gate at narrow widths** (§6.9) — chiefly the soft-keyboard
+   overlap case, which is the sharpest unresolved responsive risk on any page.
 3. **Define narrow-width behaviour for `JUSTIFIED_ROWS`, `HORIZONTAL_STRIP` and
    `SLIDESHOW`.** The principle is approved (`design-system.md` §11.5) — GALLERY
    does not inherit GRID child stacking and every mode owes its own bounded

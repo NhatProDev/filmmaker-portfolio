@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..600;1,6..72,200..500&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --surface:#F7F3EC; --ink:#16120E; --accent:#C4361C; --muted:#6C6862; --rule:#E2DCD2; --frame:#14110F;
+  --font-display:'Marcellus',Georgia,serif; --font-body:'Newsreader',Georgia,serif; --font-ui:'Newsreader',Georgia,serif;
+  --display-track:-0.005em;
+  --edge:56px; --gut:20px; --band:150px;
+}
+body{margin:0;background:#E6E1D8}
+a{color:inherit;text-decoration:none}
+a:hover{color:var(--accent)}
+img,video{display:block}
+</style>
+</helmet>
+<div ref="{{ rootRef }}" style="font-family:var(--font-body);color:var(--ink);padding:56px 48px 120px">
+
+  <div style="max-width:74ch;margin-bottom:38px">
+    <h1 style="margin:0;font-family:var(--font-display);font-size:32px;letter-spacing:var(--display-track);text-transform:uppercase">Art Works — three directions</h1>
+    <p style="margin:14px 0 0;font-size:17px;line-height:1.7">The browsing surface between Home and Project Detail. Light ground, data-driven, same nine projects in all three. Rows are solved by a real justified-flow algorithm, not authored — change <em>project count</em> in the tweaks to see each direction at 3, 9 and 18 projects. Nothing here is approved.</p>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:72px">
+
+    <div id="2a" style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
+        <span style="font-family:var(--font-ui);font-size:12px;letter-spacing:0.18em;text-transform:uppercase;background:var(--ink);color:var(--surface);padding:4px 9px">2a</span>
+        <span style="font-family:var(--font-display);font-size:22px;letter-spacing:var(--display-track)">Contact sheet</span>
+        <span style="font-size:15px;color:var(--muted)">No titles at rest. The work is the index; the name arrives on approach.</span>
+      </div>
+
+      <div data-page="" style="width:1440px;background:var(--surface);padding-bottom:110px">
+        <header data-grid="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:baseline;padding:30px var(--edge) 0">
+          <a href="#2a" style="grid-column:1/6;font-family:var(--font-ui);font-size:12px;letter-spacing:0.22em;text-transform:uppercase">Nguyen Khanh Nhat</a>
+          <nav style="grid-column:7/13;display:flex;justify-content:flex-end;gap:34px;font-size:16px">
+            <a href="#2a" style="color:var(--accent)">Works</a><a href="#2a">About</a><a href="#2a">Contact</a>
+          </nav>
+        </header>
+
+        <div data-grid="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);padding:90px var(--edge) 52px">
+          <p data-count="a" style="grid-column:1/7;margin:0;font-size:15px;font-style:italic;color:var(--muted)">Nine projects, 2023–2026</p>
+        </div>
+
+        <div data-sheet="a" data-target="330" style="display:flex;flex-wrap:wrap;gap:4px;align-content:flex-start">
+          <sc-for list="{{ projects }}" as="p" hint-placeholder-count="9">
+            <a href="#2a" data-item="" data-i="{{ p.i }}" data-ar="{{ p.ar }}" data-moving="{{ p.moving }}" style="position:relative;display:block;overflow:hidden;background:var(--frame)">
+              <img src="{{ p.cover }}" alt="{{ p.title }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+              <video data-src="{{ p.clip }}" loop="" muted="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 320ms linear"></video>
+              <span data-scrim="" style="position:absolute;inset:auto 0 0 0;height:96px;background:linear-gradient(to top,rgba(0,0,0,0.62),rgba(0,0,0,0));opacity:0;transition:opacity 180ms linear;pointer-events:none"></span>
+              <span data-cap="" style="position:absolute;left:16px;right:16px;bottom:13px;display:flex;align-items:baseline;justify-content:space-between;gap:14px;opacity:0;transition:opacity 180ms linear;pointer-events:none">
+                <span style="font-family:var(--font-display);font-size:20px;letter-spacing:var(--display-track);text-transform:uppercase;color:#F4EFE6">{{ p.title }}</span>
+                <span style="font-size:13px;color:rgba(244,239,230,0.82)">{{ p.year }}</span>
+              </span>
+            </a>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <div id="2b" style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
+        <span style="font-family:var(--font-ui);font-size:12px;letter-spacing:0.18em;text-transform:uppercase;background:var(--ink);color:var(--surface);padding:4px 9px">2b</span>
+        <span style="font-family:var(--font-display);font-size:22px;letter-spacing:var(--display-track)">Editorial sequence</span>
+        <span style="font-size:15px;color:var(--muted)">One project per band, named in the margin, alternating side.</span>
+      </div>
+
+      <div data-page="" style="width:1440px;background:var(--surface);padding-bottom:110px">
+        <header data-grid="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:baseline;padding:30px var(--edge) 0">
+          <a href="#2b" style="grid-column:1/6;font-family:var(--font-ui);font-size:12px;letter-spacing:0.22em;text-transform:uppercase">Nguyen Khanh Nhat</a>
+          <nav style="grid-column:7/13;display:flex;justify-content:flex-end;gap:34px;font-size:16px">
+            <a href="#2b" style="color:var(--accent)">Works</a><a href="#2b">About</a><a href="#2b">Contact</a>
+          </nav>
+        </header>
+
+        <div data-grid="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);padding:90px var(--edge) 0">
+          <h2 style="grid-column:1/9;margin:0;font-family:var(--font-display);font-size:64px;line-height:1;letter-spacing:var(--display-track);text-transform:uppercase">Works</h2>
+          <p data-count="b" style="grid-column:10/13;margin:0;align-self:end;font-size:15px;font-style:italic;color:var(--muted)">Nine projects, 2023–2026</p>
+        </div>
+
+        <div data-bands="">
+          <sc-for list="{{ projects }}" as="p" hint-placeholder-count="9">
+            <a href="#2b" data-band="" data-i="{{ p.i }}" data-ar="{{ p.ar }}" data-moving="{{ p.moving }}" data-flip="{{ p.flip }}" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:end;padding:110px var(--edge) 0">
+              <div data-frame="" style="position:relative;overflow:hidden;background:var(--frame)">
+                <img src="{{ p.cover }}" alt="{{ p.title }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+                <video data-src="{{ p.clip }}" loop="" muted="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 320ms linear"></video>
+              </div>
+              <div data-label="" style="padding-bottom:6px">
+                <span data-num="" style="display:block;font-family:var(--font-ui);font-size:12px;letter-spacing:0.2em;color:var(--muted)">{{ p.num }}</span>
+                <span style="display:block;margin-top:10px;font-family:var(--font-display);font-size:34px;line-height:1.08;letter-spacing:var(--display-track);text-transform:uppercase">{{ p.title }}</span>
+                <span style="display:block;margin-top:8px;font-size:15px;color:var(--muted)">{{ p.meta }}</span>
+              </div>
+            </a>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <div id="2c" style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
+        <span style="font-family:var(--font-ui);font-size:12px;letter-spacing:0.18em;text-transform:uppercase;background:var(--ink);color:var(--surface);padding:4px 9px">2c</span>
+        <span style="font-family:var(--font-display);font-size:22px;letter-spacing:var(--display-track)">Index and sheet</span>
+        <span style="font-size:15px;color:var(--muted)">A typographic index carries the names; the media stays uncaptioned. They point at each other.</span>
+      </div>
+
+      <div data-page="" style="width:1440px;background:var(--surface);padding-bottom:110px">
+        <header data-grid="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:baseline;padding:30px var(--edge) 0">
+          <a href="#2c" style="grid-column:1/6;font-family:var(--font-ui);font-size:12px;letter-spacing:0.22em;text-transform:uppercase">Nguyen Khanh Nhat</a>
+          <nav style="grid-column:7/13;display:flex;justify-content:flex-end;gap:34px;font-size:16px">
+            <a href="#2c" style="color:var(--accent)">Works</a><a href="#2c">About</a><a href="#2c">Contact</a>
+          </nav>
+        </header>
+
+        <div data-grid="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);padding:90px var(--edge) 64px">
+          <ol data-index="" style="grid-column:1/9;margin:0;padding:0;list-style:none;columns:2;column-gap:var(--gut)">
+            <sc-for list="{{ projects }}" as="p" hint-placeholder-count="9">
+              <li style="break-inside:avoid">
+                <a href="#2c" data-row="" data-i="{{ p.i }}" style="display:flex;align-items:baseline;gap:14px;border-top:1px solid var(--rule);padding:11px 0">
+                  <span style="font-family:var(--font-ui);font-size:12px;letter-spacing:0.16em;color:var(--muted)">{{ p.num }}</span>
+                  <span style="flex:1;font-family:var(--font-display);font-size:23px;letter-spacing:var(--display-track);text-transform:uppercase">{{ p.title }}</span>
+                  <span style="font-size:14px;color:var(--muted)">{{ p.year }}</span>
+                </a>
+              </li>
+            </sc-for>
+          </ol>
+          <p data-count="c" style="grid-column:10/13;margin:0;font-size:15px;line-height:1.74;color:var(--muted)">Nine projects, 2023–2026. Hover a title to find it below, or a frame to find its name above.</p>
+        </div>
+
+        <div data-sheet="c" data-target="300" style="display:flex;flex-wrap:wrap;gap:4px;align-content:flex-start">
+          <sc-for list="{{ projects }}" as="p" hint-placeholder-count="9">
+            <a href="#2c" data-item="" data-i="{{ p.i }}" data-ar="{{ p.ar }}" data-moving="{{ p.moving }}" style="position:relative;display:block;overflow:hidden;background:var(--frame)">
+              <img src="{{ p.cover }}" alt="{{ p.title }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+              <video data-src="{{ p.clip }}" loop="" muted="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 320ms linear"></video>
+            </a>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;projectCount&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;3&quot;,&quot;9&quot;,&quot;18&quot;],&quot;default&quot;:&quot;9&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Data&quot;},&quot;previews&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;few&quot;,&quot;all&quot;],&quot;default&quot;:&quot;few&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Data&quot;},&quot;captions&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;on-approach&quot;,&quot;always&quot;],&quot;default&quot;:&quot;on-approach&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Identification&quot;},&quot;motion&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;reduced&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Review&quot;}}">
+class Component extends DCLogic {
+  // Real aspect ratios, measured from the files — not authored. JUSTIFIED_ROWS
+  // preserves native aspect, so the library's true shapes are what gets tested.
+  LIB = [
+    { title: "Made to Measure", year: "2026", meta: "Trần & Sons · 8 min", cover: "mtm-atelier.jpg",  ar: 2.041, clip: "n3.mp4" },
+    { title: "Court",           year: "2026", meta: "Nike VN · 60 sec",    cover: "nike-court.jpg",   ar: 2.008, clip: "c3.mp4" },
+    { title: "The Desk",        year: "2025", meta: "Self-initiated",      cover: "desk-01.jpg",      ar: 1.776, clip: "n2.mp4" },
+    { title: "Honey, Slowly",   year: "2025", meta: "Bếp Nhà · 40 sec",    cover: "desk-03.jpg",      ar: 1.778, clip: "n1.mp4" },
+    { title: "Shopfront",       year: "2025", meta: "Documentary short",   cover: "mtm-shopfront.jpg",ar: 2.012, clip: "" },
+    { title: "Lacing",          year: "2024", meta: "Nike VN · 30 sec",    cover: "nike-lacing.jpg",  ar: 1.778, clip: "c2.mp4" },
+    { title: "Sketch",          year: "2024", meta: "Process film",        cover: "mtm-sketch.jpg",   ar: 2.041, clip: "" },
+    { title: "Night Shift",     year: "2023", meta: "Self-initiated",      cover: "desk-04.jpg",      ar: 1.776, clip: "n4.mp4" },
+    { title: "Sitting",         year: "2023", meta: "Portrait study",      cover: "portrait.jpg",     ar: 0.645, clip: "" }
+  ];
+  EXTRA = ["desk-02.jpg", "desk-05.jpg", "mtm-table.jpg", "mtm-swatches.jpg", "mtm-mannequin.jpg", "mtm-portrait.jpg", "desk-03.jpg", "nike-court.jpg", "mtm-sketch.jpg"];
+  EXTRA_AR = [1.776, 1.776, 2.0, 2.041, 2.041, 2.004, 1.778, 2.008, 2.041];
+
+  opt(k, d) { const o = window.__aw || {}; return o[k] !== undefined ? o[k] : (this.props[k] !== undefined ? this.props[k] : d); }
+
+  projectList() {
+    const n = parseInt(this.opt("projectCount", "9"), 10);
+    const movingMode = this.opt("previews", "few");
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      const base = this.LIB[i % this.LIB.length];
+      const extra = i >= this.LIB.length;
+      const p = Object.assign({}, base);
+      if (extra) {
+        const k = (i - this.LIB.length) % this.EXTRA.length;
+        p.cover = this.EXTRA[k];
+        p.ar = this.EXTRA_AR[k];
+        p.title = base.title + " II";
+      }
+      p.i = i;
+      p.num = String(i + 1).padStart(2, "0");
+      p.cover = "../../../../media/w/" + p.cover;
+      p.clip = p.clip ? "../../../../media/clips/" + p.clip : "";
+      p.moving = p.clip ? (movingMode === "all" ? "1" : (i % 3 === 0 ? "1" : "0")) : "0";
+      p.flip = i % 2 === 1 ? "1" : "0";
+      out.push(p);
+    }
+    return out;
+  }
+
+  renderVals() {
+    return { projects: this.projectList(), rootRef: (el) => { this.root = el; } };
+  }
+
+  componentDidMount() {
+    window.__awc = this;
+    this.mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    this.mqHandler = () => this.setupPlayback();
+    this.mq.addEventListener("change", this.mqHandler);
+    this.ro = new ResizeObserver(() => this.layout());
+    if (this.root) { this.ro.observe(this.root); this.root.querySelectorAll("[data-sheet]").forEach((s) => this.ro.observe(s)); }
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => this.layout());
+    setTimeout(() => this.refresh(), 0);
+  }
+
+  componentDidUpdate() { setTimeout(() => this.refresh(), 0); }
+
+  // Independent passes, isolated: a throw in one must not silently cancel the
+  // others — that is how playback went dead without a visible symptom.
+  refresh() {
+    [["layout", () => this.layout()], ["captions", () => this.applyCaptions()], ["wire", () => this.wire()], ["playback", () => this.setupPlayback()]]
+      .forEach(([name, fn]) => { try { fn(); } catch (e) { console.error("[art-works] " + name + " failed:", e); } });
+  }
+
+  componentWillUnmount() {
+    if (this.obsVis) this.obsVis.disconnect();
+    if (this.ro) this.ro.disconnect();
+    if (this.mq) this.mq.removeEventListener("change", this.mqHandler);
+  }
+
+  layout() {
+    if (!this.root) return;
+    const n = this.projectList().length;
+    this.root.querySelectorAll("[data-count]").forEach((el) => {
+      el.textContent = el.dataset.count === "c"
+        ? n + " projects, 2023–2026. Hover a title to find it below, or a frame to find its name above."
+        : n + " projects, 2023–2026";
+    });
+    this.root.querySelectorAll("[data-sheet]").forEach((sheet) => this.justify(sheet));
+    this.layoutBands();
+  }
+
+  // JUSTIFIED_ROWS, solved rather than authored: fill a row until it would be
+  // shorter than the target height, then set every cell in it to one height and
+  // its own native width. A short final row keeps the target height and stays
+  // ragged — stretching three covers across 1440px would be a lie about the data.
+  justify(sheet) {
+    const items = Array.from(sheet.querySelectorAll("[data-item]"));
+    if (!items.length) return;
+    const gap = 4;
+    const W = (sheet.clientWidth || 1440) - 1;
+    const target = parseFloat(sheet.dataset.target) || 320;
+    const rows = [];
+    let row = [], sum = 0;
+    items.forEach((it) => {
+      const ar = parseFloat(it.dataset.ar) || 1.78;
+      row.push({ el: it, ar }); sum += ar;
+      if ((W - gap * (row.length - 1)) / sum <= target) { rows.push({ cells: row, sum }); row = []; sum = 0; }
+    });
+    if (row.length) rows.push({ cells: row, sum, last: true });
+    rows.forEach((r) => {
+      const avail = W - gap * (r.cells.length - 1);
+      let h = avail / r.sum;
+      if (r.last && h > target * 1.2) h = target;
+      const full = Math.abs(h - avail / r.sum) < 0.5;
+      let used = 0;
+      r.cells.forEach((c, j) => {
+        const w = (full && j === r.cells.length - 1) ? avail - used : Math.round(c.ar * h);
+        used += w;
+        c.el.style.width = w + "px";
+        c.el.style.height = Math.round(h) + "px";
+        c.el.style.flex = "0 0 auto";
+      });
+    });
+  }
+
+  layoutBands() {
+    if (!this.root) return;
+    this.root.querySelectorAll("[data-band]").forEach((band) => {
+      const flip = band.dataset.flip === "1";
+      const frame = band.querySelector("[data-frame]");
+      const label = band.querySelector("[data-label]");
+      if (!frame || !label) return;
+      frame.style.gridColumn = flip ? "5 / 13" : "1 / 9";
+      frame.style.aspectRatio = band.dataset.ar || "1.78";
+      label.style.gridColumn = flip ? "1 / 4" : "10 / 13";
+      label.style.textAlign = flip ? "left" : "right";
+    });
+  }
+
+  // Focus by contrast, never by geometry: the approached frame stays at full
+  // strength and its siblings step back. No lift, no scale, no shadow (§10.1).
+  wire() {
+    if (!this.root) return;
+    this.root.querySelectorAll("[data-sheet],[data-bands],[data-index]").forEach((group) => {
+      // Ids start with a digit ("2c"), which is not a valid CSS identifier —
+      // getElementById, never querySelector("#2c").
+      const scope = group.dataset.sheet === "c" || group.hasAttribute("data-index")
+        ? document.getElementById("2c") : group;
+      const targets = Array.from(group.querySelectorAll("[data-item],[data-band],[data-row]"));
+      targets.forEach((t) => {
+        if (!scope || t.dataset.wiredHover) return;
+        t.dataset.wiredHover = "1";
+        const on = () => this.emphasise(scope, t.dataset.i, true);
+        const off = () => this.emphasise(scope, t.dataset.i, false);
+        t.addEventListener("mouseenter", on);
+        t.addEventListener("mouseleave", off);
+        t.addEventListener("focus", on);
+        t.addEventListener("blur", off);
+      });
+    });
+  }
+
+  emphasise(scope, i, on) {
+    if (!scope) return;
+    const captions = this.opt("captions", "on-approach");
+    scope.querySelectorAll("[data-item],[data-band]").forEach((el) => {
+      const isTarget = el.dataset.i === i;
+      el.style.transition = "opacity 180ms linear";
+      el.style.opacity = on && !isTarget ? "0.42" : "1";
+      const cap = el.querySelector("[data-cap]");
+      const scrim = el.querySelector("[data-scrim]");
+      const show = captions === "always" || (on && isTarget);
+      if (cap) cap.style.opacity = show ? "1" : "0";
+      if (scrim) scrim.style.opacity = show ? "1" : "0";
+    });
+    scope.querySelectorAll("[data-row]").forEach((el) => {
+      const isTarget = el.dataset.i === i;
+      el.style.transition = "color 180ms linear,opacity 180ms linear";
+      el.style.opacity = on && !isTarget ? "0.42" : "1";
+      el.style.color = on && isTarget ? "var(--accent)" : "";
+    });
+  }
+
+  applyCaptions() {
+    if (!this.root) return;
+    const always = this.opt("captions", "on-approach") === "always";
+    this.root.querySelectorAll("[data-item]").forEach((el) => {
+      const cap = el.querySelector("[data-cap]");
+      const scrim = el.querySelector("[data-scrim]");
+      if (cap) cap.style.opacity = always ? "1" : "0";
+      if (scrim) scrim.style.opacity = always ? "1" : "0";
+    });
+  }
+
+  isReduced() { return this.opt("motion", "auto") === "reduced" || (this.mq && this.mq.matches); }
+
+  setupPlayback() {
+    if (!this.root) return;
+    if (this.obsVis) this.obsVis.disconnect();
+    const cells = Array.from(this.root.querySelectorAll('[data-moving="1"]'));
+    this.cells = cells;
+    cells.forEach((c) => {
+      const v = c.querySelector("video");
+      if (!v || !v.dataset.src) return;
+      v.muted = true; v.loop = true; v.playsInline = true;
+      v.setAttribute("playsinline", "playsinline");
+      if (!v.dataset.wired) {
+        v.dataset.wired = "1";
+        v.addEventListener("canplay", () => { if (c.dataset.want === "1") this.play(c); });
+        v.addEventListener("loadeddata", () => { if (c.dataset.want === "1") this.play(c); });
+        v.addEventListener("playing", () => { v.style.opacity = "1"; });
+      }
+    });
+    this.root.querySelectorAll('[data-moving="0"] video').forEach((v) => { v.style.opacity = "0"; });
+    if (this.isReduced()) { cells.forEach((c) => { c.dataset.want = "0"; this.release(c); }); return; }
+    this.obsVis = new IntersectionObserver((es) => es.forEach((e) => {
+      const c = e.target;
+      if (e.isIntersecting && e.intersectionRatio >= 0.2) { c.dataset.want = "1"; this.prepare(c); this.play(c); }
+      else { c.dataset.want = "0"; const v = c.querySelector("video"); if (v) v.pause(); if (!e.isIntersecting) this.release(c); }
+    }), { threshold: [0, 0.2, 0.5] });
+    cells.forEach((c) => this.obsVis.observe(c));
+  }
+
+  prepare(c) {
+    const v = c.querySelector("video");
+    if (!v || !v.dataset.src) return;
+    if (!v.getAttribute("src")) { v.setAttribute("src", v.dataset.src); v.preload = "auto"; v.load(); }
+  }
+
+  play(c) {
+    const v = c.querySelector("video");
+    if (!v || this.isReduced() || c.dataset.want !== "1") return;
+    // A ready-state event is not a reliable drive on a sheet that loads several
+    // sources at once: canplay can arrive before want is set, or be swallowed by
+    // a release/load cycle during scroll. Poll while the cell still wants to
+    // play — same failure class as the ambient re-drive in Home v2 §8.1.
+    if (v.readyState < 2) {
+      const n = (parseInt(c.dataset.tries || "0", 10)) + 1;
+      c.dataset.tries = String(n);
+      if (n <= 14) setTimeout(() => this.play(c), 350);
+      return;
+    }
+    c.dataset.tries = "0";
+    const p = v.play();
+    if (p && p.catch) p.catch((e) => { if (e && e.name === "AbortError") setTimeout(() => this.play(c), 120); });
+  }
+
+  release(c) {
+    const v = c.querySelector("video");
+    if (!v) return;
+    v.pause(); v.style.opacity = "0";
+    c.dataset.tries = "0";
+    if (v.getAttribute("src")) { v.removeAttribute("src"); v.load(); }
+  }
+}
+
+</script>
+</body>
+</html>

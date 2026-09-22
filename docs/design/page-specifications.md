@@ -20,14 +20,14 @@ does not pretend otherwise.
 | Page | Maturity | Exploration | Reference | What exists |
 |---|---|---|---|---|
 | **Home** | **VISUALLY EXPLORED** | ✅ candidate | ✗ none | A proposed default composition, block by block |
-| **Art Works** | **PARTIALLY EVIDENCED** | ✗ | ✅ ref 3 | A reference image and a data contract; no composition |
+| **Art Works** | **VISUALLY EXPLORED** | ✅ candidate (2C v2) | ✅ ref 3 | A proposed structure, element by element |
 | **Project Detail** | **VISUALLY EXPLORED** | ✅ candidate (1B v2) | ✅ ref 4 | A proposed composition, block by block |
 | **About Me** | **PARTIALLY EVIDENCED** | ✗ | ✅ refs 1, 2 | Two reference images and a width-mode requirement; no composition |
 | **Contact** | **STRUCTURALLY SPECIFIED** | ✗ | ✗ none | Scope and prohibitions only; no visual direction at all |
 | **Private Project Gate** | **STRUCTURALLY SPECIFIED** | ✗ | ✗ none | An access contract and a stated design tension; no composition |
 
-**Two pages are VISUALLY EXPLORED — Home and Project Detail.** Neither is
-approved. The other four have no exploration.
+**Three pages are VISUALLY EXPLORED — Home, Art Works and Project Detail.** None
+is approved. The other three have no exploration.
 
 ### What each grade permits
 
@@ -44,15 +44,15 @@ asymmetric video panel. They do not specify page structure, navigation, states,
 responsive behaviour or media configuration. Treating a reference as a finished
 design for its page is the specific failure this table exists to prevent.
 
-**Nothing here is approved.** Both explored compositions are candidates recorded
-in `docs/design/prototypes/`, and both prototypes state in their own headers that
-they approve nothing. Neither has Project Owner / Architect approval.
+**Nothing here is approved.** All three explored candidates are recorded in
+`docs/design/prototypes/`, and every prototype states in its own header that it
+approves nothing. None has Project Owner / Architect approval.
 
 Worth noting how the evidence now sits: **Home has been explored but has no
-reference evidence, and Project Detail is the first page where exploration and
-reference evidence meet.** Art Works and About Me still hold reference evidence
-that has never been taken into exploration; Contact and the Private Project Gate
-have neither.
+reference evidence; Art Works and Project Detail have both.** Exploration and
+reference evidence have now met on two of the six pages. **About Me** still holds
+reference evidence that has never been taken into exploration; Contact and the
+Private Project Gate have neither.
 
 **For every page below VISUALLY EXPLORED, this document defines constraints
 only.** Where a visual composition is not yet determined it is marked
@@ -180,8 +180,15 @@ rule, no pill, no frosted panel, no arrows.
 
 ## 2. Art Works
 
-> **Maturity: PARTIALLY EVIDENCED.** Reference 3 only. **No composition has been designed.**
-> **[PENDING VISUAL EXPLORATION]**
+> **Maturity: VISUALLY EXPLORED.** Candidate structure **2C v2**, **not approved**.
+>
+> Evidence: `docs/design/prototypes/art-works/Art Works 2C v2.dc.html` and
+> `art-works-2c-v2.md`. Sibling directions 2A, 2B and 2C v1 are retained in
+> `Art Works Directions.dc.html` as exploration record only. Reference 3
+> continues to apply.
+>
+> Art Works remains **data-driven** (§2.2). Exploring it produced a candidate
+> *structure*, not a composed page, and added no block types.
 
 ### 2.1 Purpose
 
@@ -218,7 +225,101 @@ borders, no shadows, no hover chrome.** It reads as a contact sheet.
 This maps to **GALLERY `JUSTIFIED_ROWS`**, which is also what the brief's
 "Pixieset" cue describes.
 
-### 2.6 Constraints that hold regardless of composition
+### 2.6 Candidate structure — 2C v2 **[DEFAULT — candidate, not a template]**
+
+Recorded from `docs/design/prototypes/art-works/Art Works 2C v2.dc.html` and its
+review record `docs/design/prototypes/art-works/art-works-2c-v2.md`. Directions
+2A, 2B and 2C v1 remain in
+`docs/design/prototypes/art-works/Art Works Directions.dc.html` as exploration
+record only.
+
+**The core idea: a typographic project index above a dense visual sheet.** The
+index names the work; the sheet shows it; the two point at each other.
+
+| # | Element | Notes |
+|---|---|---|
+| 1 | **Site chrome / Works heading** | One display line and a right-aligned count. Chrome, outside any composer. |
+| 2 | **Typographic project index** | numeral · title · year. Column count follows project count. |
+| 3 | **Justified project-media sheet** | GALLERY `JUSTIFIED_ROWS` · native aspect · 4px gutters · no card chrome |
+| 4 | **Index ↔ media pairing** | Plate numerals pair the two at rest; hover and keyboard focus enrich it |
+| 5 | **Restrained moving-preview scheduling** | At most one preview moving at a time |
+| 6 | **Project Detail transition handoff** | The clicked media frame is the transition origin |
+
+Counts exercised in the prototype: **3, 9 and 18 projects.** Target row height
+follows the count, so fewer projects give larger frames. A ragged tail below a
+threshold is merged into the row above and that row re-solved — **cells stay
+contiguous and in order; only the row break moves.**
+
+#### Art Works is data-driven, not a composer page **[INVARIANT]**
+
+**No blocks were added, and none may be.** Art Works is one data-driven view: a
+list rendering and a gallery rendering of the same ordered collection (ADR-0007,
+§2.2). It has no composed regions and no per-project layout authoring. It is
+**not a general free-form composer page**, and exploring it did not make it one.
+
+#### Ordering **[INVARIANT]**
+
+**`displayPosition` defines semantic project order.** Index DOM order and sheet
+DOM order both follow it, and nothing re-sorts.
+
+**Gallery packing may determine row breaks but never reorders projects.** The
+packer consumes items in order and decides only where rows break; the
+orphan-tail merge moves a row boundary, not an item. The prototype audits this
+live and fails loudly if it stops being true.
+
+#### Plate numerals — current candidate decision **[DEFAULT]**
+
+Numerals are **ON** in the candidate.
+
+- A numeral is an **identification mark, not a caption** — one glyph pair, no
+  title, no year, no box.
+- **Title and year remain in the typographic index**, not on the media.
+- Numerals are **presentation-only**.
+- A numeral **fades as the project transition begins**, so the frame travels as
+  pure media.
+
+`numerals: off` is built so the alternative can be judged; with it off the page
+reverts to hover-only identification.
+
+**This is an Art Works decision and is not promoted into a global gallery rule.**
+Nothing here changes GALLERY semantics for any other surface.
+
+#### Index ↔ media pairing **[DEFAULT]**
+
+At rest the plate numeral carries identification, so the relationship does not
+depend on an approach state. Hover and keyboard focus are enrichment.
+
+**Hover and keyboard focus run one pairing routine** — verified in the prototype
+as a single code path — so the two cannot drift apart. Focus additionally draws
+a visible ring, per the §12 accessibility floor.
+
+**Clicking either the index row or the media frame resolves to the same
+project**, and in both cases **the media frame is the transition origin**.
+Clicking an index row does not hand off from the row.
+
+#### Moving-preview scheduling **[DEFAULT — page policy]**
+
+**At most one `AUTOPLAY_VISIBLE` preview is active at a time on Art Works.** The
+eligible frame nearest the viewport's vertical centre plays; every other frame
+holds its poster, and sources are released when a frame stops being active.
+
+This is how a dense sheet honours the one-moving-field density guidance
+(`design-system.md` §8.3): a naive per-cell rule puts four or five clips on
+screen at once.
+
+**This is an Art Works scheduling policy, not a redefinition of
+`AUTOPLAY_VISIBLE`.** ADR-0008's mode semantics are unchanged, all derived flags
+are unchanged, and no ADR is required — see §2.6a. Under
+`prefers-reduced-motion` everything stops and every source is released.
+
+#### Transition handoff **[DEFAULT]**
+
+The clicked media frame is the origin. The flown frame is **not required to
+carry the project title**, the numeral leaves as the handoff begins, and the
+**destination Project Detail HERO owns project-title presentation** (ADR-0010).
+Art Works therefore needs no title-bearing frame state.
+
+#### Constraints that hold regardless of structure
 
 **[INVARIANT]** No card chrome. **[INVARIANT]** Native aspect preserved —
 `JUSTIFIED_ROWS` is not an admitted uniform surface. **[INVARIANT]** Media-first;
@@ -226,12 +327,62 @@ the index is the work, not a list about the work. **[INVARIANT]** Any video
 preview here is a multi-video surface → `AUTOPLAY_VISIBLE`, never
 `AUTOPLAY_AMBIENT`.
 
+### 2.6a Why the one-preview policy needs no ADR
+
+`AUTOPLAY_VISIBLE` keeps its ADR-0008 meaning exactly: autoplay, forced muted,
+`playsInline`, must pause and release off-screen, no controls. All of those are
+derived from the mode and none is changed.
+
+What the page adds is a **selection rule inside the lifecycle ADR-0008 already
+defines** — *visible: play · near: prepare · far: pause and release* — whose
+mechanism that ADR leaves "deliberately unspecified." Choosing which single
+visible cell is promoted to *play* sits in exactly that space.
+
+It is also **stricter than ADR-0008's floor, never looser**: §6 requires that a
+surface "must not naïvely autoplay or decode an unbounded number of videos," and
+a cap of one is the strongest available bound. Off-screen frames release their
+sources, as §6 requires.
+
+**It remains a system constant, not an administrator setting** — the concurrency
+figure is chosen by the page, is not exposed in configuration, and must not
+become an admin control. The prototype's `previews` switch is a review
+affordance, not a CMS field.
+
 ### 2.7 Unresolved **[PENDING VISUAL EXPLORATION]**
 
-Whether the index is `JUSTIFIED_ROWS`, `VIDEO_GRID`, or a switchable
-presentation option · whether project titles and years appear at all, and where
-· filtering or category affordances · pagination versus a single flow · the
-hover/focus affordance given that hover lift is forbidden · mobile composition.
+**Mobile and tablet remain pending visual validation.** The candidate structure
+was exercised at desktop widths only.
+
+Carried responsive questions, deliberately **not** solved in architecture:
+
+1. **Narrow-width index layout.** Index columns follow project count (1 / 2 / 3);
+   at tablet and mobile this must fall to one column, and an 18-project list then
+   pushes the sheet far below the fold. Whether the index stays above, becomes a
+   collapsible summary, or moves beside the sheet is undesigned.
+2. **Identification without hover.** The plate numeral is the answer to this, and
+   is why it exists — but it needs the index reachable while looking at the
+   sheet, which one-column stacking breaks.
+3. **`JUSTIFIED_ROWS` narrow-width behaviour.** A row of wide covers becomes a
+   short strip below roughly 640px. The governing **principle is now approved**
+   (`design-system.md` §11.5): GALLERY does not inherit GRID child stacking, and
+   every presentation mode owes bounded narrow-width behaviour of its own.
+   **`JUSTIFIED_ROWS`' actual behaviour is still undefined** — row heights,
+   items-per-row and the narrow-width algorithm remain pending mobile visual
+   validation (§16 item 10). Art Works cannot be specified at narrow widths until
+   it exists.
+4. **Density at different project counts.** 18 projects at a small target row
+   height is a very long page; pagination or lazy extension is unresolved.
+5. **Transition behaviour on touch/mobile**, where there is no hover state to
+   precede the tap.
+
+Also still open from earlier: filtering or category affordances · whether the
+sheet presentation should be switchable at all.
+
+**Data / model questions raised by the prototype, not invented into the model:**
+whether a moving preview should be an explicit per-project choice rather than
+inferred from "a clip exists" · whether the plate numeral should be a stable
+catalogue number rather than `displayPosition`, which renumbers on reorder ·
+cover aspect must be available before layout or the first paint reflows.
 
 ### 2.8 States
 
@@ -600,19 +751,25 @@ Hold on every page regardless of exploration status.
 
 1. **Approve or amend** `design-direction.md`, `design-system.md` and this
    document. All three are Draft.
-2. **Explore the four pending pages.** Art Works and About Me hold reference
-   evidence that has never been taken into exploration; Contact and the Private
-   Project Gate have no evidence at all.
-3. **Validate the HERO overlay's narrow-width fallback.** The capability is
+2. **Explore the three pending pages.** About Me holds reference evidence that
+   has never been taken into exploration; Contact and the Private Project Gate
+   have no evidence at all.
+3. **Define narrow-width behaviour for `JUSTIFIED_ROWS`, `HORIZONTAL_STRIP` and
+   `SLIDESHOW`.** The principle is approved (`design-system.md` §11.5) — GALLERY
+   does not inherit GRID child stacking and every mode owes its own bounded
+   behaviour. `VIDEO_GRID` already has one; the other three do not, and **Art
+   Works cannot be specified at narrow widths until `JUSTIFIED_ROWS` does**
+   (§2.7 item 3).
+4. **Validate the HERO overlay's narrow-width fallback.** The capability is
    approved (ADR-0010) and requires the system to derive a stacked presentation;
    the breakpoint and its visual treatment still need mobile design validation
    (§3.9 item 1).
-4. **Resolve the poster / film `fit` contract** (§3.9 item 2) together with the
+5. **Resolve the poster / film `fit` contract** (§3.9 item 2) together with the
    letterbox method — the two are coupled. ADR-0010 deliberately left it open.
-5. **Resolve the letterbox method** (`design-system.md` §16 item 1) — it is an
+6. **Resolve the letterbox method** (`design-system.md` §16 item 1) — it is an
    approved requirement with an unresolved method and it changes what the CMS
    must show.
-6. **Apply the deferred schema work** from ADR-0006, ADR-0007 and ADR-0009 in
+7. **Apply the deferred schema work** from ADR-0006, ADR-0007 and ADR-0009 in
    one migration.
-7. **Set the `VIDEO_GRID` column maximum** — validation cannot ship without a
+8. **Set the `VIDEO_GRID` column maximum** — validation cannot ship without a
    number.

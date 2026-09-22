@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..600;1,6..72,200..500&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --surface:#F7F3EC; --ink:#16120E; --accent:#C4361C; --muted:#6C6862; --rule:#E2DCD2; --frame:#14110F;
+  --font-display:'Marcellus',Georgia,serif; --font-body:'Newsreader',Georgia,serif; --font-ui:'Newsreader',Georgia,serif;
+  --display-track:-0.005em;
+  --edge:56px; --gut:20px;
+}
+body{margin:0;background:#E6E1D8}
+a{color:inherit;text-decoration:none}
+a:hover{color:var(--accent)}
+img,video{display:block}
+</style>
+</helmet>
+<div ref="{{ rootRef }}" style="font-family:var(--font-body);color:var(--ink);padding:56px 48px 120px">
+
+  <div style="max-width:74ch;margin-bottom:34px">
+    <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
+      <span style="font-family:var(--font-ui);font-size:12px;letter-spacing:0.18em;text-transform:uppercase;background:var(--ink);color:var(--surface);padding:4px 9px">2C v2</span>
+      <h1 style="margin:0;font-family:var(--font-display);font-size:30px;letter-spacing:var(--display-track);text-transform:uppercase">Index and sheet</h1>
+    </div>
+    <p style="margin:14px 0 0;font-size:17px;line-height:1.7">Refinement of <a href="#2c" style="border-bottom:1px solid #CFC8BC">2c</a>. The index names the work, the sheet shows it, and a plate numeral ties them together at rest — so identification never depends on hover. Tweaks: project count (3 / 9 / 18), numerals, moving previews, and a review overlay that reports live order and playback state.</p>
+  </div>
+
+  <div data-page="" style="width:1440px;background:var(--surface);padding-bottom:120px">
+
+    <header data-grid="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:baseline;padding:30px var(--edge) 0">
+      <a href="#top" style="grid-column:1/6;font-family:var(--font-ui);font-size:12px;letter-spacing:0.22em;text-transform:uppercase">Nguyen Khanh Nhat</a>
+      <nav style="grid-column:7/13;display:flex;justify-content:flex-end;gap:34px;font-size:16px">
+        <a href="#top" style="color:var(--accent)">Works</a><a href="#top">About</a><a href="#top">Contact</a>
+      </nav>
+    </header>
+
+    <div data-grid="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:end;padding:78px var(--edge) 34px">
+      <h2 style="grid-column:1/7;margin:0;font-family:var(--font-display);font-size:58px;line-height:1;letter-spacing:var(--display-track);text-transform:uppercase">Works</h2>
+      <p data-count="" style="grid-column:9/13;margin:0;font-size:15px;line-height:1.7;color:var(--muted);text-align:right">Nine projects, 2023–2026</p>
+    </div>
+
+    <div data-grid="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);padding:0 var(--edge) 56px">
+      <ol data-index="" style="grid-column:1/13;margin:0;padding:0;list-style:none;column-gap:var(--gut)">
+        <sc-for list="{{ projects }}" as="p" hint-placeholder-count="9">
+          <li style="break-inside:avoid">
+            <a href="#top" data-row="" data-i="{{ p.i }}" data-pos="{{ p.pos }}" style="display:flex;align-items:baseline;gap:16px;border-top:1px solid var(--rule);padding:12px 2px;outline-offset:3px">
+              <span data-num="" style="font-family:var(--font-ui);font-size:12px;letter-spacing:0.14em;color:var(--muted);min-width:2.2ch">{{ p.num }}</span>
+              <span style="flex:1;font-family:var(--font-display);font-size:22px;letter-spacing:var(--display-track);text-transform:uppercase">{{ p.title }}</span>
+              <span data-mark="" style="width:7px;height:7px;border-radius:50%;background:var(--accent);opacity:0;transition:opacity 160ms linear"></span>
+              <span style="font-size:14px;color:var(--muted);min-width:4ch;text-align:right">{{ p.year }}</span>
+            </a>
+          </li>
+        </sc-for>
+      </ol>
+    </div>
+
+    <div data-sheet="" data-target="300" style="display:flex;flex-wrap:wrap;gap:4px;align-content:flex-start">
+      <sc-for list="{{ projects }}" as="p" hint-placeholder-count="9">
+        <a href="#top" data-item="" data-i="{{ p.i }}" data-pos="{{ p.pos }}" data-ar="{{ p.ar }}" data-clip="{{ p.clip }}" data-preview="{{ p.preview }}" style="position:relative;display:block;overflow:hidden;background:var(--frame);outline-offset:-3px">
+          <img src="{{ p.cover }}" alt="{{ p.title }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+          <video loop="" muted="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 320ms linear"></video>
+          <span data-plate-scrim="" style="position:absolute;left:0;bottom:0;width:120px;height:62px;background:radial-gradient(120% 100% at 0% 100%,rgba(0,0,0,0.6),rgba(0,0,0,0));pointer-events:none"></span>
+          <span data-plate="" style="position:absolute;left:13px;bottom:11px;font-family:var(--font-ui);font-size:12px;letter-spacing:0.14em;color:rgba(244,239,230,0.94);pointer-events:none">{{ p.num }}</span>
+          <span data-scrim="" style="position:absolute;inset:auto 0 0 0;height:92px;background:linear-gradient(to top,rgba(0,0,0,0.66),rgba(0,0,0,0));opacity:0;transition:opacity 170ms linear;pointer-events:none"></span>
+          <span data-cap="" style="position:absolute;left:40px;right:14px;bottom:10px;display:flex;align-items:baseline;justify-content:space-between;gap:12px;opacity:0;transition:opacity 170ms linear;pointer-events:none">
+            <span style="font-family:var(--font-display);font-size:19px;letter-spacing:var(--display-track);text-transform:uppercase;color:#F4EFE6">{{ p.title }}</span>
+            <span style="font-size:13px;color:rgba(244,239,230,0.86)">{{ p.year }}</span>
+          </span>
+        </a>
+      </sc-for>
+    </div>
+
+    <div data-readout="" style="display:none;margin:22px var(--edge) 0;font-family:var(--font-ui);font-size:12px;line-height:1.7;color:var(--muted);white-space:pre-wrap"></div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;projectCount&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;3&quot;,&quot;9&quot;,&quot;18&quot;],&quot;default&quot;:&quot;9&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Data&quot;},&quot;previews&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;restrained&quot;,&quot;none&quot;],&quot;default&quot;:&quot;restrained&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Data&quot;},&quot;numerals&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;on&quot;,&quot;off&quot;],&quot;default&quot;:&quot;on&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Identification&quot;},&quot;review&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Review&quot;},&quot;motion&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;reduced&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Review&quot;}}">
+class Component extends DCLogic {
+  LIB = [
+    { title: "Made to Measure", year: "2026", cover: "mtm-atelier.jpg",   ar: 2.041, clip: "n3.mp4" },
+    { title: "Court",           year: "2026", cover: "nike-court.jpg",    ar: 2.008, clip: "c3.mp4" },
+    { title: "The Desk",        year: "2025", cover: "desk-01.jpg",       ar: 1.776, clip: "n2.mp4" },
+    { title: "Honey, Slowly",   year: "2025", cover: "desk-03.jpg",       ar: 1.778, clip: "n1.mp4" },
+    { title: "Shopfront",       year: "2025", cover: "mtm-shopfront.jpg", ar: 2.012, clip: "" },
+    { title: "Lacing",          year: "2024", cover: "nike-lacing.jpg",   ar: 1.778, clip: "c2.mp4" },
+    { title: "Sketch",          year: "2024", cover: "mtm-sketch.jpg",    ar: 2.041, clip: "" },
+    { title: "Night Shift",     year: "2023", cover: "desk-04.jpg",       ar: 1.776, clip: "n4.mp4" },
+    { title: "Sitting",         year: "2023", cover: "portrait.jpg",      ar: 0.645, clip: "" }
+  ];
+  EXTRA = [["desk-02.jpg", 1.776], ["mtm-table.jpg", 2.0], ["desk-05.jpg", 1.776], ["mtm-swatches.jpg", 2.041],
+           ["mtm-mannequin.jpg", 2.041], ["mtm-portrait.jpg", 2.004], ["desk-03.jpg", 1.778], ["nike-court.jpg", 2.008], ["portrait.jpg", 0.645]];
+
+  opt(k, d) { const o = window.__aw2 || {}; return o[k] !== undefined ? o[k] : (this.props[k] !== undefined ? this.props[k] : d); }
+
+  // Semantic order is displayPosition, full stop. This array is built in that
+  // order and never re-sorted; packing happens later and only affects geometry.
+  projectList() {
+    const n = parseInt(this.opt("projectCount", "9"), 10);
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      const base = this.LIB[i % this.LIB.length];
+      const p = Object.assign({}, base);
+      if (i >= this.LIB.length) {
+        const e = this.EXTRA[(i - this.LIB.length) % this.EXTRA.length];
+        p.cover = e[0]; p.ar = e[1]; p.title = base.title + " II";
+      }
+      p.i = i;
+      p.pos = i + 1;                       // displayPosition, 1-based
+      p.num = String(i + 1).padStart(2, "0");
+      p.cover = "../../../../media/w/" + p.cover;
+      p.clip = p.clip ? "../../../../media/clips/" + p.clip : "";
+      // Eligibility only — never "plays now". One controller decides that.
+      p.preview = (this.opt("previews", "restrained") !== "none" && p.clip) ? "1" : "0";
+      out.push(p);
+    }
+    return out;
+  }
+
+  renderVals() { return { projects: this.projectList(), rootRef: (el) => { this.root = el; } }; }
+
+  componentDidMount() {
+    window.__awc2 = this;
+    this.mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    this.mqHandler = () => this.refresh();
+    this.mq.addEventListener("change", this.mqHandler);
+    this.ro = new ResizeObserver(() => this.pass("layout", () => this.layout()));
+    if (this.root) { this.ro.observe(this.root); const s = this.root.querySelector("[data-sheet]"); if (s) this.ro.observe(s); }
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => this.pass("layout", () => this.layout()));
+    this.onScroll = () => this.chooseActivePreview();
+    window.addEventListener("scroll", this.onScroll, { passive: true });
+    // Watchdog: the chosen preview can be paused by the environment (occluded
+    // frame, tab throttling) without any event we observe. Re-drive the one
+    // active cell rather than trusting a single play() to hold.
+    this.watch = setInterval(() => {
+      if (this.isReduced() || !this.active) return;
+      const v = this.active.querySelector("video");
+      if (v && v.paused && v.readyState >= 2) this.play(this.active);
+    }, 1200);
+    setTimeout(() => this.refresh(), 0);
+  }
+
+  componentDidUpdate() { setTimeout(() => this.refresh(), 0); }
+
+  componentWillUnmount() {
+    if (this.obs) this.obs.disconnect();
+    if (this.ro) this.ro.disconnect();
+    if (this.mq) this.mq.removeEventListener("change", this.mqHandler);
+    window.removeEventListener("scroll", this.onScroll);
+    if (this.watch) clearInterval(this.watch);
+  }
+
+  pass(name, fn) { try { fn(); } catch (e) { console.error("[art-works 2c] " + name + " failed:", e); } }
+
+  refresh() {
+    this.pass("layout", () => this.layout());
+    this.pass("plates", () => this.applyPlates());
+    this.pass("wire", () => this.wire());
+    this.pass("playback", () => this.setupPlayback());
+    this.pass("readout", () => this.readout());
+  }
+
+  layout() {
+    if (!this.root) return;
+    const list = this.projectList();
+    const n = list.length;
+    const count = this.root.querySelector("[data-count]");
+    if (count) count.textContent = n + (n === 1 ? " project" : " projects") + ", 2023–2026";
+    // Index column count follows the data: a two-column list of three names is
+    // a layout with a hole in it.
+    const index = this.root.querySelector("[data-index]");
+    if (index) {
+      const cols = n <= 4 ? 1 : n <= 12 ? 2 : 3;
+      index.style.columns = String(cols);
+      index.style.gridColumn = cols === 1 ? "1 / 7" : "1 / 13";
+    }
+    const sheet = this.root.querySelector("[data-sheet]");
+    if (sheet) this.justify(sheet, n);
+  }
+
+  // JUSTIFIED_ROWS. Packing decides row breaks only — items are consumed in
+  // displayPosition order and never reordered to make a row fit better.
+  justify(sheet, n) {
+    const items = Array.from(sheet.querySelectorAll("[data-item]"));
+    if (!items.length) return;
+    const gap = 4;
+    const W = (sheet.clientWidth || 1440) - 1;
+    let target = parseFloat(sheet.dataset.target) || 300;
+    if (n <= 4) target = 420;              // few projects: fewer, larger frames
+    else if (n >= 16) target = 250;        // many: denser, still native aspect
+    const rows = [];
+    let row = [], sum = 0;
+    items.forEach((el) => {
+      const ar = parseFloat(el.dataset.ar) || 1.78;
+      row.push({ el, ar }); sum += ar;
+      if ((W - gap * (row.length - 1)) / sum <= target) { rows.push({ cells: row, sum }); row = []; sum = 0; }
+    });
+    if (row.length) rows.push({ cells: row, sum, last: true });
+    // An orphan tail — one narrow cover alone on the last row — reads as a
+    // loading error, not as a rest. Absorb it into the row above and re-solve
+    // that row. Cells stay contiguous and in displayPosition order; only the
+    // row break moves.
+    if (rows.length > 1) {
+      const tail = rows[rows.length - 1];
+      if (tail.last && tail.sum * target < W * 0.4) {
+        const prev = rows[rows.length - 2];
+        prev.cells = prev.cells.concat(tail.cells);
+        prev.sum += tail.sum;
+        rows.pop();
+      }
+    }
+    this.rowMap = rows.map((r) => r.cells.map((c) => parseInt(c.el.dataset.pos, 10)));
+    rows.forEach((r) => {
+      const avail = W - gap * (r.cells.length - 1);
+      let h = avail / r.sum;
+      const full = !(r.last && h > target * 1.2);
+      if (!full) h = target;
+      let used = 0;
+      r.cells.forEach((c, j) => {
+        const w = (full && j === r.cells.length - 1) ? avail - used : Math.round(c.ar * h);
+        used += w;
+        c.el.style.width = w + "px";
+        c.el.style.height = Math.round(h) + "px";
+        c.el.style.flex = "0 0 auto";
+      });
+    });
+  }
+
+  // Rest state: a plate numeral, not a caption. It is the only permanent mark
+  // on the media, and it is what makes the index legible without hover.
+  applyPlates() {
+    if (!this.root) return;
+    const on = this.opt("numerals", "on") === "on";
+    this.root.querySelectorAll("[data-plate],[data-plate-scrim]").forEach((el) => { el.style.opacity = on ? "1" : "0"; });
+    this.root.querySelectorAll("[data-cap]").forEach((el) => { el.style.left = on ? "40px" : "14px"; });
+  }
+
+  wire() {
+    if (!this.root) return;
+    const all = Array.from(this.root.querySelectorAll("[data-row],[data-item]"));
+    all.forEach((t) => {
+      if (t.dataset.wired) return;
+      t.dataset.wired = "1";
+      const on = () => this.pair(t.dataset.i, true);
+      const off = () => this.pair(t.dataset.i, false);
+      t.addEventListener("mouseenter", on);
+      t.addEventListener("mouseleave", off);
+      t.addEventListener("focus", on);
+      t.addEventListener("blur", off);
+      t.addEventListener("click", (e) => { e.preventDefault(); this.open(t.dataset.i, t.hasAttribute("data-row") ? "index" : "frame"); });
+    });
+  }
+
+  // One pairing routine drives both directions and both input modes, so hover
+  // and keyboard cannot drift apart.
+  pair(i, on) {
+    if (!this.root) return;
+    this.root.querySelectorAll("[data-item]").forEach((el) => {
+      const hit = el.dataset.i === i;
+      el.style.transition = "opacity 170ms linear";
+      el.style.opacity = on && !hit ? "0.34" : "1";
+      const cap = el.querySelector("[data-cap]");
+      const scrim = el.querySelector("[data-scrim]");
+      if (cap) cap.style.opacity = on && hit ? "1" : "0";
+      if (scrim) scrim.style.opacity = on && hit ? "1" : "0";
+      el.style.outline = on && hit ? "2px solid #F4EFE6" : "none";
+    });
+    this.root.querySelectorAll("[data-row]").forEach((el) => {
+      const hit = el.dataset.i === i;
+      el.style.transition = "opacity 170ms linear,color 170ms linear";
+      el.style.opacity = on && !hit ? "0.34" : "1";
+      el.style.color = on && hit ? "var(--accent)" : "";
+      const mark = el.querySelector("[data-mark]");
+      if (mark) mark.style.opacity = on && hit ? "1" : "0";
+    });
+  }
+
+  // Click either surface; the frame is the transition origin in both cases.
+  // No second transition system is defined here — this only records the origin.
+  open(i, from) {
+    const frame = this.root.querySelector('[data-item][data-i="' + i + '"]');
+    this.root.querySelectorAll("[data-item]").forEach((el) => {
+      el.removeAttribute("data-origin");
+      const pl = el.querySelector("[data-plate]"), ps = el.querySelector("[data-plate-scrim]");
+      const on = this.opt("numerals", "on") === "on";
+      if (pl) pl.style.opacity = on ? "1" : "0";
+      if (ps) ps.style.opacity = on ? "1" : "0";
+    });
+    if (frame) {
+      frame.setAttribute("data-origin", "1");
+      // The numeral is a browsing mark, not part of the payload: it leaves as
+      // the handoff begins. The destination HERO owns title presentation.
+      frame.querySelectorAll("[data-plate],[data-plate-scrim]").forEach((el) => {
+        el.style.transition = "opacity 140ms linear";
+        el.style.opacity = "0";
+      });
+    }
+    this.lastOpen = { pos: frame ? frame.dataset.pos : "?", via: from, origin: frame ? "frame" : "none" };
+    this.pass("readout", () => this.readout());
+  }
+
+  isReduced() { return this.opt("motion", "auto") === "reduced" || (this.mq && this.mq.matches); }
+
+  setupPlayback() {
+    if (!this.root) return;
+    if (this.obs) this.obs.disconnect();
+    const cells = Array.from(this.root.querySelectorAll('[data-preview="1"]'));
+    this.cells = cells;
+    this.root.querySelectorAll('[data-preview="0"] video').forEach((v) => { v.style.opacity = "0"; v.pause(); });
+    if (this.isReduced() || !cells.length) { cells.forEach((c) => this.release(c)); this.active = null; return; }
+    this.obs = new IntersectionObserver(() => this.chooseActivePreview(), { threshold: [0, 0.25, 0.6, 1] });
+    cells.forEach((c) => this.obs.observe(c));
+    this.chooseActivePreview();
+  }
+
+  // The density rule, enforced rather than hoped for: at most ONE preview moves
+  // at a time — the eligible frame nearest the middle of the viewport. Everything
+  // else holds its poster. A sheet cannot honour "one moving field" any other way.
+  chooseActivePreview() {
+    if (!this.root || this.isReduced()) return;
+    const mid = window.innerHeight / 2;
+    let best = null, bestD = Infinity;
+    (this.cells || []).forEach((c) => {
+      const r = c.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > window.innerHeight) return;
+      const vis = Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0);
+      if (vis < r.height * 0.5) return;
+      const d = Math.abs((r.top + r.height / 2) - mid);
+      if (d < bestD) { bestD = d; best = c; }
+    });
+    if (this.active && this.active !== best) { this.release(this.active); this.active = null; }
+    if (best) { this.active = best; this.prepare(best); this.play(best); }
+    this.pass("readout", () => this.readout());
+  }
+
+  prepare(c) {
+    const v = c.querySelector("video");
+    if (!v) return;
+    // Set as properties: a boolean attribute written by the renderer is not a
+    // reliable carrier, and a preview that does not loop stops dead at the end
+    // of a 2.6s clip.
+    v.loop = true; v.muted = true; v.playsInline = true;
+    v.setAttribute("playsinline", "playsinline");
+    if (!v.getAttribute("src")) { v.setAttribute("src", c.dataset.clip); v.preload = "auto"; v.load(); }
+  }
+
+  play(c) {
+    const v = c.querySelector("video");
+    if (!v || this.isReduced() || this.active !== c) return;
+    if (v.readyState < 2) {
+      const n = (parseInt(c.dataset.tries || "0", 10)) + 1;
+      c.dataset.tries = String(n);
+      if (n <= 14) setTimeout(() => this.play(c), 350);
+      return;
+    }
+    c.dataset.tries = "0";
+    v.loop = true; v.muted = true; v.playsInline = true;
+    v.setAttribute("playsinline", "playsinline");
+    const p = v.play();
+    if (p && p.then) p.then(() => { v.style.opacity = "1"; }).catch((e) => { if (e && e.name === "AbortError") setTimeout(() => this.play(c), 120); });
+  }
+
+  release(c) {
+    const v = c.querySelector("video");
+    if (!v) return;
+    v.pause(); v.style.opacity = "0"; c.dataset.tries = "0";
+    if (v.getAttribute("src")) { v.removeAttribute("src"); v.load(); }
+  }
+
+  readout() {
+    const el = this.root && this.root.querySelector("[data-readout]");
+    if (!el) return;
+    if (!this.opt("review", false)) { el.style.display = "none"; return; }
+    el.style.display = "block";
+    const rows = Array.from(this.root.querySelectorAll("[data-row]")).map((r) => r.dataset.pos);
+    const frames = Array.from(this.root.querySelectorAll("[data-item]")).map((r) => r.dataset.pos);
+    const ordered = (a) => a.every((v, k) => parseInt(v, 10) === k + 1);
+    const playing = Array.from(this.root.querySelectorAll("[data-item] video")).filter((v) => !v.paused && v.readyState > 2).length;
+    el.textContent =
+      "index order    " + rows.join(" ") + (ordered(rows) ? "   ✓ displayPosition" : "   ✗ REORDERED") + "\n" +
+      "sheet order    " + frames.join(" ") + (ordered(frames) ? "   ✓ displayPosition" : "   ✗ REORDERED") + "\n" +
+      "row packing    " + (this.rowMap || []).map((r) => "[" + r.join(" ") + "]").join(" ") + "   (geometry only)\n" +
+      "previews       " + playing + " moving · " + (this.cells || []).length + " eligible · active " + (this.active ? "#" + this.active.dataset.pos : "none") +
+      (this.isReduced() ? " · reduced motion" : "") + "\n" +
+      "last open      " + (this.lastOpen ? "#" + this.lastOpen.pos + " via " + this.lastOpen.via + " → transition origin: " + this.lastOpen.origin : "—");
+  }
+}
+
+</script>
+</body>
+</html>

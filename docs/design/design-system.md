@@ -775,42 +775,41 @@ to one column resizes it correctly with no breakpoint rule (§1.4). The
 invariant is the container-relative principle; `cqw` is the default technique
 that expresses it.
 
-### 11.5 The automatic fallback does not reach GALLERY flow blocks
+### 11.5 GALLERY defines its own narrow-width behaviour **[INVARIANT]**
 
-**[PROPOSED GOVERNANCE AMENDMENT — raised, not applied]**
+**Approved by the Project Owner / Architect on 2026-09-22.** This was raised as a
+proposed amendment from `prototypes/home/home-baseline-v2.md` §8.6 and is now
+adopted. It **extends** §11.2's reach rather than weakening it.
 
-**§11.2's invariant is unchanged by this section.** What follows is a recorded
-gap in its *reach* and a candidate principle awaiting a Project Owner /
-Architect ruling. Do not treat it as adopted.
+The rule:
 
-**The finding** (`prototypes/home/home-baseline-v2.md` §8.6). §11.2 stacks **grid
-children**. A GALLERY is one block whose internals are arranged by a rule, so it
-has no grid children and nothing in the automatic fallback reflows it. At 375px
-a single-row `JUSTIFIED_ROWS` gallery left a 4:5 still at **45×176** — a sliver,
-its aspect destroyed by the shared row height. This is not specific to one
-composition: any `JUSTIFIED_ROWS` block mixing wide and narrow aspects hits it.
+- **GRID children keep the automatic safe-stack fallback** of §11.2, unchanged —
+  every grid child falls to full width in `position` order, computed not
+  authored.
+- **GALLERY does not inherit GRID child stacking.** A GALLERY is a flow /
+  presentation abstraction: one block whose internals are arranged by a rule. It
+  has no grid children, so there is nothing for the block-level stack to reach.
+- **Every GALLERY presentation mode must provide bounded narrow-width
+  behaviour** of its own. This applies to `VIDEO_GRID`, `JUSTIFIED_ROWS`,
+  `HORIZONTAL_STRIP` and `SLIDESHOW`. A mode with no defined narrow-width
+  behaviour is incomplete.
 
-This is a real distance between §11.2's promise — "a page nobody has given mobile
-attention still renders readably" — and what the fallback actually covers.
+**`VIDEO_GRID` already satisfies this** — per-breakpoint column counts, bounded
+by validation and required to fall at narrower widths (§8.2, ADR-0008 §6, §9).
+The other three modes do not yet, and must.
 
-**Candidate principle, not adopted:**
+**The evidence.** At 375px a single-row `JUSTIFIED_ROWS` gallery left a 4:5 still
+at **45×176** — a sliver, its aspect destroyed by the shared row height. Nothing
+in the block-level fallback reflowed it, because it had no grid children to
+stack. The failure is not specific to one composition: any `JUSTIFIED_ROWS` block
+mixing wide and narrow aspects reaches it.
 
-- **GRID children** keep the existing automatic safe-stack fallback, unchanged.
-- **Each GALLERY presentation mode defines its own bounded narrow-width
-  behaviour.** A gallery does not inherit grid-child stacking, because it has no
-  grid children to stack.
-- **`VIDEO_GRID` already has this** — per-breakpoint column counts, bounded by
-  validation and required to fall at narrower widths (§8.2).
-- **`JUSTIFIED_ROWS`, `HORIZONTAL_STRIP` and any other flow mode need explicit
-  responsive behaviour defined per mode.** For `JUSTIFIED_ROWS` the prototype
-  used items-per-row plus a justified solve rather than a stack; that is
-  evidence, not a specification.
+**What remains pending: the exact per-mode behaviour.** Row heights,
+items-per-row bounds, narrow-width algorithms and final mobile compositions are
+**not decided here** and remain subject to mobile visual validation. What is
+settled is *that* each mode owes one, and where the responsibility sits — with
+the presentation mode, not with the block-level stack. See §16 item 10.
 
-**The per-mode behaviours are deliberately not designed here**, and none is
-implemented. This section records that they are required, not what they are.
-
-It **extends** the guarantee's reach rather than weakening it — which is why it
-is raised as an amendment rather than applied as a correction. See §16 item 10.
 ---
 
 ## 12. Accessibility floor **[INVARIANT]**
@@ -924,8 +923,8 @@ Carried forward. **Do not close these by inference during implementation.**
 | 6 | **`VIDEO_GRID` column maximum** — a bound must exist; the number does not. | Unresolved |
 | 7 | **`AUTOPLAY_VISIBLE` visibility threshold** — what counts as "sufficiently visible". | Unresolved |
 | 8 | **Mobile composition for every page** — no reference evidence exists. | Unresolved |
-| 9 | **Art Works, About, Contact, Private Gate** — not visually designed. Project Detail now has a candidate (1B v2). | **Pending design exploration** |
-| 10 | **GALLERY narrow-width behaviour per presentation mode** — `VIDEO_GRID` has column counts; `JUSTIFIED_ROWS`, `HORIZONTAL_STRIP` and `SLIDESHOW` have none. The automatic grid-child stack does not reach them (§11.5). | **Proposed amendment, not applied** |
+| 9 | **About, Contact, Private Gate** — not visually designed. Home, Art Works (2C v2) and Project Detail (1B v2) each now have a candidate. | **Pending design exploration** |
+| 10 | **GALLERY narrow-width behaviour per presentation mode** — the *principle* is approved (§11.5): GALLERY does not inherit GRID child stacking and every mode owes bounded narrow-width behaviour. `VIDEO_GRID` satisfies it via column counts; **`JUSTIFIED_ROWS`, `HORIZONTAL_STRIP` and `SLIDESHOW` still need theirs defined.** Exact behaviours pending mobile validation. | **Principle approved; per-mode behaviour pending** |
 | 11 | **Display coefficient as a preset property** — `13.3cqw` is tuned to one face; face substitution changes clipping without anyone authoring it (§1.4). | **Proposed amendment, not applied** |
 | 12 | **Bounded HERO overlay content** — the *capability* is approved (ADR-0010): intra-block, title from `projects.title`, closed config, dismissal on media activation, `CLICK_TO_PLAY` or IMAGE only. Its **visual use on Project Detail remains candidate**, and the narrow-width stacked treatment awaits mobile validation. | **Capability approved; visual use candidate** |
 

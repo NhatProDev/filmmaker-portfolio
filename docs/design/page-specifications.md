@@ -23,11 +23,12 @@ does not pretend otherwise.
 | **Art Works** | **VISUALLY EXPLORED** | ✅ candidate (2C v2) | ✅ ref 3 | A proposed structure, element by element |
 | **Project Detail** | **VISUALLY EXPLORED** | ✅ candidate (1B v2) | ✅ ref 4 | A proposed composition, block by block |
 | **About Me** | **VISUALLY EXPLORED** | ✅ candidate (3B v2) | ✅ refs 1, 2 | A proposed composition, section by section |
-| **Contact** | **STRUCTURALLY SPECIFIED** | ✗ | ✗ none | Scope and prohibitions only; no visual direction at all |
+| **Contact** | **VISUALLY EXPLORED** | ✅ candidate (4B v2) | ✗ none | A proposed composition, element by element |
 | **Private Project Gate** | **STRUCTURALLY SPECIFIED** | ✗ | ✗ none | An access contract and a stated design tension; no composition |
 
-**Four pages are VISUALLY EXPLORED — Home, Art Works, Project Detail and About
-Me.** None is approved. Contact and the Private Project Gate have no exploration.
+**Five pages are VISUALLY EXPLORED — Home, Art Works, Project Detail, About Me
+and Contact.** None is approved. **The Private Project Gate is the only page with
+no exploration.**
 
 ### What each grade permits
 
@@ -48,12 +49,11 @@ design for its page is the specific failure this table exists to prevent.
 `docs/design/prototypes/`, and every prototype states in its own header that it
 approves nothing. None has Project Owner / Architect approval.
 
-Worth noting how the evidence now sits: **Home has been explored but has no
-reference evidence; Art Works, Project Detail and About Me have both.**
-Exploration and reference evidence have now met on three of the six pages. Every
-page carrying reference evidence has now been explored. **Contact and the Private
-Project Gate have neither**, and are the only two pages with no exploration at
-all.
+Worth noting how the evidence now sits: **every page carrying reference evidence
+has been explored**, and two pages — Home and Contact — were explored with no
+reference evidence at all. Exploration and reference evidence have met on three
+of the six pages. **Only the Private Project Gate remains unexplored**, and it
+has no reference either.
 
 **For every page below VISUALLY EXPLORED, this document defines constraints
 only.** Where a visual composition is not yet determined it is marked
@@ -784,8 +784,17 @@ Static content; no loading, empty or error states beyond the media well.
 
 ## 5. Contact
 
-> **Maturity: STRUCTURALLY SPECIFIED.** No exploration, no reference. **Visual design has not begun.**
-> **[PENDING VISUAL EXPLORATION]**
+> **Maturity: VISUALLY EXPLORED.** Candidate composition **4B v2**, **not approved**.
+>
+> Evidence: `docs/design/prototypes/contact/Contact 4B v2.dc.html` and
+> `contact-4b-v2.md`. Sibling directions 4A and 4B v1 are retained in
+> `Contact Directions.dc.html` as exploration record only. No visual reference
+> exists for this page.
+>
+> Contact remains **static / content-managed** (§5.2). Exploring it required
+> **no new architecture**, no backend and no composer blocks.
+>
+> **All contact values in the prototype are prototype copy** — see §5.6.
 
 ### 5.1 Purpose
 
@@ -793,8 +802,18 @@ Let someone make contact. Nothing more.
 
 ### 5.2 Composer status **[INVARIANT]**
 
-**Static in V1.** No contact API, no persistence table, no email provider, no
-spam system (CLAUDE.md §19).
+**Static in V1.** Contact is content-managed and committed with the code
+(CLAUDE.md §19, ADR-0007). It is **not composer-owned**.
+
+Specifically absent, and not required:
+
+- **no contact form** and no form fields of any kind
+- **no submission endpoint**
+- **no message database or persistence table**
+- **no spam workflow**
+- **no email provider integration**
+- **no booking system**
+- **no CMS schema expansion and no composer blocks**
 
 It may contain an email / `mailto:` link, social links, and other public contact
 information.
@@ -803,18 +822,156 @@ information.
 
 **Light.**
 
-### 5.4 Constraints
+### 5.4 Candidate composition — 4B v2 **[DEFAULT — candidate, not a template]**
+
+Recorded from `docs/design/prototypes/contact/Contact 4B v2.dc.html` and its
+review record `docs/design/prototypes/contact/contact-4b-v2.md`. Directions 4A
+and 4B v1 remain in `docs/design/prototypes/contact/Contact Directions.dc.html`
+as exploration record only.
+
+**The core idea: an editorial contact sheet with one primary line.** Everything
+that carries meaning sits on a single left spine.
+
+| # | Element | Notes |
+|---|---|---|
+| 1 | **Site chrome** | Identity mark + nav on the same 12 columns. Not content. |
+| 2 | **`CONTACT` heading** | Display caps, sized against the **spine** so it ends on the same edge as the rules beneath it |
+| 3 | **Collaboration / availability statement** | One short paragraph at a bounded measure |
+| 4 | **Primary email action** | Its own block above the metadata — see §5.5 |
+| 5 | **Secondary metadata** | Ruled label/value rows: social, location, availability |
+| 6 | **Optional identity media** | A margin figure — see §5.6 |
+| 7 | **Closing editorial note** | Two sentences on the spine; the page closes rather than stopping |
+
+A **shared datum rule** opens the page across all twelve columns — the same
+device as About Me 3B v2, so the two pages read as one publication. Structure is
+**rules and alignment, never containers or cards.**
+
+#### The email is the call to action **[INVARIANT]**
+
+**There is no CTA button, and none is required.** The email link itself is the
+call to action. Adding a button would make the page a marketing funnel, which
+§5.7 forbids.
+
+#### What the candidate does not contain **[INVARIANT]**
+
+Verified absent from the prototype markup, not merely asserted:
+
+**No form fields · no `<input>`, `<textarea>`, `<button>` or `<select>` · no CTA
+button · no cards · no `box-shadow` · no `border-radius` · no marketing funnel
+treatment · no decorative motion, transitions or keyframes.**
+
+The prototype carries its own audit line asserting `forms 0 · no input, no
+submit, no endpoint`.
+
+#### Contact requires no new architecture **[INVARIANT]**
+
+Static text, links and one optional image. Nothing here needs a schema field, an
+endpoint, message storage, spam handling, a booking workflow or a composer
+block. Contact remains static exactly as CLAUDE.md §19 and ADR-0007 describe.
+
+#### This is a candidate arrangement, not a universal template
+
+The current desktop composition is **candidate evidence**, not a fixed template
+and not an approved specification. The prototype's own header states it approves
+nothing.
+
+### 5.5 Email interaction **[DEFAULT]**
+
+The email is implemented as **`mailto:`** and is **visually primary over the
+secondary metadata**. Four independent signals carry that priority, so it never
+rests on one:
+
+| Signal | Email | Metadata rows |
+|---|---|---|
+| Type size | display, ~2.4× the rows | body |
+| Colour | accent | ink / muted |
+| Rule above | 1px **ink** | 1px hairline |
+| Label | tracked caps on its own line | italic muted, inline |
+
+**Social links remain secondary** — body size, hairline rules, inline labels.
+
+**[INVARIANT]** Keyboard focus is visible as an outline, wired on every link.
+**Colour is never the sole indicator** — secondary links carry an underline, and
+focus is an outline rather than a colour change (`design-system.md` §12).
+
+**[INVARIANT]** No decorative motion is required or permitted: no transitions,
+no parallax, no cursor effects.
+
+### 5.6 Optional identity media **[DEFAULT — optional and provisional]**
+
+The identity still is **optional and provisional**. Both shipping with one and
+shipping without one are valid outcomes.
+
+**[INVARIANT]** **The page must remain compositionally valid if the still is
+absent.** Everything carrying meaning sits on the spine; the still occupies
+margin the composition does not need. The prototype proves this with an
+`identityMedia: present | absent` switch — with it absent, the heading,
+statement, email block, rows and note are pixel-identical, and the page reads as
+a deliberately quiet endpoint rather than a layout with a hole in it.
+
+**[INVARIANT]** **Meaningful contact information never depends on the image.**
+
+**The current still is borrowed from Art Works and is not a permanent Contact
+dependency.** Its caption says so honestly. It may be **replaced** by a
+Contact-specific working still at any aspect — the margin is width-constrained,
+not height-constrained — or **removed entirely**, with no composition change.
+
+**Do not invent unrelated replacement media.** A Contact-specific still is a
+**publication asset gap, not an architecture blocker.**
+
+### 5.7 Constraints
 
 **[INVARIANT]** Not a form, not a product page, no SaaS CTA treatment.
-**[DEFAULT]** The email is one of the three admitted accent uses.
+**[DEFAULT]** The email is one of the three admitted accent uses — and it appears
+exactly once in the page body.
 **[INVARIANT]** Plain language, active voice; a control names what it does.
 
-### 5.5 Unresolved **[PENDING VISUAL EXPLORATION]**
+### 5.8 Unresolved **[PENDING VISUAL EXPLORATION]**
 
-Entire composition. Whether Contact is a page or a section of About. Whether the
-oversized display gesture appears here. Mobile composition.
+**Mobile and tablet remain pending visual validation.** The candidate was
+exercised at desktop widths only, and the prototype records its responsive risks
+without designing for them.
 
-**Do not invent a Contact composition during implementation.**
+Carried responsive risks, deliberately **not** solved in architecture:
+
+1. **Long email wrapping.** At display size the address already needs
+   `word-break`; on a phone it will break mid-token, which looks broken for an
+   address. It may need a smaller size or a deliberate two-line set.
+2. **Ruled label/value rows stacking.** Label-left / value-right collapses at
+   narrow widths; rows likely become label-above-value. The longest value will
+   decide the breakpoint.
+3. **`CONTACT` heading scale.** The heading is sized against the spine, so it
+   tracks the column it aligns to at any width — but at one column the spine
+   becomes the full measure and the word grows very large relative to the
+   statement beneath it.
+4. **Statement ordering.** Currently heading → statement → email. Stacked, that
+   puts two blocks of reading ahead of the action; the email may want to move up.
+5. **Identity-media placement or removal.** One margin image becomes full-width
+   when stacked — the loudest thing on a quiet page. Removing it at narrow
+   widths is a legitimate answer, and §5.6 already proves the page survives that.
+6. **Footer / closing-note compression.** Two items at opposite ends stack into
+   two lines.
+
+#### Publication-data gaps — not architecture blockers
+
+**Every contact value in the prototype is prototype copy, not publication fact.**
+The email address, Instagram and Vimeo handles, location, availability window
+and reply-time statement are **all invented for the prototype.**
+
+- Real email address, Instagram handle and Vimeo URL.
+- Real availability window, and confirmation of the location and travel values.
+- **Whether the reply-time claim should be made at all** — it is a promise, and
+  it is currently invented. This is a decision, not a copy task.
+- A Contact-specific identity still, **or** a decision to ship without one
+  (§5.6 — both are valid).
+- A true caption, only if a still is used.
+
+**Do not treat any current value as a publication fact, and do not substitute
+unrelated media.**
+
+#### Still open from before exploration
+
+Whether Contact is a page or a section of About.
 
 ---
 
@@ -898,8 +1055,8 @@ Hold on every page regardless of exploration status.
 
 1. **Approve or amend** `design-direction.md`, `design-system.md` and this
    document. All three are Draft.
-2. **Explore the two pending pages.** Contact and the Private Project Gate have
-   no evidence at all — no exploration and no reference.
+2. **Explore the Private Project Gate** — the last unexplored page, and the only
+   one with neither exploration nor reference evidence.
 3. **Define narrow-width behaviour for `JUSTIFIED_ROWS`, `HORIZONTAL_STRIP` and
    `SLIDESHOW`.** The principle is approved (`design-system.md` §11.5) — GALLERY
    does not inherit GRID child stacking and every mode owes its own bounded

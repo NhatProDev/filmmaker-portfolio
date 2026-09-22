@@ -22,7 +22,6 @@ write a new one that supersedes it, and mark the old one `Superseded by NNNN`.
 | [0006](0006-responsive-visual-layout-composer.md) | Responsive Visual Layout Composer: GRID becomes a 12-column composition container, one level of block nesting, fixed desktop/tablet/mobile breakpoints with mobile safe-stacking | Approved — extended by 0008 |
 | [0007](0007-page-owned-block-compositions.md) | Blocks may be owned by a `pages` singleton so Home is composer-driven; one shared block model, not a parallel table | Approved |
 | [0008](0008-multi-video-composition-and-playback-model.md) | Multi-video surfaces: GALLERY gains `VIDEO_GRID`; playback is one discriminated mode (`CLICK_TO_PLAY` / `AUTOPLAY_VISIBLE` / `AUTOPLAY_AMBIENT`) with derived flags; forced-muted autoplay; system-bounded concurrency | Approved |
-
 | [0009](0009-administrator-selected-poster-media.md) | Administrator-selected posters are a V1 requirement, held relationally as `media.poster_media_id` and covered by `MEDIA_IN_USE` | Approved |
 
 ADRs 0001–0008 were approved on 2026-09-21; ADR-0009 on 2026-09-22.

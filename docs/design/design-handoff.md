@@ -205,6 +205,12 @@ here is positional law. The sequence exists to demonstrate rhythm:
 | 5 | GALLERY `JUSTIFIED_ROWS` | stills at native aspect, one row, full bleed |
 | 6 | Footer | site chrome, not a block |
 
+> **Naming note — `AUTOPLAY_ALWAYS` is historical.** The current approved name
+> is **`AUTOPLAY_AMBIENT`** (ADR-0008, renamed by Project Owner / Architect
+> decision on 2026-09-22). This document predates that decision; its original
+> wording is retained unchanged for provenance. Read every `AUTOPLAY_ALWAYS`
+> below as `AUTOPLAY_AMBIENT`. See §10, amendment 1.
+
 Header and footer are **site chrome and live outside the composer.**
 
 Two alternates are built and switchable:
@@ -524,18 +530,24 @@ Two prototype findings that are implementation constraints, not design choices:
   which silently breaks iOS autoplay on every surface. Desktop testing cannot
   detect this.
 
-### Amendments awaiting approval
+### Amendments proposed here — and their outcomes
 
-These are proposals against approved or pending-approval artifacts. None is in
-effect.
+These were proposals at the time of writing, when none was in effect. **All five
+have since been resolved** by the Project Owner / Software Architect.
 
-| # | Proposal | Against |
-|---|---|---|
-| 1 | Rename `AUTOPLAY_ALWAYS` → `AUTOPLAY_AMBIENT`, permitting off-screen suspend | ADR-0008 §3 |
-| 2 | Reconsider priority of administrator-selected poster media for V1 | ADR-0008 §7 |
-| 3 | Add a focal-point field to the media model | new |
-| 4 | Handle baked-in letterbox at ingestion | new |
-| 5 | Add a **width mode** placement property (needed for the About portrait at mobile) | ADR-0006 §4, already listed there — confirm |
+The rows are retained as the record of what this exploration proposed. **The
+Outcome column is the authoritative status**; the Proposal column is history.
+Prose elsewhere in this document still reflects the pre-decision state and is
+preserved deliberately as candidate evidence — where it disagrees with an
+outcome below, the outcome wins.
+
+| # | Proposal | Against | Outcome |
+|---|---|---|---|
+| 1 | Rename `AUTOPLAY_ALWAYS` → `AUTOPLAY_AMBIENT`, permitting off-screen suspend | ADR-0008 §3 | **Approved and applied.** Renamed in ADR-0008 on 2026-09-22. `AUTOPLAY_AMBIENT` *may* suspend off-screen; the structural placement rules carried over untouched. The name `AUTOPLAY_ALWAYS` is dead — do not implement it. |
+| 2 | Reconsider priority of administrator-selected poster media for V1 | ADR-0008 §7 | **Approved via ADR-0009.** Now a V1 requirement, held relationally as `media.poster_media_id`, never as an id in `config`, and participating in `MEDIA_IN_USE`. Resolution order `poster_media_id → thumbnail_url → empty well`. Schema work specified but **not yet applied**. |
+| 3 | Add a focal-point field to the media model | new | **Deferred by Architect.** Do not add `focalX` / `focalY` — `design-system.md` §7.6. Pending testing against a larger real library; the interim mitigation is editorial. |
+| 4 | Handle baked-in letterbox at ingestion | new | **Requirement approved; method unresolved.** Detect-and-strip at ingestion vs a stored active-area crop is still open — `design-system.md` §16 item 1. CSS compensation must not ship. Whichever method is chosen must apply identically to a poster and its video (ADR-0009 §5). |
+| 5 | Add a **width mode** placement property (needed for the About portrait at mobile) | ADR-0006 §4 | **Confirmed.** Already present in ADR-0006 §4's placement vocabulary; no amendment was required. Implement it. |
 
 ---
 

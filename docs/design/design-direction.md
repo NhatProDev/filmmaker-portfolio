@@ -16,7 +16,7 @@ On approval it becomes the highest design authority in the project.
 
 It governs **direction**, not implementation. It does not define a token scale,
 component inventory, or page layout. Those belong to `design-system.md` and
-`page-specifications.md`, neither of which exists yet.
+`page-specifications.md`.
 
 Where this document says a decision is **reserved**, it is genuinely open. Do not
 close it by inference during implementation — see §16.
@@ -1006,6 +1006,9 @@ The **exact ADR decomposition will be decided when theme-system engineering
 begins.** No theme ADRs exist yet, none are numbered or reserved, and none are
 to be written as part of this document.
 
-The only ADRs this document relies on are **ADR-0003** (private projects
-excluded from the public listing) and **ADR-0004** (asymmetric layouts as `GRID`
-configuration), both already approved.
+The ADRs this document relies on are **ADR-0003** (private projects excluded
+from the public listing), **ADR-0004** (asymmetric layouts as `GRID`
+configuration), **ADR-0006** (the responsive visual layout composer, the
+12-column model and the fixed breakpoint set), **ADR-0007** (Home is
+composer-driven) and **ADR-0008** (multi-video composition and the discriminated
+playback model). All are approved.

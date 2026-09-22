@@ -179,6 +179,126 @@ its own optical adjustment. Against §1.2 / §1.4 **[DEFAULT]** only; the
 container-relative **[INVARIANT]** is untouched. **The current Title card values
 are unchanged** and no other preset's values are proposed here. See §16 item 11.
 
+#### Systematic evidence — **SHARED RESPONSIVE CANDIDATE — SYSTEM VALIDATED**
+
+The observation above has since been tested systematically. Evidence:
+`prototypes/responsive-system/Display Typography Scaling.dc.html` and
+`display-typography-scaling.md`, accepted by the Project Owner on 2026-09-22 —
+4 sizing strategies × 4 representative compositions × 3 faces × 5 strings ×
+7 widths, every figure taken from **measured glyph advances** for the real
+loaded face rather than coefficient arithmetic.
+
+**Status is a method-level system grade.** It is **not Design Approved, not
+production-ready, not page-validated, and not a universal numeric
+specification.** No page has been changed or re-validated under it.
+
+**The reference box.** The principle already held here gains a precise
+statement of *which* container:
+
+```text
+REFERENCE BOX = the composition / alignment container
+```
+
+**Not automatically the viewport, the whole page, or the outer grid.** It is the
+box the type must visually align to — the grid span, the spine, the form column.
+
+**[DEFAULT] The method.**
+
+```text
+font-size: clamp(
+  preset-scoped minimum,
+  preset-scoped coefficient × composition-container width,
+  composition-scoped maximum
+)
+```
+
+CSS container query units such as `cqw` express this directly, with the
+container context set on the box the type aligns to.
+
+**The shared decision is the METHOD. The coefficient, minimum and maximum are
+not one global numeric set** — see the scoping table below.
+
+**Why viewport-relative is rejected as the *default* reference.** Two distinct
+failures, both measured:
+
+1. **It cannot know the box.** Type sized against the viewport overflowed a
+   narrower internal composition by **51–112%** — 151–157% on an 8-column
+   project title, 203–212% on a 6-column spine.
+2. **It drifts even on the composition it was tuned for.** Tuned against Home
+   at 1440, it still overflowed Home by **3–6% at every other width**, because
+   the page's **edge padding is a fixed pixel value** — so composition width is
+   *not* a constant fraction of viewport width. A viewport coefficient is
+   correct at exactly one width.
+
+Stated narrowly, and no wider than the evidence supports:
+
+> **Viewport width is not the default reference box for aligned display type.**
+
+This does **not** say viewport units are never valid. It says they are the wrong
+reference for type that must align to an internal composition.
+
+**Composition-relative holds.** Utilisation was **100% at all seven widths in
+all four compositions** with a single coefficient. Nothing else tested did that.
+
+**The two bounds are not equally evidenced, and must not be presented as if
+they were.**
+
+| Bound | Standing | Evidence |
+|---|---|---|
+| **Maximum** | **Evidence-backed · load-bearing · composition-scoped** | Home at 1440 wants 142px and is clamped to 120px (84% utilisation). Without it a 12-column display keeps growing past what the page can carry |
+| **Minimum** | **Precautionary preset guard — not independently validated** | **Never engaged.** The smallest size anywhere in the matrix was 35px at 375 |
+
+The prototype's `26` and `120` are **experiment values, not universal site
+constants**, and 26px must not be presented as a validated threshold.
+
+**Face sensitivity, measured.** Advance per 1px of size varied **6–15%** across
+Marcellus, Spectral and Archivo. At a Marcellus-tuned 100% fill the same string
+renders at **107% in Spectral** and **104% in Archivo** — both overflow.
+
+- The sizing **method is face-independent**.
+- The **coefficient is typography-preset / font-face scoped**, comparable to
+  other preset metrics such as **tracking**, which §1.2 already treats this way.
+- **A face swap must not silently inherit a coefficient tuned for another
+  face.** This is the mechanism behind `home-baseline-v2.md` §8.4's clipping,
+  now stated precisely.
+
+**There is no universal `cqw` coefficient, and none should be created.**
+
+**Content length: wrap, never shrink.** At one coefficient in one box, the same
+face, utilisation ran 51% (short) → 85% (medium) → 100% (title) → **223% and
+three lines** (a long title). Content length dominates every other variable.
+
+> **Long display content wraps.** It does **not** receive a smaller coefficient
+> merely to remain one line.
+
+This does **not** claim all display text must remain one line. The `fit (JS)`
+control shows *why* shrink-to-fit is the wrong answer rather than merely
+unnecessary: it gave one project a 94px title and another a **42px** title in
+the same template, so **size would encode title length rather than hierarchy**.
+
+**What is preset-, composition- or page-scoped**
+
+| Value | Scope |
+|---|---|
+| Coefficient | **Preset** (per display face) |
+| Minimum | **Preset** — a precautionary legibility floor |
+| Maximum | **Page or composition** |
+| Reference box | **Composition** — the thing being aligned to |
+
+**No JavaScript is required, and none enters the production contract.**
+`clamp()` plus container query units express the method completely. **JS
+shrink-to-fit is rejected as the production sizing model**; the JS in this
+experiment exists only as measurement and comparison evidence.
+
+**This reconciles the candidate set rather than replacing it.** Home's
+`13.3cqw`, Contact's spine-relative `cqw` and the Gate's
+`clamp(26px, 8.2cqw, 46px)` are **already the same method** with different
+reference boxes and bounds. Contact and the Gate size against the box their type
+aligns to; **Home sizes against a container wider than its own alignment
+target**, which is why it clips on a face swap. No page needs a new approach —
+Home needs its reference box corrected, and **that is a page change, not made
+here.**
+
 ### 1.5 Type scale **[DEFAULT]**
 
 | Role | Size | Leading |
@@ -1132,12 +1252,15 @@ Carried forward. **Do not close these by inference during implementation.**
 | 8 | **Mobile composition for every page** — no reference evidence exists. **One page is now validated:** the Private Project Gate, at 768 / 430 / 390 / 375 and at constrained height (§11.6, `page-specifications.md` §6.9). Home, Art Works, Project Detail, About Me and Contact remain pending, and must not borrow the gate's derivations. | **1 of 6 validated as candidate; 5 pending** |
 | 9 | **All six pages now have a candidate** — Home, Art Works (2C v2), Project Detail (1B v2), About Me (3B v2), Contact (4B v2), Private Gate (5B v2). None is approved. The gate theme conflict was resolved on 2026-09-22 in favour of a route-independent pre-auth surface (`page-specifications.md` §6.3). | **Exploration complete; no candidate conflicts open** |
 | 10 | **GALLERY narrow-width behaviour per presentation mode** — the *principle* is approved (§11.5): GALLERY does not inherit GRID child stacking and every mode owes bounded narrow-width behaviour. `VIDEO_GRID` satisfies it via column counts. **`JUSTIFIED_ROWS` now satisfies it** as a shared responsive candidate, system validated (§11.7) — no page has yet been validated with it. **`HORIZONTAL_STRIP` and `SLIDESHOW` still need theirs defined.** | **2 of 4 modes answered; `HORIZONTAL_STRIP` and `SLIDESHOW` pending** |
-| 11 | **Display coefficient as a preset property** — `13.3cqw` is tuned to one face; face substitution changes clipping without anyone authoring it (§1.4). Contact 4B v2 §6 adds a second dimension: sizing display type against **the element it must align to** rather than against the page removes the guess, and **the other candidates' coefficients have not been re-checked against this.** The Private Gate responsive validation adds a third: `clamp(26px, 8.2cqw of the spine, 46px)` — spine-relative **and bounded by the desktop size**, so narrow widths can never exceed it (§11.6). That is evidence for the clamped, spine-relative form; **one convention should be chosen for all pages**, and none has been. | **Proposed amendment, not applied** |
+| 11 | **Display coefficient as a preset property** — `13.3cqw` is tuned to one face; face substitution changes clipping without anyone authoring it (§1.4). **The method question is now answered** by the Display Typography Scaling experiment (§1.4, SHARED RESPONSIVE CANDIDATE — SYSTEM VALIDATED): bounded composition-relative clamp, reference box = the alignment container, coefficient scoped to the preset, wrap rather than shrink, no JS. **What remains open is the numbers, not the method** — no preset's coefficient is derived by that experiment, and the amendment making coefficient and bounds a preset property is still raised rather than applied. | **Method validated at system level; per-preset values still not derived, amendment not applied** |
 | 12 | **Bounded HERO overlay content** — the *capability* is approved (ADR-0010): intra-block, title from `projects.title`, closed config, dismissal on media activation, `CLICK_TO_PLAY` or IMAGE only. Its **visual use on Project Detail remains candidate**, and the narrow-width stacked treatment awaits mobile validation. | **Capability approved; visual use candidate** |
 | 13 | **Constrained-height behaviour for interactive surfaces** — the Private Gate showed that centring a growing element inside a shrinking viewport pushes its action off screen, and answered it with top-aligned flow below ~620px (§11.6). Whether that becomes a general rule, at what threshold, and for which surfaces, is **not decided on one page's evidence**. | **Evidence recorded on one page; not a system rule** |
 | 14 | **Site-wide mobile navigation** — the gate hides the public nav at ≤430 because it has one job and never removes its escape route. Home, Art Works, Project Detail, About Me and Contact each need their own answer. **Explicitly not resolved by the gate, and not to be inherited from it** (§11.6). | **Unresolved** |
 | 15 | **`JUSTIFIED_ROWS` carried uncertainties** (§11.7) — `ref = 1.6` remains an **empirical** constant, not a derived one; **2.39 and 0.50 were exercised as labelled geometry probes, not real masters**, and a true cinematic master should be run before specification; and whether the **480 → 450 step** is *desirable* is a visual judgement, not a defect. | **System validated; constants empirical, judgement open** |
 | 16 | **`AUTOPLAY_VISIBLE` on one-up `JUSTIFIED_ROWS` rows** — below 700px the mode becomes a single column of native-aspect items. Art Works' one-preview-at-a-time policy will meet those one-up rows at mobile, and the two have **never been validated together**: §11.7's prototype is imagery only. | **Untested interaction** |
+| 17 | **Display minimum bound** — the minimum **never engaged** anywhere in the Display Typography matrix (smallest size 35px at 375). It is carried as a **precautionary preset guard**; the prototype's `26px` is an experiment value and **must not be presented as a validated universal threshold** (§1.4). | **Precautionary, unvalidated** |
+| 18 | **Wrapped display typography** — the evidence establishes that long display content **wraps** rather than shrinking (§1.4), but **not what a wrapped display line should look like**. **Line-height for wrapped display type is unresolved, and no maximum line-count policy exists.** | **Unresolved** |
+| 19 | **Display typography test material** — the experiment used **uppercase strings at fixed `−0.005em` tracking**, matching current usage. Mixed case changes glyph advance, and tracking changes it too, so **preset coefficient and tracking must be tuned together** and coefficients derived here would not transfer to mixed-case display type. | **Scope limit on the evidence** |
 
 ---
 

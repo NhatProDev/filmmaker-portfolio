@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Spectral:wght@200;300;400&amp;family=Archivo:wght@400;500;600&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..600&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --surface:#F7F3EC; --ink:#16120E; --accent:#C4361C; --muted:#6C6862; --rule:#E2DCD2;
+  --font-body:'Newsreader',Georgia,serif; --display-track:-0.005em;
+}
+body{margin:0;background:#E6E1D8}
+</style>
+</helmet>
+<div ref="{{ rootRef }}" style="font-family:var(--font-body);color:var(--ink);padding:56px 48px 120px">
+
+  <div style="max-width:84ch;margin-bottom:34px">
+    <h1 style="margin:0;font-family:'Marcellus',Georgia,serif;font-size:30px;letter-spacing:var(--display-track);text-transform:uppercase">Display typography — responsive scaling method</h1>
+    <p style="margin:14px 0 0;font-size:17px;line-height:1.7">A measurement instrument. Four sizing strategies are applied to four representative compositions, three display faces and five strings across seven widths, and every figure below comes from <strong>real rendered text metrics</strong> — glyph advances measured per face, not coefficient arithmetic. The question is which <em>method</em> holds, not which numbers.</p>
+  </div>
+
+  <div data-tables="" style="display:flex;flex-direction:column;gap:30px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;font-size:12px;line-height:1.7;color:#2C2822;white-space:pre"></div>
+
+  <div data-sample="" style="margin-top:44px;display:flex;flex-direction:column;gap:14px"></div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;strategy&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;clamp&quot;,&quot;comp&quot;,&quot;viewport&quot;,&quot;fit&quot;],&quot;default&quot;:&quot;clamp&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Sample&quot;},&quot;face&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Marcellus&quot;,&quot;Spectral&quot;,&quot;Archivo&quot;],&quot;default&quot;:&quot;Marcellus&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Sample&quot;},&quot;composition&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;home&quot;,&quot;pdTitle&quot;,&quot;spine&quot;,&quot;gate&quot;],&quot;default&quot;:&quot;spine&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Sample&quot;},&quot;string&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;short&quot;,&quot;medium&quot;,&quot;title&quot;,&quot;long&quot;,&quot;mixed&quot;],&quot;default&quot;:&quot;title&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Sample&quot;},&quot;width&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;1440&quot;,&quot;1024&quot;,&quot;768&quot;,&quot;600&quot;,&quot;430&quot;,&quot;390&quot;,&quot;375&quot;],&quot;default&quot;:&quot;375&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Sample&quot;},&quot;allowWrap&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Sample&quot;}}">
+class Component extends DCLogic {
+  FACES = [
+    { key: "Marcellus", css: "'Marcellus', Georgia, serif", weight: 400 },
+    { key: "Spectral", css: "'Spectral', Georgia, serif", weight: 300 },
+    { key: "Archivo", css: "'Archivo', system-ui, sans-serif", weight: 500 }
+  ];
+  STRINGS = [
+    { key: "short", text: "CONTACT" },
+    { key: "medium", text: "PRIVATE PROJECT" },
+    { key: "title", text: "MADE TO MEASURE" },
+    { key: "long", text: "THE LAST FITTING BEFORE THE SHOP CLOSED" },
+    { key: "mixed", text: "WWMMWW IIllII" }
+  ];
+  COMPS = [
+    { key: "home", label: "Home display (12 col)", cols: 12, narrowCols: 12 },
+    { key: "pdTitle", label: "Project title (8 col)", cols: 8, narrowCols: 12 },
+    { key: "spine", label: "About/Contact spine (6)", cols: 6, narrowCols: 12 },
+    { key: "gate", label: "Gate heading (6 col)", cols: 6, narrowCols: 12 }
+  ];
+  WIDTHS = [1440, 1024, 768, 600, 430, 390, 375];
+
+  // One coefficient per strategy, tuned once: Marcellus / "MADE TO MEASURE" /
+  // Home composition at 1440, filling its measure. Everything else in these
+  // tables is that single tuning meeting other conditions.
+  // Tuned once, honestly: the composition coefficient is 1 / (Marcellus advance
+  // for "MADE TO MEASURE"), i.e. exactly filling that box at any width. The
+  // viewport coefficient is set to produce the same size at 1440 on the Home
+  // composition, so the two start from the same place and diverge only by method.
+  COEF = { viewport: 0.0989, comp: 0.1073 };
+  BOUNDS = { min: 26, max: 120 };
+
+  opt(k, d) { const o = window.__dt || {}; return o[k] !== undefined ? o[k] : (this.props[k] !== undefined ? this.props[k] : d); }
+  renderVals() { return { rootRef: (el) => { this.root = el; } }; }
+
+  componentDidMount() {
+    window.__dtc = this;
+    this.ctx = document.createElement("canvas").getContext("2d");
+    const load = this.FACES.map((f) => document.fonts.load(f.weight + " 100px " + f.css.split(",")[0].replace(/'/g, "")));
+    Promise.all(load).then(() => (document.fonts.ready || Promise.resolve())).then(() => { this.ready = true; this.run(); });
+    setTimeout(() => this.run(), 400);
+  }
+  componentDidUpdate() { setTimeout(() => this.run(), 0); }
+
+  geom(W) {
+    const edge = W <= 430 ? 24 : W <= 768 ? 32 : 56;
+    const gut = 20;
+    const col = (W - 2 * edge - 11 * gut) / 12;
+    return { edge, gut, col, span: (n) => n * col + (n - 1) * gut };
+  }
+  compWidth(comp, W) {
+    const g = this.geom(W);
+    return Math.max(80, g.span(W >= 700 ? comp.cols : comp.narrowCols));
+  }
+
+  // Glyph advance per 1px of font size, measured from the real face.
+  k(face, text) {
+    this.ctx.font = face.weight + " 100px " + face.css;
+    return this.ctx.measureText(text).width / 100;
+  }
+
+  size(strategy, face, text, comp, W) {
+    const cw = this.compWidth(comp, W);
+    if (strategy === "viewport") return this.COEF.viewport * W;
+    if (strategy === "comp") return this.COEF.comp * cw;
+    if (strategy === "clamp") return Math.max(this.BOUNDS.min, Math.min(this.BOUNDS.max, this.COEF.comp * cw));
+    // "fit" — solve the size from the measured string. The control case for
+    // whether JavaScript is actually required.
+    return Math.max(this.BOUNDS.min, Math.min(this.BOUNDS.max, cw / this.k(face, text)));
+  }
+
+  measure(strategy, face, str, comp, W) {
+    const cw = this.compWidth(comp, W);
+    const s = this.size(strategy, face, str.text, comp, W);
+    const w = this.k(face, str.text) * s;
+    return { cw: Math.round(cw), size: Math.round(s), width: Math.round(w), util: Math.round((w / cw) * 100), over: w > cw + 0.5 };
+  }
+
+  run() {
+    if (!this.root || !this.ctx) return;
+    const pad = (s, n) => String(s).padEnd(n);
+    const out = [];
+
+    // 1 — font-metric sensitivity: advance per px of size, per face and string
+    let t1 = "1 · GLYPH ADVANCE PER 1px OF FONT SIZE  (measured, not assumed)\n\n" + pad("string", 12);
+    this.FACES.forEach((f) => { t1 += pad(f.key, 12); });
+    t1 += "spread vs Marcellus\n";
+    this.STRINGS.forEach((s) => {
+      const ks = this.FACES.map((f) => this.k(f, s.text));
+      t1 += pad(s.key, 12);
+      ks.forEach((k) => { t1 += pad(k.toFixed(3), 12); });
+      t1 += Math.round(((Math.max.apply(null, ks) - Math.min.apply(null, ks)) / ks[0]) * 100) + "%\n";
+    });
+    out.push(t1);
+
+    // 2 — the four strategies, one coefficient, across widths
+    const face = this.FACES.find((f) => f.key === this.opt("face", "Marcellus"));
+    const str = this.STRINGS.find((s) => s.key === this.opt("string", "title"));
+    let t2 = "2 · STRATEGIES  face=" + face.key + "  string=\"" + str.text + "\"\n\n" +
+      pad("composition", 26) + pad("width", 7) + pad("box", 7) +
+      pad("viewport", 22) + pad("composition", 22) + pad("clamped", 22) + "fit (JS)\n" +
+      pad("", 26) + pad("", 7) + pad("", 7) + pad("size / util", 22) + pad("size / util", 22) + pad("size / util", 22) + "size / util\n";
+    this.COMPS.forEach((c) => {
+      this.WIDTHS.forEach((W) => {
+        const cell = (st) => { const m = this.measure(st, face, str, c, W); return m.size + "px / " + m.util + "%" + (m.over ? " ✗over" : ""); };
+        t2 += pad(c.label, 26) + pad(W, 7) + pad(Math.round(this.compWidth(c, W)), 7) +
+          pad(cell("viewport"), 22) + pad(cell("comp"), 22) + pad(cell("clamp"), 22) + cell("fit") + "\n";
+      });
+      t2 += "\n";
+    });
+    out.push(t2);
+
+    // 3 — face swap at a fixed coefficient
+    let t3 = "3 · FACE SENSITIVITY  strategy=composition-relative, coefficient fixed at " + this.COEF.comp + "\n\n" +
+      pad("composition", 26) + pad("width", 7) + pad("string", 9);
+    this.FACES.forEach((f) => t3 += pad(f.key + " util", 16));
+    t3 += "worst\n";
+    [["home", "title"], ["pdTitle", "title"], ["spine", "medium"], ["gate", "medium"]].forEach(([ck, sk]) => {
+      const c = this.COMPS.find((x) => x.key === ck), s = this.STRINGS.find((x) => x.key === sk);
+      [1440, 768, 375].forEach((W) => {
+        const us = this.FACES.map((f) => this.measure("comp", f, s, c, W));
+        t3 += pad(c.label, 26) + pad(W, 7) + pad(s.key, 9);
+        us.forEach((m) => t3 += pad(m.util + "%" + (m.over ? " ✗" : ""), 16));
+        t3 += (us.some((m) => m.over) ? "OVERFLOW" : Math.max.apply(null, us.map((m) => m.util)) + "%") + "\n";
+      });
+    });
+    out.push(t3);
+
+    // 4 — string sensitivity at one coefficient, and the wrap threshold
+    let t4 = "4 · STRING SENSITIVITY + WRAP POINT  face=" + face.key + ", composition-relative, clamped\n\n" +
+      pad("composition", 26) + pad("width", 7) + pad("string", 9) + pad("size", 8) + pad("util", 9) + pad("lines if wrapped", 18) + "verdict\n";
+    this.COMPS.forEach((c) => {
+      [1440, 375].forEach((W) => {
+        this.STRINGS.forEach((s) => {
+          const m = this.measure("clamp", face, s, c, W);
+          const lines = Math.max(1, Math.ceil(m.width / m.cw));
+          t4 += pad(c.label, 26) + pad(W, 7) + pad(s.key, 9) + pad(m.size + "px", 8) + pad(m.util + "%", 9) +
+            pad(lines, 18) + (m.over ? (lines > 2 ? "wrap (many lines)" : "wrap") : m.util < 45 ? "under-fills" : "fits") + "\n";
+        });
+        t4 += "\n";
+      });
+    });
+    out.push(t4);
+
+    // 5 — do the bounds ever engage?
+    let t5 = "5 · BOUND ENGAGEMENT  min=" + this.BOUNDS.min + "px  max=" + this.BOUNDS.max + "px\n\n" +
+      pad("composition", 26) + pad("width", 7) + pad("unbounded", 12) + pad("clamped", 10) + "bound engaged\n";
+    this.COMPS.forEach((c) => {
+      this.WIDTHS.forEach((W) => {
+        const raw = this.COEF.comp * this.compWidth(c, W);
+        const cl = Math.max(this.BOUNDS.min, Math.min(this.BOUNDS.max, raw));
+        t5 += pad(c.label, 26) + pad(W, 7) + pad(Math.round(raw) + "px", 12) + pad(Math.round(cl) + "px", 10) +
+          (raw > this.BOUNDS.max ? "max" : raw < this.BOUNDS.min ? "min" : "—") + "\n";
+      });
+      t5 += "\n";
+    });
+    out.push(t5);
+
+    this.root.querySelector("[data-tables]").textContent = out.join("\n\n");
+    this.paint(face, str);
+  }
+
+  paint(face, str) {
+    const host = this.root.querySelector("[data-sample]");
+    host.innerHTML = "";
+    const W = parseInt(this.opt("width", "375"), 10);
+    const comp = this.COMPS.find((c) => c.key === this.opt("composition", "spine"));
+    const strategy = this.opt("strategy", "clamp");
+    const cw = this.compWidth(comp, W);
+    const m = this.measure(strategy, face, str, comp, W);
+    const cap = document.createElement("p");
+    cap.style.cssText = "margin:0;font-size:14px;color:#6C6862";
+    cap.textContent = comp.label + " · " + W + "px viewport · box " + Math.round(cw) + "px · " + strategy + " · " + m.size + "px · " + m.util + "% utilisation" + (m.over ? " · OVERFLOWS" : "");
+    host.appendChild(cap);
+    const frame = document.createElement("div");
+    frame.style.cssText = "width:" + W + "px;background:#F7F3EC;box-shadow:0 0 0 1px #D6D0C5;padding:26px 0;overflow:hidden";
+    const box = document.createElement("div");
+    box.style.cssText = "width:" + Math.round(cw) + "px;margin-left:" + this.geom(W).edge + "px;outline:1px dashed rgba(196,54,28,0.5)";
+    const h = document.createElement("div");
+    h.textContent = str.text;
+    h.style.cssText = "margin:0;font-family:" + face.css + ";font-weight:" + face.weight + ";font-size:" + m.size + "px;line-height:1.02;letter-spacing:-0.005em;text-transform:uppercase;white-space:" + (this.opt("allowWrap", true) ? "normal" : "nowrap");
+    box.appendChild(h);
+    frame.appendChild(box);
+    host.appendChild(frame);
+  }
+}
+
+</script>
+</body>
+</html>

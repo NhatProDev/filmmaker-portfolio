@@ -14,11 +14,19 @@ default, and carries no grade.
 ## This directory is not a page
 
 Every other directory under `docs/design/prototypes/` holds the evidence for one
-public surface. **This one holds cross-page responsive *system* evidence** — the
-behaviour of a shared GALLERY presentation mode, independent of any page that
-uses it.
+public surface. **This one holds cross-page responsive *system* evidence** —
+behaviour shared across pages, independent of any page that uses it.
 
 Nothing here is a page candidate, and nothing here composes a page.
+
+It currently holds two experiments:
+
+| Experiment | Subject | Status |
+|---|---|---|
+| **`JUSTIFIED_ROWS` narrow width** | a shared GALLERY presentation mode | SHARED RESPONSIVE CANDIDATE — SYSTEM VALIDATED (`design-system.md` §11.7) |
+| **Display typography scaling** | how display type is sized against its container | SHARED RESPONSIVE CANDIDATE — SYSTEM VALIDATED (`design-system.md` §1.4) |
+
+Neither is Design Approved, production-ready or page-validated.
 
 ---
 
@@ -29,6 +37,8 @@ Justified Rows Narrow Width v2.dc.html   selected shared responsive candidate
 justified-rows-narrow-width-v2.md        its validation record
 Justified Rows Narrow Width.dc.html      v1 — rejected / comparison evidence
 justified-rows-narrow-width.md           v1's record
+Display Typography Scaling.dc.html       display-typography measurement instrument
+display-typography-scaling.md            its validation record
 support.js                               prototype runtime support
 ```
 
@@ -124,6 +134,32 @@ to match current state would destroy the record of what was actually run.
 Its one unresolved reference has the same non-consequence as above: v1's
 findings are aspect-driven and unaffected. Its remaining fourteen files are the
 v2 set listed above.
+
+---
+
+## Display Typography Scaling — no media dependency
+
+**The display-typography experiment depends on no runtime media of any kind.**
+
+| Dependency | Count |
+|---|---|
+| Images (`img`, `picture`, `source`) | **0** |
+| Video / audio (`video`, `audio`) | **0** |
+| References to `media/` | **0** |
+
+It is a **measurement instrument**, not a composition: 4 sizing strategies ×
+4 representative compositions × 3 faces × 5 strings × 7 widths, reporting
+**measured glyph advances** for the real loaded face. Its only external
+dependency is the three display faces themselves, loaded from Google Fonts by
+the prototype and awaited via `document.fonts.ready` before measuring.
+
+**Nothing needs restoring in a fresh clone for this experiment** — like
+`../private-gate/`, it renders completely without `media/`.
+
+Its JavaScript measurement exists **only as evidence**. The selected production
+method is pure CSS (`clamp()` plus container query units), and
+**JS shrink-to-fit is rejected as the production sizing model**
+(`design-system.md` §1.4).
 
 ---
 

@@ -163,6 +163,22 @@ fallback guarantees nothing is broken, not that anything is good.
 
 **Home remains PENDING RESPONSIVE VALIDATION.**
 
+**Display typography — Home's large display may now be evaluated against the
+shared method** (`design-system.md` §1.4, SHARED RESPONSIVE CANDIDATE — SYSTEM
+VALIDATED): bounded composition-relative clamp, sized against the box the type
+aligns to.
+
+**The previous clipping under a face swap is now explained**, and by two causes
+rather than one: the coefficient is tuned to a single face, **and Home sizes
+against a container wider than its own alignment target** — a reference-box
+mismatch. Measured, a viewport- or page-wider reference drifts 3–6% across
+widths even on the composition it was tuned for, because edge padding is a fixed
+pixel value.
+
+**Do not rewrite Home's page-specific values yet.** Correcting the reference box
+is a page change and belongs to Home's own responsive validation, not to the
+system pass. Home is not validated by this experiment.
+
 **`JUSTIFIED_ROWS` — block 5 may now be tested against the shared system
 candidate.** The mode's narrow-width behaviour is settled at system level
 (`design-system.md` §11.7): derived target height, minimum-cell floor, height
@@ -620,6 +636,24 @@ to test against; it has not been tested here, and it touches none of this page's
 other open items — the HERO overlay's narrow-width fallback, the poster/film
 `fit` mismatch and the metadata treatment are all untouched by it.
 
+**Display typography — the project title may use the shared sizing method**
+(`design-system.md` §1.4). Two consequences matter specifically here, because
+**project titles are not known at design time**:
+
+- **An unknown-length title wraps. It does not trigger shrink-to-fit.** The
+  evidence rejects shrink-to-fit outright: it gave one project a 94px title and
+  another a 42px title in the same template, making size encode title length
+  rather than hierarchy. A long title reaching 223% of its box wraps to 2–3
+  lines and stays at full size.
+- **What a wrapped title should look like is unresolved.** **Line-height for
+  wrapped display type and any maximum line count are both open**
+  (`design-system.md` §16 item 18), and the **exact mobile title treatment
+  remains a page-level validation question** — including its interaction with
+  the HERO overlay's derived narrow-width stacked fallback.
+
+**Project Detail is not validated by this experiment.** Its long-title
+composition is explicitly carried forward as a page-level question.
+
 ### 3.11 States
 
 | State | Behaviour |
@@ -784,6 +818,13 @@ not a crop.
 **[INVARIANT]** Reading measure ≤ 46ch · negative space is load-bearing and must
 not be backfilled · no card chrome · the oversized display gesture is permitted
 here and is one per view.
+
+**Display typography.** Where About's display type aligns to the spine,
+**spine-relative scaling is consistent with the shared method**
+(`design-system.md` §1.4) — the spine is then the composition / alignment
+container, which is exactly the reference box that method specifies.
+**This consistency does not validate the page.** About remains PENDING
+RESPONSIVE VALIDATION, and no coefficient is derived for it here.
 
 ### 4.8 Unresolved **[PENDING VISUAL EXPLORATION]**
 
@@ -1006,6 +1047,14 @@ Carried responsive risks, deliberately **not** solved in architecture:
    tracks the column it aligns to at any width — but at one column the spine
    becomes the full measure and the word grows very large relative to the
    statement beneath it.
+   **Sizing against the spine is consistent with the shared method**
+   (`design-system.md` §1.4): the spine is the composition / alignment
+   container, which is the reference box that method specifies. It also points
+   at the fix for the risk recorded here — a **composition-scoped maximum** is
+   the evidence-backed half of the bound, and it is the part that stops a word
+   growing past what the page can carry. **Neither the value nor the page is
+   validated by that experiment**, and Contact remains PENDING RESPONSIVE
+   VALIDATION.
 4. **Statement ordering.** Currently heading → statement → email. Stacked, that
    puts two blocks of reading ahead of the action; the email may want to move up.
 5. **Identity-media placement or removal.** One margin image becomes full-width
@@ -1416,6 +1465,19 @@ rules:
 Do not apply the gate's numbers to another page. The generalisable observations
 are carried as evidence only, in `design-system.md` §11.6.
 
+**The gate's heading clamp is consistent with the shared display-typography
+method** (`design-system.md` §1.4): `clamp(26px, 8.2cqw of the spine, 46px)` is
+a bounded composition-relative clamp sized against the box the heading aligns
+to, which is precisely the method that experiment validated. The gate reached it
+independently, before the method was stated.
+
+**Its validated page-specific values stand and are not replaced.** They were
+measured on this page, at this page's widths, and remain this page's answer.
+Equally, **they must not be reinterpreted as universal numbers** — `26px` in
+particular is a preset guard that **never engaged** anywhere in the
+display-typography matrix (`design-system.md` §16 item 17), so its appearance
+here is not evidence for it as a site-wide floor.
+
 #### Still open on this page
 
 1. ***Show* control placement** — item 7 above, not exercised by this
@@ -1471,7 +1533,7 @@ Hold on every page regardless of exploration status.
 | **Video** | Never audible without user action. Multi-video surfaces are `AUTOPLAY_VISIBLE`. `AUTOPLAY_AMBIENT` only on a standalone ambient surface. |
 | **Posters** | `poster_media_id → thumbnail_url → empty well`. Refused autoplay shows the poster. |
 | **Motion** | Content moves; interface does not. One signature transition, shell-owned. |
-| **Responsive** | Three breakpoints. Automatic safe stacking. **Every production page still requires a mobile design review.** One page is RESPONSIVE VALIDATED — the Private Project Gate (§6.9); the other five are pending, and must not borrow its derivations. `JUSTIFIED_ROWS` has a **shared responsive candidate, system validated** (`design-system.md` §11.7) — one expression for every page, no per-page override. A system candidate is not a page validation. |
+| **Responsive** | Three breakpoints. Automatic safe stacking. **Every production page still requires a mobile design review.** One page is RESPONSIVE VALIDATED — the Private Project Gate (§6.9); the other five are pending, and must not borrow its derivations. `JUSTIFIED_ROWS` has a **shared responsive candidate, system validated** (`design-system.md` §11.7) — one expression for every page, no per-page override. **Display typography** has one too (`design-system.md` §1.4): bounded composition-relative clamp, reference box = the alignment container, coefficient scoped to the preset, long content wraps rather than shrinking. There the **method** is shared and the **numbers are not**. A system candidate is not a page validation. |
 | **Accessibility** | WCAG AA size-aware · visible focus · reduced motion yields a deterministic still · DOM order follows `position`, never `colStart`. |
 | **Never** | Product UI, card primitives, feed-like surfaces, audible autoplay, invented compositions on pending pages. |
 

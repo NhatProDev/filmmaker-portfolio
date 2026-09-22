@@ -21,12 +21,13 @@ does not pretend otherwise.
 |---|---|---|---|---|
 | **Home** | **VISUALLY EXPLORED** | ✅ candidate | ✗ none | A proposed default composition, block by block |
 | **Art Works** | **PARTIALLY EVIDENCED** | ✗ | ✅ ref 3 | A reference image and a data contract; no composition |
-| **Project Detail** | **PARTIALLY EVIDENCED** | ✗ | ✅ ref 4 | A reference image and a playback contract; no composition |
+| **Project Detail** | **VISUALLY EXPLORED** | ✅ candidate (1B v2) | ✅ ref 4 | A proposed composition, block by block |
 | **About Me** | **PARTIALLY EVIDENCED** | ✗ | ✅ refs 1, 2 | Two reference images and a width-mode requirement; no composition |
 | **Contact** | **STRUCTURALLY SPECIFIED** | ✗ | ✗ none | Scope and prohibitions only; no visual direction at all |
 | **Private Project Gate** | **STRUCTURALLY SPECIFIED** | ✗ | ✗ none | An access contract and a stated design tension; no composition |
 
-**Home is the only VISUALLY EXPLORED page.** No other page has one.
+**Two pages are VISUALLY EXPLORED — Home and Project Detail.** Neither is
+approved. The other four have no exploration.
 
 ### What each grade permits
 
@@ -43,13 +44,15 @@ asymmetric video panel. They do not specify page structure, navigation, states,
 responsive behaviour or media configuration. Treating a reference as a finished
 design for its page is the specific failure this table exists to prevent.
 
-**Nothing here is approved.** Even Home's composition is a candidate derived
-from a handoff whose prototype evidence is missing (`design-system.md` §0.1).
+**Nothing here is approved.** Both explored compositions are candidates recorded
+in `docs/design/prototypes/`, and both prototypes state in their own headers that
+they approve nothing. Neither has Project Owner / Architect approval.
 
-Worth noting the inversion: **Home is the only page that has been explored, and
-the only page with no reference evidence.** The four pages with reference
-evidence are the four that have not been explored. Exploration and evidence have
-not yet met on any single page.
+Worth noting how the evidence now sits: **Home has been explored but has no
+reference evidence, and Project Detail is the first page where exploration and
+reference evidence meet.** Art Works and About Me still hold reference evidence
+that has never been taken into exploration; Contact and the Private Project Gate
+have neither.
 
 **For every page below VISUALLY EXPLORED, this document defines constraints
 only.** Where a visual composition is not yet determined it is marked
@@ -242,8 +245,16 @@ hover/focus affordance given that hover lift is forbidden · mobile composition.
 
 ## 3. Project Detail
 
-> **Maturity: PARTIALLY EVIDENCED.** Reference 4 only. **No composition has been designed.**
-> **[PENDING VISUAL EXPLORATION]**
+> **Maturity: VISUALLY EXPLORED.** Candidate composition **1B v2**, **not approved**.
+>
+> Evidence: `docs/design/prototypes/project-detail/Project Detail 1B v2.dc.html`
+> and `project-detail-1b-v2.md`. Sibling directions 1A and 1C are retained in
+> `Project Detail Directions.dc.html` as exploration record only. Reference 4
+> continues to apply.
+>
+> The composition is **blocked from specification** by one architecture question
+> (bounded HERO overlay content, §3.9), one carried media question (poster/film
+> `fit`, §3.9), and mobile, which is identified and not designed.
 
 ### 3.1 Purpose
 
@@ -272,7 +283,56 @@ deliberate void in the panel.
 This is `HERO` / `VIDEO` / `TEXT` / `GRID` composed on one page, and it is the
 direct evidence for asymmetric GRID composition (ADR-0004, ADR-0006).
 
-### 3.5 Playback **[INVARIANT]**
+### 3.5 Candidate composition — 1B v2 **[DEFAULT — candidate, not a template]**
+
+Recorded from `docs/design/prototypes/project-detail/Project Detail 1B v2.dc.html`
+and its review record
+`docs/design/prototypes/project-detail/project-detail-1b-v2.md`. The sibling
+directions 1A and 1C remain in
+`docs/design/prototypes/project-detail/Project Detail Directions.dc.html` as
+exploration record only.
+
+**The defining idea: the project opens directly into the film.** No title-card
+preamble. The hero carries the film and the film's name; everything that has to
+be *read* sits below it.
+
+| # | Block | Configuration |
+|---|---|---|
+| 1 | **HERO / VIDEO** | Film-first, full bleed, `CLICK_TO_PLAY`. **Bounded title overlay is candidate evidence only — the architecture is unresolved (§3.9 item 1).** The prototype also builds the legal alternative: the title as a TEXT block below the hero. |
+| 2 | **GRID** | Metadata list + project statement |
+| 3 | **GALLERY `JUSTIFIED_ROWS`** | Supporting stills, native aspect, full bleed |
+| 4 | **GRID** | One supporting video, `AUTOPLAY_VISIBLE`, + caption |
+| 5 | **GRID / TEXT** | Credits, against deliberate negative space |
+| 6 | **IMAGE** | Full-bleed coda |
+| 7 | *site chrome* | Footer: next project · all works. **Not a block** — outside the composer |
+
+Reading and looking alternate, with `--band` carrying every seam. **No two moving
+fields share a viewport**: the hero is click-to-play and therefore still until
+asked, so the only autoplaying surface is the single supporting loop in block 4.
+
+### This is a candidate arrangement, not a universal Project Detail template
+
+**[INVARIANT]** Project Detail is composer-driven (§3.2), and compositions **may
+and should differ from project to project** — that flexibility is the core
+product requirement this page exists to satisfy.
+
+A project may **reorder, remove, replace, duplicate, hide or omit** any block
+above. The prototype's own review records what each removal costs
+(`project-detail-1b-v2.md` §5): no block reads as a continuation of its
+neighbour, and every one of them works anywhere in the sequence. The only
+ordering the design *prefers* — film first — is the page's idea, not a
+dependency. An administrator who moves it gets a different but coherent page.
+
+Two supporting notes from the same review, carried as **[ADVISORY]**:
+
+- **`VIDEO_GRID` is deliberately not used here.** A project's supporting material
+  is heterogeneous, and a uniform 16:9 wall would flatten it. It remains
+  available as configuration for a project that genuinely has many short clips.
+- **Below roughly three stills, block 3 is an IMAGE, not a gallery.** A
+  `JUSTIFIED_ROWS` row with too few items grows tall rather than reading as a
+  contact sheet.
+
+### 3.6 Playback **[INVARIANT]**
 
 **The primary film and ambient loops must not share a playback behaviour.**
 
@@ -285,27 +345,58 @@ direct evidence for asymmetric GRID composition (ADR-0004, ADR-0006).
 **[ADVISORY]** `CONTAIN` on the primary film — a film the visitor sits down to
 watch is shown whole. `COVER` on browsing and preview surfaces.
 
-### 3.6 Allowed patterns
+### 3.7 Allowed patterns
 
 **[INVARIANT]** Any canonical block type, any composer-valid arrangement, one
 level of GRID nesting. **[DEFAULT]** Asymmetric media/text composition, media
 wall, editorial text section, media caption.
 
-### 3.7 Private projects **[INVARIANT]**
+### 3.8 Private projects **[INVARIANT]**
 
 A PRIVATE project is reachable only by direct URL. Without a valid access cookie
 the response is `403` carrying **no project content** — no title, cover,
 description, blocks or media (ADR-0003). See §6.
 
-### 3.8 Unresolved **[PENDING VISUAL EXPLORATION]**
+### 3.9 Unresolved
+
+Two items now **block specification** and are raised, not applied.
+
+**1. Bounded HERO overlay content — [ARCHITECTURE QUESTION].** 1B v2's defining
+idea places the project's name inside the opening frame, so the frame handed off
+by the light-to-dark transition already carries it. The prototype builds **both**
+answers and switches between them with `titleMode`:
+
+- **A — HERO with bounded overlay content** (prototype default). Title on the
+  page's own 12 columns, anchored bottom-left, one text role, derived scrim,
+  overlay and affordance clearing themselves when the film starts.
+  **Not expressible in the current contract** — CLAUDE.md §13 gives HERO no
+  overlay-content concept, and ADR-0006's placement vocabulary positions blocks
+  *in a grid*, not *within another block's frame*.
+- **B — TEXT block immediately after the HERO** (`titleMode: stacked`).
+  **Legal today, no contract change.** Costs the transition: the flown frame
+  lands on an anonymous rectangle and the title arrives as a separate event.
+
+The prototype's default is **not** the decision. Resolving this requires a
+governance ruling; no ADR has been written.
+
+**2. Poster / film `fit` mismatch — [CARRIED MEDIA QUESTION].** The hero poster
+renders `COVER` and the film plays `CONTAIN`, so pressing play reframes. This
+follows from §7.3 itself, which lists hero surfaces under `COVER` and primary
+films under `CONTAIN` — the Project Detail hero is both at once. The prototype
+records a **proposed reading, not applied**: a `CLICK_TO_PLAY` poster should
+inherit the film's `fit`. Coupled to the unresolved letterbox method
+(`design-system.md` §16 item 1) and the deferred focal point (§7.6).
+
+### 3.10 Pending visual exploration **[PENDING VISUAL EXPLORATION]**
 
 Project metadata treatment — year, category, client, credits — and specifically
 **how to present them without the middle-dot meta string** that §13 forbids ·
 the transport/controls design for `CLICK_TO_PLAY` · credits block composition ·
-next/previous project affordance, if any · mobile composition · how the
-signature transition lands and reverses on this page.
+next/previous project affordance, if any · **mobile composition, including the
+overlaid title's narrow-width fallback** · how the signature transition lands and
+reverses on this page.
 
-### 3.9 States
+### 3.11 States
 
 | State | Behaviour |
 |---|---|
@@ -499,12 +590,18 @@ Hold on every page regardless of exploration status.
 
 1. **Approve or amend** `design-direction.md`, `design-system.md` and this
    document. All three are Draft.
-2. **Explore the five pending pages.** Four have reference evidence that has
-   never been taken into exploration.
-3. **Resolve the letterbox method** (`design-system.md` §16 item 1) — it is an
+2. **Explore the four pending pages.** Art Works and About Me hold reference
+   evidence that has never been taken into exploration; Contact and the Private
+   Project Gate have no evidence at all.
+3. **Rule on the bounded HERO overlay question** (§3.9 item 1). Project Detail's
+   candidate composition cannot be specified until it is answered, and option B
+   is available today if the answer is no.
+4. **Resolve the poster / film `fit` contract** (§3.9 item 2) together with the
+   letterbox method — the two are coupled.
+5. **Resolve the letterbox method** (`design-system.md` §16 item 1) — it is an
    approved requirement with an unresolved method and it changes what the CMS
    must show.
-4. **Apply the deferred schema work** from ADR-0006, ADR-0007 and ADR-0009 in
+6. **Apply the deferred schema work** from ADR-0006, ADR-0007 and ADR-0009 in
    one migration.
-5. **Set the `VIDEO_GRID` column maximum** — validation cannot ship without a
+7. **Set the `VIDEO_GRID` column maximum** — validation cannot ship without a
    number.

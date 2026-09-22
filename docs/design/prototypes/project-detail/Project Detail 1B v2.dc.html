@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..600;1,6..72,200..500&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --surface:#F7F3EC; --ink:#16120E; --accent:#C4361C;
+  --surface-dark:#0C0A08; --ink-dark:#EDE7DD; --muted-dark:#97938C; --rule-dark:#2B2926; --frame:#14110F;
+  --font-display:'Marcellus',Georgia,serif; --font-body:'Newsreader',Georgia,serif; --font-ui:'Newsreader',Georgia,serif;
+  --display-track:-0.005em;
+  --edge:56px; --gut:20px; --band:150px;
+}
+body{margin:0;background:#E6E1D8}
+a{color:inherit;text-decoration:none}
+a:hover{color:var(--accent)}
+img,video{display:block}
+</style>
+</helmet>
+<div ref="{{ rootRef }}" style="font-family:var(--font-body);color:var(--ink);padding:56px 48px 120px">
+  <div style="max-width:72ch;margin-bottom:34px">
+    <div style="display:flex;align-items:baseline;gap:14px">
+      <span style="font-family:var(--font-ui);font-size:12px;letter-spacing:0.18em;text-transform:uppercase;background:var(--ink);color:var(--surface);padding:4px 9px">1B v2</span>
+      <h1 style="margin:0;font-family:var(--font-display);font-size:30px;letter-spacing:var(--display-track);text-transform:uppercase">The project opens into the film</h1>
+    </div>
+    <p style="margin:14px 0 0;font-size:17px;line-height:1.7">Refinement of <a href="#1b" style="border-bottom:1px solid #CFC8BC">1b</a>. The hero carries the film and its name and nothing else; everything that must be read sits below it. Switch <em>title mode</em> in the tweaks to compare the overlay against the stacked alternative — that choice is an open architecture question, not a settled one.</p>
+  </div>
+
+  <div data-page="" style="width:1440px;background:var(--surface-dark);color:var(--ink-dark)">
+
+    <section data-play="click" data-block="1 · HERO / VIDEO · full bleed · CLICK_TO_PLAY · overlay: title only" style="position:relative;background:#000;height:780px;cursor:pointer;outline:var(--anno,none)">
+      <img src="../../../../media/w/mtm-table.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+      <video data-src="../../../../media/clips/c1.mp4" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;opacity:0"></video>
+
+      <div data-scrim="bottom" style="position:absolute;inset:auto 0 0 0;height:210px;background:linear-gradient(to top,rgba(0,0,0,0.66),rgba(0,0,0,0));pointer-events:none"></div>
+      <div data-scrim="top" style="position:absolute;inset:0 0 auto 0;height:120px;background:linear-gradient(to bottom,rgba(0,0,0,0.42),rgba(0,0,0,0));pointer-events:none"></div>
+
+      <a href="#top" style="position:absolute;left:var(--edge);top:34px;font-family:var(--font-ui);font-size:12px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(237,231,221,0.88);border-bottom:1px solid rgba(237,231,221,0.32);padding-bottom:4px">Back to works</a>
+
+      <span data-affordance="" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:78px;height:78px;border:1px solid rgba(237,231,221,0.78);border-radius:50%;display:flex;align-items:center;justify-content:center">
+        <span style="width:0;height:0;border-left:15px solid rgba(237,231,221,0.94);border-top:9px solid transparent;border-bottom:9px solid transparent;margin-left:4px"></span>
+      </span>
+
+      <div data-overlay="" style="position:absolute;left:0;right:0;bottom:46px;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);padding:0 var(--edge)">
+        <h2 style="grid-column:1/9;margin:0;font-family:var(--font-display);font-size:88px;line-height:0.98;letter-spacing:var(--display-track);text-transform:uppercase;color:#F4EFE6">Made to Measure</h2>
+      </div>
+    </section>
+
+    <sc-if value="{{ stacked }}" hint-placeholder-val="{{ false }}">
+      <section data-grid="" data-block="1b · TEXT · title as a block under the hero (alternative B)" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);padding:44px var(--edge) 0;outline:var(--anno,none)">
+        <h2 style="grid-column:1/9;margin:0;font-family:var(--font-display);font-size:88px;line-height:0.98;letter-spacing:var(--display-track);text-transform:uppercase">Made to Measure</h2>
+      </section>
+    </sc-if>
+
+    <section data-grid="" data-block="2 · GRID · metadata (cols 1–3) + statement (cols 5–10)" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:start;padding:var(--band) var(--edge) 0;outline:var(--anno,none)">
+      <dl style="grid-column:1/4;margin:0;font-size:15px">
+        <div style="display:flex;justify-content:space-between;gap:16px;border-top:1px solid var(--rule-dark);padding:9px 0"><dt style="color:var(--muted-dark);font-style:italic">Year</dt><dd style="margin:0">2026</dd></div>
+        <div style="display:flex;justify-content:space-between;gap:16px;border-top:1px solid var(--rule-dark);padding:9px 0"><dt style="color:var(--muted-dark);font-style:italic">Runtime</dt><dd style="margin:0">8 min</dd></div>
+        <div style="display:flex;justify-content:space-between;gap:16px;border-top:1px solid var(--rule-dark);padding:9px 0"><dt style="color:var(--muted-dark);font-style:italic">Client</dt><dd style="margin:0">Trần &amp; Sons</dd></div>
+        <div style="display:flex;justify-content:space-between;gap:16px;border-top:1px solid var(--rule-dark);border-bottom:1px solid var(--rule-dark);padding:9px 0"><dt style="color:var(--muted-dark);font-style:italic">Role</dt><dd style="margin:0">DP, colourist</dd></div>
+      </dl>
+      <div style="grid-column:5/11">
+        <p style="margin:0;font-size:26px;line-height:1.32;max-width:24ch">A tailor measures the same customer for thirty years. We filmed the last fitting before the shop closed.</p>
+        <p style="margin:28px 0 0;font-size:17px;line-height:1.74;max-width:46ch;color:var(--muted-dark)">Four mornings, one prime lens, and the window the shop has always used. Nothing was added to the room, and the grade holds the shadows where the room keeps them.</p>
+      </div>
+    </section>
+
+    <section data-block="3 · GALLERY · JUSTIFIED_ROWS · native aspect · full bleed" style="margin-top:var(--band);outline:var(--anno,none)">
+      <div data-row-gallery="" style="display:flex;gap:4px;height:330px">
+        <div data-ar="1.5" style="position:relative;flex:1.5 1 0;background:var(--frame)"><img src="../../../../media/w/mtm-sketch.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
+        <div data-ar="0.8" style="position:relative;flex:0.8 1 0;background:var(--frame)"><img src="../../../../media/w/mtm-shopfront.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
+        <div data-ar="2.39" style="position:relative;flex:2.39 1 0;background:var(--frame)"><img src="../../../../media/w/mtm-atelier.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
+        <div data-ar="1.33" style="position:relative;flex:1.33 1 0;background:var(--frame)"><img src="../../../../media/w/mtm-swatches.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
+      </div>
+    </section>
+
+    <section data-grid="" data-block="4 · GRID · one supporting loop (cols 1–8) + caption (cols 10–12)" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:end;padding:var(--band) var(--edge) 0;outline:var(--anno,none)">
+      <div data-play="visible" style="grid-column:1/9;position:relative;aspect-ratio:16/9;overflow:hidden;background:var(--frame)">
+        <img src="../../../../media/w/mtm-mannequin.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+        <video data-src="../../../../media/clips/n3.mp4" loop="" muted="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 320ms linear"></video>
+      </div>
+      <p style="grid-column:10/13;margin:0;font-size:15px;line-height:1.74;color:var(--muted-dark)">The cutting room on the second morning. Two takes survived; this is the one where nobody looked up.</p>
+    </section>
+
+    <section data-grid="" data-block="5 · GRID · credits, quiet, against the void" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);padding:var(--band) var(--edge) 0;outline:var(--anno,none)">
+      <dl style="grid-column:1/4;margin:0;font-size:15px;line-height:1.95">
+        <div style="display:flex;gap:16px"><dt style="width:8ch;color:var(--muted-dark);font-style:italic">Director</dt><dd style="margin:0">Mai Linh</dd></div>
+        <div style="display:flex;gap:16px"><dt style="width:8ch;color:var(--muted-dark);font-style:italic">Camera</dt><dd style="margin:0">Nguyen Khanh Nhat</dd></div>
+        <div style="display:flex;gap:16px"><dt style="width:8ch;color:var(--muted-dark);font-style:italic">Sound</dt><dd style="margin:0">Pham Duy</dd></div>
+        <div style="display:flex;gap:16px"><dt style="width:8ch;color:var(--muted-dark);font-style:italic">Edit</dt><dd style="margin:0">Hoang Yen</dd></div>
+      </dl>
+    </section>
+
+    <section data-block="6 · IMAGE · full-bleed coda" style="margin-top:var(--band);position:relative;height:540px;background:var(--frame);outline:var(--anno,none)">
+      <img src="../../../../media/w/mtm-portrait.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 30%">
+    </section>
+
+    <footer data-grid="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:baseline;padding:110px var(--edge) 96px">
+      <span style="grid-column:1/4;font-size:15px;font-style:italic;color:var(--muted-dark)">Next project</span>
+      <a href="#top" style="grid-column:4/11;font-family:var(--font-display);font-size:58px;letter-spacing:var(--display-track);text-transform:uppercase;color:var(--accent)">Tokyo, after rain</a>
+      <a href="#top" style="grid-column:11/13;justify-self:end;font-family:var(--font-ui);font-size:12px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted-dark);border-bottom:1px solid var(--rule-dark);padding-bottom:4px">All works</a>
+    </footer>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;titleMode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;overlay&quot;,&quot;stacked&quot;],&quot;default&quot;:&quot;overlay&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Composer question&quot;},&quot;annotate&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Review&quot;},&quot;motion&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;reduced&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Review&quot;}}">
+class Component extends DCLogic {
+  // Review hook: window.__o = {titleMode:"stacked"} + window.__pd2.forceUpdate()
+  opt(k, d) { const o = window.__o || {}; return o[k] !== undefined ? o[k] : (this.props[k] !== undefined ? this.props[k] : d); }
+
+  renderVals() {
+    return {
+      stacked: this.opt("titleMode", "overlay") === "stacked",
+      rootRef: (el) => { this.root = el; }
+    };
+  }
+
+  componentDidMount() {
+    window.__pd2 = this;
+    this.applyMode();
+    this.mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    this.mqHandler = () => this.setupPlayback();
+    this.mq.addEventListener("change", this.mqHandler);
+    setTimeout(() => this.setupPlayback(), 0);
+  }
+
+  componentDidUpdate() { this.applyMode(); setTimeout(() => this.setupPlayback(), 0); }
+
+  componentWillUnmount() {
+    if (this.obsNear) this.obsNear.disconnect();
+    if (this.obsVis) this.obsVis.disconnect();
+    if (this.mq) this.mq.removeEventListener("change", this.mqHandler);
+  }
+
+  applyMode() {
+    const on = this.opt("annotate", false);
+    document.documentElement.style.setProperty("--anno", on ? "1px dashed rgba(196,54,28,0.5)" : "none");
+    if (!this.root) return;
+    // Alternative B: the title leaves the frame, so the hero's overlay and its
+    // bottom scrim go with it — the scrim exists for the title, not for style.
+    this.syncHeroChrome();
+    this.root.querySelectorAll("[data-block]").forEach((el) => {
+      let tag = el.querySelector(":scope > [data-tag]");
+      if (on && !tag) {
+        tag = document.createElement("span");
+        tag.setAttribute("data-tag", "");
+        tag.textContent = el.dataset.block;
+        tag.style.cssText = "position:absolute;z-index:4;transform:translateY(-100%);background:#C4361C;color:#fff;font-family:var(--font-ui);font-size:10px;letter-spacing:0.08em;padding:3px 7px";
+        if (getComputedStyle(el).position === "static") el.style.position = "relative";
+        el.prepend(tag);
+      } else if (!on && tag) tag.remove();
+    });
+  }
+
+  // One place decides what sits over the film, from both inputs: which title
+  // mode is in force, and whether the visitor has started the film. The bottom
+  // scrim follows the title; the top scrim belongs to "Back to works", which
+  // stays in both modes.
+  syncHeroChrome() {
+    if (!this.root) return;
+    const hero = this.root.querySelector('[data-play="click"]');
+    if (!hero) return;
+    const overlaid = this.opt("titleMode", "overlay") !== "stacked";
+    const started = hero.dataset.started === "1";
+    const show = (el, on, disp) => { if (el) el.style.display = on ? (disp || "block") : "none"; };
+    show(hero.querySelector("[data-overlay]"), overlaid && !started, "grid");
+    show(hero.querySelector('[data-scrim="bottom"]'), overlaid && !started);
+    show(hero.querySelector('[data-scrim="top"]'), true);
+    show(hero.querySelector("[data-affordance]"), !started, "flex");
+  }
+
+  isReduced() { return this.opt("motion", "auto") === "reduced" || (this.mq && this.mq.matches); }
+
+  setupPlayback() {
+    if (!this.root) return;
+    if (this.obsNear) this.obsNear.disconnect();
+    if (this.obsVis) this.obsVis.disconnect();
+    const cells = Array.from(this.root.querySelectorAll("[data-play]"));
+    this.cells = cells;
+
+    cells.forEach((c) => {
+      const v = c.querySelector("video");
+      if (!v) return;
+      v.playsInline = true;
+      v.setAttribute("playsinline", "playsinline");
+      if (c.dataset.play !== "click") { v.muted = true; v.loop = true; }
+      if (!v.dataset.wired) {
+        v.dataset.wired = "1";
+        v.addEventListener("canplay", () => { if (c.dataset.want === "1") this.play(c); });
+        v.addEventListener("loadeddata", () => { if (c.dataset.want === "1") this.play(c); });
+        v.addEventListener("playing", () => { v.style.opacity = "1"; });
+        if (c.dataset.play === "click") c.addEventListener("click", () => this.start(c));
+      }
+    });
+
+    if (this.isReduced()) { cells.forEach((c) => { c.dataset.want = "0"; if (c.dataset.started !== "1") this.release(c); }); return; }
+
+    this.obsNear = new IntersectionObserver((es) => es.forEach((e) => {
+      const c = e.target;
+      if (c.dataset.play === "click") return;
+      if (e.isIntersecting) this.prepare(c); else if (c.dataset.want !== "1") this.release(c);
+    }), { rootMargin: "150% 0px" });
+
+    this.obsVis = new IntersectionObserver((es) => es.forEach((e) => {
+      const c = e.target;
+      if (c.dataset.play === "click") return;
+      if (e.isIntersecting && e.intersectionRatio >= 0.2) { c.dataset.want = "1"; this.prepare(c); this.play(c); }
+      else { c.dataset.want = "0"; const v = c.querySelector("video"); if (v) v.pause(); }
+    }), { threshold: [0, 0.2, 0.5] });
+
+    cells.forEach((c) => { this.obsNear.observe(c); this.obsVis.observe(c); });
+  }
+
+  // CLICK_TO_PLAY: a deliberate act — real controls, audio available, and the
+  // overlay steps out of the way so nothing sits over the film while it runs.
+  start(c) {
+    const v = c.querySelector("video");
+    if (!v) return;
+    (this.cells || []).forEach((o) => { if (o !== c) { const ov = o.querySelector("video"); if (ov && !ov.paused) ov.pause(); } });
+    c.dataset.started = "1";
+    this.syncHeroChrome();
+    this.prepare(c);
+    v.controls = true;
+    v.muted = false;
+    v.style.opacity = "1";
+    const p = v.play();
+    if (p && p.catch) p.catch(() => {});
+  }
+
+  prepare(c) {
+    const v = c.querySelector("video");
+    if (!v) return;
+    if (!v.getAttribute("src")) { v.setAttribute("src", v.dataset.src); v.preload = "auto"; v.load(); }
+  }
+
+  play(c) {
+    const v = c.querySelector("video");
+    if (!v || this.isReduced() || c.dataset.want !== "1" || v.readyState < 2) return;
+    const p = v.play();
+    if (p && p.catch) p.catch((e) => { if (e && e.name === "AbortError") setTimeout(() => this.play(c), 120); });
+  }
+
+  release(c) {
+    const v = c.querySelector("video");
+    if (!v || c.dataset.started === "1") return;
+    v.pause();
+    v.style.opacity = "0";
+    if (v.getAttribute("src")) { v.removeAttribute("src"); v.load(); }
+  }
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<!-- ARCHIVED 2026-09-22: historical Home prototype (legacy Density B state).
+     Moved to docs/design/prototypes/home/legacy/. Only relative media paths were
+     rewritten (./media/ -> ../../../../../media/). No finding, value or markup
+     of the design itself was altered. Superseded by ../Home Baseline v2.dc.html. -->
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..600;1,6..72,200..500&amp;family=Spectral:ital,wght@0,200;0,300;0,400;1,300&amp;family=Archivo:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+:root{
+  --surface:#F7F3EC; --ink:#16120E; --muted:#6C6862; --rule:#E2DCD2;
+  --surface-dark:#0C0A08; --ink-dark:#EDE7DD; --accent:#C4361C; --frame:#14110F;
+  --font-display:'Marcellus',Georgia,serif; --display-weight:400; --display-track:-0.005em;
+  --font-body:'Newsreader',Georgia,serif; --font-ui:'Newsreader',Georgia,serif;
+  --edge:clamp(24px,3.2vw,56px); --gut:clamp(10px,0.9vw,20px);
+  --band:clamp(72px,9vw,170px); --grain-opacity:0.05;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--surface);-webkit-font-smoothing:antialiased}
+img,video{display:block;max-width:100%}
+a{color:inherit;text-decoration:none;transition:color 120ms linear}
+a:hover{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+::selection{background:var(--accent);color:var(--surface)}
+image-slot{color:rgba(237,231,221,0.6)}
+[data-strip]{scrollbar-width:none}
+[data-strip]::-webkit-scrollbar{display:none}
+@keyframes filmdrift{0%{transform:translate3d(-1.4%,-1%,0) scale(1.04)}100%{transform:translate3d(1.4%,1%,0) scale(1.09)}}
+@keyframes filmlight{0%{opacity:0.45}100%{opacity:0.92}}
+@media (prefers-reduced-motion:reduce){[data-layer]{animation:none !important}}
+[data-motion]:has(image-slot[data-reframe]) [data-layer]{animation-play-state:paused !important}
+[data-poster="on"] [data-layer]{animation-play-state:paused !important}
+[data-poster="on"] [data-glow]{opacity:0.45 !important}
+[data-blocks="on"] [data-block]{outline:1px dashed color-mix(in oklab,var(--accent) 42%,transparent);outline-offset:-1px}
+[data-blocks="on"] [data-block]::before{content:attr(data-block);position:absolute;top:0;left:0;z-index:64;background:var(--accent);color:var(--surface);font-family:var(--font-ui);font-size:10px;font-weight:600;line-height:1.7;letter-spacing:0.13em;text-transform:uppercase;padding:2px 8px;white-space:nowrap;pointer-events:none}
+[data-blocks="on"] [data-span]{outline:1px dotted color-mix(in oklab,var(--accent) 34%,transparent)}
+[data-blocks="on"] [data-span]::after{content:attr(data-span);position:absolute;top:0;right:0;z-index:63;background:color-mix(in oklab,var(--accent) 16%,transparent);color:var(--accent);font-family:var(--font-ui);font-size:10px;font-weight:600;line-height:1.7;letter-spacing:0.1em;padding:2px 7px;white-space:nowrap;pointer-events:none}
+@media (max-width:719px){
+  [data-grid]>*{grid-column:1/-1 !important;grid-row:auto !important;margin-right:0 !important;margin-left:0 !important}
+  [data-wall]{grid-template-columns:1fr !important}
+  [data-nowrap]{white-space:normal !important}
+  [data-mobile-width="half"]{max-width:56% !important;margin-top:clamp(28px,7vw,48px) !important}
+}
+@media (min-width:720px) and (max-width:1099px){
+  [data-wall]{grid-template-columns:repeat(2,minmax(0,1fr)) !important}
+}
+</style>
+</helmet>
+
+<div ref="{{ shellRef }}" data-blocks="off" data-poster="off" style="position:relative;min-height:100vh;background:var(--surface);color:var(--ink);font-family:var(--font-body);overflow-x:hidden">
+
+  <header data-grid="" style="position:relative;z-index:3;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:baseline;padding:clamp(22px,2.4vw,38px) var(--edge)">
+    <a href="#top" style="grid-column:1/6;font-family:var(--font-ui);font-size:clamp(10px,0.74vw,12px);letter-spacing:0.22em;text-transform:uppercase;font-weight:500">Nguyen Khanh Nhat</a>
+    <nav style="grid-column:7/13;display:flex;justify-content:flex-end;gap:clamp(20px,2.2vw,38px);font-size:clamp(14px,1vw,16px)">
+      <a href="#work">Works</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <section data-screen-label="Hero" data-block="HERO / VIDEO / AUTOPLAY_ALWAYS / bleed" style="position:relative">
+    <div data-motion="" data-play="always" data-label="Hero" style="position:relative;overflow:hidden;height:clamp(320px,76vh,900px);background:var(--frame)">
+      <div data-layer="" style="position:absolute;inset:-6%;animation:filmdrift 44s ease-in-out -6s infinite alternate">
+        <image-slot id="nkn-hero" shape="rect" fit="cover" src="../../../../../media/w/mtm-atelier.jpg" placeholder="hero poster frame"></image-slot>
+      </div>
+      <video data-film="Hero showreel" data-focal="50% 50%" src="../../../../../media/clips/n1.mp4" loop="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 50%;opacity:0;transition:opacity 420ms ease;pointer-events:none"></video>
+      <div data-glow="" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(60% 90% at 46% 34%,rgba(255,232,196,0.10) 0%,rgba(0,0,0,0) 66%);animation:filmlight 23s ease-in-out -4s infinite alternate"></div>
+      <span style="position:absolute;left:clamp(14px,1.2vw,22px);bottom:clamp(12px,1vw,18px);pointer-events:none;font-size:clamp(13px,0.95vw,15px);font-style:italic;color:rgba(237,231,221,0.78);text-shadow:0 1px 14px rgba(0,0,0,0.55)">Showreel, 2026</span>
+    </div>
+  </section>
+
+  <section data-screen-label="Identity" data-block="GRID / 12 col / display + TEXT" data-grid="" style="position:relative;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);padding:clamp(30px,3.6vw,68px) var(--edge) 0">
+    <div data-span="cols 1–12 / display / fit to span" style="position:relative;grid-column:1/13;container-type:inline-size">
+      <h1 data-nowrap="" style="margin:0;font-family:var(--font-display);font-weight:var(--display-weight);font-size:clamp(40px,13.3cqw,250px);line-height:0.86;letter-spacing:var(--display-track);text-transform:uppercase;color:var(--accent);white-space:nowrap">Nguyen<br>Khanh Nhat</h1>
+    </div>
+    <div data-span="cols 1–5 / TEXT" style="position:relative;grid-column:1/6;padding-top:clamp(30px,3.6vw,64px)">
+      <p style="margin:0;font-size:clamp(15px,1.06vw,18px);line-height:1.74">Cinematographer and photographer in Hanoi. I shoot, light and grade: full stage, from the first frame to the final pass.</p>
+    </div>
+    <div data-span="cols 9–12 / TEXT" style="position:relative;grid-column:9/13;padding-top:clamp(30px,3.6vw,64px)">
+      <p style="margin:0;font-size:clamp(14px,0.98vw,16px);line-height:1.74;color:var(--muted)">Commercial and narrative work, in Vietnam and further out.</p>
+    </div>
+  </section>
+
+  <section data-field="Asymmetric grid" data-screen-label="Asymmetric video grid" data-block="GRID / asymmetric / 3 VIDEO + TEXT / AUTOPLAY_VISIBLE" data-grid="" style="position:relative;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:var(--gut);padding:var(--band) var(--edge) 0">
+    <div data-span="cols 1–7 / VIDEO 2.39:1" data-motion="" data-play="visible" data-project="Made to Measure" style="position:relative;grid-column:1/8;grid-row:1;overflow:hidden;aspect-ratio:2.39/1;background:var(--frame);cursor:pointer">
+      <div data-layer="" style="position:absolute;inset:-6%;animation:filmdrift 42s ease-in-out -5s infinite alternate"><image-slot id="nkn-asym-a" shape="rect" fit="cover" src="../../../../../media/w/mtm-table.jpg" placeholder="Made to Measure, wide"></image-slot></div>
+      <video data-film="Made to Measure" data-focal="50% 50%" src="../../../../../media/clips/c1.mp4" loop="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 50%;opacity:0;transition:opacity 420ms ease;pointer-events:none"></video>
+      <span style="position:absolute;left:clamp(12px,1vw,18px);bottom:clamp(10px,0.9vw,16px);pointer-events:none;font-size:13px;font-style:italic;color:rgba(237,231,221,0.78);text-shadow:0 1px 12px rgba(0,0,0,0.6)">Made to Measure</span>
+    </div>
+    <div data-span="cols 8–12 / VIDEO portrait" data-motion="" data-play="visible" data-project="Untitled (desk film)" style="position:relative;grid-column:8/13;grid-row:1/3;overflow:hidden;background:var(--frame);cursor:pointer;min-height:clamp(240px,34vw,560px)">
+      <div data-layer="" style="position:absolute;inset:-6%;animation:filmdrift 38s ease-in-out -18s infinite alternate"><image-slot id="nkn-asym-b" shape="rect" fit="cover" src="../../../../../media/w/desk-01.jpg" placeholder="desk film, portrait"></image-slot></div>
+      <video data-film="Untitled (desk film)" data-focal="50% 50%" src="../../../../../media/clips/n2.mp4" loop="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 50%;opacity:0;transition:opacity 420ms ease;pointer-events:none"></video>
+      <span style="position:absolute;left:clamp(12px,1vw,18px);bottom:clamp(10px,0.9vw,16px);pointer-events:none;font-size:13px;font-style:italic;color:rgba(237,231,221,0.78);text-shadow:0 1px 12px rgba(0,0,0,0.6)">Untitled (desk film)</span>
+    </div>
+    <div data-span="cols 1–4 / TEXT" style="position:relative;grid-column:1/5;grid-row:2;padding-top:clamp(18px,2vw,34px)">
+      <p style="margin:0;font-size:clamp(14px,0.98vw,16px);line-height:1.74;color:var(--muted)">Three bodies of work from Hanoi and Japan. Sound stays off until you open one.</p>
+    </div>
+    <div data-span="cols 5–7 / VIDEO 3:2" data-motion="" data-play="visible" data-project="Tokyo" style="position:relative;grid-column:5/8;grid-row:2;overflow:hidden;aspect-ratio:3/2;background:var(--frame);cursor:pointer;margin-top:clamp(18px,2vw,34px)">
+      <div data-layer="" style="position:absolute;inset:-6%;animation:filmdrift 34s ease-in-out -27s infinite alternate"><image-slot id="nkn-asym-c" shape="rect" fit="cover" src="../../../../../media/w/desk-03.jpg" placeholder="Room 402, 3:2"></image-slot></div>
+      <video data-film="Tokyo" data-focal="50% 50%" src="../../../../../media/clips/c2.mp4" loop="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 50%;opacity:0;transition:opacity 420ms ease;pointer-events:none"></video>
+      <span style="position:absolute;left:clamp(12px,1vw,18px);bottom:clamp(10px,0.9vw,16px);pointer-events:none;font-size:13px;font-style:italic;color:rgba(237,231,221,0.78);text-shadow:0 1px 12px rgba(0,0,0,0.6)">Tokyo</span>
+    </div>
+  </section>
+
+  <section data-field="Video wall" data-screen-label="Video wall" data-block="GALLERY / VIDEO_GRID / AUTOPLAY_VISIBLE / 4 col" style="position:relative;padding-top:var(--band)">
+    <h2 style="margin:0 0 clamp(16px,1.6vw,28px);padding-left:var(--edge);font-family:var(--font-body);font-weight:400;font-size:clamp(14px,1vw,17px);font-style:italic;color:var(--muted)">Everything moving, 2025 to 2026</h2>
+    <div data-wall="" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px">
+      <div data-motion="" data-play="visible" data-project="Nike Spec Ads" data-label="Wall 1" style="position:relative;overflow:hidden;aspect-ratio:16/9;background:var(--frame);cursor:pointer"><div data-layer="" style="position:absolute;inset:-6%;animation:filmdrift 37s ease-in-out -2s infinite alternate"><image-slot id="nkn-wall-1" shape="rect" fit="cover" src="../../../../../media/w/nike-court.jpg" placeholder="wall 1"></image-slot></div><video data-film="Wall 1" data-focal="50% 50%" src="../../../../../media/clips/c3.mp4" loop="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 50%;opacity:0;transition:opacity 420ms ease;pointer-events:none"></video></div>
+      <div data-motion="" data-play="visible" data-project="Made to Measure" data-label="Wall 2" style="position:relative;overflow:hidden;aspect-ratio:16/9;background:var(--frame);cursor:pointer"><div data-layer="" style="position:absolute;inset:-6%;animation:filmdrift 41s ease-in-out -14s infinite alternate"><image-slot id="nkn-wall-2" shape="rect" fit="cover" src="../../../../../media/w/mtm-sketch.jpg" placeholder="wall 2"></image-slot></div><video data-film="Wall 2" data-focal="50% 50%" src="../../../../../media/clips/n3.mp4" loop="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 50%;opacity:0;transition:opacity 420ms ease;pointer-events:none"></video></div>
+      <div data-motion="" data-play="visible" data-project="Made to Measure" data-label="Wall 3" style="position:relative;overflow:hidden;aspect-ratio:16/9;background:var(--frame);cursor:pointer"><div data-layer="" style="position:absolute;inset:-6%;animation:filmdrift 33s ease-in-out -21s infinite alternate"><image-slot id="nkn-wall-3" shape="rect" fit="cover" src="../../../../../media/w/mtm-portrait.jpg" placeholder="wall 3"></image-slot></div><video data-film="Wall 3" data-focal="50% 50%" src="../../../../../media/clips/c1.mp4" loop="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 50%;opacity:0;transition:opacity 420ms ease;pointer-events:none"></video></div>
+      <div data-project="Made to Measure" style="position:relative;overflow:hidden;aspect-ratio:16/9;background:var(--frame);cursor:pointer"><image-slot id="nkn-wall-4" shape="rect" fit="cover" src="../../../../../media/w/mtm-swatches.jpg" placeholder="wall 4"></image-slot></div>
+      <div data-motion="" data-play="visible" data-project="Tokyo" data-label="Wall 5" style="position:relative;overflow:hidden;aspect-ratio:16/9;background:var(--frame);cursor:pointer"><div data-layer="" style="position:absolute;inset:-6%;animation:filmdrift 46s ease-in-out -8s infinite alternate"><image-slot id="nkn-wall-5" shape="rect" fit="cover" src="../../../../../media/w/desk-02.jpg" placeholder="wall 5"></image-slot></div><video data-film="Wall 5" data-focal="50% 50%" src="../../../../../media/clips/c2.mp4" loop="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 50%;opacity:0;transition:opacity 420ms ease;pointer-events:none"></video></div>
+      <div data-project="Made to Measure" style="position:relative;overflow:hidden;aspect-ratio:16/9;background:var(--frame);cursor:pointer"><image-slot id="nkn-wall-6" shape="rect" fit="cover" src="../../../../../media/w/mtm-shopfront.jpg" placeholder="wall 6"></image-slot></div>
+      <div data-motion="" data-play="visible" data-project="Nike Spec Ads" data-label="Wall 7" style="position:relative;overflow:hidden;aspect-ratio:16/9;background:var(--frame);cursor:pointer"><div data-layer="" style="position:absolute;inset:-6%;animation:filmdrift 35s ease-in-out -30s infinite alternate"><image-slot id="nkn-wall-7" shape="rect" fit="cover" src="../../../../../media/w/nike-lacing.jpg" placeholder="wall 7"></image-slot></div><video data-film="Wall 7" data-focal="50% 50%" src="../../../../../media/clips/c4.mp4" loop="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 50%;opacity:0;transition:opacity 420ms ease;pointer-events:none"></video></div>
+      <div data-project="Untitled (desk film)" style="position:relative;overflow:hidden;aspect-ratio:16/9;background:var(--frame);cursor:pointer"><image-slot id="nkn-wall-8" shape="rect" fit="cover" src="../../../../../media/w/desk-04.jpg" placeholder="wall 8"></image-slot></div>
+      <div data-project="Untitled (desk film)" style="position:relative;overflow:hidden;aspect-ratio:16/9;background:var(--frame);cursor:pointer"><image-slot id="nkn-wall-9" shape="rect" fit="cover" src="../../../../../media/w/desk-05.jpg" placeholder="wall 9"></image-slot></div>
+    </div>
+  </section>
+
+  <section id="work" data-optional="strip" data-screen-label="Featured strip" data-block="GALLERY / HORIZONTAL_STRIP / AUTOPLAY_VISIBLE" style="position:relative;padding-top:var(--band)">
+    <div data-grid="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:baseline;padding:0 var(--edge) clamp(20px,2vw,34px)">
+      <h2 style="grid-column:1/7;margin:0;font-family:var(--font-body);font-weight:400;font-size:clamp(14px,1vw,17px);font-style:italic;color:var(--muted)">Three projects, 2025 to 2026</h2>
+      <a href="#work" style="grid-column:10/13;justify-self:end;font-size:clamp(14px,1vw,16px);border-bottom:1px solid var(--rule);padding-bottom:2px">All works</a>
+    </div>
+    <div data-strip="" ref="{{ stripRef }}" style="display:flex;gap:var(--gut);overflow-x:auto;cursor:grab;padding-right:var(--gut)">
+      <a href="#work" data-project="Made to Measure" style="flex:0 0 auto;width:clamp(260px,33vw,600px)">
+        <div data-motion="" data-play="visible" data-frame="" data-label="Strip 1" style="position:relative;overflow:hidden;aspect-ratio:2/3;background:var(--frame)"><div data-layer="" style="position:absolute;inset:-6%;animation:filmdrift 36s ease-in-out -3s infinite alternate"><image-slot id="nkn-strip-1" shape="rect" fit="cover" src="../../../../../media/w/mtm-portrait.jpg" placeholder="cover, 2:3"></image-slot></div></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:14px;margin-top:clamp(10px,0.9vw,16px)"><span style="font-family:var(--font-display);font-weight:var(--display-weight);text-transform:uppercase;letter-spacing:0.05em;font-size:clamp(12px,0.92vw,15px)">Made to Measure</span><span style="font-family:var(--font-ui);font-size:12px;color:var(--muted)">2025</span></div>
+      </a>
+      <a href="#work" data-project="Nike Spec Ads" style="flex:0 0 auto;width:clamp(260px,33vw,600px)">
+        <div data-motion="" data-play="visible" data-frame="" data-label="Strip 2" style="position:relative;overflow:hidden;aspect-ratio:2/3;background:var(--frame)"><div data-layer="" style="position:absolute;inset:-6%;animation:filmdrift 40s ease-in-out -11s infinite alternate"><image-slot id="nkn-strip-2" shape="rect" fit="cover" src="../../../../../media/w/nike-court.jpg" placeholder="cover, 2:3"></image-slot></div></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:14px;margin-top:clamp(10px,0.9vw,16px)"><span style="font-family:var(--font-display);font-weight:var(--display-weight);text-transform:uppercase;letter-spacing:0.05em;font-size:clamp(12px,0.92vw,15px)">Nike Spec Ads</span><span style="font-family:var(--font-ui);font-size:12px;color:var(--muted)">2026</span></div>
+      </a>
+      <a href="#work" data-project="Tokyo" style="flex:0 0 auto;width:clamp(260px,33vw,600px)">
+        <div data-motion="" data-play="visible" data-frame="" data-label="Strip 3" style="position:relative;overflow:hidden;aspect-ratio:2/3;background:var(--frame)"><div data-layer="" style="position:absolute;inset:-6%;animation:filmdrift 33s ease-in-out -22s infinite alternate"><image-slot id="nkn-strip-3" shape="rect" fit="cover" placeholder="Tokyo cover needed, 2:3"></image-slot></div></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:14px;margin-top:clamp(10px,0.9vw,16px)"><span style="font-family:var(--font-display);font-weight:var(--display-weight);text-transform:uppercase;letter-spacing:0.05em;font-size:clamp(12px,0.92vw,15px)">Tokyo</span><span style="font-family:var(--font-ui);font-size:12px;color:var(--muted)">2026</span></div>
+      </a>
+    </div>
+  </section>
+
+  <section id="about" data-screen-label="About entry" data-block="GRID / TEXT + IMAGE" data-grid="" style="position:relative;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:end;padding:var(--band) var(--edge) clamp(60px,7vw,130px)">
+    <div data-span="cols 10–12 / IMAGE" data-mobile-width="half" style="position:relative;grid-column:10/13;grid-row:1;aspect-ratio:277/430;background:var(--frame)">
+      <image-slot id="nkn-portrait" shape="rect" fit="cover" src="../../../../../media/w/portrait.jpg" placeholder="portrait"></image-slot>
+    </div>
+    <div data-span="cols 1–6 / TEXT" style="position:relative;grid-column:1/7;grid-row:1">
+      <p style="margin:0;max-width:24ch;font-family:var(--font-display);font-weight:var(--display-weight);letter-spacing:var(--display-track);font-size:clamp(26px,3.2vw,56px);line-height:1.1">It begins with an idea, and the discipline to reach the last frame.</p>
+      <a href="#about" style="display:inline-block;margin-top:clamp(24px,2.4vw,44px);font-size:clamp(14px,1vw,16px);border-bottom:1px solid var(--rule);padding-bottom:2px">More about Nhat</a>
+    </div>
+  </section>
+
+  <section data-screen-label="Stills" data-block="GALLERY / JUSTIFIED_ROWS / IMAGE" style="position:relative;padding-top:var(--band)">
+    <h2 style="margin:0 0 clamp(16px,1.6vw,28px);padding-left:var(--edge);font-family:var(--font-body);font-weight:400;font-size:clamp(14px,1vw,17px);font-style:italic;color:var(--muted)">Frames, not moving</h2>
+    <div style="display:flex;gap:4px;height:clamp(150px,19vw,330px)">
+      <div style="position:relative;flex:2.39 1 0;background:var(--frame)"><image-slot id="nkn-still-1" shape="rect" fit="cover" src="../../../../../media/w/desk-02.jpg" placeholder="2.39:1"></image-slot></div>
+      <div style="position:relative;flex:1.5 1 0;background:var(--frame)"><image-slot id="nkn-still-2" shape="rect" fit="cover" src="../../../../../media/w/desk-05.jpg" placeholder="3:2"></image-slot></div>
+      <div style="position:relative;flex:0.8 1 0;background:var(--frame)"><image-slot id="nkn-still-3" shape="rect" fit="cover" src="../../../../../media/w/mtm-shopfront.jpg" placeholder="4:5"></image-slot></div>
+      <div style="position:relative;flex:1.78 1 0;background:var(--frame)"><image-slot id="nkn-still-4" shape="rect" fit="cover" src="../../../../../media/w/desk-04.jpg" placeholder="16:9"></image-slot></div>
+      <div style="position:relative;flex:1.33 1 0;background:var(--frame)"><image-slot id="nkn-still-5" shape="rect" fit="cover" src="../../../../../media/w/mtm-sketch.jpg" placeholder="4:3"></image-slot></div>
+      <div style="position:relative;flex:2.39 1 0;background:var(--frame)"><image-slot id="nkn-still-6" shape="rect" fit="cover" src="../../../../../media/w/desk-01.jpg" placeholder="2.39:1"></image-slot></div>
+    </div>
+  </section>
+
+
+  <footer id="contact" data-grid="" style="position:relative;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:24px var(--gut);align-items:end;border-top:1px solid var(--rule);margin:0 var(--edge);padding:clamp(36px,4vw,72px) 0 clamp(30px,3vw,56px)">
+    <div style="grid-column:1/8">
+      <a href="mailto:hello@khanhnhat.film" style="font-family:var(--font-display);font-weight:var(--display-weight);letter-spacing:var(--display-track);font-size:clamp(20px,2.3vw,40px);color:var(--accent)">hello@khanhnhat.film</a>
+      <p style="margin:clamp(10px,1vw,18px) 0 0;font-size:14px;color:var(--muted)">Hanoi, Vietnam. Open to work through early 2027.</p>
+    </div>
+    <div style="grid-column:9/13;display:flex;justify-content:flex-end;gap:clamp(18px,2vw,34px);font-size:clamp(14px,1vw,16px)">
+      <a href="#contact">Instagram</a>
+      <a href="#contact">Vimeo</a>
+      <a href="#contact">Email</a>
+    </div>
+  </footer>
+
+  <div ref="{{ diagRef }}" aria-hidden="true" style="position:fixed;left:var(--edge);bottom:18px;z-index:66;display:none;font-family:var(--font-ui);font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;background:var(--ink);color:var(--surface);padding:9px 14px"><span ref="{{ diagTextRef }}">playing 0</span></div>
+
+  <div aria-hidden="true" style="position:fixed;inset:0;z-index:70;pointer-events:none;opacity:var(--grain-opacity);mix-blend-mode:multiply;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E&quot;)"></div>
+
+  <div aria-hidden="true" ref="{{ curtainRef }}" style="position:fixed;inset:0;z-index:80;pointer-events:none;background:var(--surface-dark);transform:scaleY(0);transform-origin:50% 100%"></div>
+  <div aria-hidden="true" ref="{{ flyerRef }}" style="position:fixed;left:0;top:0;width:0;height:0;z-index:81;pointer-events:none;opacity:0;background-size:cover;background-position:center"></div>
+  <div aria-hidden="true" ref="{{ plateRef }}" style="position: fixed; inset: 0; z-index: 82; pointer-events: none; opacity: 0; display: grid; place-items: center; background: url(&quot;./still-2026-09-16-004936_1-25-1-mubiihvg-c4sw.jpg&quot;) center / cover no-repeat">
+    <span style="font-family:var(--font-display);font-weight:var(--display-weight);letter-spacing:0.06em;text-transform:uppercase;font-size:clamp(24px,3.4vw,60px);color:var(--ink-dark)"></span>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;mainField&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Asymmetric grid&quot;,&quot;Video wall&quot;],&quot;default&quot;:&quot;Video wall&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Composition&quot;},&quot;wallColumns&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;3&quot;,&quot;4&quot;,&quot;5&quot;],&quot;default&quot;:&quot;3&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Composition&quot;},&quot;includeStrip&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Composition&quot;},&quot;trimLetterbox&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Media review&quot;},&quot;posterReview&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Media review&quot;},&quot;showPlayback&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Media review&quot;},&quot;showBlocks&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Composition&quot;},&quot;palette&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Bone &amp; vermilion&quot;,&quot;Silver gelatin&quot;,&quot;Tungsten&quot;],&quot;default&quot;:&quot;Bone &amp; vermilion&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;},&quot;typePreset&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Title card&quot;,&quot;Plate&quot;,&quot;Monograph&quot;,&quot;Festival&quot;],&quot;default&quot;:&quot;Title card&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;options&quot;:[&quot;#C4361C&quot;,&quot;#B02E22&quot;,&quot;#A8412A&quot;,&quot;#1F1B16&quot;],&quot;default&quot;:&quot;#C4361C&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;},&quot;grain&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.shell = React.createRef();
+    this.curtain = React.createRef();
+    this.flyer = React.createRef();
+    this.plate = React.createRef();
+    this.strip = React.createRef();
+    this.diag = React.createRef();
+    this.diagText = React.createRef();
+    this.busy = false;
+    this.moved = 0;
+    this.timers = [];
+    this.states = new Map();
+    this.palettes = {
+      'Bone & vermilion': { surface: '#F7F3EC', ink: '#16120E', muted: '#6C6862', rule: '#E2DCD2', dark: '#0C0A08', inkDark: '#EDE7DD', frame: '#14110F' },
+      'Silver gelatin':   { surface: '#F1F1EE', ink: '#121314', muted: '#666A6B', rule: '#DCDCD8', dark: '#09090A', inkDark: '#E8E8E4', frame: '#121314' },
+      'Tungsten':         { surface: '#F0E7D9', ink: '#1B1510', muted: '#6A6154', rule: '#DCD1BF', dark: '#0E0B08', inkDark: '#EFE4D2', frame: '#16110C' }
+    };
+    this.typefaces = {
+      'Title card': { display: "'Marcellus',Georgia,serif", dw: '400', dt: '-0.005em', body: "'Newsreader',Georgia,serif", ui: "'Newsreader',Georgia,serif" },
+      'Plate':      { display: "'Marcellus',Georgia,serif", dw: '400', dt: '-0.005em', body: "'Newsreader',Georgia,serif", ui: "'Archivo',Helvetica,sans-serif" },
+      'Monograph':  { display: "'Spectral',Georgia,serif", dw: '300', dt: '-0.02em', body: "'Spectral',Georgia,serif", ui: "'Spectral',Georgia,serif" },
+      'Festival':   { display: "'Archivo',Helvetica,sans-serif", dw: '600', dt: '-0.035em', body: "'Newsreader',Georgia,serif", ui: "'Archivo',Helvetica,sans-serif" }
+    };
+  }
+
+  applyTheme() {
+    const r = document.documentElement.style;
+    const p = this.palettes[this.props.palette] || this.palettes['Bone & vermilion'];
+    r.setProperty('--surface', p.surface);
+    r.setProperty('--ink', p.ink);
+    r.setProperty('--muted', p.muted);
+    r.setProperty('--rule', p.rule);
+    r.setProperty('--surface-dark', p.dark);
+    r.setProperty('--ink-dark', p.inkDark);
+    r.setProperty('--frame', p.frame);
+    r.setProperty('--accent', this.props.accent || '#C4361C');
+    const f = this.typefaces[this.props.typePreset] || this.typefaces['Title card'];
+    r.setProperty('--font-display', f.display);
+    r.setProperty('--display-weight', f.dw);
+    r.setProperty('--display-track', f.dt);
+    r.setProperty('--font-body', f.body);
+    r.setProperty('--font-ui', f.ui);
+    r.setProperty('--grain-opacity', this.props.grain === false ? '0' : '0.05');
+
+    const s = this.shell.current;
+    if (!s) return;
+    s.dataset.blocks = this.props.showBlocks ? 'on' : 'off';
+    s.dataset.poster = this.props.posterReview ? 'on' : 'off';
+    const field = this.props.mainField || 'Asymmetric grid';
+    s.querySelectorAll('[data-field]').forEach(el => {
+      if (el.dataset.disp === undefined) el.dataset.disp = el.style.display || '';
+      el.style.display = el.dataset.field === field ? el.dataset.disp : 'none';
+    });
+    const trim = this.props.trimLetterbox !== false;
+    s.querySelectorAll('[data-film]').forEach(v => {
+      v.muted = true;
+      v.loop = true;
+      v.playsInline = true;
+      if (!v.hasAttribute('playsinline')) v.setAttribute('playsinline', '');
+      const src = v.getAttribute('src') || '';
+      const bars = src.indexOf('c1.mp4') > -1 ? 0.121 : /c[234]\.mp4/.test(src) ? 0.055 : 0;
+      v.style.transform = trim && bars ? 'scale(' + (1 / (1 - bars * 2)).toFixed(3) + ')' : 'none';
+    });
+    const wall = s.querySelector('[data-wall]');
+    if (wall) wall.style.gridTemplateColumns = 'repeat(' + (this.props.wallColumns || 3) + ',minmax(0,1fr))';
+    s.querySelectorAll('[data-optional]').forEach(el => {
+      if (el.dataset.disp === undefined) el.dataset.disp = el.style.display || '';
+      el.style.display = this.props.includeStrip ? el.dataset.disp : 'none';
+    });
+    if (this.diag.current) this.diag.current.style.display = this.props.showPlayback ? 'block' : 'none';
+    this.refreshPlayback();
+  }
+
+  componentDidMount() {
+    this.applyTheme();
+    const shell = this.shell.current;
+    if (!shell) return;
+    shell.addEventListener('click', this.onShellClick);
+    shell.addEventListener('dragover', this.onDragOver, true);
+    shell.addEventListener('drop', this.onDrop, true);
+    this.bindFilm = (v) => {
+      v.muted = true; v.loop = true; v.playsInline = true; v.setAttribute('playsinline', '');
+      v.addEventListener('canplay', () => {
+        const h = v.closest('[data-motion]');
+        if (h) this.setPlay(h, this.states.get(h) || (h.dataset.play === 'always' ? 'playing' : 'released'));
+      });
+    };
+    shell.querySelectorAll('[data-film]').forEach(this.bindFilm);
+
+    shell.querySelectorAll('[data-motion]').forEach(el => {
+      this.states.set(el, el.dataset.play === 'always' ? 'playing' : 'released');
+      this.setPlay(el, this.states.get(el));
+    });
+
+    this.visIO = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        const el = e.target;
+        if (el.dataset.play === 'always') return;
+        if (e.isIntersecting) this.setPlay(el, 'playing');
+        else if (this.states.get(el) === 'playing') this.setPlay(el, 'prepared');
+      });
+    }, { threshold: 0.01 });
+
+    this.nearIO = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        const el = e.target;
+        if (el.dataset.play === 'always') return;
+        if (!e.isIntersecting) this.setPlay(el, 'released');
+        else if (this.states.get(el) === 'released') this.setPlay(el, 'prepared');
+      });
+    }, { rootMargin: '500px 0px' });
+
+    shell.querySelectorAll('[data-motion]').forEach(el => { this.visIO.observe(el); this.nearIO.observe(el); });
+
+    const el = this.strip.current;
+    if (!el) return;
+    requestAnimationFrame(() => {
+      const card = el.firstElementChild;
+      if (card) el.scrollLeft = Math.round(card.getBoundingClientRect().width * 0.22);
+    });
+    let down = false, startX = 0, startScroll = 0;
+    this.onDown = (e) => { if (e.target.closest('image-slot')) return; down = true; this.moved = 0; startX = e.clientX; startScroll = el.scrollLeft; el.style.cursor = 'grabbing'; };
+    this.onMove = (e) => { if (!down) return; const d = e.clientX - startX; this.moved = Math.abs(d); el.scrollLeft = startScroll - d; };
+    this.onUp = () => { down = false; el.style.cursor = 'grab'; };
+    el.addEventListener('pointerdown', this.onDown);
+    window.addEventListener('pointermove', this.onMove);
+    window.addEventListener('pointerup', this.onUp);
+  }
+
+  componentDidUpdate() { this.applyTheme(); }
+
+  componentWillUnmount() {
+    this.timers.forEach(clearTimeout);
+    if (this.visIO) this.visIO.disconnect();
+    if (this.nearIO) this.nearIO.disconnect();
+    window.removeEventListener('pointermove', this.onMove);
+    window.removeEventListener('pointerup', this.onUp);
+    const shell = this.shell.current;
+    if (shell) {
+      shell.removeEventListener('click', this.onShellClick);
+      shell.removeEventListener('dragover', this.onDragOver, true);
+      shell.removeEventListener('drop', this.onDrop, true);
+    }
+  }
+
+  setPlay(el, state) {
+    this.states.set(el, state);
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const film = el.querySelector('[data-film]');
+    const live = !!(film && film.getAttribute('src'));
+    const active = state === 'playing' && !this.props.posterReview && !reduced;
+    const layer = el.querySelector('[data-layer]');
+    if (layer) layer.style.animationPlayState = (active && !live) ? 'running' : 'paused';
+    if (live) {
+      if (active) {
+        film.preload = 'auto';
+        const p = film.play();
+        if (p && p.then) {
+          p.then(() => { film.dataset.refused = ''; film.style.opacity = '1'; this.report(); })
+           .catch(() => { film.dataset.refused = '1'; film.style.opacity = '0'; this.report(); });
+        } else { film.style.opacity = '1'; }
+      } else {
+        film.pause();
+        if (state === 'prepared') film.preload = 'auto';
+        if (state === 'released') { film.preload = 'none'; film.style.opacity = '0'; }
+        if (this.props.posterReview || reduced) film.style.opacity = '0';
+      }
+    }
+    this.report();
+  }
+
+  refreshPlayback() {
+    this.states.forEach((state, el) => this.setPlay(el, state));
+  }
+
+  report() {
+    const t = this.diagText.current;
+    if (!t) return;
+    let playing = 0, prepared = 0, released = 0, off = 0, film = 0, refused = 0;
+    this.states.forEach((state, el) => {
+      const v = el.querySelector('[data-film]');
+      const live = !!(v && v.getAttribute('src'));
+      if (!el.offsetParent && el.dataset.play !== 'always') { off++; return; }
+      if (state === 'playing') { playing++; if (live) { if (v.dataset.refused === '1') refused++; else film++; } }
+      else if (state === 'prepared') prepared++;
+      else released++;
+    });
+    const mode = this.props.posterReview ? 'posters\u2003' : '';
+    t.textContent = mode + 'playing ' + playing + '\u2003video ' + film + (refused ? '\u2003refused ' + refused : '') +
+      '\u2003prepared ' + prepared + '\u2003released ' + released + '\u2003off ' + off;
+  }
+
+  after(ms, fn) { this.timers.push(setTimeout(fn, ms)); }
+
+  onDragOver = (e) => {
+    const items = e.dataTransfer && e.dataTransfer.items;
+    if (items && Array.prototype.some.call(items, i => i.kind === 'file' && i.type.indexOf('video/') === 0)) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+
+  onDrop = (e) => {
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (!f || f.type.indexOf('video/') !== 0) return;
+    const host = e.target.closest('[data-motion]');
+    if (!host) return;
+    e.preventDefault();
+    e.stopPropagation();
+    let film = host.querySelector('[data-film]');
+    if (!film) {
+      film = document.createElement('video');
+      film.setAttribute('data-film', host.dataset.label || host.dataset.project || 'clip');
+      film.setAttribute('data-focal', '50% 50%');
+      film.loop = true;
+      film.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 50%;opacity:0;transition:opacity 420ms ease;pointer-events:none';
+      const layer = host.querySelector('[data-layer]');
+      if (layer && layer.nextSibling) host.insertBefore(film, layer.nextSibling);
+      else host.appendChild(film);
+      if (this.bindFilm) this.bindFilm(film);
+    }
+    film.dataset.refused = '';
+    film.setAttribute('src', URL.createObjectURL(f));
+    film.load();
+    if (!this.states.has(host)) {
+      this.states.set(host, 'playing');
+      if (this.visIO) this.visIO.observe(host);
+      if (this.nearIO) this.nearIO.observe(host);
+    }
+    this.setPlay(host, host.dataset.play === 'always' ? 'playing' : (this.states.get(host) || 'playing'));
+  };
+
+  onShellClick = (e) => {
+    const slot = e.target.closest('image-slot');
+    if (slot && !slot.hasAttribute('data-filled') && !slot.getAttribute('src')) return;
+    if (slot && slot.hasAttribute('data-reframe')) return;
+    const target = e.target.closest('[data-project]');
+    if (!target) return;
+    e.preventDefault();
+    if (this.moved > 6 || this.busy) return;
+    this.run(target, target.getAttribute('data-project') || '');
+  };
+
+  run(node, title) {
+    this.busy = true;
+    const frame = node.querySelector('[data-frame]') || node;
+    const cur = this.curtain.current, fly = this.flyer.current, pl = this.plate.current;
+    const label = pl.querySelector('span');
+    if (label) label.textContent = title;
+    const r = frame.getBoundingClientRect();
+    const img = frame.querySelector('image-slot');
+    const cs = getComputedStyle(frame);
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const ease = 'cubic-bezier(.76,0,.24,1)';
+
+    fly.style.transition = 'none';
+    fly.style.left = r.left + 'px';
+    fly.style.top = r.top + 'px';
+    fly.style.width = r.width + 'px';
+    fly.style.height = r.height + 'px';
+    fly.style.backgroundColor = cs.backgroundColor;
+    const shot = img && img.shadowRoot && img.shadowRoot.querySelector('img');
+    fly.style.backgroundImage = shot && shot.src ? 'url("' + shot.src + '")' : cs.backgroundImage;
+    fly.style.opacity = '1';
+    cur.style.transition = 'none';
+    cur.style.transformOrigin = '50% 100%';
+    cur.style.transform = 'scaleY(0)';
+    pl.style.transition = 'none';
+    pl.style.opacity = '0';
+    void fly.offsetWidth;
+
+    if (reduced) {
+      cur.style.transform = 'scaleY(1)';
+      pl.style.opacity = '1';
+      fly.style.opacity = '0';
+      this.after(1100, () => { pl.style.opacity = '0'; cur.style.transform = 'scaleY(0)'; this.busy = false; });
+      return;
+    }
+
+    cur.style.transition = 'transform 720ms ' + ease;
+    cur.style.transform = 'scaleY(1)';
+    fly.style.transition = ['left', 'top', 'width', 'height'].map(k => k + ' 760ms ' + ease).join(',');
+    fly.style.left = '0px';
+    fly.style.top = '0px';
+    fly.style.width = '100vw';
+    fly.style.height = '100vh';
+
+    this.after(720, () => { pl.style.transition = 'opacity 520ms ease'; pl.style.opacity = '1'; });
+    this.after(1980, () => { pl.style.opacity = '0'; });
+    this.after(2360, () => {
+      fly.style.transition = 'opacity 340ms ease';
+      fly.style.opacity = '0';
+      cur.style.transition = 'transform 640ms ' + ease;
+      cur.style.transformOrigin = '50% 0%';
+      cur.style.transform = 'scaleY(0)';
+    });
+    this.after(3060, () => { cur.style.transformOrigin = '50% 100%'; this.busy = false; });
+  }
+
+  renderVals() {
+    return { shellRef: this.shell, stripRef: this.strip, curtainRef: this.curtain, flyerRef: this.flyer, plateRef: this.plate, diagRef: this.diag, diagTextRef: this.diagText };
+  }
+}
+</script>
+</body>
+</html>

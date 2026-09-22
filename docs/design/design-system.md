@@ -31,7 +31,7 @@ Findings appear below as **[DEFAULT]** or **[ADVISORY]** only — never as
 **[INVARIANT]** — unless an approved ADR already carried the rule independently,
 or the rule is independently derivable without the prototype.
 
-### 0.1 Evidence status — the prototype is missing
+### 0.1 Evidence status — the prototype has been recovered
 
 `design-handoff.md` cites two evidence sources:
 
@@ -40,26 +40,40 @@ Home Baseline.dc.html   "source of truth for the visuals"
 home-baseline.md        "test findings and their evidence"
 ```
 
-**Neither exists.** Searched: the repository, its parent directory, Downloads,
-Documents and Desktop, plus any `*.dc.html`. Nothing found. They have not been
-fabricated and no rule below claims their support.
+**Both are now present**, at `docs/design/prototypes/home/legacy/`. They were
+absent when this section was first written. **The grading consequences recorded
+below were applied then and still hold** — recovery does not re-promote
+anything.
 
-Consequence for grading, applied throughout this document:
+Two tiers of Home evidence now exist:
 
-- **A measurement that cannot be re-derived is not a specification.** Frame
-  rates, the reported ~12% poster/video scale jump, and the letterbox bar
-  dimensions are retained in `design-handoff.md` as **historical reported
-  evidence** and are cited nowhere here as the sole basis for a rule.
-- **Rules previously resting on those measurements were downgraded** — see the
-  reclassification note in §17.
+| Tier | Artifacts | Standing |
+|---|---|---|
+| **Current candidate** | `prototypes/home/Home Baseline v2.dc.html` · `home-baseline-v2.md` | Candidate evidence. **Not approved.** |
+| **Historical** | `prototypes/home/legacy/Home Baseline.dc.html` · `legacy/home-baseline.md` | Superseded. Retained as record. |
+
+Consequence for grading, unchanged:
+
+- **A measurement that cannot be re-derived is not a specification.** The legacy
+  frame rates, the reported ~12% poster/video scale jump and the letterbox bar
+  dimensions remain **historical**. Recovering the file that reported them does
+  not verify them; only re-measurement does.
+- **Rules previously resting on those measurements stay downgraded** — see the
+  reclassification register in §17. **Nothing is re-promoted by this recovery.**
 - **Measurements that could be independently verified, were.** The contrast
   ratios in §2 were recomputed from the documented hex values (WCAG 2.x
   relative luminance). All three asserted figures verified, and the check found
   one additional failure the handoff did not report (§2.3).
 
-Until the prototype is recovered or rebuilt, treat every numeric visual value in
-this document as **[DEFAULT]** unless it carries an explicit invariant
-justification that does not depend on the prototype.
+**What v2 re-verified** is recorded in `home-baseline-v2.md`, which states in its
+own header that it approves nothing. One correction is worth carrying here: with
+no CSS letterbox compensation there is **no poster-to-video scale jump** — the
+legacy ~12% figure was produced *by* the workaround, not by the assets (§8.3).
+The §7.5 letterbox requirement and the §13 prohibition are unaffected, and
+ADR-0009 §5's poster/video coupling still stands.
+
+Treat every numeric visual value in this document as **[DEFAULT]** unless it
+carries an explicit invariant justification that does not depend on a prototype.
 
 ---
 
@@ -139,6 +153,31 @@ the invariant. **Viewport units do not**, because they measure the wrong thing.
 
 The clamp bounds `40px` and `250px` and the `13.3` coefficient are **[DEFAULT]**
 values of the current identity, not invariants.
+
+**The coefficient is face-dependent — it belongs to the preset, not to the
+layout.** `home-baseline-v2.md` §8.4 observed that at one container width the
+same string fits inside 12 columns in **Title card** (Marcellus) and **overflows
+and clips at the right edge** in **Monograph** (Spectral) and **Festival**
+(Archivo). `13.3` is tuned to one face and one string length.
+
+This does not touch the **[INVARIANT]** above: display typography still scales
+relative to its composition container under every preset. What it locates is
+*where the number lives*. The coefficient and clamp bounds are a **face-specific
+optical adjustment**, and belong with the preset — **alongside display tracking**,
+which §1.2 already treats exactly this way ("per-face and belongs to the preset,
+never to the layout"). §1.1's own invariant, that no composition may depend on
+the metrics of one typeface, points the same way.
+
+Clipping display type is permitted (`design-direction.md` §6), so a face that
+clips is not a defect on its face. The problem is that today it happens
+**accidentally rather than by authorship**, changing per preset without anyone
+choosing it.
+
+**[PROPOSED GOVERNANCE AMENDMENT — raised, not applied]** Make the display
+coefficient and clamp bounds a **preset property**, so face substitution carries
+its own optical adjustment. Against §1.2 / §1.4 **[DEFAULT]** only; the
+container-relative **[INVARIANT]** is untouched. **The current Title card values
+are unchanged** and no other preset's values are proposed here. See §16 item 11.
 
 ### 1.5 Type scale **[DEFAULT]**
 
@@ -629,9 +668,9 @@ produce silent failures.
    which silently breaks iOS autoplay on **every** surface. **Desktop testing
    cannot detect this.**
 
-**Grading note.** These surfaced during prototype testing, and that prototype is
-now missing (§0.1) — but they are graded **INVARIANT** because neither depends
-on the missing measurement. Both are independently derivable:
+**Grading note.** These surfaced during legacy prototype testing and are graded
+**INVARIANT** because neither depends on a prototype measurement. Both are
+independently derivable:
 
 1. Follows from the mode definitions alone. `AUTOPLAY_AMBIENT` is by definition
    a standalone surface that starts automatically; if start is driven only by a
@@ -642,9 +681,14 @@ on the missing measurement. Both are independently derivable:
    reaches the element. It is verifiable on any page, and it is **autoplay
    safety** (§9.1) — protected from downgrade.
 
-What was *not* retained is the supporting measurement (the reported frame-rate
-figure), which is unverifiable and appears only in `design-handoff.md` as
-historical evidence.
+**Both were reconfirmed by Home v2** (`home-baseline-v2.md` §8.1), which observed
+the re-drive failure twice before fixing it and set `playsInline` as both a
+property and a real attribute value.
+
+What was *not* retained is the supporting measurement (the legacy frame-rate
+figure), which remains unverified and appears only in `design-handoff.md` as
+historical evidence. Home v2 §7 reports its own frame rate explicitly as an
+environment-bound observation and **not a number to specify**.
 
 ---
 
@@ -727,6 +771,42 @@ to one column resizes it correctly with no breakpoint rule (§1.4). The
 invariant is the container-relative principle; `cqw` is the default technique
 that expresses it.
 
+### 11.5 The automatic fallback does not reach GALLERY flow blocks
+
+**[PROPOSED GOVERNANCE AMENDMENT — raised, not applied]**
+
+**§11.2's invariant is unchanged by this section.** What follows is a recorded
+gap in its *reach* and a candidate principle awaiting a Project Owner /
+Architect ruling. Do not treat it as adopted.
+
+**The finding** (`prototypes/home/home-baseline-v2.md` §8.6). §11.2 stacks **grid
+children**. A GALLERY is one block whose internals are arranged by a rule, so it
+has no grid children and nothing in the automatic fallback reflows it. At 375px
+a single-row `JUSTIFIED_ROWS` gallery left a 4:5 still at **45×176** — a sliver,
+its aspect destroyed by the shared row height. This is not specific to one
+composition: any `JUSTIFIED_ROWS` block mixing wide and narrow aspects hits it.
+
+This is a real distance between §11.2's promise — "a page nobody has given mobile
+attention still renders readably" — and what the fallback actually covers.
+
+**Candidate principle, not adopted:**
+
+- **GRID children** keep the existing automatic safe-stack fallback, unchanged.
+- **Each GALLERY presentation mode defines its own bounded narrow-width
+  behaviour.** A gallery does not inherit grid-child stacking, because it has no
+  grid children to stack.
+- **`VIDEO_GRID` already has this** — per-breakpoint column counts, bounded by
+  validation and required to fall at narrower widths (§8.2).
+- **`JUSTIFIED_ROWS`, `HORIZONTAL_STRIP` and any other flow mode need explicit
+  responsive behaviour defined per mode.** For `JUSTIFIED_ROWS` the prototype
+  used items-per-row plus a justified solve rather than a stack; that is
+  evidence, not a specification.
+
+**The per-mode behaviours are deliberately not designed here**, and none is
+implemented. This section records that they are required, not what they are.
+
+It **extends** the guarantee's reach rather than weakening it — which is why it
+is raised as an amendment rather than applied as a correction. See §16 item 10.
 ---
 
 ## 12. Accessibility floor **[INVARIANT]**
@@ -840,7 +920,10 @@ Carried forward. **Do not close these by inference during implementation.**
 | 6 | **`VIDEO_GRID` column maximum** — a bound must exist; the number does not. | Unresolved |
 | 7 | **`AUTOPLAY_VISIBLE` visibility threshold** — what counts as "sufficiently visible". | Unresolved |
 | 8 | **Mobile composition for every page** — no reference evidence exists. | Unresolved |
-| 9 | **Art Works, Project Detail, About, Contact, Private Gate** — not visually designed. | **Pending design exploration** |
+| 9 | **Art Works, About, Contact, Private Gate** — not visually designed. Project Detail now has a candidate (1B v2). | **Pending design exploration** |
+| 10 | **GALLERY narrow-width behaviour per presentation mode** — `VIDEO_GRID` has column counts; `JUSTIFIED_ROWS`, `HORIZONTAL_STRIP` and `SLIDESHOW` have none. The automatic grid-child stack does not reach them (§11.5). | **Proposed amendment, not applied** |
+| 11 | **Display coefficient as a preset property** — `13.3cqw` is tuned to one face; face substitution changes clipping without anyone authoring it (§1.4). | **Proposed amendment, not applied** |
+| 12 | **Bounded HERO overlay content** — required by the Project Detail 1B v2 candidate; not expressible in the current contract. No ADR written. | **Architecture question, open** |
 
 ---
 
@@ -860,8 +943,8 @@ INVARIANT. Each change below is a **downgrade**; no rule was strengthened.
 | 11.4 | Oversized type adapts | INVARIANT via `cqw` | **INVARIANT** via container-relative principle | Restated so it does not name a technique. |
 
 **Re-justified, not downgraded** — §9.3's two carried constraints keep INVARIANT
-because both are independently derivable without the missing prototype, and one
-is autoplay safety.
+because both are independently derivable without any prototype measurement, and
+one is autoplay safety. Home v2 §8.1 reconfirmed both.
 
 ### Deliberately not downgraded
 

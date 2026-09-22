@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..600;1,6..72,200..500&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --surface:#F7F3EC; --ink:#16120E; --accent:#C4361C;
+  --surface-dark:#0C0A08; --ink-dark:#EDE7DD; --muted-dark:#97938C; --rule-dark:#2B2926; --frame:#14110F;
+  --font-display:'Marcellus',Georgia,serif; --font-body:'Newsreader',Georgia,serif; --font-ui:'Newsreader',Georgia,serif;
+  --display-track:-0.005em;
+  --edge:56px; --gut:20px; --band:140px;
+}
+body{margin:0;background:#E6E1D8}
+a{color:inherit;text-decoration:none}
+a:hover{color:var(--accent)}
+img,video{display:block}
+</style>
+</helmet>
+<div ref="{{ rootRef }}" style="font-family:var(--font-body);color:var(--ink);padding:56px 48px 120px">
+
+<section style="display:flex;flex-direction:column;gap:40px">
+  <div style="max-width:70ch">
+    <h1 style="margin:0;font-family:var(--font-display);font-size:34px;letter-spacing:var(--display-track);text-transform:uppercase">Project detail — three directions</h1>
+    <p style="margin:14px 0 0;font-size:17px;line-height:1.7">Same project, same assets, three compositions. Desktop only, 1440px. Every block is a canonical type placed in logical columns; the primary film is <em>click to play</em> in all three, supporting loops are autoplay-visible. Nothing here is approved.</p>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:72px">
+
+    <div id="1a" style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:14px">
+        <span style="font-family:var(--font-ui);font-size:12px;letter-spacing:0.18em;text-transform:uppercase;background:var(--ink);color:var(--surface);padding:4px 9px">1a</span>
+        <span style="font-family:var(--font-display);font-size:22px;letter-spacing:var(--display-track)">Title card</span>
+        <span style="font-size:15px;color:#6C6862">The film is an event. The page opens on an empty dark room and a name.</span>
+      </div>
+
+      <div data-page="" style="width:1440px;background:var(--surface-dark);color:var(--ink-dark)">
+        <header data-grid="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:baseline;padding:30px var(--edge)">
+          <a href="#1a" style="grid-column:1/6;font-family:var(--font-ui);font-size:12px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted-dark)">Nguyen Khanh Nhat</a>
+          <div style="grid-column:7/13;display:flex;justify-content:flex-end;font-size:16px"><a href="#1a" style="border-bottom:1px solid var(--rule-dark);padding-bottom:3px">Back to works</a></div>
+        </header>
+
+        <section data-grid="" data-block="GRID · title card" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:end;min-height:560px;padding:0 var(--edge) 84px;container-type:inline-size;outline:var(--anno,none)">
+          <h2 style="grid-column:1/9;margin:0;font-family:var(--font-display);font-size:11cqw;line-height:0.94;letter-spacing:var(--display-track);text-transform:uppercase">Made to<br>Measure</h2>
+          <dl style="grid-column:10/13;margin:0;display:grid;grid-template-columns:1fr;gap:12px;font-size:15px">
+            <div style="display:flex;justify-content:space-between;gap:16px;border-top:1px solid var(--rule-dark);padding-top:8px"><dt style="color:var(--muted-dark);font-style:italic">Year</dt><dd style="margin:0">2026</dd></div>
+            <div style="display:flex;justify-content:space-between;gap:16px;border-top:1px solid var(--rule-dark);padding-top:8px"><dt style="color:var(--muted-dark);font-style:italic">Client</dt><dd style="margin:0">Trần &amp; Sons</dd></div>
+            <div style="display:flex;justify-content:space-between;gap:16px;border-top:1px solid var(--rule-dark);padding-top:8px"><dt style="color:var(--muted-dark);font-style:italic">Role</dt><dd style="margin:0">DP, colourist</dd></div>
+            <div style="display:flex;justify-content:space-between;gap:16px;border-top:1px solid var(--rule-dark);padding-top:8px"><dt style="color:var(--muted-dark);font-style:italic">Runtime</dt><dd style="margin:0">8 min</dd></div>
+          </dl>
+        </section>
+
+        <section data-play="click" data-block="VIDEO · primary film · CLICK_TO_PLAY · CONTAIN" style="position:relative;background:#000;aspect-ratio:16/9;cursor:pointer;outline:var(--anno,none)">
+          <img src="../../../../media/w/mtm-swatches.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+          <video data-src="../../../../media/clips/c1.mp4" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;opacity:0"></video>
+          <span data-affordance="" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:92px;height:92px;border:1px solid rgba(237,231,221,0.8);border-radius:50%;display:flex;align-items:center;justify-content:center">
+            <span style="width:0;height:0;border-left:18px solid rgba(237,231,221,0.92);border-top:11px solid transparent;border-bottom:11px solid transparent;margin-left:5px"></span>
+          </span>
+        </section>
+
+        <section data-grid="" data-block="GRID · lead + credits" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);padding:var(--band) var(--edge) 0;outline:var(--anno,none)">
+          <div style="grid-column:1/6">
+            <p style="margin:0;font-size:24px;line-height:1.35;max-width:24ch">A tailor measures the same customer for thirty years. We filmed the last fitting before the shop closed.</p>
+            <p style="margin:26px 0 0;font-size:17px;line-height:1.74;max-width:46ch;color:var(--muted-dark)">Shot over four mornings on a single prime, lit almost entirely by the window the shop has always used. The grade holds the shadows where the room keeps them.</p>
+          </div>
+          <dl style="grid-column:9/13;margin:0;font-size:15px;line-height:1.9">
+            <div style="display:flex;gap:18px"><dt style="width:9ch;color:var(--muted-dark);font-style:italic">Director</dt><dd style="margin:0">Mai Linh</dd></div>
+            <div style="display:flex;gap:18px"><dt style="width:9ch;color:var(--muted-dark);font-style:italic">Camera</dt><dd style="margin:0">Nguyen Khanh Nhat</dd></div>
+            <div style="display:flex;gap:18px"><dt style="width:9ch;color:var(--muted-dark);font-style:italic">Sound</dt><dd style="margin:0">Pham Duy</dd></div>
+            <div style="display:flex;gap:18px"><dt style="width:9ch;color:var(--muted-dark);font-style:italic">Edit</dt><dd style="margin:0">Hoang Yen</dd></div>
+          </dl>
+        </section>
+
+        <section data-block="GALLERY · JUSTIFIED_ROWS" style="margin-top:var(--band);outline:var(--anno,none)">
+          <div data-row-gallery="" style="display:flex;gap:4px;height:300px">
+            <div data-ar="1.5" style="position:relative;flex:1.5 1 0;background:var(--frame)"><img src="../../../../media/w/mtm-table.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
+            <div data-ar="0.8" style="position:relative;flex:0.8 1 0;background:var(--frame)"><img src="../../../../media/w/mtm-shopfront.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
+            <div data-ar="1.78" style="position:relative;flex:1.78 1 0;background:var(--frame)"><img src="../../../../media/w/mtm-sketch.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
+          </div>
+        </section>
+
+        <section data-grid="" data-block="GRID · two supporting loops, offset" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);padding:var(--band) var(--edge) 0;outline:var(--anno,none)">
+          <div data-play="visible" style="grid-column:1/7;grid-row:1;position:relative;aspect-ratio:16/9;overflow:hidden;background:var(--frame)">
+            <img src="../../../../media/w/mtm-atelier.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+            <video data-src="../../../../media/clips/n3.mp4" loop="" muted="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 320ms linear"></video>
+            <span style="position:absolute;left:16px;bottom:14px;font-size:13px;font-style:italic;color:rgba(237,231,221,0.86)">Cutting room, second morning</span>
+          </div>
+          <div data-block-spacer="" style="grid-column:1/7;grid-row:2;height:130px"></div>
+          <div data-play="visible" style="grid-column:8/13;grid-row:1/3;align-self:end;position:relative;aspect-ratio:3/2;overflow:hidden;background:var(--frame)">
+            <img src="../../../../media/w/mtm-mannequin.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+            <video data-src="../../../../media/clips/n4.mp4" loop="" muted="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 320ms linear"></video>
+          </div>
+        </section>
+
+        <footer data-grid="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:baseline;padding:var(--band) var(--edge) 90px">
+          <span style="grid-column:1/4;font-size:15px;font-style:italic;color:var(--muted-dark)">Next project</span>
+          <a href="#1a" style="grid-column:4/11;font-family:var(--font-display);font-size:56px;letter-spacing:var(--display-track);text-transform:uppercase;color:var(--accent)">Tokyo, after rain</a>
+        </footer>
+      </div>
+    </div>
+
+    <div id="1b" style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:14px">
+        <span style="font-family:var(--font-ui);font-size:12px;letter-spacing:0.18em;text-transform:uppercase;background:var(--ink);color:var(--surface);padding:4px 9px">1b</span>
+        <span style="font-family:var(--font-display);font-size:22px;letter-spacing:var(--display-track)">Cut to the film</span>
+        <span style="font-size:15px;color:#6C6862">No preamble. The film owns the first viewport; everything else answers to it.</span>
+      </div>
+
+      <div data-page="" style="width:1440px;background:var(--surface-dark);color:var(--ink-dark)">
+        <section data-play="click" data-block="HERO/VIDEO · full bleed · CLICK_TO_PLAY" style="position:relative;background:#000;height:760px;cursor:pointer;outline:var(--anno,none)">
+          <img src="../../../../media/w/mtm-table.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+          <video data-src="../../../../media/clips/c1.mp4" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;opacity:0"></video>
+          <div style="position:absolute;inset:auto 0 0 0;height:300px;background:linear-gradient(to top,rgba(0,0,0,0.72),rgba(0,0,0,0))"></div>
+          <span data-affordance="" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:92px;height:92px;border:1px solid rgba(237,231,221,0.8);border-radius:50%;display:flex;align-items:center;justify-content:center">
+            <span style="width:0;height:0;border-left:18px solid rgba(237,231,221,0.92);border-top:11px solid transparent;border-bottom:11px solid transparent;margin-left:5px"></span>
+          </span>
+          <div style="position:absolute;left:var(--edge);right:var(--edge);bottom:44px;display:flex;align-items:flex-end;justify-content:space-between;gap:40px">
+            <h2 style="margin:0;font-family:var(--font-display);font-size:92px;line-height:0.96;letter-spacing:var(--display-track);text-transform:uppercase">Made to Measure</h2>
+            <dl style="margin:0 0 10px;display:flex;gap:32px;font-size:15px">
+              <div style="display:flex;flex-direction:column;gap:2px"><dt style="color:rgba(237,231,221,0.7);font-style:italic">Year</dt><dd style="margin:0;color:rgba(237,231,221,0.92)">2026</dd></div>
+              <div style="display:flex;flex-direction:column;gap:2px"><dt style="color:rgba(237,231,221,0.7);font-style:italic">Runtime</dt><dd style="margin:0;color:rgba(237,231,221,0.92)">8 min</dd></div>
+            </dl>
+          </div>
+          <a href="#1b" style="position:absolute;left:var(--edge);top:34px;font-family:var(--font-ui);font-size:12px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(237,231,221,0.86)">Back to works</a>
+        </section>
+
+        <section data-grid="" data-block="GRID · thumbnail cluster + lead" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:end;padding:var(--band) var(--edge) 0;outline:var(--anno,none)">
+          <div style="grid-column:1/6;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px">
+            <div style="position:relative;aspect-ratio:1;background:var(--frame)"><img src="../../../../media/w/mtm-sketch.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
+            <div style="position:relative;aspect-ratio:1;background:var(--frame)"><img src="../../../../media/w/mtm-swatches.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
+            <div style="position:relative;aspect-ratio:1;background:var(--frame)"><img src="../../../../media/w/mtm-shopfront.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
+            <div style="position:relative;aspect-ratio:1;background:var(--frame)"><img src="../../../../media/w/mtm-atelier.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
+            <div style="position:relative;aspect-ratio:1;background:var(--frame)"><img src="../../../../media/w/mtm-mannequin.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
+            <div style="position:relative;aspect-ratio:1;background:var(--frame)"><img src="../../../../media/w/mtm-portrait.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
+          </div>
+          <div style="grid-column:7/12">
+            <p style="margin:0;font-size:26px;line-height:1.32;max-width:24ch">A tailor measures the same customer for thirty years. We filmed the last fitting before the shop closed.</p>
+            <p style="margin:24px 0 0;font-size:17px;line-height:1.74;max-width:46ch;color:var(--muted-dark)">Four mornings, one prime lens, and the window the shop has always used. Nothing was added to the room.</p>
+          </div>
+        </section>
+
+        <section data-block="GALLERY · VIDEO_GRID · 3 columns" style="margin-top:var(--band);outline:var(--anno,none)">
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px">
+            <div data-play="visible" style="position:relative;aspect-ratio:16/9;overflow:hidden;background:var(--frame)">
+              <img src="../../../../media/w/mtm-atelier.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+              <video data-src="../../../../media/clips/n3.mp4" loop="" muted="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 320ms linear"></video>
+            </div>
+            <div style="position:relative;aspect-ratio:16/9;overflow:hidden;background:var(--frame)"><img src="../../../../media/w/desk-04.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
+            <div data-play="visible" style="position:relative;aspect-ratio:16/9;overflow:hidden;background:var(--frame)">
+              <img src="../../../../media/w/mtm-mannequin.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+              <video data-src="../../../../media/clips/n4.mp4" loop="" muted="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 320ms linear"></video>
+            </div>
+            <div style="position:relative;aspect-ratio:16/9;overflow:hidden;background:var(--frame)"><img src="../../../../media/w/mtm-swatches.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
+            <div data-play="visible" style="position:relative;aspect-ratio:16/9;overflow:hidden;background:var(--frame)">
+              <img src="../../../../media/w/mtm-table.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+              <video data-src="../../../../media/clips/c2.mp4" loop="" muted="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 320ms linear"></video>
+            </div>
+            <div style="position:relative;aspect-ratio:16/9;overflow:hidden;background:var(--frame)"><img src="../../../../media/w/mtm-sketch.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
+          </div>
+        </section>
+
+        <section data-grid="" data-block="GRID · credits against a void" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);padding:var(--band) var(--edge) 0;outline:var(--anno,none)">
+          <dl style="grid-column:1/4;margin:0;font-size:15px;line-height:1.9">
+            <div style="display:flex;gap:18px"><dt style="width:9ch;color:var(--muted-dark);font-style:italic">Director</dt><dd style="margin:0">Mai Linh</dd></div>
+            <div style="display:flex;gap:18px"><dt style="width:9ch;color:var(--muted-dark);font-style:italic">Camera</dt><dd style="margin:0">Nguyen Khanh Nhat</dd></div>
+            <div style="display:flex;gap:18px"><dt style="width:9ch;color:var(--muted-dark);font-style:italic">Sound</dt><dd style="margin:0">Pham Duy</dd></div>
+            <div style="display:flex;gap:18px"><dt style="width:9ch;color:var(--muted-dark);font-style:italic">Client</dt><dd style="margin:0">Trần &amp; Sons</dd></div>
+          </dl>
+        </section>
+
+        <section data-block="IMAGE · full bleed coda" style="margin-top:var(--band);position:relative;height:520px;background:var(--frame);outline:var(--anno,none)">
+          <img src="../../../../media/w/mtm-portrait.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+        </section>
+
+        <footer data-grid="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:baseline;padding:90px var(--edge)">
+          <span style="grid-column:1/4;font-size:15px;font-style:italic;color:var(--muted-dark)">Next project</span>
+          <a href="#1b" style="grid-column:4/11;font-family:var(--font-display);font-size:56px;letter-spacing:var(--display-track);text-transform:uppercase;color:var(--accent)">Tokyo, after rain</a>
+        </footer>
+      </div>
+    </div>
+
+    <div id="1c" style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:14px">
+        <span style="font-family:var(--font-ui);font-size:12px;letter-spacing:0.18em;text-transform:uppercase;background:var(--ink);color:var(--surface);padding:4px 9px">1c</span>
+        <span style="font-family:var(--font-display);font-size:22px;letter-spacing:var(--display-track)">Dossier</span>
+        <span style="font-size:15px;color:#6C6862">The film is composed into the page, not given a viewport of its own.</span>
+      </div>
+
+      <div data-page="" style="width:1440px;background:var(--surface-dark);color:var(--ink-dark)">
+        <header data-grid="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:baseline;padding:30px var(--edge)">
+          <a href="#1c" style="grid-column:1/6;font-family:var(--font-ui);font-size:12px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted-dark)">Nguyen Khanh Nhat</a>
+          <div style="grid-column:7/13;display:flex;justify-content:flex-end;font-size:16px"><a href="#1c" style="border-bottom:1px solid var(--rule-dark);padding-bottom:3px">Back to works</a></div>
+        </header>
+
+        <section data-grid="" data-block="GRID · clipped title + metadata + lead" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);padding:70px 0 0;container-type:inline-size;overflow:hidden;outline:var(--anno,none)">
+          <h2 style="grid-column:1/13;margin:0 0 54px;padding-left:var(--edge);font-family:var(--font-display);font-size:15.4cqw;line-height:0.9;letter-spacing:var(--display-track);text-transform:uppercase;white-space:nowrap">Made to Measure</h2>
+          <dl style="grid-column:1/5;margin:0;padding-left:var(--edge);font-size:15px">
+            <div style="display:flex;justify-content:space-between;gap:16px;border-top:1px solid var(--rule-dark);padding:9px 0"><dt style="color:var(--muted-dark);font-style:italic">Year</dt><dd style="margin:0">2026</dd></div>
+            <div style="display:flex;justify-content:space-between;gap:16px;border-top:1px solid var(--rule-dark);padding:9px 0"><dt style="color:var(--muted-dark);font-style:italic">Client</dt><dd style="margin:0">Trần &amp; Sons</dd></div>
+            <div style="display:flex;justify-content:space-between;gap:16px;border-top:1px solid var(--rule-dark);padding:9px 0"><dt style="color:var(--muted-dark);font-style:italic">Role</dt><dd style="margin:0">DP, colourist</dd></div>
+            <div style="display:flex;justify-content:space-between;gap:16px;border-top:1px solid var(--rule-dark);border-bottom:1px solid var(--rule-dark);padding:9px 0"><dt style="color:var(--muted-dark);font-style:italic">Runtime</dt><dd style="margin:0">8 min</dd></div>
+          </dl>
+          <p style="grid-column:6/11;margin:0;padding-right:var(--edge);font-size:22px;line-height:1.4;max-width:24ch">A tailor measures the same customer for thirty years. We filmed the last fitting before the shop closed.</p>
+        </section>
+
+        <section data-grid="" data-block="GRID · still + primary film in the grid" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:start;padding:var(--band) var(--edge) 0;outline:var(--anno,none)">
+          <div style="grid-column:1/4;position:relative;aspect-ratio:2/3;background:var(--frame)">
+            <img src="../../../../media/w/mtm-portrait.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+          </div>
+          <div data-play="click" style="grid-column:5/13;position:relative;aspect-ratio:16/9;background:#000;cursor:pointer">
+            <img src="../../../../media/w/mtm-swatches.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+            <video data-src="../../../../media/clips/c1.mp4" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;opacity:0"></video>
+            <span data-affordance="" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:82px;height:82px;border:1px solid rgba(237,231,221,0.8);border-radius:50%;display:flex;align-items:center;justify-content:center">
+              <span style="width:0;height:0;border-left:16px solid rgba(237,231,221,0.92);border-top:10px solid transparent;border-bottom:10px solid transparent;margin-left:4px"></span>
+            </span>
+            <span style="position:absolute;left:0;top:calc(100% + 12px);font-size:13px;font-style:italic;color:var(--muted-dark)">The film, 8 min. Sound on.</span>
+          </div>
+        </section>
+
+        <section data-block="GALLERY · JUSTIFIED_ROWS · full bleed" style="margin-top:var(--band);outline:var(--anno,none)">
+          <div data-row-gallery="" style="display:flex;gap:4px;height:270px">
+            <div data-ar="2.39" style="position:relative;flex:2.39 1 0;background:var(--frame)"><img src="../../../../media/w/mtm-atelier.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
+            <div data-ar="1.5" style="position:relative;flex:1.5 1 0;background:var(--frame)"><img src="../../../../media/w/mtm-table.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
+            <div data-ar="0.8" style="position:relative;flex:0.8 1 0;background:var(--frame)"><img src="../../../../media/w/mtm-shopfront.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
+            <div data-ar="1.78" style="position:relative;flex:1.78 1 0;background:var(--frame)"><img src="../../../../media/w/mtm-sketch.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
+          </div>
+        </section>
+
+        <section data-grid="" data-block="GRID · long-form + credits" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);padding:var(--band) var(--edge) 0;outline:var(--anno,none)">
+          <div style="grid-column:3/9">
+            <p style="margin:0;font-size:17px;line-height:1.74;max-width:46ch">Shot over four mornings on a single prime, lit almost entirely by the window the shop has always used. The grade holds the shadows where the room keeps them, and the cut follows the fitting rather than the calendar.</p>
+            <p style="margin:22px 0 0;font-size:17px;line-height:1.74;max-width:46ch;color:var(--muted-dark)">The shop closed in March. The last roll of cloth went to the customer in the film.</p>
+          </div>
+          <dl style="grid-column:10/13;margin:0;font-size:15px;line-height:1.9">
+            <div style="display:flex;gap:14px"><dt style="width:8ch;color:var(--muted-dark);font-style:italic">Director</dt><dd style="margin:0">Mai Linh</dd></div>
+            <div style="display:flex;gap:14px"><dt style="width:8ch;color:var(--muted-dark);font-style:italic">Camera</dt><dd style="margin:0">N. K. Nhat</dd></div>
+            <div style="display:flex;gap:14px"><dt style="width:8ch;color:var(--muted-dark);font-style:italic">Sound</dt><dd style="margin:0">Pham Duy</dd></div>
+            <div style="display:flex;gap:14px"><dt style="width:8ch;color:var(--muted-dark);font-style:italic">Edit</dt><dd style="margin:0">Hoang Yen</dd></div>
+          </dl>
+        </section>
+
+        <section data-play="visible" data-block="VIDEO · full-bleed coda · AUTOPLAY_VISIBLE" style="margin-top:var(--band);position:relative;height:560px;overflow:hidden;background:var(--frame);outline:var(--anno,none)">
+          <img src="../../../../media/w/mtm-mannequin.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+          <video data-src="../../../../media/clips/n3.mp4" loop="" muted="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 320ms linear"></video>
+          <span style="position:absolute;left:var(--edge);bottom:20px;font-size:13px;font-style:italic;color:rgba(237,231,221,0.86)">Cutting room, second morning</span>
+        </section>
+
+        <footer data-grid="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:baseline;padding:90px var(--edge)">
+          <span style="grid-column:1/4;font-size:15px;font-style:italic;color:var(--muted-dark)">Next project</span>
+          <a href="#1c" style="grid-column:4/11;font-family:var(--font-display);font-size:56px;letter-spacing:var(--display-track);text-transform:uppercase;color:var(--accent)">Tokyo, after rain</a>
+        </footer>
+      </div>
+    </div>
+
+  </div>
+</section>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;annotate&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Review&quot;},&quot;motion&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;reduced&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Review&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    return { rootRef: (el) => { this.root = el; } };
+  }
+
+  componentDidMount() {
+    window.__pd = this;
+    this.applyAnno();
+    this.mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    this.mqHandler = () => this.setupPlayback();
+    this.mq.addEventListener("change", this.mqHandler);
+    setTimeout(() => this.setupPlayback(), 0);
+  }
+
+  componentDidUpdate() { this.applyAnno(); setTimeout(() => this.setupPlayback(), 0); }
+
+  componentWillUnmount() {
+    if (this.obsNear) this.obsNear.disconnect();
+    if (this.obsVis) this.obsVis.disconnect();
+    if (this.mq) this.mq.removeEventListener("change", this.mqHandler);
+  }
+
+  applyAnno() {
+    const on = this.props.annotate ?? false;
+    document.documentElement.style.setProperty("--anno", on ? "1px dashed rgba(196,54,28,0.5)" : "none");
+    if (!this.root) return;
+    this.root.querySelectorAll("[data-block]").forEach((el) => {
+      let tag = el.querySelector(":scope > [data-tag]");
+      if (on && !tag) {
+        tag = document.createElement("span");
+        tag.setAttribute("data-tag", "");
+        tag.textContent = el.dataset.block;
+        tag.style.cssText = "position:absolute;z-index:4;transform:translateY(-100%);background:#C4361C;color:#fff;font-family:var(--font-ui);font-size:10px;letter-spacing:0.08em;padding:3px 7px";
+        if (getComputedStyle(el).position === "static") el.style.position = "relative";
+        el.prepend(tag);
+      } else if (!on && tag) tag.remove();
+    });
+  }
+
+  isReduced() { return (this.props.motion ?? "auto") === "reduced" || (this.mq && this.mq.matches); }
+
+  setupPlayback() {
+    if (!this.root) return;
+    if (this.obsNear) this.obsNear.disconnect();
+    if (this.obsVis) this.obsVis.disconnect();
+    const cells = Array.from(this.root.querySelectorAll("[data-play]"));
+    this.cells = cells;
+
+    cells.forEach((c) => {
+      const v = c.querySelector("video");
+      if (!v) return;
+      v.playsInline = true;
+      v.setAttribute("playsinline", "playsinline");
+      if (c.dataset.play !== "click") { v.muted = true; v.loop = true; }
+      if (!v.dataset.wired) {
+        v.dataset.wired = "1";
+        v.addEventListener("canplay", () => { if (c.dataset.want === "1") this.play(c); });
+        v.addEventListener("loadeddata", () => { if (c.dataset.want === "1") this.play(c); });
+        v.addEventListener("playing", () => { v.style.opacity = "1"; });
+        if (c.dataset.play === "click") c.addEventListener("click", () => this.start(c));
+      }
+    });
+
+    if (this.isReduced()) { cells.forEach((c) => { c.dataset.want = "0"; if (c.dataset.play !== "click" || c.dataset.started !== "1") this.release(c); }); return; }
+
+    this.obsNear = new IntersectionObserver((es) => es.forEach((e) => {
+      const c = e.target;
+      if (c.dataset.play === "click") return;
+      if (e.isIntersecting) this.prepare(c);
+      else if (c.dataset.want !== "1") this.release(c);
+    }), { rootMargin: "150% 0px" });
+
+    this.obsVis = new IntersectionObserver((es) => es.forEach((e) => {
+      const c = e.target;
+      if (c.dataset.play === "click") return;
+      if (e.isIntersecting && e.intersectionRatio >= 0.2) { c.dataset.want = "1"; this.prepare(c); this.play(c); }
+      else { c.dataset.want = "0"; const v = c.querySelector("video"); if (v) v.pause(); }
+    }), { threshold: [0, 0.2, 0.5] });
+
+    cells.forEach((c) => { this.obsNear.observe(c); this.obsVis.observe(c); });
+  }
+
+  // CLICK_TO_PLAY: a deliberate act, so audio is available and real controls appear.
+  start(c) {
+    const v = c.querySelector("video");
+    if (!v) return;
+    (this.cells || []).forEach((o) => { if (o !== c) { const ov = o.querySelector("video"); if (ov && !ov.paused) ov.pause(); } });
+    c.dataset.started = "1";
+    const aff = c.querySelector("[data-affordance]");
+    if (aff) aff.style.display = "none";
+    this.prepare(c);
+    v.controls = true;
+    v.muted = false;
+    v.style.opacity = "1";
+    const p = v.play();
+    if (p && p.catch) p.catch(() => {});
+  }
+
+  prepare(c) {
+    const v = c.querySelector("video");
+    if (!v) return;
+    if (!v.getAttribute("src")) { v.setAttribute("src", v.dataset.src); v.preload = "auto"; v.load(); }
+  }
+
+  play(c) {
+    const v = c.querySelector("video");
+    if (!v || this.isReduced() || c.dataset.want !== "1" || v.readyState < 2) return;
+    const p = v.play();
+    if (p && p.catch) p.catch((e) => { if (e && e.name === "AbortError") setTimeout(() => this.play(c), 120); });
+  }
+
+  release(c) {
+    const v = c.querySelector("video");
+    if (!v || c.dataset.started === "1") return;
+    v.pause();
+    v.style.opacity = "0";
+    if (v.getAttribute("src")) { v.removeAttribute("src"); v.load(); }
+  }
+}
+
+</script>
+</body>
+</html>

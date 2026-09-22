@@ -5,28 +5,41 @@ the Home exploration currently *is*, so that `design-system.md` and
 `page-specifications.md` can be authored from it. It is not a specification and
 it is not production code.
 
-Source of truth for the visuals: `Home Baseline.dc.html`.
-Test findings and their evidence: `home-baseline.md`.
+Source of truth for the visuals: `prototypes/home/legacy/Home Baseline.dc.html`.
+Test findings and their evidence: `prototypes/home/legacy/home-baseline.md`.
 Governing decisions: `design-direction.md`, ADR-0004, ADR-0006, ADR-0007, ADR-0008.
 
-> **⚠ Evidence status — governance audit, 2026-09-22.**
+> **⚠ Evidence status — updated 2026-09-22.**
 >
-> **Both cited sources are missing.** `Home Baseline.dc.html` and
-> `home-baseline.md` are not in this repository, nor in its parent directory,
-> Downloads, Documents or Desktop. No `*.dc.html` exists anywhere searched.
+> **Both cited sources are present**, at `docs/design/prototypes/home/legacy/`.
+> A governance audit earlier the same day recorded them as missing; they have
+> since been placed in the repository. Only their relative media paths were
+> rewritten so they still render from that location, plus a provenance comment —
+> **no finding, value or design markup was altered**
+> (`prototypes/home/home-baseline-v2.md` §0).
 >
-> Every measurement below — frame rates, the ~12% poster/video scale jump,
-> letterbox bar dimensions, the fps figure for concurrent streams — is therefore
-> **reported but unverifiable**. It is retained as **historical evidence of what
-> testing found**, and is deliberately preserved rather than deleted.
+> **Recovery does not promote anything.** Every measurement below — frame rates,
+> the ~12% poster/video scale jump, letterbox bar dimensions, the fps figure for
+> concurrent streams — remains **historical**, because recovering the file that
+> reported them does not re-measure them. They are retained as **historical
+> evidence of what testing found**, and deliberately preserved rather than
+> deleted or rewritten.
 >
-> **No unverifiable measurement here is a specification.** `design-system.md`
-> §0.1 records how this affects rule grading, and §17 lists the rules that were
-> downgraded as a result. Contrast ratios were the exception: they were
-> recomputed from the documented hex values and verified independently.
+> **No measurement here is a specification.** `design-system.md` §0.1 records how
+> this affects rule grading, and §17 lists the rules that were downgraded. Those
+> downgrades stand. Contrast ratios were the exception: they were recomputed from
+> the documented hex values and verified independently.
 >
-> If the prototype is recovered, propose `docs/design/prototypes/home/` as its
-> canonical location and re-verify before promoting any measurement.
+> **This document has been superseded as current evidence** by
+> `prototypes/home/Home Baseline v2.dc.html` and `home-baseline-v2.md`, which
+> rebuild the Home candidate and run real media through it. v2 approves nothing
+> either. Where v2 re-measured something, v2 is the current reading; where it did
+> not, the figure below stays historical.
+>
+> One correction from v2 worth reading against §5 below: with no CSS letterbox
+> compensation there is **no poster-to-video scale jump**. The ~12% figure was
+> produced *by* the `trimLetterbox` workaround, not by the assets
+> (`home-baseline-v2.md` §8.3). The finding as originally written is left intact.
 
 ### How to read `[test finding]`
 

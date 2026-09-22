@@ -76,3 +76,6 @@ imgs & videos/
 #   docs/human-description/description.source.docx   signed-off source of record
 #   docs/design/prototypes/home/MEDIA.md             tracked manifest
 #   db/migrations/*.sql                              persistence contract
+
+# Local runtime media for archived design prototypes
+/media/

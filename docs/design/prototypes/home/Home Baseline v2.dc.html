@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..600;1,6..72,200..500&amp;family=Spectral:ital,wght@0,200;0,300;0,400;1,300&amp;family=Archivo:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --surface:#F7F3EC; --ink:#16120E; --accent:#C4361C; --surface-dark:#0C0A08; --ink-dark:#EDE7DD;
+  --muted:#6C6862; --rule:#E2DCD2; --frame:#14110F;
+  --font-display:'Marcellus',Georgia,serif; --font-body:'Newsreader',Georgia,serif; --font-ui:'Newsreader',Georgia,serif;
+  --display-track:-0.005em;
+  --edge:clamp(24px,3.2vw,56px); --gut:clamp(10px,0.9vw,20px); --band:clamp(72px,9vw,170px);
+  --wall-cols:3;
+}
+body{margin:0;background:#F7F3EC}
+a{color:inherit;text-decoration:none}
+a:hover{color:var(--accent)}
+img,video{display:block}
+</style>
+</helmet>
+<div id="top" ref="{{ rootRef }}" style="background:var(--surface);color:var(--ink);font-family:var(--font-body);min-height:100vh;overflow-x:hidden;position:relative;padding-bottom:clamp(40px,5vw,90px)">
+
+  <header data-grid="" data-screen-label="Chrome / navigation line" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:baseline;padding:clamp(22px,2.4vw,38px) var(--edge)">
+    <a href="#top" data-col="1/6" style="grid-column:1/6;font-family:var(--font-ui);font-size:clamp(10px,0.74vw,12px);letter-spacing:0.22em;text-transform:uppercase">Nguyen Khanh Nhat</a>
+    <nav data-col="7/13" style="grid-column:7/13;display:flex;justify-content:flex-end;gap:clamp(20px,2.2vw,38px);font-size:clamp(14px,1vw,16px)">
+      <a href="#work">Works</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <section data-screen-label="Block 1 — HERO / VIDEO" data-play="ambient" style="position:relative;overflow:hidden;height:clamp(320px,76vh,900px);background:var(--frame);outline:var(--anno-outline,none);outline-offset:-1px">
+    <img src="../../../../media/w/mtm-atelier.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+    <video data-src="../../../../media/clips/n1.mp4" data-film="Honey pour, studio" loop="" muted="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 320ms linear"></video>
+    <span style="position:absolute;left:clamp(14px,1.2vw,22px);bottom:clamp(12px,1vw,18px);font-size:13px;font-style:italic;color:rgba(237,231,221,0.86);text-shadow:0 1px 14px rgba(0,0,0,0.6)">Studio, 2026</span>
+    <span style="display:var(--anno-label,none);position:absolute;left:8px;top:8px;background:var(--accent);color:#fff;font-family:var(--font-ui);font-size:10px;letter-spacing:0.1em;padding:3px 7px">1 · HERO/VIDEO · full bleed · AUTOPLAY_AMBIENT · COVER</span>
+  </section>
+
+  
+
+  <sc-if value="{{ showWall }}" hint-placeholder-val="{{ true }}">
+    <section data-grid="" data-screen-label="Block 2 — GRID identity" style="container-type:inline-size;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);padding:var(--band) var(--edge) 0;outline:var(--anno-outline,none)">
+    <h1 data-col="1/13" style="grid-column:1/13;margin:0;font-family:var(--font-display);font-weight:400;font-size:clamp(40px,13.3cqw,250px);line-height:0.92;letter-spacing:var(--display-track);text-transform:uppercase">Portfolio</h1>
+    <p data-col="1/6" style="grid-column:1/6;margin:clamp(30px,3.6vw,64px) 0 0;max-width:46ch;font-size:clamp(15px,1.06vw,18px);line-height:1.74">Cinematographer and photographer in Hanoi. I shoot, light and grade: full stage, from the first frame to the final pass.</p>
+    <p data-col="9/13" style="grid-column:9/13;margin:clamp(30px,3.6vw,64px) 0 0;max-width:46ch;font-size:clamp(14px,0.98vw,16px);line-height:1.74;color:var(--muted)">Commercial films, documentary work and stills. Sound stays off until you open a project.</p>
+    <span style="display:var(--anno-label,none);grid-column:1/13;margin-top:10px;font-family:var(--font-ui);font-size:10px;letter-spacing:0.1em;color:var(--accent)">2 · GRID · display 1–12 · TEXT 1–5 · TEXT 9–12</span>
+  </section><section id="work" data-screen-label="Block 3 — GALLERY VIDEO_GRID" style="margin-top:var(--band);outline:var(--anno-outline,none)">
+      <h2 style="margin:0 0 clamp(16px,1.6vw,28px);padding:0 var(--edge);font-family:var(--font-body);font-weight:400;font-size:clamp(14px,1vw,17px);font-style:italic;color:var(--muted)">Everything moving, this year</h2>
+      <div data-wall="" style="display:grid;grid-template-columns:repeat(var(--wall-cols,3),minmax(0,1fr));gap:4px">
+        <div data-play="visible" style="position:relative;overflow:hidden;aspect-ratio:16/9;background:var(--frame)">
+          <img src="../../../../media/w/desk-01.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+          <video data-src="../../../../media/clips/n2.mp4" loop="" muted="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 320ms linear"></video>
+        </div>
+        <div style="position:relative;overflow:hidden;aspect-ratio:16/9;background:var(--frame)">
+          <img src="../../../../media/w/mtm-swatches.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+        </div>
+        <div data-play="visible" style="position:relative;overflow:hidden;aspect-ratio:16/9;background:var(--frame)">
+          <img src="../../../../media/w/desk-03.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+          <video data-src="../../../../media/clips/c2.mp4" loop="" muted="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 320ms linear"></video>
+        </div>
+        <div data-play="visible" style="position:relative;overflow:hidden;aspect-ratio:16/9;background:var(--frame)">
+          <img src="../../../../media/w/mtm-table.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+          <video data-src="../../../../media/clips/n3.mp4" loop="" muted="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 320ms linear"></video>
+        </div>
+        <div style="position:relative;overflow:hidden;aspect-ratio:16/9;background:var(--frame)">
+          <img src="../../../../media/w/nike-lacing.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+        </div>
+        <div data-play="visible" style="position:relative;overflow:hidden;aspect-ratio:16/9;background:var(--frame)">
+          <img src="../../../../media/w/nike-court.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+          <video data-src="../../../../media/clips/c3.mp4" loop="" muted="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 320ms linear"></video>
+        </div>
+        <div style="position:relative;overflow:hidden;aspect-ratio:16/9;background:var(--frame)">
+          <img src="../../../../media/w/desk-04.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+        </div>
+        <div data-play="visible" style="position:relative;overflow:hidden;aspect-ratio:16/9;background:var(--frame)">
+          <img src="../../../../media/w/mtm-atelier.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+          <video data-src="../../../../media/clips/n4.mp4" loop="" muted="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 320ms linear"></video>
+        </div>
+        <div style="position:relative;overflow:hidden;aspect-ratio:16/9;background:var(--frame)">
+          <img src="../../../../media/w/mtm-sketch.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+        </div>
+      </div>
+      <span style="display:var(--anno-label,none);padding:10px var(--edge) 0;font-family:var(--font-ui);font-size:10px;letter-spacing:0.1em;color:var(--accent)">3 · GALLERY VIDEO_GRID · 9 cells · 5 moving + 4 still · 4px · 16:9 COVER · AUTOPLAY_VISIBLE</span>
+    </section>
+  </sc-if>
+
+  <sc-if value="{{ showAsym }}" hint-placeholder-val="{{ false }}">
+    <section id="work-alt" data-grid="" data-screen-label="Block 3 alternate — GRID asymmetric" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:var(--gut);margin-top:var(--band);padding:0 var(--edge);outline:var(--anno-outline,none)">
+      <div data-play="visible" data-col="1/8" data-row="1" style="grid-column:1/8;grid-row:1;position:relative;overflow:hidden;aspect-ratio:2.39/1;background:var(--frame)">
+        <img src="../../../../media/w/mtm-table.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+        <video data-src="../../../../media/clips/c1.mp4" loop="" muted="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 320ms linear"></video>
+      </div>
+      <div data-play="visible" data-col="8/13" data-row="1/3" style="grid-column:8/13;grid-row:1/3;position:relative;overflow:hidden;background:var(--frame)">
+        <img src="../../../../media/w/desk-01.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+        <video data-src="../../../../media/clips/n2.mp4" loop="" muted="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 320ms linear"></video>
+      </div>
+      <p data-col="1/5" data-row="2" style="grid-column:1/5;grid-row:2;margin:0;padding-top:clamp(18px,2vw,34px);max-width:46ch;font-size:clamp(14px,0.98vw,16px);line-height:1.74;color:var(--muted)">Three bodies of work from Hanoi and Japan. Sound stays off until you open one.</p>
+      <div data-play="visible" data-col="5/8" data-row="2" style="grid-column:5/8;grid-row:2;position:relative;overflow:hidden;aspect-ratio:3/2;background:var(--frame)">
+        <img src="../../../../media/w/desk-03.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+        <video data-src="../../../../media/clips/c2.mp4" loop="" muted="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 320ms linear"></video>
+      </div>
+      <span style="display:var(--anno-label,none);grid-column:1/13;font-family:var(--font-ui);font-size:10px;letter-spacing:0.1em;color:var(--accent)">3-alt · GRID · VIDEO 1–7 / VIDEO 8–12 (2 rows) / TEXT 1–4 / VIDEO 5–7 · AUTOPLAY_VISIBLE</span>
+    </section>
+  </sc-if>
+
+  
+
+  <section id="about" data-grid="" data-screen-label="Block 4 — GRID text + portrait" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:end;margin-top:var(--band);padding:0 var(--edge);outline:var(--anno-outline,none)">
+    <h1 data-col="1/13" style="grid-column: 1/13; margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(40px,13.3cqw,250px); line-height: 0.92; letter-spacing: var(--display-track); text-transform: uppercase; width: 1340px; height: 208px">ABOUT ME</h1><div data-col="1/7" style="grid-column:1/7">
+      <p style="margin:0;max-width:46ch;font-size:clamp(15px,1.06vw,18px);line-height:1.74">I work small and close: one camera, available light where it serves the frame, and a grade that keeps the dark parts dark. Most of what is here was shot in Hanoi, some of it in Japan, all of it in the last three years.</p>
+      <p style="margin:clamp(14px,1.4vw,24px) 0 0;font-size:clamp(14px,0.98vw,16px);line-height:1.74;color:var(--muted)"><a href="#about" style="border-bottom:1px solid var(--rule);padding-bottom:2px">More about the work</a></p>
+    </div>
+    <div data-col="10/13" data-mobile-width="half" style="grid-column:10/13;position:relative;aspect-ratio:277/430;background:var(--frame)">
+      <img src="../../../../media/w/portrait.jpg" alt="Portrait of the filmmaker" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+    </div>
+    <span style="display:var(--anno-label,none);grid-column:1/13;margin-top:10px;font-family:var(--font-ui);font-size:10px;letter-spacing:0.1em;color:var(--accent)">4 · GRID · TEXT 1–6 + IMAGE 10–12 · align end · width mode: half at mobile</span>
+  </section><section data-screen-label="Block 5 — GALLERY JUSTIFIED_ROWS" style="margin-top:var(--band);outline:var(--anno-outline,none)">
+    <h2 style="margin:0 0 clamp(16px,1.6vw,28px);padding:0 var(--edge);font-family:var(--font-body);font-weight:400;font-size:clamp(14px,1vw,17px);font-style:italic;color:var(--muted)">Frames, not films</h2>
+    <div data-row-gallery="" style="display:flex;gap:4px;height:clamp(150px,19vw,330px)">
+      <div data-ar="2.39" style="position:relative;flex:2.39 1 0;background:var(--frame)"><img src="../../../../media/w/desk-02.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
+      <div data-ar="1.5" style="position:relative;flex:1.5 1 0;background:var(--frame)"><img src="../../../../media/w/desk-05.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
+      <div data-ar="0.8" style="position:relative;flex:0.8 1 0;background:var(--frame)"><img src="../../../../media/w/mtm-shopfront.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
+      <div data-ar="1.78" style="position:relative;flex:1.78 1 0;background:var(--frame)"><img src="../../../../media/w/mtm-mannequin.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
+    </div>
+    <span style="display:var(--anno-label,none);padding:10px var(--edge) 0;font-family:var(--font-ui);font-size:10px;letter-spacing:0.1em;color:var(--accent)">5 · GALLERY JUSTIFIED_ROWS · native aspect · one row · full bleed</span>
+  </section>
+
+  <footer id="contact" data-grid="" data-screen-label="Chrome / footer" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:baseline;margin-top:var(--band);padding:0 var(--edge)">
+    <div data-col="1/8" style="grid-column:1/8">
+      <a href="mailto:hello@khanhnhat.film" style="font-family:var(--font-display);font-size:clamp(20px,2.3vw,40px);letter-spacing:var(--display-track);color:var(--accent)">hello@khanhnhat.film</a>
+      <p style="margin:clamp(10px,1vw,18px) 0 0;font-size:14px;color:var(--muted)">Hanoi, Vietnam. Open to work through early 2027.</p>
+    </div>
+    <div data-col="9/13" style="grid-column:9/13;display:flex;justify-content:flex-end;gap:clamp(18px,2vw,34px);font-size:clamp(14px,1vw,16px)">
+      <a href="#work">Works</a>
+      <a href="#about">About</a>
+    </div>
+  </footer>
+
+  <div ref="{{ hudRef }}" style="display:var(--hud-display,none);position:fixed;right:10px;bottom:10px;z-index:9;background:rgba(12,10,8,0.88);color:#EDE7DD;font-family:var(--font-ui);font-size:11px;line-height:1.5;padding:8px 10px;white-space:pre"></div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440},&quot;mainField&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;VIDEO_GRID&quot;,&quot;ASYMMETRIC_GRID&quot;],&quot;default&quot;:&quot;VIDEO_GRID&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Composition&quot;},&quot;typePreset&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Title card&quot;,&quot;Plate&quot;,&quot;Monograph&quot;,&quot;Festival&quot;],&quot;default&quot;:&quot;Title card&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;},&quot;palette&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Bone &amp; vermilion&quot;,&quot;Silver gelatin&quot;,&quot;Tungsten&quot;],&quot;default&quot;:&quot;Bone &amp; vermilion&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;},&quot;motion&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;reduced&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Validation&quot;},&quot;annotate&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Validation&quot;}}">
+class Component extends DCLogic {
+  PALETTES = {
+    "Bone & vermilion": { surface:"#F7F3EC", ink:"#16120E", accent:"#C4361C", surfaceDark:"#0C0A08", inkDark:"#EDE7DD", muted:"#6C6862", rule:"#E2DCD2", frame:"#14110F" },
+    "Silver gelatin": { surface:"#F1F1EE", ink:"#121314", accent:"#B02E22", surfaceDark:"#0A0B0C", inkDark:"#E9E9E6", muted:"#6B6C6E", rule:"#DCDCD9", frame:"#101112" },
+    "Tungsten": { surface:"#F0E7D9", ink:"#1B1510", accent:"#C4361C", surfaceDark:"#0D0906", inkDark:"#EFE6D8", muted:"#6F675C", rule:"#DED4C4", frame:"#17110C" }
+  };
+  PRESETS = {
+    "Title card": { display:"'Marcellus',Georgia,serif", body:"'Newsreader',Georgia,serif", ui:"'Newsreader',Georgia,serif", track:"-0.005em" },
+    "Plate": { display:"'Marcellus',Georgia,serif", body:"'Newsreader',Georgia,serif", ui:"'Archivo',system-ui,sans-serif", track:"-0.005em" },
+    "Monograph": { display:"'Spectral',Georgia,serif", body:"'Spectral',Georgia,serif", ui:"'Spectral',Georgia,serif", track:"-0.02em" },
+    "Festival": { display:"'Archivo',system-ui,sans-serif", body:"'Newsreader',Georgia,serif", ui:"'Archivo',system-ui,sans-serif", track:"-0.035em" }
+  };
+
+  // Validation hook: window.__v2 = {motion:"reduced"} + window.__v2c.forceUpdate()
+  // lets a test drive the same switches the Tweaks panel drives. Prototype only.
+  opt(k, d) { const o = window.__v2 || {}; return o[k] !== undefined ? o[k] : (this.props[k] !== undefined ? this.props[k] : d); }
+
+  renderVals() {
+    const field = this.opt("mainField", "VIDEO_GRID");
+    return {
+      showWall: field === "VIDEO_GRID",
+      showAsym: field === "ASYMMETRIC_GRID",
+      rootRef: (el) => { this.root = el; },
+      hudRef: (el) => { this.hud = el; }
+    };
+  }
+
+  componentDidMount() {
+    window.__v2c = this;
+    this.applyTheme();
+    this.applyBreakpoint(true);
+    this.ro = new ResizeObserver(() => this.applyBreakpoint());
+    if (this.root) {
+      this.ro.observe(this.root);
+      this.root.querySelectorAll("[data-row-gallery]").forEach((r) => this.ro.observe(r));
+    }
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => this.applyBreakpoint(true));
+    window.addEventListener("load", () => this.applyBreakpoint(true));
+    this.mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    this.mqHandler = () => this.setupPlayback();
+    this.mq.addEventListener("change", this.mqHandler);
+    this.stats = { refused: 0, fps: 0, playing: 0 };
+    setTimeout(() => this.setupPlayback(), 0);
+    this.startHud();
+  }
+
+  componentDidUpdate() {
+    this.applyTheme();
+    this.applyBreakpoint(true);
+    setTimeout(() => this.setupPlayback(), 0);
+  }
+
+  componentWillUnmount() {
+    this.teardown();
+    if (this.ro) this.ro.disconnect();
+    if (this.mq) this.mq.removeEventListener("change", this.mqHandler);
+    if (this.raf) cancelAnimationFrame(this.raf);
+  }
+
+  applyTheme() {
+    const r = document.documentElement;
+    const p = this.PALETTES[this.opt("palette", "Bone & vermilion")] || this.PALETTES["Bone & vermilion"];
+    const t = this.PRESETS[this.opt("typePreset", "Title card")] || this.PRESETS["Title card"];
+    r.style.setProperty("--surface", p.surface);
+    r.style.setProperty("--ink", p.ink);
+    r.style.setProperty("--accent", p.accent);
+    r.style.setProperty("--surface-dark", p.surfaceDark);
+    r.style.setProperty("--ink-dark", p.inkDark);
+    r.style.setProperty("--muted", p.muted);
+    r.style.setProperty("--rule", p.rule);
+    r.style.setProperty("--frame", p.frame);
+    r.style.setProperty("--font-display", t.display);
+    r.style.setProperty("--font-body", t.body);
+    r.style.setProperty("--font-ui", t.ui);
+    r.style.setProperty("--display-track", t.track);
+    document.body.style.background = p.surface;
+    const anno = this.opt("annotate", false);
+    r.style.setProperty("--anno-outline", anno ? "1px dashed rgba(196,54,28,0.55)" : "none");
+    r.style.setProperty("--anno-label", anno ? "block" : "none");
+    r.style.setProperty("--hud-display", anno ? "block" : "none");
+  }
+
+  breakpointOf(w) { return w >= 1024 ? "desktop" : w >= 640 ? "tablet" : "mobile"; }
+
+  applyBreakpoint(force) {
+    if (!this.root) return;
+    const bp = this.breakpointOf(this.root.clientWidth || window.innerWidth);
+    const changed = bp !== this.bp;
+    this.bp = bp;
+    this.justifyRows(bp);           // width-driven, so it runs on every resize
+    if (!force && !changed) return;
+    document.documentElement.style.setProperty("--wall-cols", bp === "desktop" ? "3" : bp === "tablet" ? "2" : "1");
+
+    this.root.querySelectorAll("[data-col]").forEach((el) => {
+      const stack = bp === "mobile";
+      el.style.gridColumn = stack ? "1 / -1" : el.dataset.col;
+      if (el.dataset.row) el.style.gridRow = stack ? "auto" : el.dataset.row;
+      el.style.maxWidth = stack && el.dataset.mobileWidth === "half" ? "58%" : "";
+    });
+  }
+
+  // JUSTIFIED_ROWS: a real justified solve. Cells in a row share one height and
+  // keep native aspect; the row is flush by construction, so wrapping leaves no
+  // hole. Desktop takes all cells in one row; narrower widths chunk them.
+  justifyRows(bp) {
+    const perRow = bp === "desktop" ? 0 : bp === "tablet" ? 2 : 1;
+    const gap = 4;
+    this.root.querySelectorAll("[data-row-gallery]").forEach((row) => {
+      const cells = Array.from(row.querySelectorAll("[data-ar]"));
+      if (!cells.length) return;
+      if (!row.dataset.h) row.dataset.h = row.style.height;
+      // 1px of slack: a chunk that sums to exactly the row width can wrap on a
+      // sub-pixel rounding and break the row it just solved.
+      const W = row.clientWidth ? row.clientWidth - 1 : 0;
+      if (!perRow || !W) {
+        row.style.display = "flex";
+        row.style.flexWrap = "nowrap";
+        row.style.height = row.dataset.h;
+        row.style.alignItems = "";
+        cells.forEach((c) => { c.style.flex = c.dataset.ar + " 1 0"; c.style.width = ""; c.style.height = ""; });
+        return;
+      }
+      row.style.display = "flex";
+      row.style.flexWrap = "wrap";
+      row.style.height = "auto";
+      row.style.alignItems = "flex-start";
+      for (let i = 0; i < cells.length; i += perRow) {
+        const chunk = cells.slice(i, i + perRow);
+        const sum = chunk.reduce((t, c) => t + parseFloat(c.dataset.ar), 0);
+        const h = (W - gap * (chunk.length - 1)) / sum;
+        let used = 0;
+        chunk.forEach((c, j) => {
+          const w = j === chunk.length - 1
+            ? W - gap * (chunk.length - 1) - used
+            : Math.round(parseFloat(c.dataset.ar) * h);
+          used += w;
+          c.style.flex = "0 0 auto";
+          c.style.width = w + "px";
+          c.style.height = Math.round(h) + "px";
+          c.style.aspectRatio = "";
+        });
+      }
+    });
+  }
+
+  isReduced() {
+    return this.opt("motion", "auto") === "reduced" || (this.mq && this.mq.matches);
+  }
+
+  teardown() {
+    if (this.obsNear) this.obsNear.disconnect();
+    if (this.obsVis) this.obsVis.disconnect();
+    (this.cells || []).forEach((c) => this.release(c));
+  }
+
+  setupPlayback() {
+    if (!this.root) return;
+    this.teardown();
+    this.stats.refused = 0;
+    const cells = Array.from(this.root.querySelectorAll("[data-play]"));
+    this.cells = cells;
+    const reduced = this.isReduced();
+
+    cells.forEach((c) => {
+      const v = c.querySelector("video");
+      if (!v) return;
+      v.muted = true;
+      v.loop = true;
+      v.playsInline = true;              // property, not an empty-string attribute
+      v.setAttribute("playsinline", "playsinline");
+      v.preload = "none";
+      if (!v.dataset.wired) {
+        v.dataset.wired = "1";
+        v.addEventListener("canplay", () => { if (c.dataset.want === "1") this.play(c); });
+        v.addEventListener("loadeddata", () => { if (c.dataset.want === "1") this.play(c); });
+        v.addEventListener("playing", () => { v.style.opacity = "1"; });
+      }
+    });
+
+    if (reduced) {
+      cells.forEach((c) => { c.dataset.want = "0"; this.release(c); });
+      return;
+    }
+
+    this.obsNear = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        const c = e.target;
+        if (e.isIntersecting) {
+          this.prepare(c);
+          // Ambient is driven by preparation, not by a visibility transition —
+          // it must restart after a release without waiting to be "seen".
+          if (c.dataset.play === "ambient") { c.dataset.want = "1"; this.play(c); }
+        } else if (c.dataset.play === "ambient" || c.dataset.want !== "1") { c.dataset.want = "0"; this.release(c); }
+      });
+    }, { rootMargin: "200% 0px" });
+
+    this.obsVis = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        const c = e.target;
+        if (c.dataset.play === "ambient") return;
+        if (e.isIntersecting && e.intersectionRatio >= 0.2) { c.dataset.want = "1"; this.prepare(c); this.play(c); }
+        else { c.dataset.want = "0"; const v = c.querySelector("video"); if (v) v.pause(); }
+      });
+    }, { threshold: [0, 0.2, 0.5] });
+
+    cells.forEach((c) => {
+      this.obsNear.observe(c);
+      this.obsVis.observe(c);
+      if (c.dataset.play === "ambient") {
+        // Never depends on a visibility transition: a standalone ambient surface
+        // already in view at load is never observed entering.
+        c.dataset.want = "1";
+        this.prepare(c);
+        this.play(c);
+      }
+    });
+  }
+
+  prepare(c) {
+    const v = c.querySelector("video");
+    if (!v) return;
+    if (!v.getAttribute("src")) { v.setAttribute("src", v.dataset.src); v.preload = "auto"; v.load(); }
+  }
+
+  play(c) {
+    const v = c.querySelector("video");
+    if (!v || this.isReduced() || c.dataset.want !== "1") return;
+    // A source that is not decodable yet is not a refusal: leave it to the
+    // canplay/loadeddata re-drive rather than burning a rejected play().
+    if (v.readyState < 2) return;
+    const p = v.play();
+    if (p && p.catch) p.catch((e) => {
+      if (e && e.name === "AbortError") { setTimeout(() => this.play(c), 120); return; }
+      c.dataset.refused = "1"; this.stats.refused++; v.style.opacity = "0";
+    });
+  }
+
+  release(c) {
+    const v = c.querySelector("video");
+    if (!v) return;
+    v.pause();
+    v.style.opacity = "0";
+    if (v.getAttribute("src")) { v.removeAttribute("src"); v.load(); }
+  }
+
+  startHud() {
+    let frames = 0, last = performance.now();
+    const tick = (now) => {
+      frames++;
+      if (now - last >= 1000) {
+        this.stats.fps = Math.round((frames * 1000) / (now - last));
+        frames = 0; last = now;
+        const playing = (this.cells || []).filter((c) => { const v = c.querySelector("video"); return v && !v.paused && !v.ended && v.readyState > 2; }).length;
+        this.stats.playing = playing;
+        if (this.hud) {
+          this.hud.textContent =
+            this.stats.fps + " fps\n" +
+            playing + " streams playing\n" +
+            (this.cells || []).length + " playback surfaces\n" +
+            this.stats.refused + " autoplay refused\n" +
+            (this.bp || "-") + " · " + (this.isReduced() ? "reduced motion" : "motion on");
+        }
+      }
+      this.raf = requestAnimationFrame(tick);
+    };
+    this.raf = requestAnimationFrame(tick);
+  }
+}
+
+</script>
+</body>
+</html>

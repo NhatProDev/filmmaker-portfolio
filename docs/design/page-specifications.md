@@ -22,12 +22,12 @@ does not pretend otherwise.
 | **Home** | **VISUALLY EXPLORED** | ✅ candidate | ✗ none | A proposed default composition, block by block |
 | **Art Works** | **VISUALLY EXPLORED** | ✅ candidate (2C v2) | ✅ ref 3 | A proposed structure, element by element |
 | **Project Detail** | **VISUALLY EXPLORED** | ✅ candidate (1B v2) | ✅ ref 4 | A proposed composition, block by block |
-| **About Me** | **PARTIALLY EVIDENCED** | ✗ | ✅ refs 1, 2 | Two reference images and a width-mode requirement; no composition |
+| **About Me** | **VISUALLY EXPLORED** | ✅ candidate (3B v2) | ✅ refs 1, 2 | A proposed composition, section by section |
 | **Contact** | **STRUCTURALLY SPECIFIED** | ✗ | ✗ none | Scope and prohibitions only; no visual direction at all |
 | **Private Project Gate** | **STRUCTURALLY SPECIFIED** | ✗ | ✗ none | An access contract and a stated design tension; no composition |
 
-**Three pages are VISUALLY EXPLORED — Home, Art Works and Project Detail.** None
-is approved. The other three have no exploration.
+**Four pages are VISUALLY EXPLORED — Home, Art Works, Project Detail and About
+Me.** None is approved. Contact and the Private Project Gate have no exploration.
 
 ### What each grade permits
 
@@ -49,10 +49,11 @@ design for its page is the specific failure this table exists to prevent.
 approves nothing. None has Project Owner / Architect approval.
 
 Worth noting how the evidence now sits: **Home has been explored but has no
-reference evidence; Art Works and Project Detail have both.** Exploration and
-reference evidence have now met on two of the six pages. **About Me** still holds
-reference evidence that has never been taken into exploration; Contact and the
-Private Project Gate have neither.
+reference evidence; Art Works, Project Detail and About Me have both.**
+Exploration and reference evidence have now met on three of the six pages. Every
+page carrying reference evidence has now been explored. **Contact and the Private
+Project Gate have neither**, and are the only two pages with no exploration at
+all.
 
 **For every page below VISUALLY EXPLORED, this document defines constraints
 only.** Where a visual composition is not yet determined it is marked
@@ -570,8 +571,15 @@ reverses on this page.
 
 ## 4. About Me
 
-> **Maturity: PARTIALLY EVIDENCED.** References 1 and 2 only. **No composition has been designed.**
-> **[PENDING VISUAL EXPLORATION]**
+> **Maturity: VISUALLY EXPLORED.** Candidate composition **3B v2**, **not approved**.
+>
+> Evidence: `docs/design/prototypes/about/About Me 3B v2.dc.html` and
+> `about-me-3b-v2.md`. Sibling directions 3A, 3B v1 and 3C are retained in
+> `About Me Directions.dc.html` as exploration record only. References 1 and 2
+> continue to apply.
+>
+> About Me remains **content/file-managed** (§4.2). Exploring it required **no
+> new architecture** and no composer blocks.
 
 ### 4.1 Purpose
 
@@ -603,7 +611,84 @@ frames, deliberately offset so they intersect, with content **breaking out of
 its own frames**. Scattered behind-the-scenes collage at varied sizes. Roughly
 40% of the canvas empty. Zero accent colour — all colour from the photography.
 
-### 4.5 The About portrait — width mode **[INVARIANT]**
+### 4.5 Candidate composition — 3B v2 **[DEFAULT — candidate, not a template]**
+
+Recorded from `docs/design/prototypes/about/About Me 3B v2.dc.html` and its
+review record `docs/design/prototypes/about/about-me-3b-v2.md`. Directions 3A,
+3B v1 and 3C remain in `docs/design/prototypes/about/About Me Directions.dc.html`
+as exploration record only.
+
+**The core idea: About Me is a filmmaker profile feature.** Writing leads, the
+portrait establishes identity, process imagery is evidence, experience is
+editorial metadata.
+
+| # | Section | Notes |
+|---|---|---|
+| 1 | **Site chrome** | Identity mark + nav on the same 12 columns. Not content. |
+| 2 | **Biography-led opening** | Text cols 1–7 · portrait cols 9–12 · both hang from one **shared datum rule**. The first evidence image sits under the biography. |
+| 3 | **Immutable portrait** | `media/w/portrait.jpg` at **native aspect**, never cropped — see §4.6a |
+| 4 | **Process / BTS evidence** | Three real frames, each answering a line of writing from the opposite side |
+| 5 | **Restrained Selected Experience** | Four ruled entries · year in a 5ch column · role and production in body type |
+| 6 | **Closing contact line** | Present in the candidate; the page closes rather than stopping |
+
+The reading sequence is **one descending spine**: *identity → biography →
+evidence → experience*. Text always begins at column 1 and images answer from
+the opposite side.
+
+#### The bounding device is rules, not a container **[DEFAULT]**
+
+The biography is bounded by a **shared datum rule** spanning all twelve columns
+above it and a **partial closing rule** at 46% of the column below it.
+
+**This is deliberately a partial rule, not a card-style full rectangle.** The
+earlier direction used a bounding rectangle; it was removed. Structure without a
+container. The portrait hangs from the same datum as the text, offset below it —
+so non-alignment reads as a deliberate offset from a common line rather than as
+two unrelated columns.
+
+#### Process imagery is evidence, not a gallery **[DEFAULT]**
+
+Three images, each with a stated reason and a caption describing what the frame
+actually is. Each is answered by a short line of writing on the opposite side,
+so the imagery reads as evidence *for the text*.
+
+**Deliberately the sparser surface:** three images across the page, against 9–18
+frames in an Art Works sheet. About is not a portfolio gallery, and its imagery
+must not be read as one.
+
+#### What the candidate does not contain **[INVARIANT]**
+
+Verified absent from the prototype markup, not merely asserted:
+
+**No timeline UI · no cards · no skill meters · no software or logo cloud · no
+badges or icons · no arbitrary overlap primitive.**
+
+Selected Experience is metadata at the foot of a feature, **not a CV**. No
+`box-shadow`, no `border-radius`, no authored `z-index` appears in the
+composition.
+
+#### About requires no new architecture **[INVARIANT]**
+
+**About Me is content/file-managed in V1** (§4.2, CLAUDE.md §19, ADR-0007).
+Exploring it changed nothing about that:
+
+- **It is not a composer-owned page.** No composed regions, no per-section
+  layout authoring.
+- **No arbitrary blocks are required.** The page is grid placement, rules,
+  images at native aspect and text.
+- **No free-form layout editor is required.**
+- **No new overlap primitive is required.** The candidate does **not** touch
+  `design-system.md` §5.5's deferred inter-child overlap, and that deferral
+  stands.
+- **No schema, contract or ADR change is required.**
+
+#### This is a candidate arrangement, not a universal template
+
+The current desktop composition is **candidate evidence**. It is one accepted
+arrangement of a content-managed page, not a fixed template and not an approved
+specification. The prototype's own header states it approves nothing.
+
+### 4.6 The About portrait — width mode **[INVARIANT]**
 
 The About portrait is the **motivating case for width mode**
 (`design-system.md` §5.3).
@@ -613,23 +698,85 @@ rather than an editorial portrait. **Width mode lets it stay deliberately
 narrower than its container after stacking.** This is why width mode is required
 rather than optional.
 
-### 4.6 Constraints
+### 4.6a The portrait is immutable at native aspect **[INVARIANT]**
+
+The About portrait is `media/w/portrait.jpg` — **native 970 × 1505, aspect
+0.6445**, verified against the file itself.
+
+**It is rendered at native aspect and must never be altered:** no crop, no zoom,
+no reframe, no transform, no `object-fit: cover`, no `object-position`. The
+candidate renders it with width and automatic height only.
+
+**The prototype enforces this with a live audit** that compares natural to
+rendered aspect and inspects computed `object-fit`, printing `✗ ALTERED` if the
+aspect diverges or `cover` ever appears. That audit is evidence the rule is
+holdable, not a specification of how to implement it.
+
+This sits alongside — and does not replace — the width-mode requirement in §4.6.
+Width mode governs **how wide the portrait is allowed to be** after stacking;
+this governs **that its aspect is never changed** at any width. A width cap is
+not a crop.
+
+### 4.7 Constraints
 
 **[INVARIANT]** Reading measure ≤ 46ch · negative space is load-bearing and must
 not be backfilled · no card chrome · the oversized display gesture is permitted
 here and is one per view.
 
-### 4.7 Unresolved **[PENDING VISUAL EXPLORATION]**
+### 4.8 Unresolved **[PENDING VISUAL EXPLORATION]**
 
-Whether About uses the hairline-frame device from reference 2, the overlap
-device from reference 1, or both · portrait treatment and placement · whether
-tool/credential badges appear · how the collage composes responsively · mobile
-composition.
+**Mobile and tablet remain pending visual validation.** The candidate was
+exercised at desktop widths only, and the prototype records its responsive risks
+without designing for them.
 
-**Content blocker:** the current About portrait asset is **a crop out of a
-screenshot and is soft at display size**. A master file is outstanding.
+Carried responsive risks, deliberately **not** solved in architecture:
 
-### 4.8 States
+1. **Portrait/text stacking order.** DOM order puts the biography before the
+   portrait, so mobile leads with text. Defensible for a writing-led page, but
+   identity arrives after three paragraphs.
+2. **Loss of desktop non-alignment.** The deliberate offset and the tail that
+   nearly meets *are* the composition; stacked, both vanish and the page risks
+   becoming a plain column.
+3. **The shared datum becoming a simple divider.** The datum spans twelve
+   columns; above a single stacked column it may read as a divider rather than
+   as a line two things hang from.
+4. **Process-image and text pairing weakening when stacked.** Each image
+   currently answers a line of writing from the opposite side; stacked, that
+   becomes image-then-text and the "answer" relationship weakens.
+5. **Caption reading order** once images and their answering text are stacked.
+6. **Selected Experience row wrapping.** Year and role share a row; at 375px
+   that wraps, and the year likely becomes a line above rather than a column
+   beside.
+7. **Exact mobile treatment of the biography rules.** There is no frame to lose,
+   only rules — but the partial closing rule set as a percentage may need a
+   fixed measure at narrow widths.
+
+#### Publication asset gaps — not architecture blockers
+
+Recorded by the prototype and **explicitly not blocking** the candidate
+(`about-me-3b-v2.md` §0 decision 11, §7):
+
+- **One missing on-set operating frame** (~3:2, hands and camera in the room).
+  The prototype holds a designed placeholder slot for it, which is the accepted
+  interim state.
+- **A second working portrait**, distinct from the seated one.
+- **About-specific process imagery.** Two process frames are currently shared
+  with Art Works as project covers — acceptable for judging composition, but for
+  publication About should own its own.
+- **A master file for the portrait.** Separately recorded in
+  `prototypes/home/home-baseline-v2.md` §9: the current asset is a crop out of a
+  screenshot and is soft at display size. Its *aspect* is correct and immutable
+  (§4.6a); its *resolution* is the gap.
+
+**Do not substitute unrelated media for any of these.**
+
+#### Copy
+
+Biography copy at all four levels is **provisional**, as are the Selected
+Experience entries and the captions, which describe the prototype's actual
+frames.
+
+### 4.9 States
 
 Static content; no loading, empty or error states beyond the media well.
 
@@ -751,9 +898,8 @@ Hold on every page regardless of exploration status.
 
 1. **Approve or amend** `design-direction.md`, `design-system.md` and this
    document. All three are Draft.
-2. **Explore the three pending pages.** About Me holds reference evidence that
-   has never been taken into exploration; Contact and the Private Project Gate
-   have no evidence at all.
+2. **Explore the two pending pages.** Contact and the Private Project Gate have
+   no evidence at all — no exploration and no reference.
 3. **Define narrow-width behaviour for `JUSTIFIED_ROWS`, `HORIZONTAL_STRIP` and
    `SLIDESHOW`.** The principle is approved (`design-system.md` §11.5) — GALLERY
    does not inherit GRID child stacking and every mode owes its own bounded

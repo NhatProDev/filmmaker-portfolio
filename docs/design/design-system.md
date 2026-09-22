@@ -923,7 +923,7 @@ Carried forward. **Do not close these by inference during implementation.**
 | 6 | **`VIDEO_GRID` column maximum** — a bound must exist; the number does not. | Unresolved |
 | 7 | **`AUTOPLAY_VISIBLE` visibility threshold** — what counts as "sufficiently visible". | Unresolved |
 | 8 | **Mobile composition for every page** — no reference evidence exists. | Unresolved |
-| 9 | **About, Contact, Private Gate** — not visually designed. Home, Art Works (2C v2) and Project Detail (1B v2) each now have a candidate. | **Pending design exploration** |
+| 9 | **Contact, Private Gate** — not visually designed. Home, Art Works (2C v2), Project Detail (1B v2) and About Me (3B v2) each now have a candidate. | **Pending design exploration** |
 | 10 | **GALLERY narrow-width behaviour per presentation mode** — the *principle* is approved (§11.5): GALLERY does not inherit GRID child stacking and every mode owes bounded narrow-width behaviour. `VIDEO_GRID` satisfies it via column counts; **`JUSTIFIED_ROWS`, `HORIZONTAL_STRIP` and `SLIDESHOW` still need theirs defined.** Exact behaviours pending mobile validation. | **Principle approved; per-mode behaviour pending** |
 | 11 | **Display coefficient as a preset property** — `13.3cqw` is tuned to one face; face substitution changes clipping without anyone authoring it (§1.4). | **Proposed amendment, not applied** |
 | 12 | **Bounded HERO overlay content** — the *capability* is approved (ADR-0010): intra-block, title from `projects.title`, closed config, dismissal on media activation, `CLICK_TO_PLAY` or IMAGE only. Its **visual use on Project Detail remains candidate**, and the narrow-width stacked treatment awaits mobile validation. | **Capability approved; visual use candidate** |

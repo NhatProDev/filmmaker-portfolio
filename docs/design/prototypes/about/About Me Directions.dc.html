@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..600;1,6..72,200..500&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --surface:#F7F3EC; --ink:#16120E; --accent:#C4361C; --muted:#6C6862; --rule:#E2DCD2; --frame:#14110F;
+  --font-display:'Marcellus',Georgia,serif; --font-body:'Newsreader',Georgia,serif; --font-ui:'Newsreader',Georgia,serif;
+  --display-track:-0.005em; --edge:56px; --gut:20px; --band:140px;
+}
+body{margin:0;background:#E6E1D8}
+a{color:inherit;text-decoration:none}
+a:hover{color:var(--accent)}
+img{display:block}
+</style>
+</helmet>
+<div ref="{{ rootRef }}" style="font-family:var(--font-body);color:var(--ink);padding:56px 48px 120px">
+
+  <div style="max-width:74ch;margin-bottom:38px">
+    <h1 style="margin:0;font-family:var(--font-display);font-size:32px;letter-spacing:var(--display-track);text-transform:uppercase">About Me — three directions</h1>
+    <p style="margin:14px 0 0;font-size:17px;line-height:1.7">Person, process and authored voice, in the existing light editorial language. The portrait is the real asset at its native 970 × 1505 in all three — never cropped, never <em>cover</em>. Turn on <em>review</em> for block labels and a live portrait-integrity audit. Nothing here is approved.</p>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:72px">
+
+    <div id="3a" style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
+        <span style="font-family:var(--font-ui);font-size:12px;letter-spacing:0.18em;text-transform:uppercase;background:var(--ink);color:var(--surface);padding:4px 9px">3A</span>
+        <span style="font-family:var(--font-display);font-size:22px;letter-spacing:var(--display-track)">Portrait / typographic</span>
+        <span style="font-size:15px;color:var(--muted)">An opening spread. The word and the person occupy the same space.</span>
+      </div>
+
+      <div data-page="" style="width:1440px;background:var(--surface);padding-bottom:130px">
+        <header data-grid="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:baseline;padding:30px var(--edge) 0">
+          <a href="#3a" style="grid-column:1/6;font-family:var(--font-ui);font-size:12px;letter-spacing:0.22em;text-transform:uppercase">Nguyen Khanh Nhat</a>
+          <nav style="grid-column:7/13;display:flex;justify-content:flex-end;gap:34px;font-size:16px">
+            <a href="#3a">Works</a><a href="#3a" style="color:var(--accent)">About</a><a href="#3a">Contact</a>
+          </nav>
+        </header>
+
+        <section data-block="GRID · display word + portrait, one row, overlapping spans" style="container-type:inline-size;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);padding:96px var(--edge) 0;outline:var(--anno,none)">
+          <h2 style="grid-column:1/13;grid-row:1;align-self:end;position:relative;z-index:3;margin:0;font-family:var(--font-display);font-size:19.6cqw;line-height:0.86;letter-spacing:var(--display-track);text-transform:uppercase;color:var(--accent)">About</h2>
+          <div data-portrait="" style="grid-column:7/11;grid-row:1;align-self:start;position:relative;z-index:1">
+            <img src="../../../../media/w/portrait.jpg" alt="Nguyen Khanh Nhat" style="width:100%;height:auto">
+          </div>
+        </section>
+
+        <section data-block="GRID · statement + identification" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:start;padding:80px var(--edge) 0;outline:var(--anno,none)">
+          <div style="grid-column:1/6">
+            <p style="margin:0;font-size:25px;line-height:1.36;max-width:24ch">I light rooms that already have light in them, and I stay until the room gives something back.</p>
+            <p style="margin:26px 0 0;font-size:17px;line-height:1.74;max-width:46ch;color:var(--muted)">Cinematographer and photographer in Hanoi. I shoot, light and grade — mostly documentary and commercial work, mostly with one camera and whatever the room offers.</p>
+          </div>
+          <div style="grid-column:7/11">
+            <p style="margin:0;font-family:var(--font-display);font-size:23px;letter-spacing:var(--display-track);color:var(--accent)">Nguyen Khanh Nhat</p>
+            <p style="margin:8px 0 0;font-size:16px;color:var(--muted)">Cinematography · Photography · Colour</p>
+          </div>
+        </section>
+
+        <section data-block="TEXT · quiet fact list" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);padding:var(--band) var(--edge) 0;outline:var(--anno,none)">
+          <dl style="grid-column:1/4;margin:0;font-size:15px">
+            <div style="display:flex;justify-content:space-between;gap:16px;border-top:1px solid var(--rule);padding:9px 0"><dt style="color:var(--muted);font-style:italic">Based</dt><dd style="margin:0">Hanoi</dd></div>
+            <div style="display:flex;justify-content:space-between;gap:16px;border-top:1px solid var(--rule);padding:9px 0"><dt style="color:var(--muted);font-style:italic">Shooting since</dt><dd style="margin:0">2019</dd></div>
+            <div style="display:flex;justify-content:space-between;gap:16px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:9px 0"><dt style="color:var(--muted);font-style:italic">Languages</dt><dd style="margin:0">Vietnamese, English</dd></div>
+          </dl>
+          <p style="grid-column:9/13;margin:0;align-self:end;font-size:16px;text-align:right"><a href="#3a" style="border-bottom:1px solid var(--rule);padding-bottom:3px">hello@khanhnhat.film</a></p>
+        </section>
+      </div>
+    </div>
+
+    <div id="3b" style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
+        <span style="font-family:var(--font-ui);font-size:12px;letter-spacing:0.18em;text-transform:uppercase;background:var(--ink);color:var(--surface);padding:4px 9px">3B</span>
+        <span style="font-family:var(--font-display);font-size:22px;letter-spacing:var(--display-track)">Editorial / process</span>
+        <span style="font-size:15px;color:var(--muted)">A filmmaker profile feature: writing first, evidence distributed down the page.</span>
+      </div>
+
+      <div data-page="" style="width:1440px;background:var(--surface);padding-bottom:130px">
+        <header data-grid="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:baseline;padding:30px var(--edge) 0">
+          <a href="#3b" style="grid-column:1/6;font-family:var(--font-ui);font-size:12px;letter-spacing:0.22em;text-transform:uppercase">Nguyen Khanh Nhat</a>
+          <nav style="grid-column:7/13;display:flex;justify-content:flex-end;gap:34px;font-size:16px">
+            <a href="#3b">Works</a><a href="#3b" style="color:var(--accent)">About</a><a href="#3b">Contact</a>
+          </nav>
+        </header>
+
+        <section data-block="GRID · framed text + portrait, deliberately unaligned" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:start;padding:80px var(--edge) 0;outline:var(--anno,none)">
+          <div style="grid-column:1/8;border:1px solid var(--rule);padding:44px 46px">
+            <span style="display:block;font-family:var(--font-ui);font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted)">About me</span>
+            <p style="margin:26px 0 0;font-size:22px;line-height:1.42;max-width:30ch">I started shooting weddings to pay for a camera, and stayed for the part where nobody is performing.</p>
+            <p style="margin:22px 0 0;font-size:17px;line-height:1.76;max-width:52ch">Most of my work is documentary and commercial: tailors, kitchens, courts, workshops. I shoot with one camera and available light where it serves the frame, and I grade my own material because the grade is where the intent either survives or does not.</p>
+            <p style="margin:18px 0 0;font-size:17px;line-height:1.76;max-width:52ch;color:var(--muted)">Before this I cut other people's footage for three years, which is the best training there is for knowing what you actually need to shoot.</p>
+          </div>
+          <div data-portrait="" style="grid-column:10/13;margin-top:104px">
+            <img src="../../../../media/w/portrait.jpg" alt="Nguyen Khanh Nhat" style="width:100%;height:auto">
+            <p style="margin:12px 0 0;font-size:13px;font-style:italic;color:var(--muted)">Hanoi, 2025</p>
+          </div>
+        </section>
+
+        <section data-block="GRID · process evidence, loose sequence" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);padding:var(--band) var(--edge) 0;outline:var(--anno,none)">
+          <figure style="grid-column:1/7;margin:0">
+            <img src="../../../../media/w/desk-01.jpg" alt="" style="width:100%;height:auto">
+            <figcaption style="margin-top:11px;font-size:13px;font-style:italic;color:var(--muted)">Grading at home, second pass</figcaption>
+          </figure>
+          <figure style="grid-column:8/13;margin:150px 0 0">
+            <img src="../../../../media/w/desk-03.jpg" alt="" style="width:100%;height:auto">
+            <figcaption style="margin-top:11px;font-size:13px;font-style:italic;color:var(--muted)">Rough assembly, day four</figcaption>
+          </figure>
+        </section>
+
+        <section data-block="GRID · missing BTS + process still" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:start;padding:var(--band) var(--edge) 0;outline:var(--anno,none)">
+          <figure data-missing="on set — operating, 3:2" style="grid-column:2/8;margin:0">
+            <div style="aspect-ratio:3/2;border:1px solid var(--rule);display:flex;flex-direction:column;justify-content:flex-end;padding:18px;background:repeating-linear-gradient(135deg,rgba(226,220,210,0.5) 0 12px,transparent 12px 24px)">
+              <span style="font-family:var(--font-ui);font-size:12px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted)">Missing asset</span>
+              <span style="margin-top:6px;font-size:16px">On set — operating. No real BTS frame exists in the media set.</span>
+            </div>
+            <figcaption style="margin-top:11px;font-size:13px;font-style:italic;color:var(--muted)">Placeholder, not imagery</figcaption>
+          </figure>
+          <figure style="grid-column:9/13;margin:90px 0 0">
+            <img src="../../../../media/w/mtm-atelier.jpg" alt="" style="width:100%;height:auto">
+            <figcaption style="margin-top:11px;font-size:13px;font-style:italic;color:var(--muted)">The tailor's workroom, before the lights</figcaption>
+          </figure>
+        </section>
+
+        <section data-block="TEXT · selected experience, ruled list" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);padding:var(--band) var(--edge) 0;outline:var(--anno,none)">
+          <h3 style="grid-column:1/4;margin:0;font-family:var(--font-body);font-weight:400;font-style:italic;font-size:17px;color:var(--muted)">Selected experience</h3>
+          <dl style="grid-column:5/12;margin:0;font-size:16px">
+            <div style="display:flex;gap:26px;border-top:1px solid var(--rule);padding:12px 0"><dt style="width:5ch;color:var(--muted)">2026</dt><dd style="margin:0">DP and colourist — <em>Made to Measure</em>, Trần &amp; Sons</dd></div>
+            <div style="display:flex;gap:26px;border-top:1px solid var(--rule);padding:12px 0"><dt style="width:5ch;color:var(--muted)">2025</dt><dd style="margin:0">DP — <em>Court</em>, Nike Vietnam</dd></div>
+            <div style="display:flex;gap:26px;border-top:1px solid var(--rule);padding:12px 0"><dt style="width:5ch;color:var(--muted)">2024</dt><dd style="margin:0">Editor and colourist — freelance, Hanoi</dd></div>
+            <div style="display:flex;gap:26px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:12px 0"><dt style="width:5ch;color:var(--muted)">2019</dt><dd style="margin:0">First paid shoot</dd></div>
+          </dl>
+        </section>
+      </div>
+    </div>
+
+    <div id="3c" style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
+        <span style="font-family:var(--font-ui);font-size:12px;letter-spacing:0.18em;text-transform:uppercase;background:var(--ink);color:var(--surface);padding:4px 9px">3C</span>
+        <span style="font-family:var(--font-display);font-size:22px;letter-spacing:var(--display-track)">Hybrid — one reading column</span>
+        <span style="font-size:15px;color:var(--muted)">Identity opens it; the text then carries, and process images punctuate the margin.</span>
+      </div>
+
+      <div data-page="" style="width:1440px;background:var(--surface);padding-bottom:130px">
+        <header data-grid="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:baseline;padding:30px var(--edge) 0">
+          <a href="#3c" style="grid-column:1/6;font-family:var(--font-ui);font-size:12px;letter-spacing:0.22em;text-transform:uppercase">Nguyen Khanh Nhat</a>
+          <nav style="grid-column:7/13;display:flex;justify-content:flex-end;gap:34px;font-size:16px">
+            <a href="#3c">Works</a><a href="#3c" style="color:var(--accent)">About</a><a href="#3c">Contact</a>
+          </nav>
+        </header>
+
+        <section data-block="GRID · portrait + title, shared baseline" style="container-type:inline-size;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:end;padding:86px var(--edge) 0;outline:var(--anno,none)">
+          <div data-portrait="" style="grid-column:1/5">
+            <img src="../../../../media/w/portrait.jpg" alt="Nguyen Khanh Nhat" style="width:100%;height:auto">
+          </div>
+          <div style="grid-column:6/13;border-bottom:1px solid var(--rule);padding-bottom:22px">
+            <h2 style="margin:0;font-family:var(--font-display);font-size:9.4cqw;line-height:0.9;letter-spacing:var(--display-track);text-transform:uppercase">About</h2>
+            <p style="margin:34px 0 0;font-size:25px;line-height:1.36;max-width:26ch">I light rooms that already have light in them, and I stay until the room gives something back.</p>
+          </div>
+        </section>
+
+        <section data-block="GRID · reading column 4–9, images in the opposite margin" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);padding:110px var(--edge) 0;outline:var(--anno,none)">
+          <p style="grid-column:4/10;grid-row:1;margin:0;font-size:17px;line-height:1.78;max-width:52ch">Cinematographer and photographer in Hanoi. Most of the work is documentary and commercial — tailors, kitchens, courts, workshops — shot with one camera and the light the room already has.</p>
+
+          <figure style="grid-column:1/4;grid-row:2;margin:0;padding-top:52px">
+            <img src="../../../../media/w/desk-01.jpg" alt="" style="width:100%;height:auto">
+            <figcaption style="margin-top:10px;font-size:13px;font-style:italic;color:var(--muted)">Grading at home, second pass</figcaption>
+          </figure>
+          <p style="grid-column:4/10;grid-row:2;margin:0;padding-top:52px;font-size:17px;line-height:1.78;max-width:52ch">I grade my own material. The grade is where the intent either survives or it does not, and handing that to someone else has never once gone the way I imagined it.</p>
+
+          <p style="grid-column:4/10;grid-row:3;margin:0;padding-top:52px;font-size:17px;line-height:1.78;max-width:52ch">Before this I cut other people's footage for three years — the best training there is for knowing what you actually need to shoot, and how little of it that usually is.</p>
+          <figure style="grid-column:10/13;grid-row:3;margin:0;padding-top:130px">
+            <img src="../../../../media/w/desk-03.jpg" alt="" style="width:100%;height:auto">
+            <figcaption style="margin-top:10px;font-size:13px;font-style:italic;color:var(--muted)">Rough assembly, day four</figcaption>
+          </figure>
+        </section>
+
+        <section data-block="IMAGE · full-bleed process break" style="margin-top:110px;outline:var(--anno,none)">
+          <img src="../../../../media/w/mtm-atelier.jpg" alt="" style="width:100%;height:auto">
+          <p style="margin:11px var(--edge) 0;font-size:13px;font-style:italic;color:var(--muted)">The tailor's workroom, before the lights</p>
+        </section>
+
+        <section data-block="GRID · reading column continues + fact list" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);padding:110px var(--edge) 0;outline:var(--anno,none)">
+          <p style="grid-column:4/10;margin:0;font-size:17px;line-height:1.78;max-width:52ch">I work small and close, usually alone, occasionally with a gaffer when the room is bigger than the light. If a project needs a crew of twelve, I am probably not the right call.</p>
+          <dl style="grid-column:4/10;margin:44px 0 0;font-size:15px">
+            <div style="display:flex;justify-content:space-between;gap:16px;border-top:1px solid var(--rule);padding:9px 0"><dt style="color:var(--muted);font-style:italic">Based</dt><dd style="margin:0">Hanoi</dd></div>
+            <div style="display:flex;justify-content:space-between;gap:16px;border-top:1px solid var(--rule);padding:9px 0"><dt style="color:var(--muted);font-style:italic">Shooting since</dt><dd style="margin:0">2019</dd></div>
+            <div style="display:flex;justify-content:space-between;gap:16px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:9px 0"><dt style="color:var(--muted);font-style:italic">Contact</dt><dd style="margin:0"><a href="#3c" style="color:var(--accent)">hello@khanhnhat.film</a></dd></div>
+          </dl>
+        </section>
+      </div>
+    </div>
+
+  </div>
+
+  <div data-readout="" style="display:none;margin-top:30px;font-family:var(--font-ui);font-size:12px;line-height:1.75;color:#3A362F;white-space:pre-wrap"></div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;review&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Review&quot;}}">
+class Component extends DCLogic {
+  opt(k, d) { const o = window.__ab || {}; return o[k] !== undefined ? o[k] : (this.props[k] !== undefined ? this.props[k] : d); }
+
+  renderVals() { return { rootRef: (el) => { this.root = el; } }; }
+
+  componentDidMount() {
+    window.__abc = this;
+    this.ro = new ResizeObserver(() => this.audit());
+    if (this.root) this.ro.observe(this.root);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => this.refresh());
+    setTimeout(() => this.refresh(), 0);
+    setTimeout(() => this.refresh(), 900);
+  }
+
+  componentDidUpdate() { setTimeout(() => this.refresh(), 0); }
+  componentWillUnmount() { if (this.ro) this.ro.disconnect(); }
+
+  refresh() {
+    [["labels", () => this.labels()], ["audit", () => this.audit()]]
+      .forEach(([n, f]) => { try { f(); } catch (e) { console.error("[about] " + n + ":", e); } });
+  }
+
+  labels() {
+    const on = this.opt("review", false);
+    document.documentElement.style.setProperty("--anno", on ? "1px dashed rgba(196,54,28,0.45)" : "none");
+    if (!this.root) return;
+    this.root.querySelectorAll("[data-block]").forEach((el) => {
+      let tag = el.querySelector(":scope > [data-tag]");
+      if (on && !tag) {
+        tag = document.createElement("span");
+        tag.setAttribute("data-tag", "");
+        tag.textContent = el.dataset.block;
+        tag.style.cssText = "position:absolute;z-index:5;transform:translateY(-100%);background:#C4361C;color:#fff;font-family:var(--font-ui);font-size:10px;letter-spacing:0.08em;padding:3px 7px";
+        if (getComputedStyle(el).position === "static") el.style.position = "relative";
+        el.prepend(tag);
+      } else if (!on && tag) tag.remove();
+    });
+  }
+
+  // The portrait is an immutable asset, so integrity is measured, not asserted:
+  // native aspect against rendered aspect, plus the object-fit actually in force.
+  audit() {
+    const el = this.root && this.root.querySelector("[data-readout]");
+    if (!el) return;
+    if (!this.opt("review", false)) { el.style.display = "none"; return; }
+    el.style.display = "block";
+    const lines = [];
+    this.root.querySelectorAll("[data-portrait]").forEach((wrap) => {
+      const dir = wrap.closest("[id]") ? wrap.closest("[id]").id : "?";
+      const img = wrap.querySelector("img");
+      const b = img.getBoundingClientRect();
+      const nat = img.naturalWidth / img.naturalHeight;
+      const ren = b.width / b.height;
+      const fit = getComputedStyle(img).objectFit;
+      const ok = Math.abs(nat - ren) < 0.004 && fit !== "cover";
+      lines.push("portrait " + dir + "   native " + img.naturalWidth + "×" + img.naturalHeight +
+        " (" + nat.toFixed(4) + ")   rendered " + Math.round(b.width) + "×" + Math.round(b.height) +
+        " (" + ren.toFixed(4) + ")   object-fit " + fit + "   " + (ok ? "✓ uncropped" : "✗ ALTERED"));
+    });
+    const missing = Array.from(this.root.querySelectorAll("[data-missing]")).map((m) => m.dataset.missing);
+    lines.push("");
+    lines.push("missing real assets   " + (missing.length ? missing.join(" · ") : "none"));
+    lines.push("substituted imagery   none — process frames are real files, captioned as what they are");
+    el.textContent = lines.join("\n");
+  }
+}
+
+</script>
+</body>
+</html>

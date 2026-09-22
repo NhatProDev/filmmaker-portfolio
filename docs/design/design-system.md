@@ -796,7 +796,10 @@ The rule:
 
 **`VIDEO_GRID` already satisfies this** — per-breakpoint column counts, bounded
 by validation and required to fall at narrower widths (§8.2, ADR-0008 §6, §9).
-The other three modes do not yet, and must.
+
+**`JUSTIFIED_ROWS` now satisfies it too**, as a **SHARED RESPONSIVE CANDIDATE —
+SYSTEM VALIDATED** (§11.7). **`HORIZONTAL_STRIP` and `SLIDESHOW` still do not,
+and must.**
 
 **The evidence.** At 375px a single-row `JUSTIFIED_ROWS` gallery left a 4:5 still
 at **45×176** — a sliver, its aspect destroyed by the shared row height. Nothing
@@ -804,11 +807,16 @@ in the block-level fallback reflowed it, because it had no grid children to
 stack. The failure is not specific to one composition: any `JUSTIFIED_ROWS` block
 mixing wide and narrow aspects reaches it.
 
-**What remains pending: the exact per-mode behaviour.** Row heights,
-items-per-row bounds, narrow-width algorithms and final mobile compositions are
-**not decided here** and remain subject to mobile visual validation. What is
-settled is *that* each mode owes one, and where the responsibility sits — with
-the presentation mode, not with the block-level stack. See §16 item 10.
+**What remains pending: the exact per-mode behaviour, for two of the four
+modes.** `VIDEO_GRID` has its column counts; `JUSTIFIED_ROWS` now has a shared
+system candidate covering row height, items-per-row and the narrow-width
+algorithm (§11.7). **`HORIZONTAL_STRIP` and `SLIDESHOW` still have none**, and
+remain subject to visual validation. What was settled here — *that* each mode
+owes one, and that the responsibility sits with the presentation mode rather
+than the block-level stack — is unchanged. See §16 item 10.
+
+**A system candidate is not a page validation.** §11.7 settles how the mode
+behaves at a given width; it does not settle how any page looks using it.
 
 ### 11.6 First responsive validation — what it settles, and what it does not
 
@@ -856,6 +864,158 @@ statement about the quality of the evidence, not a design rule, so it carries no
 grade — but it bounds what the grade above means. Responsive *candidate* status
 is not a claim about behaviour on an actual software keyboard; the QA coverage
 that would settle that is listed in `page-specifications.md` §6.9.
+
+### 11.7 `JUSTIFIED_ROWS` narrow-width behaviour — **SHARED RESPONSIVE CANDIDATE — SYSTEM VALIDATED**
+
+**Status, precisely.** The behaviour below is validated **at system level**: one
+expression, exercised across 5 datasets × 11 widths with zero starved cells. It
+is **not Design Approved, not production-ready, and not page-validated.** No
+page using the mode has been validated with it.
+
+Evidence: `prototypes/responsive-system/Justified Rows Narrow Width v2.dc.html`
+and `justified-rows-narrow-width-v2.md`, accepted by the Project Owner on
+2026-09-22 as the shared responsive candidate. **v1**
+(`Justified Rows Narrow Width.dc.html` / `justified-rows-narrow-width.md`) is
+**retained unchanged as rejected / comparison evidence** — it holds the
+sequence-average behaviour this pass replaced and the starved-cell failure of
+the desktop-as-is algorithm. No page candidate was modified to produce either.
+
+#### The defect it fixes
+
+The desktop-oriented behaviour the page candidates ship today — fixed 300px
+target, greedy fill, orphan merge — produces **a starved cell at every tested
+width, including desktop**: 102px at 1440, 103px at 1024, 89px at 768, 77px at
+390. With a fixed target height a row's cells divide the measure in proportion
+to their aspects, so a portrait beside two wide items always takes the
+remainder. The narrow-width brief surfaced a bug the desktop compositions
+already had.
+
+#### The candidate **[DEFAULT]**
+
+```text
+T      = W >= 1024 ? 3 :
+         W >= 700  ? 2 :
+                     1          // intended items per row, not a limit
+ref    = 1.6                    // fixed reference aspect
+target = (W - gap × (T - 1)) / (T × ref)
+floor  = max(120px, 0.10 × W)   // minimum cell width
+ceil   = 1.25 × W               // maximum cell height
+gap    = 4px
+```
+
+Pack in **source order**. Close a row when the solved height reaches the target,
+or before adding an item that would push any cell below the floor. Re-check
+solved rows and move a trailing cell down while the floor is violated. Cap
+solved row height at the ceiling — the row then renders ragged. **Single-item
+rows are exempt from the floor**; a lone item cannot starve.
+
+Deterministic: same items, same width, same output, every time.
+
+#### Why sequence-dependent references were rejected
+
+A reference aspect derived from the sequence itself **couples every item to
+every later item**. Appending media changes the reference, which changes the
+target height, which repacks gallery content the visitor may already be looking
+at. Measured, with the first nine items unchanged:
+
+| Reference | 1440 +6 portrait | 600 +6 portrait | 375 +6 wide |
+|---|---|---|---|
+| sequence average (v1) | 312 → **402** (+90) | 392 → **505** (+113) | 245 → **208** (−37) |
+| median | 268 → **663** (+395) | 337 → **833** (+496) | 211 → **184** (−27) |
+| trimmed 20% | 307 → **444** (+137) | 385 → **558** (+173) | 241 → **187** (−54) |
+| **fixed 1.6** | **298 → 298 (0)** | **375 → 375 (0)** | **234 → 234 (0)** |
+
+The average raises the target by 29% on a six-item append. The median is worse
+still — a median over a small sample is a step function, so one appended item
+can move it a whole aspect class. Trimming only softens it. **A fixed reference
+removes the coupling entirely: Δtarget is exactly 0, at every width, for every
+tested append.**
+
+This is why `ref` is a **system constant and not a per-page value**. A per-page
+or per-gallery reference would reintroduce the coupling it exists to remove.
+
+#### Append stability — exactly what was tested **[DEFAULT]**
+
+Tested as a real append (9 → 18 items), not as two unrelated datasets:
+
+- **Completed rows above the current tail remain stable.** Row-boundary runs
+  were prefix-identical: **3/3 at 1440, 7/7 at 600, 9/9 at 375**.
+- **Appending may repack the current tail** — the row that was incomplete, and
+  which the append exists to finish.
+- **Later media must not globally repack already-completed rows above it.**
+
+1–3 of the first nine items still move by more than 5% after an append, and
+that movement is **confined to the final row**. The instrument measures
+*prefix* stability — it counts matching row boundaries from the start and stops
+at the first divergence — which is the right property for this claim and should
+not be read as a guarantee about anything below the tail.
+
+#### Row and tail semantics **[DEFAULT]**
+
+- A **justified row** fills the measure exactly, and **may not contain a cell
+  below the minimum floor**.
+- A **ragged tail is not inherently defective.** It is what honest
+  native-aspect packing looks like when the remainder cannot fill a row without
+  cropping.
+- **A tail is defective only if its own cell is starved** — below the floor.
+  No such fragment was observed in any tested combination.
+- **A tail may merge into the previous row only when the merge starves no
+  cell.** Otherwise it stands ragged.
+- **Tall and extreme media may remain ragged** while bounded by the ceiling.
+- **No fixed item-per-row maximum is required** by this candidate. The floor
+  produces the counts implicitly and adapts to content — two landscapes pair at
+  375, a portrait beside them does not. A cap would be a number chosen for
+  convenience.
+- **Source order remains invariant.** Floor enforcement and orphan merge move
+  row boundaries only; they never swap, promote or defer an item. This is
+  consistent with the §12 accessibility invariant that DOM order follows
+  `position` — verified here, not newly asserted.
+
+#### What the evidence establishes
+
+Across 5 datasets × 11 widths: **no starved justified cells** · **source order
+preserved in every combination** · **native aspect preserved**, every cell
+within 2% of its source ratio · **no crop introduced** · **portrait-dominant
+datasets usable** (dataset D, 12 items, 8 in the 0.5–0.8 band — no starvation,
+no repeated monoliths) · **wide and extreme media bounded** by the ceiling ·
+**431–699 explicitly tested** · **9 → 18 append explicitly tested**.
+
+The `T` change at 700 is **not** a discontinuity — it moves five rows to six and
+nothing else jumps, because `T` only sets the target while the floor keeps
+pairing items above it.
+
+#### The 480 → 450 transition — preserved, deliberately not smoothed
+
+Between 480 and 450 the last portrait pairings dissolve and portraits begin
+standing alone at the ceiling (563px = 1.25 × 450, exactly the bound).
+
+It is **bounded**, **deterministic**, and **caused by enforcing the
+minimum-cell floor** — the rule refusing a sub-120px cell, which is the rule
+working rather than failing. It has **not** been smoothed by inference, and must
+not be smoothed without evidence.
+
+**Whether it is aesthetically desirable is a page-level visual-validation
+question**, and the owner's to judge by eye.
+
+#### Constant status
+
+```text
+ref    = 1.6
+floor  = max(120px, 0.10 × W)
+ceil   = 1.25 × W
+```
+
+These are **EMPIRICAL SYSTEM CONSTANTS SUPPORTED BY CURRENT EVIDENCE.** They are
+**not mathematically derived and not permanently final.** `1.6` sits between the
+library's landscape cluster (1.78–2.04) and its portraits (0.65); the floor
+comes from observed failure — 77–103px cells read as slivers, 119–168px did not.
+
+**Revisit them only if page-level validation produces a concrete failure.**
+Adjusting them on taste, per page, or to smooth the 480/450 step is not
+supported by this evidence.
+
+**No administrator control is introduced or required, and no per-page algorithm
+override is permitted.** One expression, one set of constants, every page.
 
 ---
 
@@ -971,11 +1131,13 @@ Carried forward. **Do not close these by inference during implementation.**
 | 7 | **`AUTOPLAY_VISIBLE` visibility threshold** — what counts as "sufficiently visible". | Unresolved |
 | 8 | **Mobile composition for every page** — no reference evidence exists. **One page is now validated:** the Private Project Gate, at 768 / 430 / 390 / 375 and at constrained height (§11.6, `page-specifications.md` §6.9). Home, Art Works, Project Detail, About Me and Contact remain pending, and must not borrow the gate's derivations. | **1 of 6 validated as candidate; 5 pending** |
 | 9 | **All six pages now have a candidate** — Home, Art Works (2C v2), Project Detail (1B v2), About Me (3B v2), Contact (4B v2), Private Gate (5B v2). None is approved. The gate theme conflict was resolved on 2026-09-22 in favour of a route-independent pre-auth surface (`page-specifications.md` §6.3). | **Exploration complete; no candidate conflicts open** |
-| 10 | **GALLERY narrow-width behaviour per presentation mode** — the *principle* is approved (§11.5): GALLERY does not inherit GRID child stacking and every mode owes bounded narrow-width behaviour. `VIDEO_GRID` satisfies it via column counts; **`JUSTIFIED_ROWS`, `HORIZONTAL_STRIP` and `SLIDESHOW` still need theirs defined.** Exact behaviours pending mobile validation. | **Principle approved; per-mode behaviour pending** |
+| 10 | **GALLERY narrow-width behaviour per presentation mode** — the *principle* is approved (§11.5): GALLERY does not inherit GRID child stacking and every mode owes bounded narrow-width behaviour. `VIDEO_GRID` satisfies it via column counts. **`JUSTIFIED_ROWS` now satisfies it** as a shared responsive candidate, system validated (§11.7) — no page has yet been validated with it. **`HORIZONTAL_STRIP` and `SLIDESHOW` still need theirs defined.** | **2 of 4 modes answered; `HORIZONTAL_STRIP` and `SLIDESHOW` pending** |
 | 11 | **Display coefficient as a preset property** — `13.3cqw` is tuned to one face; face substitution changes clipping without anyone authoring it (§1.4). Contact 4B v2 §6 adds a second dimension: sizing display type against **the element it must align to** rather than against the page removes the guess, and **the other candidates' coefficients have not been re-checked against this.** The Private Gate responsive validation adds a third: `clamp(26px, 8.2cqw of the spine, 46px)` — spine-relative **and bounded by the desktop size**, so narrow widths can never exceed it (§11.6). That is evidence for the clamped, spine-relative form; **one convention should be chosen for all pages**, and none has been. | **Proposed amendment, not applied** |
 | 12 | **Bounded HERO overlay content** — the *capability* is approved (ADR-0010): intra-block, title from `projects.title`, closed config, dismissal on media activation, `CLICK_TO_PLAY` or IMAGE only. Its **visual use on Project Detail remains candidate**, and the narrow-width stacked treatment awaits mobile validation. | **Capability approved; visual use candidate** |
 | 13 | **Constrained-height behaviour for interactive surfaces** — the Private Gate showed that centring a growing element inside a shrinking viewport pushes its action off screen, and answered it with top-aligned flow below ~620px (§11.6). Whether that becomes a general rule, at what threshold, and for which surfaces, is **not decided on one page's evidence**. | **Evidence recorded on one page; not a system rule** |
 | 14 | **Site-wide mobile navigation** — the gate hides the public nav at ≤430 because it has one job and never removes its escape route. Home, Art Works, Project Detail, About Me and Contact each need their own answer. **Explicitly not resolved by the gate, and not to be inherited from it** (§11.6). | **Unresolved** |
+| 15 | **`JUSTIFIED_ROWS` carried uncertainties** (§11.7) — `ref = 1.6` remains an **empirical** constant, not a derived one; **2.39 and 0.50 were exercised as labelled geometry probes, not real masters**, and a true cinematic master should be run before specification; and whether the **480 → 450 step** is *desirable* is a visual judgement, not a defect. | **System validated; constants empirical, judgement open** |
+| 16 | **`AUTOPLAY_VISIBLE` on one-up `JUSTIFIED_ROWS` rows** — below 700px the mode becomes a single column of native-aspect items. Art Works' one-preview-at-a-time policy will meet those one-up rows at mobile, and the two have **never been validated together**: §11.7's prototype is imagery only. | **Untested interaction** |
 
 ---
 

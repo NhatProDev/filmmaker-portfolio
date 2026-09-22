@@ -47,6 +47,9 @@ docs/
       about/                  About Me 3B v2.
       contact/                Contact 4B v2.
       private-gate/           Private Gate 5B v2. No runtime media.
+      responsive-system/      Cross-page responsive system evidence, not a
+                              page: JUSTIFIED_ROWS narrow-width v1 (rejected /
+                              comparison) and v2 (shared candidate).
     guidelines/
       frontend-design/        Imported Anthropic frontend-design skill.
                               Advisory only (CLAUDE.md §21, tier 4).

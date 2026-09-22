@@ -161,6 +161,22 @@ units, no breakpoint rule.
 **[INVARIANT]** Home still requires a mobile design review. The automatic
 fallback guarantees nothing is broken, not that anything is good.
 
+**Home remains PENDING RESPONSIVE VALIDATION.**
+
+**`JUSTIFIED_ROWS` — block 5 may now be tested against the shared system
+candidate.** The mode's narrow-width behaviour is settled at system level
+(`design-system.md` §11.7): derived target height, minimum-cell floor, height
+ceiling, ragged tails, source order preserved, no crop. The gap this block hit
+at 375 — a 4:5 still at 45×176, which the block-level stack could not reach —
+is what that candidate exists to close.
+
+**That is an opportunity to test, not a result.** Nothing here is validated
+until Home is run through it. Page validation should specifically check that
+block 5's authored "one row" desktop intent still reads correctly once the
+target height is derived from `T` rather than authored, and that the
+`VIDEO_GRID` wall and the justified row still sit well together at tablet, where
+nine cells already leave an orphan.
+
 ### 1.8 Media behaviour
 
 **[INVARIANT]** Hero and wall use `COVER`; native aspect elsewhere except the
@@ -383,18 +399,33 @@ Carried responsive questions, deliberately **not** solved in architecture:
 2. **Identification without hover.** The plate numeral is the answer to this, and
    is why it exists — but it needs the index reachable while looking at the
    sheet, which one-column stacking breaks.
-3. **`JUSTIFIED_ROWS` narrow-width behaviour.** A row of wide covers becomes a
-   short strip below roughly 640px. The governing **principle is now approved**
-   (`design-system.md` §11.5): GALLERY does not inherit GRID child stacking, and
-   every presentation mode owes bounded narrow-width behaviour of its own.
-   **`JUSTIFIED_ROWS`' actual behaviour is still undefined** — row heights,
-   items-per-row and the narrow-width algorithm remain pending mobile visual
-   validation (§16 item 10). Art Works cannot be specified at narrow widths until
-   it exists.
+3. **`JUSTIFIED_ROWS` narrow-width behaviour — RESOLVED AT SYSTEM LEVEL.**
+   The missing system behaviour that previously blocked this page now exists as
+   a **shared responsive candidate, system validated**
+   (`design-system.md` §11.7): derived target height, a minimum-cell floor that
+   removes the starved sliver, a height ceiling bounding tall media, ragged
+   tails permitted, source order and native aspect preserved, no crop, and a
+   single column below 700px. It also fixes a starved-cell defect the desktop
+   sheet already had.
+   **Art Works itself is NOT responsive validated.** The system rule has never
+   been run through this page's composition, its 18-project density, or its
+   index↔sheet relationship. The blocker is lifted; the validation is not done.
 4. **Density at different project counts.** 18 projects at a small target row
    height is a very long page; pagination or lazy extension is unresolved.
 5. **Transition behaviour on touch/mobile**, where there is no hover state to
    precede the tap.
+6. **`AUTOPLAY_VISIBLE` on one-up rows — untested.** Below 700px
+   `JUSTIFIED_ROWS` becomes a single column, and this page runs at most one
+   moving preview at a time, selected by proximity to the viewport centre. That
+   policy has **never been validated against one-up rows**: §11.7's prototype is
+   imagery only, with no video in it at all. Carried as `design-system.md`
+   §16 item 16.
+
+**Items 1 and 2 remain fully open.** The narrow-width index layout and
+identification-without-hover are **not** addressed by the `JUSTIFIED_ROWS`
+resolution — that rule governs how the sheet packs, not whether the index is
+reachable while looking at it. Item 2 is still the decision that will force
+itself first.
 
 Also still open from earlier: filtering or category affordances · whether the
 sheet presentation should be switchable at all.
@@ -577,6 +608,17 @@ the transport/controls design for `CLICK_TO_PLAY` · credits block composition �
 next/previous project affordance, if any · **mobile composition, including the
 overlaid title's narrow-width fallback** · how the signature transition lands and
 reverses on this page.
+
+**`JUSTIFIED_ROWS` — the supporting row may now be tested against the shared
+system candidate** (`design-system.md` §11.7). The risk recorded for this page
+— four stills in one row will not survive 375px — is the case that candidate
+addresses: below 700px the mode resolves to a single column of native-aspect
+items, with no starved cell and no crop.
+
+**Project Detail remains PENDING RESPONSIVE VALIDATION.** The rule is available
+to test against; it has not been tested here, and it touches none of this page's
+other open items — the HERO overlay's narrow-width fallback, the poster/film
+`fit` mismatch and the metadata treatment are all untouched by it.
 
 ### 3.11 States
 
@@ -1429,7 +1471,7 @@ Hold on every page regardless of exploration status.
 | **Video** | Never audible without user action. Multi-video surfaces are `AUTOPLAY_VISIBLE`. `AUTOPLAY_AMBIENT` only on a standalone ambient surface. |
 | **Posters** | `poster_media_id → thumbnail_url → empty well`. Refused autoplay shows the poster. |
 | **Motion** | Content moves; interface does not. One signature transition, shell-owned. |
-| **Responsive** | Three breakpoints. Automatic safe stacking. **Every production page still requires a mobile design review.** One page is RESPONSIVE VALIDATED — the Private Project Gate (§6.9); the other five are pending, and must not borrow its derivations. |
+| **Responsive** | Three breakpoints. Automatic safe stacking. **Every production page still requires a mobile design review.** One page is RESPONSIVE VALIDATED — the Private Project Gate (§6.9); the other five are pending, and must not borrow its derivations. `JUSTIFIED_ROWS` has a **shared responsive candidate, system validated** (`design-system.md` §11.7) — one expression for every page, no per-page override. A system candidate is not a page validation. |
 | **Accessibility** | WCAG AA size-aware · visible focus · reduced motion yields a deterministic still · DOM order follows `position`, never `colStart`. |
 | **Never** | Product UI, card primitives, feed-like surfaces, audible autoplay, invented compositions on pending pages. |
 
@@ -1446,12 +1488,15 @@ Hold on every page regardless of exploration status.
    keyboard open/close, focus retention, and reflow while INVALID and RATE
    LIMITED are visible (§6.9). That is an implementation/QA gate, not a design
    one. **The other five pages still need responsive validation.**
-3. **Define narrow-width behaviour for `JUSTIFIED_ROWS`, `HORIZONTAL_STRIP` and
-   `SLIDESHOW`.** The principle is approved (`design-system.md` §11.5) — GALLERY
-   does not inherit GRID child stacking and every mode owes its own bounded
-   behaviour. `VIDEO_GRID` already has one; the other three do not, and **Art
-   Works cannot be specified at narrow widths until `JUSTIFIED_ROWS` does**
-   (§2.7 item 3).
+3. **Define narrow-width behaviour for `HORIZONTAL_STRIP` and `SLIDESHOW`.**
+   The principle is approved (`design-system.md` §11.5) — GALLERY does not
+   inherit GRID child stacking and every mode owes its own bounded behaviour.
+   `VIDEO_GRID` has its column counts, and **`JUSTIFIED_ROWS` now has a shared
+   responsive candidate, system validated** (`design-system.md` §11.7). **These
+   two modes still have none.**
+   **The Art Works blocker is lifted at system level** (§2.7 item 3) — but Art
+   Works, Home and Project Detail each still require **page-level** responsive
+   validation with the rule, and none has had it.
 4. **Validate the HERO overlay's narrow-width fallback.** The capability is
    approved (ADR-0010) and requires the system to derive a stacked presentation;
    the breakpoint and its visual treatment still need mobile design validation

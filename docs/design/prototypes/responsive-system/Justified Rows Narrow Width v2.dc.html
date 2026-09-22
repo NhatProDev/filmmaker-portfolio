@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..600&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --surface:#F7F3EC; --ink:#16120E; --accent:#C4361C; --muted:#6C6862; --rule:#E2DCD2; --frame:#14110F;
+  --font-display:'Marcellus',Georgia,serif; --font-body:'Newsreader',Georgia,serif;
+  --display-track:-0.005em;
+}
+body{margin:0;background:#E6E1D8}
+img{display:block}
+</style>
+</helmet>
+<div ref="{{ rootRef }}" style="font-family:var(--font-body);color:var(--ink);padding:56px 48px 120px">
+
+  <div style="max-width:82ch;margin-bottom:34px">
+    <h1 style="margin:0;font-family:var(--font-display);font-size:30px;letter-spacing:var(--display-track);text-transform:uppercase">JUSTIFIED_ROWS v2 — hardening pass</h1>
+    <p style="margin:14px 0 0;font-size:17px;line-height:1.7">Candidate C under attack: does a sequence-wide average couple unrelated items together, does appending break what is already on screen, does portrait-dominant data survive, and is the two-up to one-up region coherent? The tables below are computed, not eyeballed — the rendered sheet underneath shows the currently selected combination. <a href="./Justified Rows Narrow Width.dc.html" style="color:var(--accent)">v1</a> is retained unchanged as evidence.</p>
+  </div>
+
+  <div data-tables="" style="display:flex;flex-direction:column;gap:26px;margin-bottom:38px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;font-size:12px;line-height:1.7;color:#2C2822;white-space:pre"></div>
+
+  <div data-render="" style="display:flex;flex-direction:column;gap:12px"></div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;reference&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;fixed&quot;,&quot;median&quot;,&quot;trimmed&quot;,&quot;avg&quot;],&quot;default&quot;:&quot;fixed&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Algorithm&quot;},&quot;width&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;1440&quot;,&quot;1024&quot;,&quot;768&quot;,&quot;699&quot;,&quot;600&quot;,&quot;540&quot;,&quot;480&quot;,&quot;431&quot;,&quot;430&quot;,&quot;390&quot;,&quot;375&quot;],&quot;default&quot;:&quot;600&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Test&quot;},&quot;dataset&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;A · base 9&quot;,&quot;B · base 9 + 6 portrait&quot;,&quot;C · base 9 + 6 wide&quot;,&quot;D · portrait-dominant 12&quot;,&quot;E · base 18&quot;],&quot;default&quot;:&quot;D · portrait-dominant 12&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Test&quot;}}">
+class Component extends DCLogic {
+  GAP = 4;
+  // Real files where they exist; labelled geometry probes where the library has
+  // no asset at that ratio. Probes carry no invented imagery.
+  M = {
+    atelier: { src: "mtm-atelier.jpg", ar: 2.041 },
+    portrait: { src: "portrait.jpg", ar: 0.645 },
+    desk1: { src: "desk-01.jpg", ar: 1.776 },
+    wide239: { probe: "2.39", ar: 2.39 },
+    shop: { src: "mtm-shopfront.jpg", ar: 2.012 },
+    // Runtime asset correction (Project Owner, 2026-09-22): about-portrait.png
+    // is not present in the repository runtime set. The declared aspect is
+    // deliberately left at 0.647 so the geometry under test is unchanged.
+    aboutP: { src: "portrait.jpg", ar: 0.647 },
+    desk3: { src: "desk-03.jpg", ar: 1.778 },
+    table: { src: "mtm-table.jpg", ar: 2.0 },
+    tall50: { probe: "0.50", ar: 0.5 },
+    court: { src: "nike-court.jpg", ar: 2.008 },
+    sketch: { src: "mtm-sketch.jpg", ar: 2.041 },
+    desk4: { src: "desk-04.jpg", ar: 1.776 },
+    swatch: { src: "mtm-swatches.jpg", ar: 2.041 },
+    lacing: { src: "nike-lacing.jpg", ar: 1.778 },
+    mportrait: { src: "mtm-portrait.jpg", ar: 2.004 },
+    desk5: { src: "desk-05.jpg", ar: 1.776 },
+    mannequin: { src: "mtm-mannequin.jpg", ar: 2.041 },
+    p056: { probe: "0.56", ar: 0.5625 },
+    p067: { probe: "0.67", ar: 0.667 },
+    p072: { probe: "0.72", ar: 0.72 },
+    p080: { probe: "0.80", ar: 0.8 },
+    w220: { probe: "2.20", ar: 2.2 }
+  };
+
+  seq(names) { return names.map((n, i) => Object.assign({}, this.M[n], { pos: i + 1, key: n })); }
+
+  base9() { return ["atelier", "portrait", "desk1", "wide239", "shop", "aboutP", "desk3", "table", "tall50"]; }
+  datasets() {
+    const b = this.base9();
+    return {
+      "A · base 9": this.seq(b),
+      "B · base 9 + 6 portrait": this.seq(b.concat(["p056", "p067", "portrait", "p072", "aboutP", "p080"])),
+      "C · base 9 + 6 wide": this.seq(b.concat(["wide239", "w220", "atelier", "wide239", "sketch", "w220"])),
+      "D · portrait-dominant 12": this.seq(["portrait", "p056", "desk1", "aboutP", "p067", "p072", "wide239", "tall50", "p080", "shop", "portrait", "p056"]),
+      "E · base 18": this.seq(b.concat(["court", "sketch", "desk4", "swatch", "lacing", "mportrait", "desk5", "mannequin", "w220"]))
+    };
+  }
+
+  opt(k, d) { const o = window.__j2 || {}; return o[k] !== undefined ? o[k] : (this.props[k] !== undefined ? this.props[k] : d); }
+
+  renderVals() { return { rootRef: (el) => { this.root = el; } }; }
+  componentDidMount() { window.__j2c = this; setTimeout(() => this.run(), 0); }
+  componentDidUpdate() { setTimeout(() => this.run(), 0); }
+
+  // ---- reference aspect strategies under test
+  refAspect(items, mode) {
+    const ars = items.map((i) => i.ar).slice().sort((a, b) => a - b);
+    if (mode === "fixed") return 1.6;
+    if (mode === "median") return ars[Math.floor(ars.length / 2)];
+    if (mode === "trimmed") {
+      const k = Math.floor(ars.length * 0.2);
+      const t = ars.slice(k, ars.length - k || undefined);
+      return t.reduce((a, b) => a + b, 0) / t.length;
+    }
+    return ars.reduce((a, b) => a + b, 0) / ars.length;          // "avg" — v1 behaviour
+  }
+
+  pack(items, W, mode) {
+    const gap = this.GAP;
+    const T = W >= 1024 ? 3 : W >= 700 ? 2 : 1;
+    const ref = this.refAspect(items, mode);
+    const target = (W - gap * (T - 1)) / (T * ref);
+    const floor = Math.max(120, 0.10 * W);
+    const ceil = 1.25 * W;
+    const narrowest = (cells, s) => {
+      const h = (W - gap * (cells.length - 1)) / s;
+      return Math.min.apply(null, cells.map((c) => c.ar * h));
+    };
+    const rows = []; let row = [], sum = 0;
+    items.forEach((it) => {
+      const nextCells = row.concat([it]), nextSum = sum + it.ar;
+      if (row.length && narrowest(nextCells, nextSum) < floor) { rows.push({ cells: row, sum }); row = [it]; sum = it.ar; }
+      else { row = nextCells; sum = nextSum; }
+      if ((W - gap * (row.length - 1)) / sum <= target) { rows.push({ cells: row, sum }); row = []; sum = 0; }
+    });
+    if (row.length) rows.push({ cells: row, sum, last: true });
+    for (let pass = 0; pass < 8; pass++) {
+      let moved = false;
+      for (let i = 0; i < rows.length; i++) {
+        const r = rows[i];
+        if (r.cells.length < 2) continue;
+        const h = (W - gap * (r.cells.length - 1)) / r.sum;
+        if (Math.min.apply(null, r.cells.map((c) => c.ar * h)) >= floor) continue;
+        const m = r.cells.pop(); r.sum -= m.ar;
+        const next = rows[i + 1];
+        if (next) { next.cells.unshift(m); next.sum += m.ar; } else rows.push({ cells: [m], sum: m.ar, last: true });
+        moved = true;
+      }
+      if (!moved) break;
+    }
+    if (rows.length > 1) {
+      const tail = rows[rows.length - 1];
+      if (tail.last && tail.cells.length === 1 && tail.sum * target < W * 0.4) {
+        const prev = rows[rows.length - 2];
+        const merged = prev.cells.concat(tail.cells), mSum = prev.sum + tail.sum;
+        if (narrowest(merged, mSum) >= floor) { prev.cells = merged; prev.sum = mSum; rows.pop(); }
+      }
+    }
+    const solved = rows.map((r) => {
+      const avail = W - gap * (r.cells.length - 1);
+      let h = avail / r.sum, full = true;
+      if (r.last && h > target * 1.2) { h = target; full = false; }
+      if (h > ceil) { h = ceil; full = false; }
+      let used = 0;
+      const cells = r.cells.map((c, j) => {
+        const w = (full && j === r.cells.length - 1) ? avail - used : Math.round(c.ar * h);
+        used += w;
+        return Object.assign({}, c, { w, h: Math.round(h) });
+      });
+      return { cells, full, fill: cells.reduce((a, c) => a + c.w, 0) + gap * (cells.length - 1) };
+    });
+    return { rows: solved, target: Math.round(target), ref: +ref.toFixed(3), floor: Math.round(floor), T };
+  }
+
+  metrics(res, W) {
+    const cells = res.rows.reduce((a, r) => a.concat(r.cells), []);
+    const just = res.rows.filter((r) => r.full);
+    const inRow = just.length ? Math.min.apply(null, just.reduce((a, r) => a.concat(r.cells.map((c) => c.w)), [])) : W;
+    const tail = res.rows[res.rows.length - 1];
+    return {
+      starved: inRow < res.floor - 1,
+      narrowest: Math.round(inRow),
+      order: cells.every((c, i) => c.pos === i + 1),
+      aspect: cells.every((c) => Math.abs((c.w / c.h) - c.ar) / c.ar < 0.02),
+      rows: res.rows.length,
+      heights: res.rows.map((r) => r.cells[0].h),
+      boundaries: res.rows.map((r) => r.cells.map((c) => c.pos).join("-")).join(" | "),
+      tallest: Math.max.apply(null, cells.map((c) => c.h)),
+      tailFragment: Math.min.apply(null, tail.cells.map((c) => c.w)) < res.floor - 1,
+      byPos: cells.reduce((m, c) => { m[c.pos] = c.h; return m; }, {})
+    };
+  }
+
+  // Coupling: how much does the geometry of items 1–9 move when later items,
+  // which the visitor may never have scrolled to, are appended?
+  coupling(W, mode) {
+    const ds = this.datasets();
+    const a = this.pack(ds["A · base 9"], W, mode), ma = this.metrics(a, W);
+    const rows = [];
+    [["+6 portrait", "B · base 9 + 6 portrait"], ["+6 wide", "C · base 9 + 6 wide"], ["→ 18", "E · base 18"]].forEach(([label, key]) => {
+      const p = this.pack(ds[key], W, mode), mp = this.metrics(p, W);
+      const first9 = Object.keys(ma.byPos).filter((k) => +k <= 9);
+      const moved = first9.filter((k) => Math.abs(mp.byPos[k] - ma.byPos[k]) / ma.byPos[k] > 0.05).length;
+      const bA = ma.boundaries.split(" | ");
+      const bP = mp.boundaries.split(" | ");
+      let sameRuns = 0;
+      for (let i = 0; i < bA.length && i < bP.length; i++) { if (bA[i] === bP[i]) sameRuns++; else break; }
+      rows.push({ label, target: p.target, dTarget: p.target - a.target, moved, of: first9.length, stableRuns: sameRuns + "/" + bA.length });
+    });
+    return { base: a, rows };
+  }
+
+  run() {
+    if (!this.root) return;
+    const tables = this.root.querySelector("[data-tables]");
+    const mode = this.opt("reference", "fixed");
+    const W = parseInt(this.opt("width", "600"), 10);
+    const ds = this.datasets();
+    const pad = (s, n) => String(s).padEnd(n);
+    const out = [];
+
+    // 1 — reference-aspect strategies, coupling at three widths
+    let t = "1 · APPEND COUPLING — does adding later items move the first nine?\n\n" +
+      pad("strategy", 10) + pad("width", 7) + pad("append", 14) + pad("target", 9) + pad("Δtarget", 9) + pad("items moved >5%", 18) + "row runs stable\n";
+    ["avg", "median", "trimmed", "fixed"].forEach((m) => {
+      [1440, 600, 375].forEach((w) => {
+        const c = this.coupling(w, m);
+        c.rows.forEach((r, i) => {
+          t += pad(i === 0 ? m : "", 10) + pad(i === 0 ? w : "", 7) + pad(r.label, 14) + pad(r.target, 9) +
+            pad((r.dTarget > 0 ? "+" : "") + r.dTarget, 9) + pad(r.moved + " of " + r.of, 18) + r.stableRuns + "\n";
+        });
+      });
+    });
+    out.push(t);
+
+    // 2 — the selected strategy across every dataset and width
+    let t2 = "2 · SELECTED STRATEGY  reference = " + mode + "\n\n" +
+      pad("dataset", 26) + pad("width", 7) + pad("T", 3) + pad("ref", 7) + pad("target", 8) + pad("rows", 6) + pad("narrowest", 11) + pad("tallest", 9) + pad("starved", 9) + pad("order", 7) + "aspect\n";
+    Object.keys(ds).forEach((name) => {
+      [1440, 1024, 768, 699, 600, 540, 480, 431, 430, 390, 375].forEach((w) => {
+        const r = this.pack(ds[name], w, mode), m = this.metrics(r, w);
+        t2 += pad(name, 26) + pad(w, 7) + pad(r.T, 3) + pad(r.ref, 7) + pad(r.target, 8) + pad(m.rows, 6) +
+          pad(m.narrowest + "px", 11) + pad(m.tallest + "px", 9) + pad(m.starved ? "✗ YES" : "✓ no", 9) +
+          pad(m.order ? "✓" : "✗", 7) + (m.aspect ? "✓" : "✗") + "\n";
+      });
+      t2 += "\n";
+    });
+    out.push(t2);
+
+    // 3 — the T=2 → T=1 transition
+    let t3 = "3 · TWO-UP → ONE-UP TRANSITION  (dataset A, reference = " + mode + ")\n\n" +
+      pad("width", 8) + pad("T", 3) + pad("rows", 6) + pad("row heights", 40) + "narrowest\n";
+    [768, 720, 699, 680, 650, 600, 540, 480, 450, 431, 430, 420, 390, 375].forEach((w) => {
+      const r = this.pack(ds["A · base 9"], w, mode), m = this.metrics(r, w);
+      t3 += pad(w, 8) + pad(r.T, 3) + pad(m.rows, 6) + pad(m.heights.join(","), 40) + m.narrowest + "px\n";
+    });
+    out.push(t3);
+
+    tables.textContent = out.join("\n\n");
+    this.paint(ds[this.opt("dataset", "D · portrait-dominant 12")] || ds["A · base 9"], W, mode);
+  }
+
+  paint(items, W, mode) {
+    const host = this.root.querySelector("[data-render]");
+    const res = this.pack(items, W, mode);
+    host.innerHTML = "";
+    const cap = document.createElement("p");
+    cap.style.cssText = "margin:0;font-size:14px;color:#6C6862";
+    cap.textContent = this.opt("dataset", "D · portrait-dominant 12") + " · " + W + "px · reference " + mode + " (" + res.ref + ") · target " + res.target + "px · floor " + res.floor + "px";
+    host.appendChild(cap);
+    const sheet = document.createElement("div");
+    sheet.style.cssText = "width:" + W + "px;background:#F7F3EC;box-shadow:0 0 0 1px #D6D0C5;display:flex;flex-direction:column;gap:" + this.GAP + "px";
+    res.rows.forEach((r) => {
+      const rowEl = document.createElement("div");
+      rowEl.style.cssText = "display:flex;gap:" + this.GAP + "px";
+      r.cells.forEach((c) => {
+        const cell = document.createElement("div");
+        cell.style.cssText = "position:relative;overflow:hidden;background:#14110F;width:" + c.w + "px;height:" + c.h + "px;flex:0 0 auto";
+        if (c.src) {
+          const img = document.createElement("img");
+          img.src = "../../../../media/w/" + c.src; img.alt = "";
+          img.style.cssText = "position:absolute;inset:0;width:100%;height:100%;object-fit:cover";
+          cell.appendChild(img);
+        } else {
+          cell.style.background = "#F2ECE2"; cell.style.boxShadow = "inset 0 0 0 1px #D6D0C5";
+          const l = document.createElement("span");
+          l.textContent = "probe " + c.probe;
+          l.style.cssText = "position:absolute;left:6px;bottom:6px;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#6C6862";
+          cell.appendChild(l);
+        }
+        const n = document.createElement("span");
+        n.textContent = String(c.pos).padStart(2, "0");
+        n.style.cssText = "position:absolute;left:5px;top:4px;font-size:11px;letter-spacing:0.1em;color:" + (c.src ? "rgba(244,239,230,0.92)" : "#6C6862");
+        cell.appendChild(n);
+        rowEl.appendChild(cell);
+      });
+      sheet.appendChild(rowEl);
+    });
+    host.appendChild(sheet);
+  }
+}
+
+</script>
+</body>
+</html>

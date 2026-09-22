@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..600&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --surface:#F7F3EC; --ink:#16120E; --accent:#C4361C; --muted:#6C6862; --rule:#E2DCD2; --frame:#14110F;
+  --font-display:'Marcellus',Georgia,serif; --font-body:'Newsreader',Georgia,serif;
+  --display-track:-0.005em;
+}
+body{margin:0;background:#E6E1D8}
+a{color:inherit;text-decoration:none}
+img{display:block}
+</style>
+</helmet>
+<div ref="{{ rootRef }}" style="font-family:var(--font-body);color:var(--ink);padding:56px 48px 120px">
+
+  <div style="max-width:80ch;margin-bottom:36px">
+    <h1 style="margin:0;font-family:var(--font-display);font-size:30px;letter-spacing:var(--display-track);text-transform:uppercase">JUSTIFIED_ROWS — narrow-width behaviour</h1>
+    <p style="margin:14px 0 0;font-size:17px;line-height:1.7">A system test, not a page. Three packing algorithms run the same ordered sequence at the same width so the differences are attributable to the algorithm alone. Every cell keeps its native aspect — nothing is cropped, nothing is reordered. Switch width and count in the tweaks; each column reports its own row metrics, order audit and aspect audit.</p>
+    <p style="margin:12px 0 0;font-size:15px;line-height:1.7;color:var(--muted)">The library holds no true 2.39:1 asset, so extreme-aspect geometry is exercised with labelled <em>geometry probes</em> — ruled boxes, not invented imagery.</p>
+  </div>
+
+  <div data-columns="" style="display:flex;align-items:flex-start;gap:64px"></div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;width&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;1440&quot;,&quot;1024&quot;,&quot;768&quot;,&quot;430&quot;,&quot;390&quot;,&quot;375&quot;],&quot;default&quot;:&quot;375&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Test&quot;},&quot;count&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;3&quot;,&quot;4&quot;,&quot;6&quot;,&quot;9&quot;,&quot;18&quot;],&quot;default&quot;:&quot;9&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Test&quot;},&quot;showOrder&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Test&quot;}}">
+class Component extends DCLogic {
+  // Real files, real measured aspects. Probes are geometry only — never imagery.
+  LIB = [
+    { src: "mtm-atelier.jpg", ar: 2.041, kind: "landscape" },
+    { src: "portrait.jpg", ar: 0.645, kind: "portrait" },
+    { src: "desk-01.jpg", ar: 1.776, kind: "landscape" },
+    { probe: "2.39 cinematic", ar: 2.39, kind: "wide" },
+    { src: "mtm-shopfront.jpg", ar: 2.012, kind: "landscape" },
+    { src: "about-portrait.png", ar: 0.647, kind: "portrait" },
+    { src: "desk-03.jpg", ar: 1.778, kind: "landscape" },
+    { src: "mtm-table.jpg", ar: 2.0, kind: "landscape" },
+    { probe: "0.50 tall", ar: 0.5, kind: "portrait" },
+    { src: "nike-court.jpg", ar: 2.008, kind: "landscape" },
+    { src: "mtm-sketch.jpg", ar: 2.041, kind: "landscape" },
+    { src: "desk-04.jpg", ar: 1.776, kind: "landscape" },
+    { src: "mtm-swatches.jpg", ar: 2.041, kind: "landscape" },
+    { src: "nike-lacing.jpg", ar: 1.778, kind: "landscape" },
+    { src: "mtm-portrait.jpg", ar: 2.004, kind: "landscape" },
+    { probe: "2.39 cinematic", ar: 2.39, kind: "wide" },
+    { src: "desk-05.jpg", ar: 1.776, kind: "landscape" },
+    { src: "mtm-mannequin.jpg", ar: 2.041, kind: "landscape" }
+  ];
+  GAP = 4;
+
+  ALGOS = [
+    { key: "A", name: "A · desktop as-is", note: "Fixed 300px target, greedy fill, orphan merge. What the page candidates ship today." },
+    { key: "B", name: "B · proportional target", note: "Target height scales with width. No minimum cell width." },
+    { key: "C", name: "C · target + minimum cell", note: "Target from an intended items-per-row, plus a floor on cell width and a ceiling on cell height." }
+  ];
+
+  opt(k, d) { const o = window.__jr || {}; return o[k] !== undefined ? o[k] : (this.props[k] !== undefined ? this.props[k] : d); }
+
+  renderVals() { return { rootRef: (el) => { this.root = el; } }; }
+
+  componentDidMount() { window.__jrc = this; setTimeout(() => this.build(), 0); }
+  componentDidUpdate() { setTimeout(() => this.build(), 0); }
+
+  items() {
+    const n = parseInt(this.opt("count", "9"), 10);
+    return this.LIB.slice(0, n).map((it, i) => Object.assign({}, it, { pos: i + 1 }));
+  }
+
+  // ---- packers. All three consume items in order and may only move row breaks.
+  packA(items, W) {
+    const target = 300, gap = this.GAP;
+    const rows = []; let row = [], sum = 0;
+    items.forEach((it) => {
+      row.push(it); sum += it.ar;
+      if ((W - gap * (row.length - 1)) / sum <= target) { rows.push({ cells: row, sum }); row = []; sum = 0; }
+    });
+    if (row.length) rows.push({ cells: row, sum, last: true });
+    if (rows.length > 1) {
+      const tail = rows[rows.length - 1];
+      if (tail.last && tail.sum * target < W * 0.4) {
+        const prev = rows[rows.length - 2];
+        prev.cells = prev.cells.concat(tail.cells); prev.sum += tail.sum; rows.pop();
+      }
+    }
+    return this.solve(rows, W, target);
+  }
+
+  packB(items, W) {
+    const avg = items.reduce((a, b) => a + b.ar, 0) / items.length;
+    const T = W >= 1024 ? 3 : W >= 700 ? 2 : 1;
+    const target = (W - this.GAP * (T - 1)) / (T * avg);
+    const rows = []; let row = [], sum = 0;
+    items.forEach((it) => {
+      row.push(it); sum += it.ar;
+      if ((W - this.GAP * (row.length - 1)) / sum <= target) { rows.push({ cells: row, sum }); row = []; sum = 0; }
+    });
+    if (row.length) rows.push({ cells: row, sum, last: true });
+    return this.solve(rows, W, target);
+  }
+
+  packC(items, W) {
+    const gap = this.GAP;
+    const avg = items.reduce((a, b) => a + b.ar, 0) / items.length;
+    const T = W >= 1024 ? 3 : W >= 700 ? 2 : 1;               // intended items per row
+    const target = (W - gap * (T - 1)) / (T * avg);            // derived, not authored
+    // A legibility floor, not a proportion: 0.22W was tried first and forced
+    // 2-item rows at desktop, swinging row heights from 232 to 592px. The
+    // defect being prevented is a cell too small to read — that is an absolute
+    // size with a gentle proportional term, not a share of the measure.
+    // Applies at every width. An earlier version disabled the floor whenever
+    // the intended row held one item — which switched it off at exactly the
+    // widths where starvation is worst, and 74px cells duly appeared at 375.
+    // A single-item row cannot starve, so the exemption belongs to the row, not
+    // to the viewport (see the length check in the enforcement pass).
+    const minW = Math.max(120, 0.10 * W);
+    const maxH = 1.25 * W;                                     // no monoliths
+    const rows = []; let row = [], sum = 0;
+    const narrowest = (cells, s) => {
+      const h = (W - gap * (cells.length - 1)) / s;
+      return Math.min.apply(null, cells.map((c) => c.ar * h));
+    };
+    items.forEach((it) => {
+      const nextSum = sum + it.ar;
+      const nextCells = row.concat([it]);
+      // Close the row *before* adding an item that would starve any cell.
+      if (row.length && minW && narrowest(nextCells, nextSum) < minW) {
+        rows.push({ cells: row, sum }); row = [it]; sum = it.ar;
+      } else { row = nextCells; sum = nextSum; }
+      if ((W - gap * (row.length - 1)) / sum <= target) { rows.push({ cells: row, sum }); row = []; sum = 0; }
+    });
+    if (row.length) rows.push({ cells: row, sum, last: true });
+    // The predictive check can still be beaten by the row that closes on target
+    // in the same step. Enforce the floor on the solved geometry too: push the
+    // offending trailing cell down a row. Order is never disturbed — only the
+    // boundary moves.
+    if (minW) {
+      for (let pass = 0; pass < 8; pass++) {
+        let moved = false;
+        for (let i = 0; i < rows.length; i++) {
+          const r = rows[i];
+          if (r.cells.length < 2) continue;
+          const h = (W - gap * (r.cells.length - 1)) / r.sum;
+          if (Math.min.apply(null, r.cells.map((c) => c.ar * h)) >= minW) continue;
+          const moved_ = r.cells.pop();
+          r.sum -= moved_.ar;
+          const next = rows[i + 1];
+          if (next) { next.cells.unshift(moved_); next.sum += moved_.ar; }
+          else rows.push({ cells: [moved_], sum: moved_.ar, last: true });
+          moved = true;
+        }
+        if (!moved) break;
+      }
+    }
+    // Orphan tail: absorb only if it would be a fragment; a lone item that can
+    // stand at full measure is a deliberate closing frame, not an error.
+    if (rows.length > 1) {
+      const tail = rows[rows.length - 1];
+      if (tail.last && tail.cells.length === 1 && tail.sum * target < W * 0.4) {
+        const prev = rows[rows.length - 2];
+        const merged = prev.cells.concat(tail.cells), mSum = prev.sum + tail.sum;
+        if (!minW || narrowest(merged, mSum) >= minW * 0.8) { prev.cells = merged; prev.sum = mSum; rows.pop(); }
+      }
+    }
+    return this.solve(rows, W, target, maxH);
+  }
+
+  solve(rows, W, target, maxH) {
+    return rows.map((r) => {
+      const avail = W - this.GAP * (r.cells.length - 1);
+      let h = avail / r.sum;
+      let full = true;
+      if (r.last && h > target * 1.2) { h = target; full = false; }
+      if (maxH && h > maxH) { h = maxH; full = false; }          // bounded tall cells
+      let used = 0;
+      const cells = r.cells.map((c, j) => {
+        const w = (full && j === r.cells.length - 1) ? avail - used : Math.round(c.ar * h);
+        used += w;
+        return Object.assign({}, c, { w, h: Math.round(h) });
+      });
+      return { cells, full, fill: cells.reduce((a, c) => a + c.w, 0) + this.GAP * (cells.length - 1) };
+    });
+  }
+
+  build() {
+    if (!this.root) return;
+    const host = this.root.querySelector("[data-columns]");
+    if (!host) return;
+    const W = parseInt(this.opt("width", "375"), 10);
+    const items = this.items();
+    host.innerHTML = "";
+    this.ALGOS.forEach((algo) => {
+      const rows = algo.key === "A" ? this.packA(items, W) : algo.key === "B" ? this.packB(items, W) : this.packC(items, W);
+      host.appendChild(this.renderColumn(algo, rows, W, items));
+    });
+  }
+
+  renderColumn(algo, rows, W, items) {
+    const wrap = document.createElement("div");
+    wrap.setAttribute("data-algo", algo.key);
+    wrap.style.cssText = "display:flex;flex-direction:column;gap:12px";
+
+    const head = document.createElement("div");
+    head.style.cssText = "max-width:" + Math.max(W, 320) + "px";
+    head.innerHTML = '<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">' +
+      '<span style="font-family:var(--font-body);font-size:12px;letter-spacing:0.16em;text-transform:uppercase;background:#16120E;color:#F7F3EC;padding:3px 8px">' + algo.name + '</span></div>' +
+      '<p style="margin:8px 0 0;font-size:14px;line-height:1.6;color:#6C6862">' + algo.note + '</p>';
+    wrap.appendChild(head);
+
+    const sheet = document.createElement("div");
+    sheet.setAttribute("data-sheet", "");
+    sheet.style.cssText = "width:" + W + "px;background:#F7F3EC;box-shadow:0 0 0 1px #D6D0C5;display:flex;flex-direction:column;gap:" + this.GAP + "px";
+
+    const minCell = [];
+    rows.forEach((r) => {
+      const rowEl = document.createElement("div");
+      rowEl.style.cssText = "display:flex;gap:" + this.GAP + "px";
+      r.cells.forEach((c) => {
+        minCell.push(c.w);
+        const cell = document.createElement("div");
+        cell.setAttribute("data-cell", "");
+        cell.dataset.pos = c.pos;
+        cell.dataset.ar = c.ar;
+        cell.style.cssText = "position:relative;overflow:hidden;background:#14110F;width:" + c.w + "px;height:" + c.h + "px;flex:0 0 auto";
+        if (c.src) {
+          const img = document.createElement("img");
+          img.src = "../../../../media/w/" + c.src;
+          img.alt = "";
+          img.style.cssText = "position:absolute;inset:0;width:100%;height:100%;object-fit:cover";
+          cell.appendChild(img);
+        } else {
+          cell.style.background = "#F2ECE2";
+          cell.style.boxShadow = "inset 0 0 0 1px #D6D0C5";
+          const l = document.createElement("span");
+          l.textContent = c.probe;
+          l.style.cssText = "position:absolute;left:6px;bottom:6px;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:#6C6862";
+          cell.appendChild(l);
+        }
+        if (this.opt("showOrder", true)) {
+          const n = document.createElement("span");
+          n.textContent = String(c.pos).padStart(2, "0");
+          n.style.cssText = "position:absolute;left:5px;top:4px;font-family:var(--font-body);font-size:11px;letter-spacing:0.1em;color:" + (c.src ? "rgba(244,239,230,0.92)" : "#6C6862") + ";text-shadow:" + (c.src ? "0 1px 6px rgba(0,0,0,0.7)" : "none");
+          cell.appendChild(n);
+        }
+        rowEl.appendChild(cell);
+      });
+      sheet.appendChild(rowEl);
+    });
+    wrap.appendChild(sheet);
+
+    const order = rows.reduce((a, r) => a.concat(r.cells.map((c) => c.pos)), []);
+    const ordered = order.every((v, i) => v === i + 1);
+    const arOk = rows.every((r) => r.cells.every((c) => Math.abs((c.w / c.h) - c.ar) / c.ar < 0.02));
+    const narrowest = Math.min.apply(null, minCell);
+    const tail = rows[rows.length - 1];
+    const out = document.createElement("div");
+    out.setAttribute("data-readout", "");
+    out.style.cssText = "max-width:" + Math.max(W, 320) + "px;font-size:12px;line-height:1.7;color:#3A362F;white-space:pre-wrap";
+    // A starved cell inside a justified row is the defect. A ragged tail is a
+    // different thing: it is what honest native-aspect packing looks like when
+    // the remainder cannot fill a row without cropping.
+    const justified = rows.filter((r) => r.full);
+    const inRow = justified.length
+      ? Math.min.apply(null, justified.reduce((a2, r) => a2.concat(r.cells.map((c) => c.w)), []))
+      : W;
+    // Judge every cell by the same legibility floor the rule enforces. An
+    // earlier version judged the audit proportionally (0.18W) and reported a
+    // perfectly legible 168px portrait at 1440 as starved — the measurement
+    // repeating the mistake the rule had just corrected.
+    const floor = Math.max(120, 0.10 * W);
+    const tailRagged = !tail.full || tail.fill < 0.98 * W;
+    const tailMin = Math.min.apply(null, tail.cells.map((c) => c.w));
+    out.textContent = [
+      "rows          " + rows.length + "  ·  " + rows.map((r) => r.cells.length).join("/") + " items",
+      "row heights   " + rows.map((r) => r.cells[0].h).join(", ") + "px",
+      "cell floor    " + Math.round(floor) + "px  (max(120px, 0.10 × measure))",
+      "in justified  narrowest " + Math.round(inRow) + "px" + (inRow < floor - 1 ? "   ✗ STARVED CELL" : "   ✓ above floor"),
+      "tail row      " + tail.cells.length + " item" + (tail.cells.length === 1 ? "" : "s") + " · " + Math.round((tail.fill / W) * 100) + "% filled · " + (tailRagged ? "ragged" : "justified") + " · narrowest " + Math.round(tailMin) + "px" + (tailMin < floor - 1 ? "   ✗ FRAGMENT" : "   ✓"),
+      "order         " + order.join(" ") + (ordered ? "   ✓ source order" : "   ✗ REORDERED"),
+      "native aspect " + (arOk ? "✓ every cell within 2% of its source ratio" : "✗ ALTERED")
+    ].join("\n");
+    wrap.appendChild(out);
+    return wrap;
+  }
+}
+
+</script>
+</body>
+</html>

@@ -36,6 +36,13 @@ Governing decisions: `design-direction.md`, ADR-0004, ADR-0006, ADR-0007, ADR-00
 > either. Where v2 re-measured something, v2 is the current reading; where it did
 > not, the figure below stays historical.
 >
+> **Exploration has since reached all six public surfaces**, not only Home.
+> Statements below that describe other pages as unexplored are **historical and
+> overtaken** — §10 items 6 and 8 in particular. For current coverage and status
+> read `page-specifications.md` §0, `design-system.md` §16, and the candidate
+> prototypes in `docs/design/prototypes/`. None of those candidates is approved
+> either.
+>
 > One correction from v2 worth reading against §5 below: with no CSS letterbox
 > compensation there is **no poster-to-video scale jump**. The ~12% figure was
 > produced *by* the `trimLetterbox` workaround, not by the assets
@@ -507,6 +514,14 @@ editorial character. That is a gate, not a preference.
 ## 10. Open design questions
 
 Only items that genuinely need visual testing.
+
+> **Superseded in part — coverage.** This list is preserved as written.
+> **Items 6 and 8 have been overtaken by later exploration** and are no longer
+> an accurate statement of coverage: all six public surfaces now have a
+> candidate, recorded in `docs/design/prototypes/`. Current status lives in
+> `page-specifications.md` §0 and the carried-forward register in
+> `design-system.md` §16. The remaining items are still open. Nothing below is
+> rewritten, and no candidate is approved.
 
 1. **Focal point** — does a single normalised focal point per asset survive
    2:3, 2.39:1, tall and 16:9, or does the system need per-container framing?

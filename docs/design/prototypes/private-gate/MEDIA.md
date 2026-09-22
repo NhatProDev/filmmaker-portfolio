@@ -84,11 +84,36 @@ Recorded because it is easy to assume otherwise of a page with a password field:
 ## Open items
 
 None are media. The gate's outstanding items are recorded in
-`page-specifications.md` §6.9 and fall into three kinds:
+`page-specifications.md` §6.9 and fall into two kinds:
 
-- **A design conflict** — the theme environment (§6.3), which is disputed
-  between the specification and the candidate.
 - **Responsive**, chiefly soft-keyboard overlap at constrained heights.
 - **Engineering / security** — routing behaviour, enumeration resistance,
   rate-limit policy, `Retry-After`, cookie scope and response-timing parity.
   None of these is a visual-design blocker.
+
+**No visual-design blocker remains** (`page-specifications.md` §6.9).
+
+### Resolved — the theme-environment conflict
+
+This manifest previously listed a third item: a **design conflict** over the
+gate's theme environment, "disputed between the specification and the
+candidate." **That conflict is closed.** It was resolved by Project Owner
+decision on **2026-09-22** in favour of the candidate, and is recorded at
+`page-specifications.md` §6.3.
+
+```text
+pre-authorization    route-independent · non-project-derived
+                     light public editorial candidate surface
+
+authorized handoff   may transition into protected Project Detail
+                     the current candidate uses the light → dark handoff
+```
+
+The superseded rule was *"the gate inherits the environment of the project it
+guards."* It conflicted with the stronger pre-authorization non-disclosure
+invariant (§6.5): a protected project's environment is itself project-derived
+presentation, and exposing it before access is verified discloses something
+about the work being guarded.
+
+This changes nothing about the zero-media finding above — that finding is the
+visual expression of the same non-disclosure invariant.

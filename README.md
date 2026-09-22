@@ -37,9 +37,16 @@ docs/
     design-system.md          Draft — system-level visual rules, graded.
     design-handoff.md         Candidate — Home exploration evidence.
     page-specifications.md    Draft — per-page maturity and constraints.
-    prototypes/
-      home/
-        MEDIA.md              Manifest for the local-only prototype footage.
+    prototypes/               Candidate visual evidence. Nothing here is
+                              approved. Each directory carries its own
+                              MEDIA.md manifest and a review record.
+      home/                   Home Baseline v2. legacy/ holds the superseded
+                              prototype, retained as record.
+      project-detail/         Project Detail 1B v2.
+      art-works/              Art Works 2C v2.
+      about/                  About Me 3B v2.
+      contact/                Contact 4B v2.
+      private-gate/           Private Gate 5B v2. No runtime media.
     guidelines/
       frontend-design/        Imported Anthropic frontend-design skill.
                               Advisory only (CLAUDE.md §21, tier 4).
@@ -49,9 +56,18 @@ docs/
 scripts/                      Operational scripts. seed-admin.ts is reserved.
 src/                          Application code. Does not exist yet.
 
-imgs & videos/                Local-only prototype footage. Untracked and
-                              gitignored; a fresh clone will not have it.
-                              See docs/design/prototypes/home/MEDIA.md.
+imgs & videos/                Local SOURCE / working media. The original
+                              camera/export footage. Nothing renders from it
+                              directly. Untracked and gitignored.
+media/                        Local RUNTIME DERIVATIVE package. The web-sized
+                              clips (clips/) and stills (w/) that the prototype
+                              .dc.html evidence loads. Generated from the
+                              above, not a source. Untracked and gitignored.
+
+                              Neither media tier is in Git and neither is in a
+                              fresh clone. The prototype evidence that loads
+                              them IS tracked. See the MEDIA.md manifest in
+                              each prototypes/ directory.
 ```
 
 ## Precedence
@@ -114,14 +130,45 @@ yet, so this must be re-verified whenever either file changes.
 
 This repository is under Git, on branch `main`, with no remote configured.
 
-Two directories are deliberately untracked and gitignored. Each has a tracked
-manifest that travels in their place:
+Three paths are deliberately untracked and gitignored. Each has a tracked
+manifest that travels in its place:
 
-| Untracked | Tracked manifest |
-|---|---|
-| `docs/human-description/references/*.png` | `docs/human-description/references/INDEX.md` |
-| `imgs & videos/` | `docs/design/prototypes/home/MEDIA.md` |
+| Untracked | What it is | Tracked manifest |
+|---|---|---|
+| `docs/human-description/references/*.png` | Tier-2 visual references | `docs/human-description/references/INDEX.md` |
+| `imgs & videos/` | Local source / working media | `docs/design/prototypes/home/MEDIA.md` |
+| `/media/` | Local runtime derivative package | The `MEDIA.md` in each `docs/design/prototypes/` directory |
 
-A fresh clone contains neither. Both must be restored manually from wherever the
-owner keeps them, under the exact filenames the manifests list — the filenames
-are load-bearing.
+A fresh clone contains none of them. All must be restored manually from wherever
+the owner keeps them, under the exact filenames the manifests list — the
+filenames are load-bearing.
+
+### The two local media tiers
+
+There are two untracked media directories at the repository root. They are
+different things and must not be conflated.
+
+- **`imgs & videos/` — local source / working media.** The original
+  camera/export footage. Review material, and the input the derivatives are
+  made from. Nothing renders from it directly.
+- **`media/` — local runtime derivative package.** The web-sized clips
+  (`clips/`) and stills (`w/`) that the prototype `.dc.html` evidence loads at
+  runtime. Generated artifacts, not sources.
+
+**Neither is committed, and neither should be.** Both are gitignored
+(`imgs & videos/` and `/media/`), and **a fresh clone contains neither tier** —
+both must be restored manually before any prototype will render. Neither is a
+production asset store: production media is uploaded browser-to-object-storage
+and referenced by the `media` table (CLAUDE.md §12). The mapping between
+`media/` derivatives and the `imgs & videos/` source filenames is unrecorded
+and unverified — do not infer one from filenames.
+
+**The prototype evidence itself IS tracked.** Every `.dc.html`, `.md` and `.js`
+file under `docs/design/prototypes/` is in Git. Only the media those files load
+is not, so a fresh clone has the evidence and must restore the media to view it.
+The Private Gate prototype is the one exception that needs nothing restored: it
+has zero runtime media dependencies by design.
+
+The two-tier distinction is recorded in full in
+`docs/design/prototypes/home/MEDIA.md`; each other prototype directory's
+`MEDIA.md` lists the specific assets that directory references.

@@ -115,6 +115,10 @@ legacy/image-slot.js         legacy dependency, not used by v2
 legacy/support.js            legacy runtime support
 ```
 
+**Home Baseline v2 is the current Home candidate baseline. It is not approved.**
+Its own report says so, and `page-specifications.md` §1 records Home as
+VISUALLY EXPLORED — candidate.
+
 `legacy/` was previously reported missing. It has since been placed here. Only
 its relative media paths were rewritten (`./media/` → `../../../../../media/`)
 so the archived file still renders from this location, plus a provenance comment
@@ -126,9 +130,15 @@ Measurements in the legacy report remain **historical**. `home-baseline-v2.md`
 there is **no poster-to-video scale jump** — the reported ~12% jump was produced
 *by* the workaround, not by the assets.
 
-Note that `design-system.md` §0.1 and `design-handoff.md` still describe the Home
-prototype as missing. Those statements predate this directory and have not been
-revised here.
+`design-system.md` §0.1 and `design-handoff.md` both carried a statement that
+the Home prototype was missing. **Both have since been revised** and now record
+the cited sources as present — §0.1 is titled "the prototype has been
+recovered," and `design-handoff.md` carries a dated evidence notice saying the
+same.
+
+**Recovery promoted nothing.** The grading consequences recorded while the files
+were absent still stand; see `design-system.md` §0.1 and the reclassification
+register at §17.
 
 ---
 

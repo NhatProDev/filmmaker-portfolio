@@ -83,7 +83,7 @@ Recorded from `project-detail-1b-v2.md`. **Evidence, not specification.**
 
 - **Poster / film `fit` mismatch.** The hero poster renders `COVER` and the film
   plays `CONTAIN`, so pressing play reframes. Unresolved; see
-  `page-specifications.md` §3.8 item 2.
+  `page-specifications.md` §3.9 item 2.
 - **Letterbox on `c1` is visible** inside the contained frame. Left untreated on
   purpose — `design-system.md` §13 forbids shipping CSS compensation, and the
   ingestion method is unresolved (§16 item 1).

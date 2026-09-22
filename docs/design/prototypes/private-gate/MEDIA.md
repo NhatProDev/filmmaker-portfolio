@@ -10,6 +10,9 @@ This file exists to record an absence, and that absence is the point.
 ## Zero project-specific media dependencies
 
 **The Private Project Gate candidate depends on no runtime media of any kind.**
+**This now holds for both prototypes in this directory** — the desktop candidate
+and the responsive validation artifact. Counts below were re-verified against
+both on 2026-09-22.
 
 | Dependency | Count |
 |---|---|
@@ -28,10 +31,17 @@ colour would each disclose that a project exists and hint at what it is.
 **The prototype contains no project object.** Nothing is fetched, passed in or
 derived, so there is no path by which project data could reach the render.
 
-The prototype enforces this at runtime with a **live vocabulary scan** over
-rendered text on every state change, flagging any of *title, client, runtime,
-synopsis, credit, year, poster* if it ever appears — plus an element count
-asserting zero media nodes.
+The **desktop** prototype enforces this at runtime with a **live vocabulary
+scan** over rendered text on every state change, flagging any of *title, client,
+runtime, synopsis, credit, year, poster* if it ever appears — plus an element
+count asserting zero media nodes.
+
+The **responsive** prototype carries a different runtime readout — per-frame
+*Enter* clearance, scroll state, field measure, heading size, navigation
+visibility and `aria-invalid`. It does **not** re-run the vocabulary scan. Its
+zero-media and no-project-object properties were verified by inspection, not by
+that instrument, and `private-gate-5b-responsive.md` §1 records disclosure as
+holding at every width.
 
 **Consequently there is nothing to restore in a fresh clone for this page.**
 Unlike every other prototype directory, the gate renders completely without
@@ -42,15 +52,24 @@ Unlike every other prototype directory, the gate renders completely without
 ## Artifacts in this directory
 
 ```text
-Private Gate 5B v2.dc.html        candidate baseline prototype
-private-gate-5b-v2.md             its review record
-Private Gate Directions.dc.html   exploration record — directions 5A / 5B v1
-support.js                        prototype runtime support
+Private Gate 5B v2.dc.html         desktop candidate baseline prototype
+private-gate-5b-v2.md              its review record
+Private Gate 5B Responsive.dc.html responsive validation of 5B v2
+private-gate-5b-responsive.md      its validation record
+Private Gate Directions.dc.html    exploration record — directions 5A / 5B v1
+support.js                         prototype runtime support
 ```
 
 **5B v2 is the selected candidate baseline. It is not approved.** Its own header
 says so, and `page-specifications.md` §6 records the Private Project Gate as
-VISUALLY EXPLORED — candidate.
+VISUALLY EXPLORED — candidate on the desktop axis.
+
+**`Private Gate 5B Responsive.dc.html` validates 5B v2; it does not replace
+it.** Six viewports — 768 × 1024, 430 × 932, 430 × 596 (keyboard), 390 × 844,
+390 × 400 (keyboard) and 375 × 307 (keyboard, worst case) — each running the
+full six-state machine. **There is no 5C, and the desktop artifacts are
+unmodified by it.** `page-specifications.md` §6 records the gate as RESPONSIVE
+VALIDATED — candidate on the responsive axis. Neither axis is approved.
 
 `Private Gate Directions.dc.html` is **exploration evidence, retained as
 record**. 5A and 5B v1 remain exactly as explored; they are not maintained
@@ -86,10 +105,20 @@ Recorded because it is easy to assume otherwise of a page with a password field:
 None are media. The gate's outstanding items are recorded in
 `page-specifications.md` §6.9 and fall into two kinds:
 
-- **Responsive**, chiefly soft-keyboard overlap at constrained heights.
+- **Real-device QA** — iOS Safari, actual `visualViewport` behaviour, software
+  keyboard open/close, focus retention, and reflow while INVALID and RATE
+  LIMITED are visible. Simulated short viewports are good evidence and are
+  **not** a substitute.
 - **Engineering / security** — routing behaviour, enumeration resistance,
   rate-limit policy, `Retry-After`, cookie scope and response-timing parity.
   None of these is a visual-design blocker.
+
+The **soft-keyboard overlap** risk that previously headed this list is
+**resolved as a responsive candidate**: reproduced at 375 × 307, measured at
+20px below the fold, and answered by top-aligned flow below ~620px of available
+height. See `page-specifications.md` §6.9 and
+`private-gate-5b-responsive.md`. One page item is still open — ***Show* control
+placement at narrow widths**, which the validation did not exercise.
 
 **No visual-design blocker remains** (`page-specifications.md` §6.9).
 

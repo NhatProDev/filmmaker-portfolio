@@ -810,6 +810,53 @@ items-per-row bounds, narrow-width algorithms and final mobile compositions are
 settled is *that* each mode owes one, and where the responsibility sits — with
 the presentation mode, not with the block-level stack. See §16 item 10.
 
+### 11.6 First responsive validation — what it settles, and what it does not
+
+**The Private Project Gate is the first page exercised at narrow widths and at
+constrained height** (2026-09-22). Evidence:
+`prototypes/private-gate/Private Gate 5B Responsive.dc.html` and
+`private-gate-5b-responsive.md`; the integrated result is
+`page-specifications.md` §6.9. **The desktop candidate 5B v2 is unchanged by
+it**, and nothing in it is approved.
+
+**[DEFAULT]** The gate's derivations — its ≤430 navigation treatment, heading
+clamp, field measure and constrained/squeezed height thresholds — are **that
+page's answers on that page's evidence.** They live in `page-specifications.md`
+§6.9 and **are not site-wide rules.** Do not apply the gate's numbers to another
+page.
+
+**The other five pages remain pending responsive validation.** §11.3 is
+unchanged by this: the automatic fallback still guarantees only that nothing is
+*broken*, not that anything is *good*.
+
+#### Cross-cutting evidence — evidence only **[ADVISORY]**
+
+Two observations generalise beyond the gate. **Neither is promoted to a rule
+here.** One page's evidence is not enough to make either an invariant, and doing
+so would repeat the over-grading §17 had to undo.
+
+1. **Interactive surfaces may need top-aligned flow at constrained visual
+   heights.** Centring a growing element inside a shrinking viewport pushes its
+   bottom off screen — the gate's failure was the mechanism, not a quirk. Any
+   page whose primary control sits below a growing element has the same
+   exposure. Carried as §16 item 13.
+2. **Display typography likely benefits from bounded, composition-relative
+   clamping.** The gate sizes its heading `clamp(min, cqw-of-the-spine,
+   desktop-ceiling)` — the third approach in the candidate set, after Home's
+   `13.3cqw` of a grid container and Contact's `cqw` of the spine, and **the
+   first with an explicit ceiling.** Carried as §16 item 11.
+
+**Site-wide mobile navigation is explicitly not resolved by this page.** Hiding
+the nav is right for a surface whose job is one field; Home, Art Works, Project
+Detail, About Me and Contact each need their own answer and **must not inherit
+the gate's**. Carried as §16 item 14.
+
+**Simulated constrained height is not real-device testing.** This is a
+statement about the quality of the evidence, not a design rule, so it carries no
+grade — but it bounds what the grade above means. Responsive *candidate* status
+is not a claim about behaviour on an actual software keyboard; the QA coverage
+that would settle that is listed in `page-specifications.md` §6.9.
+
 ---
 
 ## 12. Accessibility floor **[INVARIANT]**
@@ -922,11 +969,13 @@ Carried forward. **Do not close these by inference during implementation.**
 | 5 | **Overlap primitive** | Deferred, not a V1 blocker |
 | 6 | **`VIDEO_GRID` column maximum** — a bound must exist; the number does not. | Unresolved |
 | 7 | **`AUTOPLAY_VISIBLE` visibility threshold** — what counts as "sufficiently visible". | Unresolved |
-| 8 | **Mobile composition for every page** — no reference evidence exists. | Unresolved |
+| 8 | **Mobile composition for every page** — no reference evidence exists. **One page is now validated:** the Private Project Gate, at 768 / 430 / 390 / 375 and at constrained height (§11.6, `page-specifications.md` §6.9). Home, Art Works, Project Detail, About Me and Contact remain pending, and must not borrow the gate's derivations. | **1 of 6 validated as candidate; 5 pending** |
 | 9 | **All six pages now have a candidate** — Home, Art Works (2C v2), Project Detail (1B v2), About Me (3B v2), Contact (4B v2), Private Gate (5B v2). None is approved. The gate theme conflict was resolved on 2026-09-22 in favour of a route-independent pre-auth surface (`page-specifications.md` §6.3). | **Exploration complete; no candidate conflicts open** |
 | 10 | **GALLERY narrow-width behaviour per presentation mode** — the *principle* is approved (§11.5): GALLERY does not inherit GRID child stacking and every mode owes bounded narrow-width behaviour. `VIDEO_GRID` satisfies it via column counts; **`JUSTIFIED_ROWS`, `HORIZONTAL_STRIP` and `SLIDESHOW` still need theirs defined.** Exact behaviours pending mobile validation. | **Principle approved; per-mode behaviour pending** |
-| 11 | **Display coefficient as a preset property** — `13.3cqw` is tuned to one face; face substitution changes clipping without anyone authoring it (§1.4). Contact 4B v2 §6 adds a second dimension: sizing display type against **the element it must align to** rather than against the page removes the guess, and **the other candidates' coefficients have not been re-checked against this.** | **Proposed amendment, not applied** |
+| 11 | **Display coefficient as a preset property** — `13.3cqw` is tuned to one face; face substitution changes clipping without anyone authoring it (§1.4). Contact 4B v2 §6 adds a second dimension: sizing display type against **the element it must align to** rather than against the page removes the guess, and **the other candidates' coefficients have not been re-checked against this.** The Private Gate responsive validation adds a third: `clamp(26px, 8.2cqw of the spine, 46px)` — spine-relative **and bounded by the desktop size**, so narrow widths can never exceed it (§11.6). That is evidence for the clamped, spine-relative form; **one convention should be chosen for all pages**, and none has been. | **Proposed amendment, not applied** |
 | 12 | **Bounded HERO overlay content** — the *capability* is approved (ADR-0010): intra-block, title from `projects.title`, closed config, dismissal on media activation, `CLICK_TO_PLAY` or IMAGE only. Its **visual use on Project Detail remains candidate**, and the narrow-width stacked treatment awaits mobile validation. | **Capability approved; visual use candidate** |
+| 13 | **Constrained-height behaviour for interactive surfaces** — the Private Gate showed that centring a growing element inside a shrinking viewport pushes its action off screen, and answered it with top-aligned flow below ~620px (§11.6). Whether that becomes a general rule, at what threshold, and for which surfaces, is **not decided on one page's evidence**. | **Evidence recorded on one page; not a system rule** |
+| 14 | **Site-wide mobile navigation** — the gate hides the public nav at ≤430 because it has one job and never removes its escape route. Home, Art Works, Project Detail, About Me and Contact each need their own answer. **Explicitly not resolved by the gate, and not to be inherited from it** (§11.6). | **Unresolved** |
 
 ---
 

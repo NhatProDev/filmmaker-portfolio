@@ -17,18 +17,29 @@ does not pretend otherwise.
 
 ### Maturity grades
 
-| Page | Maturity | Exploration | Reference | What exists |
-|---|---|---|---|---|
-| **Home** | **VISUALLY EXPLORED** | ✅ candidate | ✗ none | A proposed default composition, block by block |
-| **Art Works** | **VISUALLY EXPLORED** | ✅ candidate (2C v2) | ✅ ref 3 | A proposed structure, element by element |
-| **Project Detail** | **VISUALLY EXPLORED** | ✅ candidate (1B v2) | ✅ ref 4 | A proposed composition, block by block |
-| **About Me** | **VISUALLY EXPLORED** | ✅ candidate (3B v2) | ✅ refs 1, 2 | A proposed composition, section by section |
-| **Contact** | **VISUALLY EXPLORED** | ✅ candidate (4B v2) | ✗ none | A proposed composition, element by element |
-| **Private Project Gate** | **VISUALLY EXPLORED** | ✅ candidate (5B v2) | ✗ none | A proposed composition with six states |
+**Maturity has two axes.** A page's *desktop composition* and its *responsive
+behaviour* are graded separately, because they are validated by different work.
+A page may be explored on one axis and pending on the other. **Neither axis
+implies approval.**
+
+| Page | Desktop maturity | Responsive maturity | Exploration | Reference | What exists |
+|---|---|---|---|---|---|
+| **Home** | **VISUALLY EXPLORED** | **PENDING RESPONSIVE VALIDATION** | ✅ candidate | ✗ none | A proposed default composition, block by block |
+| **Art Works** | **VISUALLY EXPLORED** | **PENDING RESPONSIVE VALIDATION** | ✅ candidate (2C v2) | ✅ ref 3 | A proposed structure, element by element |
+| **Project Detail** | **VISUALLY EXPLORED** | **PENDING RESPONSIVE VALIDATION** | ✅ candidate (1B v2) | ✅ ref 4 | A proposed composition, block by block |
+| **About Me** | **VISUALLY EXPLORED** | **PENDING RESPONSIVE VALIDATION** | ✅ candidate (3B v2) | ✅ refs 1, 2 | A proposed composition, section by section |
+| **Contact** | **VISUALLY EXPLORED** | **PENDING RESPONSIVE VALIDATION** | ✅ candidate (4B v2) | ✗ none | A proposed composition, element by element |
+| **Private Project Gate** | **VISUALLY EXPLORED** | **RESPONSIVE VALIDATED** | ✅ candidate (5B v2) | ✗ none | A proposed composition with six states, exercised at four narrow widths and at constrained height |
 
 **All six pages are now VISUALLY EXPLORED.** None is approved. Every page has a
 candidate recorded in `docs/design/prototypes/`, and every prototype states in
 its own header that it approves nothing.
+
+**One page is RESPONSIVE VALIDATED — the Private Project Gate** (§6.9, from
+`prototypes/private-gate/private-gate-5b-responsive.md`). It is a **candidate on
+both axes**: validation reproduced and answered a real failure, and approves
+nothing. **The other five remain pending responsive validation** — for them the
+automatic safe-stack floor (`design-system.md` §11.2) is all that is guaranteed.
 
 ### What each grade permits
 
@@ -38,6 +49,14 @@ its own header that it approves nothing.
 | **PARTIALLY EVIDENCED** | A visual reference exists, but **no composition has been designed from it**. | Apply the constraints and the reference's evidenced qualities. **Not** invent a final composition |
 | **STRUCTURALLY SPECIFIED** | Scope, contracts and prohibitions are settled. Visual design has not begun. | Implement the contract. **Not** design the page |
 | **PENDING VISUAL EXPLORATION** | Marks a specific unresolved item inside any page above. | Stop and raise it |
+
+The **responsive** axis uses its own two grades. They describe narrow-width and
+constrained-height behaviour only, and say nothing about approval:
+
+| Responsive grade | Means | An implementer may |
+|---|---|---|
+| **RESPONSIVE VALIDATED** | The desktop candidate has been exercised at narrow widths **and at constrained height**, its failures reproduced, measured and answered by derivation rather than redesign. Still **not approved**. | Build the recorded derivations as candidate defaults. **Not** treat them as approved, production-ready, or verified on real hardware — see the real-device caveat in §6.9 |
+| **PENDING RESPONSIVE VALIDATION** | A desktop candidate exists; its narrow-width and constrained-height behaviour has not been exercised. | Rely on the automatic safe-stack floor only (`design-system.md` §11.2). **Not** invent responsive behaviour, and **not** borrow another page's derivations |
 
 **A reference image is not a design.** References 1–4 show *qualities* — an
 oversized clipped wordmark, hairline frames, a justified still grid, an
@@ -978,19 +997,28 @@ Whether Contact is a page or a section of About.
 
 ## 6. Private Project Gate
 
-> **Maturity: VISUALLY EXPLORED.** Candidate composition **5B v2**, **not approved**.
+> **Maturity: VISUALLY EXPLORED** (desktop) · **RESPONSIVE VALIDATED**
+> (narrow width and constrained height). Candidate composition **5B v2**,
+> **not approved on either axis**.
 >
-> Evidence: `docs/design/prototypes/private-gate/Private Gate 5B v2.dc.html` and
+> Desktop evidence:
+> `docs/design/prototypes/private-gate/Private Gate 5B v2.dc.html` and
 > `private-gate-5b-v2.md`. Sibling directions 5A and 5B v1 are retained in
 > `Private Gate Directions.dc.html` as exploration record only. No visual
 > reference exists for this page.
 >
-> Exploring it required **no new architecture**. The existing project-access
-> contract already carries the whole flow (§6.2).
+> Responsive evidence: `Private Gate 5B Responsive.dc.html` and
+> `private-gate-5b-responsive.md` (§6.9). **The desktop candidate is unchanged
+> by it** — the responsive artifact validates 5B v2, it does not replace or
+> reinterpret it. There is no 5C.
+>
+> Exploring it required **no new architecture**, and validating it responsively
+> required none either. The existing project-access contract already carries the
+> whole flow (§6.2).
 >
 > The gate's theme environment was **resolved in favour of this candidate** on
-> 2026-09-22 (§6.3). Remaining blockers are responsive validation and the
-> engineering / security questions in §6.9 — none is a visual-design blocker.
+> 2026-09-22 (§6.3). What remains is **real-device QA** (§6.9) and the
+> engineering / security questions in §6.10 — none is a visual-design blocker.
 
 ### 6.1 Purpose
 
@@ -1196,29 +1224,171 @@ such.**
 private projects emit `noindex, nofollow` · errors explain what to do next
 without apologising or being vague.
 
-### 6.9 Unresolved
+### 6.9 Responsive **[RESPONSIVE VALIDATED — candidate]**
 
-#### Responsive **[PENDING VISUAL EXPLORATION]**
+**Validated 2026-09-22.** Evidence:
+`docs/design/prototypes/private-gate/Private Gate 5B Responsive.dc.html` and
+`private-gate-5b-responsive.md`. **The desktop candidate 5B v2 is unchanged.**
+**Six of the seven risks this section previously recorded are now answered by
+measurement**; the seventh — item 7, *Show* control placement — was not
+exercised and is carried below. The prediction record is kept in full.
 
-**Mobile and tablet remain pending visual validation.** Recorded, not solved:
+Every derivation here is **[DEFAULT]** — one page's answer on one page's
+evidence. It approves nothing and it is not a site-wide rule.
 
-1. **Soft-keyboard overlap — the sharpest risk.** Content is vertically centred;
-   with a keyboard open the field, message and *Enter* can all sit beneath it.
-2. **Loss of vertical centring at constrained heights.** Centring almost
-   certainly has to give way to top-aligned flow.
-3. **Field width.** The minimum measure is close to a small phone's usable width
-   and may need revisiting.
-4. **Error wrapping**, which pushes the actions down while the keyboard is open.
-5. **Nav compression** — full navigation on a page whose job is one field.
-6. **Heading scaling** — fixed rather than container-relative, unlike the rest of
-   the candidate set.
-7. **Show control placement**, which may want to sit inline with the label at
-   narrow widths.
+#### What this section predicted, and how each risk resolved
 
-#### Engineering / security questions — **not visual-design blockers**
+The seven risks recorded here before validation are preserved as the prediction
+record. Six were exercised; one was not.
+
+| # | Risk as recorded | Outcome |
+|---|---|---|
+| 1 | **Soft-keyboard overlap — the sharpest risk.** Content is vertically centred; with a keyboard open the field, message and *Enter* can all sit beneath it. | **Reproduced and measured.** *Enter* fell 20px below the fold at 375 × 307 with the invalid message shown. Answered by top-aligned flow below 620px |
+| 2 | **Loss of vertical centring at constrained heights.** Centring almost certainly has to give way to top-aligned flow. | **Confirmed.** Centring was the mechanism of item 1, not a side effect. Top-aligned below 620px |
+| 3 | **Field width.** The minimum measure is close to a small phone's usable width and may need revisiting. | **Confirmed and revised.** `22ch` alone resolved to 199px. Now `min(max(240px, 22ch), 100%)` |
+| 4 | **Error wrapping**, which pushes the actions down while the keyboard is open. | **Exercised.** Both messages wrap to two lines at 375 inside a 40ch measure; neither pushes *Enter* off screen. Copy unchanged |
+| 5 | **Nav compression** — full navigation on a page whose job is one field. | **Answered.** Public nav hidden at ≤430; the wordmark stays and *Back to works* is never removed |
+| 6 | **Heading scaling** — fixed rather than container-relative, unlike the rest of the candidate set. | **Answered.** Now `clamp(26px, 8.2cqw of the spine, 46px)`, bounded by the desktop size |
+| 7 | ***Show* control placement**, which may want to sit inline with the label at narrow widths. | **Not exercised.** Still open — see *Still open on this page* below |
+
+#### Coverage
+
+Six frames rendered simultaneously, each running the full six-state machine —
+**IDLE · FOCUSED · SUBMITTING · INVALID · RATE LIMITED · HANDOFF**:
+
+```text
+768 × 1024   tablet, normal height
+430 × 932    normal height
+430 × 596    keyboard open, constrained height
+390 × 844    normal height
+390 × 400    keyboard open, constrained height
+375 × 307    keyboard open, constrained height — worst case
+```
+
+A keyboard frame is short because the keyboard has taken the rest; what the
+frame shows is what the visitor can reach without scrolling.
+
+#### The observed failure — measured, not predicted
+
+The soft-keyboard risk recorded as item 1 above was **reproduced and measured**.
+
+At **375 × 307 with the invalid message shown**, *Enter* finished **20px below
+the fold** and the content began to scroll. The submit control for a
+single-field page was off screen at the exact moment the visitor most needs it
+— immediately after a failed attempt, with the keyboard still open.
+
+**The mechanism is vertical centring itself**: centring a growing form inside a
+shrinking box pushes the bottom of the form off screen as soon as a message
+appears. It is the cause, not a by-product.
+
+Two further observations, both real if less acute:
+
+- **`22ch` alone is too narrow a field.** At the responsive type size the
+  measure resolved to **199px** — under a third of a 768 viewport, and cramped
+  for typing a password with the characters hidden.
+- **The first squeezed-tier threshold was wrong.** Set at `height < 360`, it
+  left **390 × 400 with 11px of clearance** in the invalid state — technically
+  reachable, effectively on the edge, and worse than the shorter 375 frame that
+  did qualify.
+
+#### Derivations **[DEFAULT — candidate]**
+
+| Derivation | Rule |
+|---|---|
+| **Vertical alignment** | centred above **620px** available height; **top-aligned below** |
+| **Constrained tier** | `height < 620` — reduced gaps; statement drops below 380 |
+| **Squeezed tier** | `height < 430` — heading 21px, gaps 10–12px, footnote hidden |
+| **Narrow tier** | `width <= 430` |
+| **Field measure** | `min(max(240px, 22ch), 100%)` |
+| **Heading** | `clamp(26px, 8.2cqw of the spine, 46px)`, −4px constrained, 21px squeezed |
+| **Edge padding** | 56 → 32 (≤768) → 24 (≤430) |
+| **Navigation** | full public nav hidden at ≤430; ***Back to works* is never removed** |
+
+Each is computed from the frame's own width and height. Nothing is authored per
+device, and none of it changes the page's meaning, hierarchy or order.
+
+The squeezed threshold moved from 360 to **430 on evidence**: the boundary has
+to sit above the tallest failing case, not at the shortest device. That took
+390 × 400 from 11px of clearance to 61px.
+
+#### Result — *Enter* clearance above the fold
+
+| Viewport | Idle | Invalid | Rate limited |
+|---|---|---|---|
+| 768 × 1024 | 679px | 612px | 633px |
+| 430 × 932 | 577px | 510px | 532px |
+| 430 × 596 (kb) | 268px | 201px | 223px |
+| 390 × 844 | 496px | 429px | 450px |
+| 390 × 400 (kb) | 128px | **61px** | 83px |
+| 375 × 307 (kb) | 96px | **29px** | 51px |
+
+**No frame scrolls in any state.** *Back to works* sits 3–4px below *Enter* in
+every case, so the escape route is reachable wherever the action is. The figures
+are computed live from element geometry inside the prototype, not asserted.
+
+#### States and semantics — re-verified at every width
+
+- **INVALID and RATE LIMITED may wrap** — a 40ch measure, two lines at 375 — and
+  **must not push *Enter* below the usable viewport**. Copy was not shortened to
+  hide a layout problem. The rate-limit message stays visually quieter than the
+  form it is about.
+- **`aria-invalid` is `true` only for INVALID, and `false` for RATE LIMITED**
+  (§6.7, unchanged). The password was not judged wrong; the request was not
+  judged at all. Both are announced via `role="alert"` and referenced by
+  `aria-describedby`.
+- **Non-disclosure holds at every width** (§6.5, unchanged): zero media
+  elements and no project object in either prototype.
+- **`prefers-reduced-motion` sets the handoff transition to `0s`** in all six
+  frames. State is carried by veil and content opacity, not by the animation, so
+  the handoff is instantaneous and reads identically.
+
+**Nothing was added to reach this**: no card, no modal, no sticky action bar, no
+hamburger, no account UI, no new state (§6.2, §6.5 unchanged).
+
+#### Real-device testing — outstanding, and does not block candidate status
+
+**Simulated constrained height does not replace real-device testing.** A short
+frame is a good proxy for an open keyboard; it is not iOS Safari. Before the
+gate may be called done, implementation / QA must test at minimum:
+
+- **iOS Safari**
+- actual **`visualViewport`** behaviour
+- software-keyboard **opening and closing**
+- **focus retention** across those transitions
+- **scrolling and reflow while INVALID and RATE LIMITED are visible**
+
+This caveat does **not** block responsive *candidate* status. It blocks calling
+the page finished.
+
+#### Page-specific — do not promote **[DEFAULT]**
+
+These are this page's answers on this page's evidence and are **not** site-wide
+rules:
+
+- the **≤430 navigation treatment**
+- the **exact heading clamp values**
+- the **exact field sizing values**
+- the **exact constrained-height thresholds**, including the squeezed tier
+- the statement / footnote drop order
+
+Do not apply the gate's numbers to another page. The generalisable observations
+are carried as evidence only, in `design-system.md` §11.6.
+
+#### Still open on this page
+
+1. ***Show* control placement** — item 7 above, not exercised by this
+   validation. It may still want to sit inline with the label at narrow widths.
+2. **Real-device validation**, above.
+3. The three cross-cutting items in `design-system.md` §16 — display-coefficient
+   convention (item 11), constrained-height behaviour (item 13) and site-wide
+   mobile navigation (item 14). **None is this page's to settle.**
+
+### 6.10 Unresolved — engineering and security
 
 Carried forward without invented answers. **None is a Design decision**, and the
-visual contract does not depend on any particular answer:
+visual contract does not depend on any particular answer. **The responsive
+validation in §6.9 changed none of them** — it introduced no new state, no new
+route and no new client-side verification:
 
 1. **Unknown-route vs private-route HTTP and routing behaviour.** The gate
    deliberately cannot tell a visitor whether they found a real private project
@@ -1237,8 +1407,13 @@ visual contract does not depend on any particular answer:
 
 **None open.** The theme-environment conflict was resolved on 2026-09-22 in
 favour of a route-independent pre-auth surface (§6.3). **No visual-design
-blocker remains** — what is left is responsive validation and the engineering /
-security questions above.
+blocker remains.**
+
+Responsive validation, which previously sat here as outstanding, is **done** —
+the gate is RESPONSIVE VALIDATED — candidate (§6.9). What is left is
+**real-device QA** (§6.9), the engineering / security questions above, one
+page-level open item (*Show* control placement), and **approval**, which no
+amount of validation supplies.
 
 ---
 
@@ -1254,7 +1429,7 @@ Hold on every page regardless of exploration status.
 | **Video** | Never audible without user action. Multi-video surfaces are `AUTOPLAY_VISIBLE`. `AUTOPLAY_AMBIENT` only on a standalone ambient surface. |
 | **Posters** | `poster_media_id → thumbnail_url → empty well`. Refused autoplay shows the poster. |
 | **Motion** | Content moves; interface does not. One signature transition, shell-owned. |
-| **Responsive** | Three breakpoints. Automatic safe stacking. **Every production page still requires a mobile design review.** |
+| **Responsive** | Three breakpoints. Automatic safe stacking. **Every production page still requires a mobile design review.** One page is RESPONSIVE VALIDATED — the Private Project Gate (§6.9); the other five are pending, and must not borrow its derivations. |
 | **Accessibility** | WCAG AA size-aware · visible focus · reduced motion yields a deterministic still · DOM order follows `position`, never `colStart`. |
 | **Never** | Product UI, card primitives, feed-like surfaces, audible autoplay, invented compositions on pending pages. |
 
@@ -1264,8 +1439,13 @@ Hold on every page regardless of exploration status.
 
 1. **Approve or amend** `design-direction.md`, `design-system.md` and this
    document. All three are Draft.
-2. **Validate the gate at narrow widths** (§6.9) — chiefly the soft-keyboard
-   overlap case, which is the sharpest unresolved responsive risk on any page.
+2. ~~**Validate the gate at narrow widths**~~ — **done, 2026-09-22** (§6.9).
+   The soft-keyboard overlap case was reproduced at 375 × 307, measured, and
+   answered by derivation; the gate is **RESPONSIVE VALIDATED — candidate**.
+   **What replaces it:** real-device QA on iOS Safari, `visualViewport`,
+   keyboard open/close, focus retention, and reflow while INVALID and RATE
+   LIMITED are visible (§6.9). That is an implementation/QA gate, not a design
+   one. **The other five pages still need responsive validation.**
 3. **Define narrow-width behaviour for `JUSTIFIED_ROWS`, `HORIZONTAL_STRIP` and
    `SLIDESHOW`.** The principle is approved (`design-system.md` §11.5) — GALLERY
    does not inherit GRID child stacking and every mode owes its own bounded

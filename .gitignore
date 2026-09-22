@@ -63,7 +63,16 @@ ehthumbs.db
 # describing them; a fresh clone must restore these images manually.
 docs/human-description/references/*.png
 
+# Local working/prototype media — intentionally NOT version-controlled.
+# Footage used for Home visual and media testing. Held locally, never in Git:
+# it is large, it is working material rather than a source-controlled fixture,
+# and production media will live in object storage (CLAUDE.md §12), not here.
+# docs/design/prototypes/home/MEDIA.md is the tracked manifest describing it;
+# a fresh clone must restore these assets manually.
+imgs & videos/
+
 # Deliberately NOT ignored:
 #   docs/human-description/references/INDEX.md       tracked manifest
 #   docs/human-description/description.source.docx   signed-off source of record
+#   docs/design/prototypes/home/MEDIA.md             tracked manifest
 #   db/migrations/*.sql                              persistence contract

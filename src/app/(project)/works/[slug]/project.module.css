@@ -1,0 +1,645 @@
+/* Project Detail. Reproduces docs/design/prototypes/project-detail/Project
+   Detail 1B v2 Responsive.dc.html. Every derivation here is
+   PROJECT-DETAIL-SPECIFIC (project-detail-1b-v2-responsive.md §000 and §14,
+   page-specifications.md §3.12) and none is promoted to the system. Tiers are
+   measured on the `page` container, as the prototype measures its page. */
+
+/* The hero height, resolved once on the opening and inherited as a length, so
+   the frame, the affordance and both scrims derive from one value. */
+@property --hero-h {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+
+/* ---- The project environment ---- */
+
+/* Dark: entering a project darkens the room (page-specifications.md §3.3). The
+   page carries no site header — Back to works and All works are its
+   navigation (§3.12). */
+.environment {
+  container: page / inline-size;
+  background: var(--surface-dark);
+  color: var(--ink-dark);
+}
+
+/* Overscroll shows the document canvas, which belongs to the same room. */
+:global(html):has(.environment) {
+  background: var(--surface-dark);
+}
+
+/* Project Detail's own tiers: 56/20/150 at 1024 and above, 32/14/104 at 600
+   and above, 24/10/80 below. */
+.page {
+  --edge: 56px;
+  --gut: 20px;
+  --band: 150px;
+}
+
+@container page (width < 1024px) {
+  .page {
+    --edge: 32px;
+    --gut: 14px;
+    --band: 104px;
+  }
+}
+
+@container page (width < 600px) {
+  .page {
+    --edge: 24px;
+    --gut: 10px;
+    --band: 80px;
+  }
+}
+
+.flow,
+.metaSec,
+.support,
+.creditsSec,
+.footer {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gut);
+}
+
+/* Poster, film and loop fill their frame under COVER. */
+.fill {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* A line of type, not a control (Back to works, All works): tracked caps with
+   a hairline underline, so colour never carries it alone. On the dark ground
+   the accent may not carry text this small (design-system.md §2.4), so hover
+   keeps the line's own colour. */
+.line,
+.line:hover {
+  display: inline-block;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(237, 231, 221, 0.88);
+  border-bottom: 1px solid rgba(237, 231, 221, 0.32);
+  padding-bottom: 4px;
+}
+
+/* Below 1024px a 44px hit area, by padding. The underline moves from the
+   border to text-decoration so that it stays where it was. */
+@container page (width < 1024px) {
+  .line,
+  .line:hover {
+    box-sizing: border-box;
+    min-height: 44px;
+    padding: 12px 0;
+    border-bottom: 0;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-decoration-color: rgba(237, 231, 221, 0.32);
+    text-underline-offset: 5px;
+  }
+}
+
+/* ---- Block 1: HERO / VIDEO, CLICK_TO_PLAY ---- */
+
+/* 700 and above: min(0.78 × viewport height, 0.5417 × width, 900). Below 700:
+   the film's own width-derived height, lifted to 30% of the first screen. svh
+   keeps the first screen stable while mobile browser chrome changes, and cqw
+   is the page container's width. The overlay's bottom offset is 46px, 32px
+   below 1024. */
+.opening {
+  position: relative;
+  isolation: isolate;
+  --hero-h: min(78svh, 54.17cqw, 900px);
+  --overlay-bottom: 46px;
+}
+
+@container page (width < 1024px) {
+  .opening {
+    --overlay-bottom: 32px;
+  }
+}
+
+@container page (width < 700px) {
+  .opening {
+    --hero-h: max(54.17cqw, 30svh);
+  }
+}
+
+/* The prototype rounds these to whole pixels. round() is newer than the build's
+   browser targets, so it is layered on where supported, as Home does. */
+@supports (height: round(1px, 1px)) {
+  .opening {
+    --hero-h: round(min(78svh, 54.17cqw, 900px), 1px);
+  }
+
+  @container page (width < 700px) {
+    .opening {
+      --hero-h: round(max(54.17cqw, 30svh), 1px);
+    }
+  }
+}
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  height: var(--hero-h);
+  background: #000;
+}
+
+.hero[data-film] {
+  cursor: pointer;
+}
+
+/* COVER → COVER: the film takes the poster's fit, so activation does not
+   reframe. Its encoded letterbox is left as it is (design-system.md §7.5). */
+.film {
+  background: #000;
+  opacity: 0;
+}
+
+.opening[data-started] .film {
+  opacity: 1;
+}
+
+/* Back to works' scrim: max(0.154 × hero, 96px). It stays after activation. */
+.scrimTop {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: max(0.154 * var(--hero-h), 96px);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.42), rgba(0, 0, 0, 0));
+  pointer-events: none;
+}
+
+.back {
+  position: absolute;
+  left: var(--edge);
+  top: 34px;
+  z-index: 1;
+}
+
+@container page (width < 1024px) {
+  .back {
+    top: 20px;
+  }
+}
+
+/* The play affordance: min(78, max(56, 0.3 × hero)), centred, and the keyboard
+   route to the film. Its mark scales with it. */
+.affordance {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: content-box;
+  width: clamp(56px, 0.3 * var(--hero-h), 78px);
+  height: clamp(56px, 0.3 * var(--hero-h), 78px);
+  margin: 0;
+  padding: 0;
+  border: 1px solid rgba(237, 231, 221, 0.78);
+  border-radius: 50%;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+}
+
+.affordance:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.playMark {
+  width: 0;
+  height: 0;
+  margin-left: 4px;
+  border-left: clamp(10.769px, 0.057692 * var(--hero-h), 15px) solid rgba(237, 231, 221, 0.94);
+  border-top: clamp(6.4615px, 0.034615 * var(--hero-h), 9px) solid transparent;
+  border-bottom: clamp(6.4615px, 0.034615 * var(--hero-h), 9px) solid transparent;
+}
+
+@supports (height: round(1px, 1px)) {
+  .scrimTop {
+    height: round(max(0.154 * var(--hero-h), 96px), 1px);
+  }
+
+  .affordance {
+    width: clamp(56px, round(0.3 * var(--hero-h), 1px), 78px);
+    height: clamp(56px, round(0.3 * var(--hero-h), 1px), 78px);
+  }
+
+  .playMark {
+    border-left-width: round(clamp(10.769px, 0.057692 * var(--hero-h), 15px), 1px);
+    border-top-width: round(clamp(6.4615px, 0.034615 * var(--hero-h), 9px), 1px);
+    border-bottom-width: round(clamp(6.4615px, 0.034615 * var(--hero-h), 9px), 1px);
+  }
+}
+
+.opening[data-started] .affordance {
+  visibility: hidden;
+}
+
+/* ---- The title: overlay, stacked, or derived fallback ---- */
+
+.backRow {
+  grid-column: 1 / -1;
+  display: none;
+}
+
+/* The title's reference box is its own span: columns 1–8, or 1–12 in the
+   fallback. Dynamic project names use the Newsreader-backed display preset,
+   clamp(27px, 9.094cqw, 80px), line-height 0.98. Length wraps; it never
+   shrinks. */
+.titleBox {
+  grid-column: 1 / 9;
+  container-type: inline-size;
+}
+
+.title {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  font-family: var(--font-display-title);
+  font-weight: 400;
+  font-size: clamp(27px, 9.094cqw, 80px);
+  line-height: 0.98;
+  letter-spacing: var(--display-track);
+  text-transform: uppercase;
+  color: #f4efe6;
+  text-wrap: balance;
+}
+
+@container page (width >= 700px) {
+  /* The bounded overlay: on the page's 12 columns, bottom-left in the frame.
+     It takes no pointer events, so the whole frame stays the hit area. */
+  .flow {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: var(--overlay-bottom);
+    padding: 0 var(--edge);
+    pointer-events: none;
+  }
+
+  /* The title's scrim follows the title: max(0.269 × hero, 1.588 × the
+     title's extent), within the frame. 100% is the title's own height. */
+  .flow::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(-1 * var(--overlay-bottom));
+    height: min(var(--hero-h), max(0.269 * var(--hero-h), 1.588 * (var(--overlay-bottom) + 100%)));
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.66), rgba(0, 0, 0, 0));
+    pointer-events: none;
+  }
+
+  @supports (height: round(1px, 1px)) {
+    .flow::before {
+      height: round(min(var(--hero-h), max(0.269 * var(--hero-h), 1.588 * (var(--overlay-bottom) + 100%))), 1px);
+    }
+  }
+
+  /* Held back until its face has loaded, so its placement never visibly
+     changes after fonts load (titlePlacement.ts). */
+  .opening[data-title-pending] .title {
+    visibility: hidden;
+  }
+
+  /* Stacked below the film when the placement rule fails, at any width. */
+  .opening[data-title-mode="stacked"] .flow {
+    position: static;
+    padding: 44px var(--edge) 0;
+    pointer-events: auto;
+  }
+
+  .opening[data-title-mode="stacked"] .flow::before {
+    display: none;
+  }
+
+  /* Media activation dismisses the overlay and its scrim. The title stays in
+     the accessibility tree. */
+  .opening[data-started]:not([data-title-mode="stacked"]) .flow {
+    opacity: 0;
+  }
+}
+
+/* Below 700: the derived fallback (ADR-0010 §6). The frame carries only the
+   affordance; Back to works and the title follow it in flow, and no scrim is
+   needed because nothing sits over the film. */
+@container page (width < 700px) {
+  .flow {
+    padding: 20px var(--edge) 0;
+  }
+
+  .backRow {
+    display: block;
+  }
+
+  .titleBox {
+    grid-column: 1 / -1;
+  }
+
+  .title {
+    margin-top: 10px;
+  }
+
+  .back,
+  .scrimTop {
+    display: none;
+  }
+}
+
+/* ---- Block 2: GRID, metadata + statement ---- */
+
+.metaSec {
+  align-items: start;
+  padding: var(--band) var(--edge) 0;
+}
+
+.meta {
+  grid-column: 1 / 4;
+  margin: 0;
+  font-size: 15px;
+}
+
+.fact {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 9px 0;
+  border-top: 1px solid var(--rule-dark);
+}
+
+.fact:last-child {
+  border-bottom: 1px solid var(--rule-dark);
+}
+
+.fact dt,
+.credit dt {
+  color: var(--muted-dark);
+  font-style: italic;
+}
+
+.fact dd {
+  margin: 0;
+  text-align: right;
+}
+
+.statement {
+  grid-column: 5 / 11;
+}
+
+.lead {
+  margin: 0;
+  max-width: 24ch;
+  font-size: 26px;
+  line-height: 1.32;
+  text-wrap: pretty;
+}
+
+.body {
+  margin: 28px 0 0;
+  max-width: 46ch;
+  font-size: 17px;
+  line-height: 1.74;
+  color: var(--muted-dark);
+  text-wrap: pretty;
+}
+
+/* ---- Block 3: GRID of stills ---- */
+
+/* A structured grid, not JUSTIFIED_ROWS: 4 columns at 1024 and above, 2 from
+   700, 1 below. Equal columns, each still at its own native aspect — no crop,
+   no reorder — top-aligned, 4px apart, full bleed. */
+.stills {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  align-items: start;
+  margin-top: var(--band);
+}
+
+.still {
+  width: 100%;
+  height: auto;
+  background: var(--frame);
+}
+
+/* ---- Block 4: GRID, AUTOPLAY_VISIBLE loop + caption ---- */
+
+.support {
+  align-items: end;
+  margin: 0;
+  padding: var(--band) var(--edge) 0;
+}
+
+.loop {
+  grid-column: 1 / 9;
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  background: var(--frame);
+}
+
+.caption {
+  grid-column: 10 / 13;
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.74;
+  color: var(--muted-dark);
+  text-wrap: pretty;
+}
+
+/* ---- Block 5: GRID, credits ---- */
+
+.creditsSec {
+  padding: var(--band) var(--edge) 0;
+}
+
+.credits {
+  grid-column: 1 / 4;
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.95;
+}
+
+.credit {
+  display: flex;
+  gap: 16px;
+}
+
+.credit dt {
+  flex: 0 0 8ch;
+}
+
+.credit dd {
+  min-width: 0;
+  margin: 0;
+}
+
+/* ---- Block 6: IMAGE, full-bleed coda ---- */
+
+/* max(0.375 × width, min(the image's native height at full width, 0.5 ×
+   viewport height)): the locked desktop crop at 1440, converging on native
+   aspect at phone widths. */
+.coda {
+  position: relative;
+  height: max(37.5cqw, min(100cqw / var(--coda-aspect), 50svh));
+  margin-top: var(--band);
+  background: var(--frame);
+}
+
+@supports (height: round(1px, 1px)) {
+  .coda {
+    height: round(max(37.5cqw, min(100cqw / var(--coda-aspect), 50svh)), 1px);
+  }
+}
+
+.codaImage {
+  object-position: 50% 30%;
+}
+
+/* ---- Site chrome: next project · all works. Not a block. ---- */
+
+/* Padding scales with the band: 110/96 at 150. */
+.footer {
+  align-items: baseline;
+  padding: 110px var(--edge) 96px;
+}
+
+.nextLabel {
+  grid-column: 1 / 4;
+  font-size: 15px;
+  font-style: italic;
+  color: var(--muted-dark);
+}
+
+/* The next-project title's reference box is columns 4–10, or 1–12 stacked:
+   clamp(27px, 6.913cqw, 53px). */
+.nextBox {
+  grid-column: 4 / 11;
+  container-type: inline-size;
+}
+
+.next {
+  display: block;
+  font-family: var(--font-display-title);
+  font-weight: 400;
+  font-size: clamp(27px, 6.913cqw, 53px);
+  line-height: 1.02;
+  letter-spacing: var(--display-track);
+  text-transform: uppercase;
+  color: var(--accent);
+  text-wrap: balance;
+}
+
+.all,
+.all:hover {
+  grid-column: 11 / 13;
+  justify-self: end;
+  color: var(--muted-dark);
+  border-bottom-color: var(--rule-dark);
+  text-decoration-color: var(--rule-dark);
+}
+
+/* ---- Below 1024 ---- */
+
+@container page (width < 1024px) {
+  .meta {
+    grid-column: 1 / 5;
+  }
+
+  .statement {
+    grid-column: 6 / 13;
+  }
+
+  .stills {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .credits {
+    grid-column: 1 / 7;
+  }
+
+  .footer {
+    padding: 76px var(--edge) 67px;
+  }
+}
+
+/* The caption stacks beneath the video when its own column (cols 10–12) falls
+   under 200px. With c = (W - 2e - 11g) / 12 that column measures 3c + 2g,
+   under 200px when W < 906 at the 600–1023 tier, and at every width below 600;
+   at 1024 and above it never does. Recompute if the tier values change. */
+@container page (width < 906px) {
+  .support {
+    align-items: start;
+  }
+
+  .loop {
+    grid-column: 1 / -1;
+  }
+
+  .caption {
+    grid-column: 1 / -1;
+    max-width: 36ch;
+    margin-top: 16px;
+  }
+}
+
+/* ---- Below 700 ---- */
+
+@container page (width < 700px) {
+  .meta,
+  .statement,
+  .credits {
+    grid-column: 1 / -1;
+  }
+
+  .meta {
+    max-width: 360px;
+  }
+
+  .statement {
+    margin-top: 56px;
+  }
+
+  .stills {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .nextLabel,
+  .nextBox,
+  .all,
+  .all:hover {
+    grid-column: 1 / -1;
+  }
+
+  .nextBox {
+    margin-top: 12px;
+  }
+
+  .all,
+  .all:hover {
+    justify-self: start;
+    margin-top: 24px;
+  }
+}
+
+/* ---- Below 600 ---- */
+
+@container page (width < 600px) {
+  .lead {
+    font-size: 22px;
+  }
+
+  .footer {
+    padding: 59px var(--edge) 51px;
+  }
+}

@@ -84,7 +84,9 @@ imgs & videos/
 # policy as /media/: never committed. A fresh clone must restore them by copying
 # from media/w/ and media/clips/ into public/media/<page>/ (About uses
 # portrait.jpg, desk-01.jpg and mtm-atelier.jpg; Home's and Works' files are
-# listed in src/content/home.ts and src/content/works.ts).
+# listed in src/content/home.ts and src/content/works.ts). Project Detail's
+# live under public/media/projects/<slug>/ and are listed in
+# src/content/projects.ts.
 /public/media/
 
 # Local preview tooling: this machine's launch configurations for the dev,

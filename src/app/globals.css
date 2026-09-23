@@ -8,6 +8,14 @@
   --rule: #e2dcd2;
   --frame: #14110f;
 
+  /* The project environment (page-specifications.md §3.3): Project Detail is
+     dark. --muted-dark and --rule-dark derive like --muted and --rule, as
+     ink-dark at 62% and 14% over surface-dark (design-system.md §2.2). */
+  --surface-dark: #0c0a08;
+  --ink-dark: #ede7dd;
+  --muted-dark: #97938c;
+  --rule-dark: #2b2926;
+
   --font-display: var(--font-marcellus), Georgia, serif;
   /* The dynamic project-title preset of font-display (design-system.md §1.1):
      a preset under that role, not a fourth role. Newsreader carries the

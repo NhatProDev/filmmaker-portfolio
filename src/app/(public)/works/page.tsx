@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Fragment, type CSSProperties } from "react";
-import { works, type WorksProject } from "@/content/works";
+import { getContentGateway } from "@/features/site-content/site-content.gateway";
+import type { WorksProject } from "@/features/site-content/site-content.types";
 import { IndexSheet } from "./IndexSheet";
 import { indexColumns, sheetCss } from "./worksLayout";
 import styles from "./works.module.css";
@@ -56,8 +57,8 @@ function EntryParts({ project, index }: { project: WorksProject; index: number }
 // never re-sorted. From the desktop takeover the index is a list above the
 // sheet; below it, each frame carries its own index entry directly above it.
 // Packing only moves row breaks.
-export default function WorksPage() {
-  const { projects } = works;
+export default async function WorksPage() {
+  const { projects } = await getContentGateway().getWorksIndex();
   const aspects = projects.map(({ cover }) => cover.width / cover.height);
   const css = sheetCss("[data-works-sheet]", aspects);
 

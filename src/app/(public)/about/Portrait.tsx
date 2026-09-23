@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef } from "react";
-import type { AboutImage } from "@/content/about";
+import type { AboutImage } from "@/features/site-content/site-content.types";
 import styles from "./about.module.css";
 
 type PortraitProps = {

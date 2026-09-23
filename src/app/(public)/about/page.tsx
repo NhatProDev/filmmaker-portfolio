@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { Fragment } from "react";
-import { about, type Inline } from "@/content/about";
+import { getContentGateway } from "@/features/site-content/site-content.gateway";
+import type { Inline } from "@/features/site-content/site-content.types";
 import { Portrait } from "./Portrait";
 import styles from "./about.module.css";
 
@@ -19,7 +20,8 @@ function InlineText({ parts }: { parts: Inline[] }) {
 // Source order is the narrow reading order at every width — statement, portrait,
 // biography, evidence — and the desktop grid places the same elements exactly
 // as the locked desktop candidate does.
-export default function AboutPage() {
+export default async function AboutPage() {
+  const about = await getContentGateway().getAbout();
   const { portrait, evidence, process, placeholder, experience, contact } = about;
 
   return (

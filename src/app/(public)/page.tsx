@@ -2,15 +2,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { AutoplayVideo } from "@/components/media/AutoplayVideo";
 import { JustifiedRows } from "@/components/media/JustifiedRows";
-import { home } from "@/content/home";
+import { getContentGateway } from "@/features/site-content/site-content.gateway";
 import styles from "./home.module.css";
 
 // Implements docs/design/prototypes/home/Home Baseline v2 Responsive.dc.html.
 // Source order is visual order at every width: nothing is reordered, hidden or
 // moved between breakpoints. The footer is site chrome rather than a block, so
 // it sits outside <main>; only Home's prototype carries one so far.
-export default function HomePage() {
-  const { hero, identity, wall, about, coda, footer } = home;
+export default async function HomePage() {
+  const { hero, identity, wall, about, coda, footer } = await getContentGateway().getHome();
   const [mailbox, domain] = footer.email.split("@");
 
   return (

@@ -3,7 +3,8 @@
 // (PublicProject). That API and the composer schema are not implemented yet, so
 // this file stands in for the detail response, keyed by the Works slug. Project
 // identity — slug, title, year, cover and displayPosition — is read from
-// works.ts and never repeated here.
+// works.ts and never repeated here; the static content gateway joins the two
+// (src/features/site-content/static-gateway.ts).
 //
 // Only "made-to-measure" has detail content: it is the one project that
 // docs/design/prototypes/project-detail/Project Detail 1B v2 Responsive.dc.html
@@ -21,70 +22,19 @@
 // public/media/projects/<slug>/, which is gitignored like /media/ itself. A
 // fresh clone must restore them by hand.
 
-import { works, type WorksCover } from "./works";
-
-export type ProjectImage = {
-  src: string;
-  width: number;
-  height: number;
-  alt: string;
-};
-
-// A CLICK_TO_PLAY film. Its poster is a property of the video asset
-// (ADR-0009), not of the block.
-export type ProjectFilm = {
-  src: string;
-  width: number;
-  height: number;
-  poster: ProjectImage;
-};
-
-export type ProjectCredit = {
-  role: string;
-  name: string;
-};
-
-export type ProjectDetail = {
-  client?: string;
-  runtime?: string;
-  role?: string;
-  credits: ProjectCredit[];
-  // Block 1 — HERO / VIDEO, CLICK_TO_PLAY. Without a film the HERO is an IMAGE
-  // HERO of the project's cover.
-  film?: ProjectFilm;
-  // Block 2 — GRID: metadata list + statement.
-  statement?: { lead: string; body: string };
-  // Block 3 — GRID of stills.
-  stills: ProjectImage[];
-  // Block 4 — GRID: AUTOPLAY_VISIBLE loop + caption.
-  loop?: { src: string; poster: ProjectImage; caption: string };
-  // Block 6 — IMAGE, full-bleed coda.
-  coda?: ProjectImage;
-};
-
-export type ProjectPage = {
-  slug: string;
-  title: string;
-  year: number;
-  cover: WorksCover;
-  displayPosition: number;
-  detail: ProjectDetail | null;
-  // The next project in the public listing's displayPosition order, wrapping
-  // after the last. Only listed projects can be next, so a PRIVATE project is
-  // never named here (ADR-0003).
-  next: { slug: string; title: string };
-};
+import type { ProjectDetail, ProjectImage } from "@/features/site-content/site-content.types";
+import { mediaUrl } from "@/lib/storage/media-url";
 
 const image = (slug: string, file: string, width: number, height: number, alt = ""): ProjectImage => ({
-  src: `/media/projects/${slug}/${file}`,
+  src: mediaUrl(`projects/${slug}/${file}`),
   width,
   height,
   alt,
 });
 
-const media = (slug: string, file: string) => `/media/projects/${slug}/${file}`;
+const media = (slug: string, file: string) => mediaUrl(`projects/${slug}/${file}`);
 
-const details: Record<string, ProjectDetail> = {
+export const projectDetails: Record<string, ProjectDetail> = {
   "made-to-measure": {
     client: "Trần & Sons",
     runtime: "8 min",
@@ -122,24 +72,3 @@ const details: Record<string, ProjectDetail> = {
     coda: image("made-to-measure", "mtm-portrait.jpg", 1000, 499),
   },
 };
-
-export function projectSlugs(): string[] {
-  return works.projects.map((project) => project.slug);
-}
-
-export function projectPage(slug: string): ProjectPage | undefined {
-  const { projects } = works;
-  const index = projects.findIndex((project) => project.slug === slug);
-  if (index < 0) return undefined;
-  const { title, year, cover } = projects[index];
-  const next = projects[(index + 1) % projects.length];
-  return {
-    slug,
-    title,
-    year,
-    cover,
-    displayPosition: index,
-    detail: details[slug] ?? null,
-    next: { slug: next.slug, title: next.title },
-  };
-}

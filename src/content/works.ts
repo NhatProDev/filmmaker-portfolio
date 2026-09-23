@@ -19,27 +19,16 @@
 // public/media/works/, which is gitignored like /media/ itself. A fresh clone
 // must restore them by hand.
 
-export type WorksCover = {
-  src: string;
-  width: number;
-  height: number;
-};
-
-export type WorksProject = {
-  slug: string;
-  title: string;
-  year: number;
-  cover: WorksCover;
-  preview?: string;
-};
+import type { WorksCover, WorksProject } from "@/features/site-content/site-content.types";
+import { mediaUrl } from "@/lib/storage/media-url";
 
 const cover = (file: string, width: number, height: number): WorksCover => ({
-  src: `/media/works/${file}`,
+  src: mediaUrl(`works/${file}`),
   width,
   height,
 });
 
-const clip = (file: string) => `/media/works/${file}`;
+const clip = (file: string) => mediaUrl(`works/${file}`);
 
 export const works = {
   projects: [

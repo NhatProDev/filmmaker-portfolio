@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import type { ContactRow } from "@/content/contact";
+import type { ContactRow } from "@/features/site-content/site-content.types";
 import styles from "./contact.module.css";
 
 type ContactRowsProps = {

@@ -10,21 +10,15 @@
 // Images are local-only copies of media/w/ under public/media/about/, which is
 // gitignored like /media/ itself. A fresh clone must restore them by hand.
 
-export type Inline = string | { em: string };
-
-export type AboutImage = {
-  src: string;
-  width: number;
-  height: number;
-  alt: string;
-};
+import type { Inline } from "@/features/site-content/site-content.types";
+import { mediaUrl } from "@/lib/storage/media-url";
 
 export const about = {
   marker: "About me",
   lead: "I started shooting weddings to pay for a camera, and stayed for the part where nobody is performing.",
   portrait: {
     image: {
-      src: "/media/about/portrait.jpg",
+      src: mediaUrl("about/portrait.jpg"),
       width: 970,
       height: 1505,
       alt: "Nguyen Khanh Nhat",
@@ -37,7 +31,7 @@ export const about = {
   ],
   evidence: {
     image: {
-      src: "/media/about/desk-01.jpg",
+      src: mediaUrl("about/desk-01.jpg"),
       width: 1000,
       height: 563,
       alt: "",
@@ -49,7 +43,7 @@ export const about = {
   process: {
     line: "I photograph a room before I light it. Most of the time the room has already solved it.",
     image: {
-      src: "/media/about/mtm-atelier.jpg",
+      src: mediaUrl("about/mtm-atelier.jpg"),
       width: 1800,
       height: 882,
       alt: "",

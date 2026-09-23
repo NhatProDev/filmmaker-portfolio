@@ -12,11 +12,8 @@
 // media/w/mtm-shopfront.jpg under public/media/contact/, which is gitignored
 // like /media/ itself. A fresh clone must restore it by hand.
 
-export type ContactRow = {
-  label: string;
-  value: string;
-  href?: string;
-};
+import type { ContactIdentity, ContactRow } from "@/features/site-content/site-content.types";
+import { mediaUrl } from "@/lib/storage/media-url";
 
 export const contact = {
   heading: "Contact",
@@ -37,13 +34,13 @@ export const contact = {
   // Optional: the page is valid without it (contact-4b-v2-responsive.md §7).
   identity: {
     image: {
-      src: "/media/contact/mtm-shopfront.jpg",
+      src: mediaUrl("contact/mtm-shopfront.jpg"),
       width: 1000,
       height: 497,
       alt: "",
     },
     caption: "Provisional identity media — caption to come",
-  } as { image: { src: string; width: number; height: number; alt: string }; caption: string } | null,
+  } as ContactIdentity | null,
   footer: {
     name: "Nguyen Khanh Nhat",
     role: "— cinematography and photography",

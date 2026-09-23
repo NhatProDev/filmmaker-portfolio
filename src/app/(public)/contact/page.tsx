@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { contact } from "@/content/contact";
+import { getContentGateway } from "@/features/site-content/site-content.gateway";
 import { ContactRows } from "./ContactRows";
 import styles from "./contact.module.css";
 
@@ -13,7 +13,8 @@ export const metadata: Metadata = {
 // reading order at every width — heading, statement, email, rows, closing note,
 // identity still — so nothing is reordered between tiers. The footer is this
 // page's own chrome, as on Home, and sits outside <main>.
-export default function ContactPage() {
+export default async function ContactPage() {
+  const contact = await getContentGateway().getContact();
   const { email, identity, footer } = contact;
 
   return (

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useLayoutEffect, useRef, useState, type MouseEvent } from "react";
-import type { ProjectImage } from "@/content/projects";
+import type { ProjectImage } from "@/features/site-content/site-content.types";
 import { bootTitle, placeTitle } from "./titlePlacement";
 import styles from "./project.module.css";
 

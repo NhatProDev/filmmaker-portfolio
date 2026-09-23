@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { CSSProperties } from "react";
 import { AutoplayVideo } from "@/components/media/AutoplayVideo";
-import { projectPage, projectSlugs } from "@/content/projects";
+import { getContentGateway } from "@/features/site-content/site-content.gateway";
 import { ProjectOpening } from "./ProjectOpening";
 import { titleBootstrap } from "./titlePlacement";
 import styles from "./project.module.css";
@@ -16,12 +16,13 @@ type ProjectDetailProps = {
 // One page per Works project; any other slug is not found.
 export const dynamicParams = false;
 
-export function generateStaticParams() {
-  return projectSlugs().map((slug) => ({ slug }));
+export async function generateStaticParams() {
+  const slugs = await getContentGateway().listPublicProjectSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: ProjectDetailProps): Promise<Metadata> {
-  const project = projectPage((await params).slug);
+  const project = await getContentGateway().getProjectPage((await params).slug);
   return project ? { title: project.title } : {};
 }
 
@@ -41,7 +42,7 @@ function Fact({ label, value }: { label: string; value: string | number }) {
 // is visual order at every width. This route sits outside the (public) layout
 // because the page carries no site header.
 export default async function ProjectDetailPage({ params }: ProjectDetailProps) {
-  const project = projectPage((await params).slug);
+  const project = await getContentGateway().getProjectPage((await params).slug);
   if (!project) notFound();
   const { title, year, cover, detail, next } = project;
   const film = detail?.film;

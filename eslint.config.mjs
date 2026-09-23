@@ -13,7 +13,5 @@ export default defineConfig([
     // Design evidence, not application code: the prototypes carry their own
     // bundled runtime (support.js) and are never linted or modified.
     "docs/**",
-    // Persistence is outside this pass; drizzle-orm is not installed yet.
-    "db/**",
   ]),
 ]);

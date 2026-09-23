@@ -4,15 +4,16 @@ A professional filmmaker portfolio: public site (Home, Art Works, About Me,
 Contact), public and password-protected project pages, and an admin CMS with a
 block-based project builder.
 
-**Status: planning and contracts only.** There is no application code yet.
-Next.js has not been bootstrapped and no dependencies are installed.
+**Status: public frontend locked; database and media foundation in place.**
+The public site (Home, Art Works, Project Detail, About Me, Contact) is
+implemented and reads all content through a content gateway. By default it
+serves the committed static content and needs no database; a
+PostgreSQL-backed adapter serves the same pages from the database model. The
+Studio (admin CMS), REST handlers, authentication and publishing are not built
+yet.
 
-Core V1 engineering contracts are approved. The current `openapi.yaml` and
-`db/schema.ts` baseline implements **ADR-0001 through ADR-0005**. The approved
-extensions from **ADR-0006, ADR-0007 and ADR-0009** remain to be applied, in one
-coordinated migration and API update (see the ADR log). Those three ADRs are
-approved decisions; it is only their schema and contract work that is
-outstanding. Implementation has not begun.
+`db/schema.ts` implements ADR-0001 to ADR-0007, ADR-0009, ADR-0011, ADR-0014
+and ADR-0015. `openapi.yaml` was realigned to that domain model by ADR-0015.
 
 ## Repository map
 
@@ -23,8 +24,9 @@ openapi.yaml                  Canonical REST contract (OpenAPI 3.1).
 
 db/
   schema.ts                   Canonical Drizzle/PostgreSQL schema.
-  migrations/
-    0001_initial.sql          Initial SQL migration.
+  client.ts                   Database connection (opened only when used).
+  migrations/                 Drizzle migration history, starting at
+                              0001_initial.sql; meta/ holds Drizzle's journal.
 
 docs/
   human-description/
@@ -56,8 +58,12 @@ docs/
   architecture/
     decisions/                Approved ADRs. See its README.
 
-scripts/                      Operational scripts. seed-admin.ts is reserved.
-src/                          Application code. Does not exist yet.
+scripts/                      Operational scripts: db-migrate.ts and
+                              import-static-content.ts. seed-admin.ts is reserved.
+src/                          Application code (Next.js). Public content is read
+                              through src/features/site-content/.
+tests/                        node:test suites; database tests run on an
+                              in-process PostgreSQL (PGlite).
 
 imgs & videos/                Local SOURCE / working media. The original
                               camera/export footage. Nothing renders from it
@@ -98,36 +104,31 @@ are deliberately not repeated here; a second copy would drift.
 4. `docs/human-description/description.md` and
    `docs/human-description/references/INDEX.md` before any UI work.
 
-## Implementation sequence
+## Commands
 
-Not yet started. When it begins:
+| Command | Does |
+|---|---|
+| `npm run dev` / `build` / `start` | The Next.js site. Uses the static content adapter unless `SITE_CONTENT_ADAPTER=db`. |
+| `npm run typecheck` · `lint` · `test` | Checks. The tests need no database server. |
+| `npm run db:generate` | Generates the next migration from `db/schema.ts`. |
+| `npm run db:check` | Verifies the migration history's consistency. |
+| `npm run db:migrate` | Applies migrations — **local development database only**. |
+| `npm run db:import` | Dry run of the static-content import; add `-- --apply` to write (local database only). |
 
-1. Initialise the Next.js / TypeScript application in `src/`.
-2. Configure PostgreSQL + Drizzle. `drizzle.config.ts` points at `./db/schema.ts`
-   with `out: './db/migrations'` (ADR-0001).
-3. Apply migrations and confirm schema parity.
-4. Authentication and Project CRUD as the first API vertical slice.
-5. Project Builder, Media, and Private Project Access in later slices.
-6. CMS UI only after the corresponding domain/API behaviour works.
-7. Public site UI only after the design specification is approved. Per architect
-   decision Q13 the external design guideline had to be imported and reviewed
-   alongside the visual references first — that import is complete and lives in
-   `docs/design/guidelines/frontend-design/`. `design-direction.md`,
-   `design-system.md` and `page-specifications.md` now exist, but all are
-   **Draft / candidate and not approved**, so tier 1 remains empty.
+Configuration is in `.env.local`; see `.env.example`. No database is needed to
+run the site.
 
-## Schema parity
+## Migrations
 
-`db/schema.ts` is the canonical model definition.
-
-`db/migrations/0001_initial.sql` is a hand-authored equivalent for review and
-bootstrap. Once the repository is initialised with a pinned Drizzle version, use
-Drizzle Kit to generate subsequent migrations from schema changes rather than
-hand-editing migration history.
-
-The two are currently in agreement: same five enums, five tables, all columns,
-nine check constraints and fourteen indexes. There is no automated parity check
-yet, so this must be re-verified whenever either file changes.
+`db/schema.ts` is the canonical model definition, and Drizzle Kit generates
+every migration after the first from it. `db/migrations/0001_initial.sql` is the
+original hand-authored baseline; Drizzle's journal adopts it as the first
+migration, and its snapshot (`meta/0001_snapshot.json`) was verified to produce
+a catalogue identical to the file (ADR-0015 §3 records its normalisation for
+the migrator; no semantic DDL change is ever made to it). `0002` applies
+ADR-0006, ADR-0007, ADR-0009, ADR-0011 and ADR-0014; `0003` seeds the HOME page
+row; `0004` adds ADR-0015's placement poster override. Never hand-edit applied
+migrations.
 
 ## Version control
 

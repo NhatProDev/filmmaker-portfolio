@@ -1,11 +1,45 @@
 openapi: 3.1.0
 info:
   title: Filmmaker Portfolio API
-  version: 1.0.0
+  version: 1.1.0
   description: |
     REST API contract for the V1 filmmaker portfolio modular monolith.
-    Public visitors do not have accounts. Admin authentication and private-project
-    access are separate security contexts.
+
+    Public visitors do not have accounts. Admin authentication and
+    private-project access are separate security contexts (CLAUDE.md §11).
+
+    **Scope of this contract.** The public pages do not call this API: they
+    read through the server-side content gateway (Page → ContentGateway →
+    adapter). This API is the administrative contract (the Studio) plus the
+    public project resources and the private-project access action.
+
+    **Conventions**
+
+    - JSON is camelCase. Database columns are snake_case.
+    - Ids are UUIDs.
+    - Errors use the envelope `{ "error": { "code", "message", "details" } }`.
+    - An unknown request field is rejected with `422 VALIDATION_ERROR`, never
+      ignored. This includes derived playback flags (ADR-0008) and authored
+      overlay text (ADR-0010).
+    - Malformed JSON returns `400 MALFORMED_REQUEST`.
+
+    **Admin mutations** require the admin session cookie. They also require
+    a same-origin `Origin` header, so a cross-site request is refused with
+    `403 CSRF_REJECTED` before any work is done. The session cookie is
+    `HttpOnly`, `SameSite=Strict`, and `Secure` in production.
+
+    **Publication (ADR-0012).** Admin reads and writes act on the working
+    copy. `publish` validates it and writes the single current published
+    snapshot, and public reads return only that snapshot. Access-control and
+    routing fields are live: `slug`, `visibility`, the password, `status`,
+    soft deletion and ordering. Making a project PRIVATE therefore takes
+    effect immediately, without a publish.
+
+    **Media (ADR-0014, ADR-0015).** Media identity is `storageProvider` +
+    `storageKey`, plus `checksumSha256`. Delivery URLs are derived at read
+    time and never accepted as input. A video's poster resolves in this
+    order: placement override → asset default → generated thumbnail →
+    empty frame.
 servers:
   - url: /api/v1
     description: Same-origin application API
@@ -13,17 +47,29 @@ servers:
 tags:
   - name: Auth
   - name: Projects
-  - name: Public Projects
+  - name: Publishing
+  - name: Pages
   - name: Blocks
   - name: Block Media
   - name: Media
+  - name: Public Projects
 
 paths:
+  # ---------------------------------------------------------------- Auth
   /auth/login:
     post:
       tags: [Auth]
       operationId: loginAdmin
       summary: Authenticate an admin
+      description: |
+        Verifies the email and password against an Argon2id hash. On success,
+        the server creates a revocable server-side session and sets the
+        `portfolio_admin_session` cookie.
+
+        Attempts are rate-limited per client address and per account. A
+        wrong email and a wrong password return the same `401
+        INVALID_CREDENTIALS`, so the response does not reveal whether an
+        account exists.
       security: []
       requestBody:
         required: true
@@ -40,6 +86,8 @@ paths:
                 $ref: '#/components/schemas/AdminUserEnvelope'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
         '422':
           $ref: '#/components/responses/ValidationError'
         '429':
@@ -50,13 +98,14 @@ paths:
       tags: [Auth]
       operationId: logoutAdmin
       summary: End the current admin session
+      description: Revokes the session server-side and clears the cookie. Idempotent.
       security:
         - adminSession: []
       responses:
         '204':
           description: Logged out
-        '401':
-          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
 
   /auth/me:
     get:
@@ -75,11 +124,13 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
+  # ------------------------------------------------------------ Projects
   /projects:
     get:
       tags: [Projects]
       operationId: listAdminProjects
       summary: List projects for the CMS
+      description: Non-deleted projects in `displayPosition` order.
       security:
         - adminSession: []
       parameters:
@@ -107,10 +158,16 @@ paths:
                 $ref: '#/components/schemas/ProjectSummaryCollectionEnvelope'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
     post:
       tags: [Projects]
       operationId: createProject
       summary: Create a draft project
+      description: |
+        The project is created as a DRAFT and appended to the end of the
+        display order. A PRIVATE project must be created with a `password`,
+        because a PRIVATE project must always have a password hash.
       security:
         - adminSession: []
       requestBody:
@@ -128,12 +185,10 @@ paths:
                 $ref: '#/components/schemas/ProjectDetailEnvelope'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
         '409':
-          description: Slug already exists
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorEnvelope'
+          $ref: '#/components/responses/Conflict'
         '422':
           $ref: '#/components/responses/ValidationError'
 
@@ -147,13 +202,13 @@ paths:
         single database transaction, as contiguous integers from 0 in array
         order.
 
-        This is the only write path for `display_position`; it is deliberately
+        This is the only write path for `display_position`. It is deliberately
         not settable through `PATCH /projects/{projectId}`, so that reordering
         can never degrade into one HTTP mutation per moved row. See ADR-0002.
 
-        Display order is maintained across all non-soft-deleted projects
+        Display order is maintained across all non-soft-deleted projects,
         regardless of status. Public listings filter that ordered set; they do
-        not maintain a separate order.
+        not keep a separate order. Ordering is live: it needs no publish.
       security:
         - adminSession: []
       requestBody:
@@ -167,10 +222,10 @@ paths:
           description: Project display order updated transactionally
         '401':
           $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
         '409':
-          description: Payload is incomplete or references unknown or soft-deleted projects
+          description: '`REORDER_SET_MISMATCH` — the payload is incomplete or names unknown or soft-deleted projects.'
           content:
             application/json:
               schema:
@@ -192,8 +247,8 @@ paths:
         the payload must contain all of them. This is the only write path for
         `featured_position`. See ADR-0002.
 
-        Toggling `isFeatured` remains a `PATCH /projects/{projectId}` operation;
-        a newly featured project is appended to the end of the featured order.
+        Toggling `isFeatured` remains a `PATCH /projects/{projectId}` operation.
+        A newly featured project is appended to the end of the featured order.
       security:
         - adminSession: []
       requestBody:
@@ -207,10 +262,10 @@ paths:
           description: Featured project order updated transactionally
         '401':
           $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
         '409':
-          description: Payload is incomplete or contains projects that are not featured
+          description: '`REORDER_SET_MISMATCH` — the payload is incomplete or contains projects that are not featured.'
           content:
             application/json:
               schema:
@@ -224,7 +279,7 @@ paths:
     get:
       tags: [Projects]
       operationId: getAdminProject
-      summary: Get a project including draft blocks and media
+      summary: Get a project's working copy, including hidden blocks
       security:
         - adminSession: []
       responses:
@@ -242,6 +297,13 @@ paths:
       tags: [Projects]
       operationId: updateProject
       summary: Partially update project metadata
+      description: |
+        Updates the working copy. Content changes reach the public site only
+        on `publish`. The live fields (`slug`, `visibility`) take effect
+        immediately.
+
+        Setting `visibility` to PRIVATE on a project without a password
+        returns `409 PROJECT_PASSWORD_REQUIRED`. Set the password first.
       security:
         - adminSession: []
       requestBody:
@@ -259,20 +321,22 @@ paths:
                 $ref: '#/components/schemas/ProjectDetailEnvelope'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
-          description: Slug or state conflict
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorEnvelope'
+          $ref: '#/components/responses/Conflict'
         '422':
           $ref: '#/components/responses/ValidationError'
     delete:
       tags: [Projects]
       operationId: softDeleteProject
       summary: Soft-delete a project and archive it
+      description: |
+        Sets `deleted_at`, archives the project, removes its published
+        snapshot and closes the gap in the display and featured orders, all in
+        one transaction. Media Library assets are untouched.
       security:
         - adminSession: []
       responses:
@@ -280,6 +344,8 @@ paths:
           description: Project soft-deleted
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
         '404':
           $ref: '#/components/responses/NotFound'
 
@@ -287,9 +353,21 @@ paths:
     parameters:
       - $ref: '#/components/parameters/ProjectId'
     post:
-      tags: [Projects]
+      tags: [Publishing]
       operationId: publishProject
-      summary: Validate and publish a project
+      summary: Validate the working copy and write the published snapshot
+      description: |
+        Builds the public snapshot from the working copy, validates it, and
+        replaces the project's single current snapshot, all in one
+        transaction. It also records the media the snapshot references, so
+        `MEDIA_IN_USE` protects them. Status becomes PUBLISHED.
+
+        The snapshot must render on the locked public templates. If it
+        cannot, the response is `422 PROJECT_NOT_PUBLISHABLE`, with the
+        reasons in `details.issues`, and nothing is written. Required: a
+        title, a year, and a READY image cover. Every block must pass the
+        block contract. The composition must match the Project Detail
+        template (ADR-0013). Every referenced asset must be live and READY.
       security:
         - adminSession: []
       responses:
@@ -301,6 +379,8 @@ paths:
                 $ref: '#/components/schemas/ProjectDetailEnvelope'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
         '404':
           $ref: '#/components/responses/NotFound'
         '422':
@@ -310,9 +390,9 @@ paths:
     parameters:
       - $ref: '#/components/parameters/ProjectId'
     post:
-      tags: [Projects]
+      tags: [Publishing]
       operationId: unpublishProject
-      summary: Return a published project to draft
+      summary: Remove the published snapshot and return the project to draft
       security:
         - adminSession: []
       responses:
@@ -324,10 +404,12 @@ paths:
                 $ref: '#/components/schemas/ProjectDetailEnvelope'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
-          description: Project cannot be unpublished from its current state
+          description: '`INVALID_STATE` — the project is not published.'
           content:
             application/json:
               schema:
@@ -337,9 +419,10 @@ paths:
     parameters:
       - $ref: '#/components/parameters/ProjectId'
     post:
-      tags: [Projects]
+      tags: [Publishing]
       operationId: archiveProject
       summary: Archive a project without deleting it
+      description: Removes the published snapshot, if any, and sets status ARCHIVED.
       security:
         - adminSession: []
       responses:
@@ -351,6 +434,8 @@ paths:
                 $ref: '#/components/schemas/ProjectDetailEnvelope'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
         '404':
           $ref: '#/components/responses/NotFound'
 
@@ -361,6 +446,10 @@ paths:
       tags: [Projects]
       operationId: setProjectPassword
       summary: Set or replace the project password
+      description: |
+        Stores an Argon2id hash; the password itself is never stored or
+        logged. Replacing the password revokes every access already granted
+        for the project.
       security:
         - adminSession: []
       requestBody:
@@ -374,6 +463,8 @@ paths:
           description: Password updated
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
         '404':
           $ref: '#/components/responses/NotFound'
         '422':
@@ -390,138 +481,166 @@ paths:
           description: Password removed
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
-          description: A private project must keep a password
+          description: '`PROJECT_PASSWORD_REQUIRED` — a private project must keep a password.'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
 
-  /public/projects:
-    get:
-      tags: [Public Projects]
-      operationId: listPublicProjects
-      summary: List published, non-deleted, PUBLIC projects
-      description: |
-        Returns only projects satisfying all of:
-
-            status = 'PUBLISHED' AND deleted_at IS NULL AND visibility = 'PUBLIC'
-
-        PRIVATE projects are never enumerated here in V1 — not even as locked
-        placeholders. No field of a PRIVATE project, including its cover media,
-        short description, year or category, may appear in this response before
-        project access has been verified.
-
-        A PRIVATE project is reachable only through its direct project URL,
-        where the visitor supplies the project password. See ADR-0003.
-
-        Results are ordered by `displayPosition` ascending.
-      security: []
-      parameters:
-        - $ref: '#/components/parameters/Page'
-        - $ref: '#/components/parameters/PageSize'
-        - name: featured
-          in: query
-          schema:
-            type: boolean
-        - name: category
-          in: query
-          schema:
-            type: string
-            maxLength: 120
-      responses:
-        '200':
-          description: Public project summaries. PRIVATE projects are excluded entirely.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PublicProjectSummaryCollectionEnvelope'
-
-  /public/projects/{slug}:
+  /projects/{projectId}/preview:
     parameters:
-      - $ref: '#/components/parameters/ProjectSlug'
+      - $ref: '#/components/parameters/ProjectId'
     get:
-      tags: [Public Projects]
-      operationId: getPublicProject
-      summary: Get a published project by slug
+      tags: [Publishing]
+      operationId: previewProject
+      summary: Open the working copy on the real public page
       description: |
-        PUBLIC projects are returned directly. PRIVATE projects require a valid
-        project-access cookie previously granted by the access endpoint.
-
-        This is the only way to reach a PRIVATE project in V1: the visitor must
-        already hold the direct URL, because PRIVATE projects are not
-        enumerated by GET /public/projects (ADR-0003). Without a valid access
-        cookie the response is 403 and carries no project content.
-      security: []
+        Enables preview mode for the requesting admin and redirects to the
+        project's public URL. There, the working copy renders through the
+        public components with an admin-only banner. Preview mode is
+        honoured only together with a valid admin session. It never changes
+        what a visitor sees.
+      security:
+        - adminSession: []
       responses:
-        '200':
-          description: Public project detail
-          content:
-            application/json:
+        '307':
+          description: Redirect to the project's public URL in preview mode
+          headers:
+            Location:
               schema:
-                $ref: '#/components/schemas/PublicProjectEnvelope'
-        '403':
-          description: |
-            Private project is locked. The body carries the error envelope only —
-            no title, cover, description, blocks or media. The client should
-            present the password prompt and call
-            POST /public/projects/{slug}/access.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorEnvelope'
+                type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /public/projects/{slug}/access:
-    parameters:
-      - $ref: '#/components/parameters/ProjectSlug'
-    post:
-      tags: [Public Projects]
-      operationId: unlockPrivateProject
-      summary: Verify a private-project password and grant temporary access
+  /preview/exit:
+    get:
+      tags: [Publishing]
+      operationId: exitPreview
+      summary: Leave preview mode
+      description: |
+        Clears preview mode and redirects to `to`, a site path. The default
+        is `/`.
       security: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ProjectAccessRequest'
+      parameters:
+        - name: to
+          in: query
+          schema:
+            type: string
+            pattern: '^/(?!/)'
+            maxLength: 500
       responses:
-        '204':
-          description: Access granted; server sets a signed HTTPOnly project-access cookie.
-        '401':
-          description: Incorrect project password
+        '307':
+          description: Redirect with preview mode cleared
+
+  # ---------------------------------------------------------------- Pages
+  /pages/{pageKey}:
+    parameters:
+      - $ref: '#/components/parameters/PageKey'
+    get:
+      tags: [Pages]
+      operationId: getPage
+      summary: Get a page's working copy (Home), including hidden blocks
+      security:
+        - adminSession: []
+      responses:
+        '200':
+          description: Page
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorEnvelope'
+                $ref: '#/components/schemas/PageEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /pages/{pageKey}/publish:
+    parameters:
+      - $ref: '#/components/parameters/PageKey'
+    post:
+      tags: [Publishing]
+      operationId: publishPage
+      summary: Validate the page's working copy and write its published snapshot
+      description: |
+        Works like project publish (ADR-0012). The composition must match the
+        locked Home template's slots, in order: hero, identity, wall, About
+        teaser, coda (ADR-0007, ADR-0013). If it does not, the response is
+        `422 PAGE_NOT_PUBLISHABLE` with `details.issues`, and nothing is
+        written. Home cannot be unpublished. A page with no snapshot yet
+        renders its committed default.
+      security:
+        - adminSession: []
+      responses:
+        '200':
+          description: Published page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
         '404':
           $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/ValidationError'
-        '429':
-          $ref: '#/components/responses/RateLimited'
 
+  /pages/{pageKey}/preview:
+    parameters:
+      - $ref: '#/components/parameters/PageKey'
+    get:
+      tags: [Publishing]
+      operationId: previewPage
+      summary: Open the page's working copy on the real public page
+      security:
+        - adminSession: []
+      responses:
+        '307':
+          description: Redirect to the page's public URL in preview mode
+          headers:
+            Location:
+              schema:
+                type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # --------------------------------------------------------------- Blocks
   /projects/{projectId}/blocks:
     parameters:
       - $ref: '#/components/parameters/ProjectId'
     post:
       tags: [Blocks]
-      operationId: createBlock
-      summary: Add a block to a project
+      operationId: createProjectBlock
+      summary: Add a block to a project, at its root or inside one of its GRIDs
       description: |
-        `position` is optional. Omitting it appends the block to the end.
+        The target container is the project root, or the GRID named by
+        `parentBlockId`, which must belong to this project (ADR-0006).
 
-        Supplying a `position` in `0..N` (where N is the current block count)
-        inserts at that position and shifts existing blocks at or after it one
-        place to the right. The bounds check, the shift and the insert all occur
-        in one transaction, so a failed insert leaves no shifted siblings
-        committed and block positions stay contiguous from 0.
-
+        `position` is optional. Omitting it appends the block to the end of
+        the container. Supplying a `position` in `0..N`, where N is the
+        container's current block count, inserts at that position and shifts
+        the blocks at or after it one place to the right. The bounds check,
+        the shift and the insert all run in one transaction, so a failed
+        insert commits nothing and positions stay contiguous from 0.
         `position > N` returns 422. See ADR-0005.
+
+        `content` and `config` are validated for the block type in the
+        block's context (CLAUDE.md §14):
+
+        - only leaf blocks may go inside a GRID;
+        - `AUTOPLAY_AMBIENT` is allowed only on a standalone surface;
+        - the HERO overlay is valid only on a project-owned HERO with
+          `CLICK_TO_PLAY` playback.
       security:
         - adminSession: []
       requestBody:
@@ -539,6 +658,8 @@ paths:
                 $ref: '#/components/schemas/BlockEnvelope'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
         '404':
           $ref: '#/components/responses/NotFound'
         '422':
@@ -549,8 +670,13 @@ paths:
       - $ref: '#/components/parameters/ProjectId'
     put:
       tags: [Blocks]
-      operationId: reorderBlocks
-      summary: Atomically replace block ordering for a project
+      operationId: reorderProjectBlocks
+      summary: Atomically replace block ordering within one container of a project
+      description: |
+        `blockIds` must be the complete set of blocks in the target container:
+        the project root when `parentBlockId` is null, otherwise that GRID's
+        children (ADR-0002, ADR-0006). Positions are reassigned as contiguous
+        integers from 0 in one transaction.
       security:
         - adminSession: []
       requestBody:
@@ -564,10 +690,77 @@ paths:
           description: Block order updated transactionally
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
-          description: Payload contains blocks outside the target project or is incomplete
+          description: '`REORDER_SET_MISMATCH` — the payload is incomplete or names blocks outside the target container.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /pages/{pageKey}/blocks:
+    parameters:
+      - $ref: '#/components/parameters/PageKey'
+    post:
+      tags: [Blocks]
+      operationId: createPageBlock
+      summary: Add a block to a page, at its root or inside one of its GRIDs
+      description: Same semantics as `POST /projects/{projectId}/blocks`, with the page as owner (ADR-0007).
+      security:
+        - adminSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBlockRequest'
+      responses:
+        '201':
+          description: Block created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /pages/{pageKey}/blocks/order:
+    parameters:
+      - $ref: '#/components/parameters/PageKey'
+    put:
+      tags: [Blocks]
+      operationId: reorderPageBlocks
+      summary: Atomically replace block ordering within one container of a page
+      security:
+        - adminSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReorderBlocksRequest'
+      responses:
+        '204':
+          description: Block order updated transactionally
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: '`REORDER_SET_MISMATCH`'
           content:
             application/json:
               schema:
@@ -581,7 +774,12 @@ paths:
     patch:
       tags: [Blocks]
       operationId: updateBlock
-      summary: Update block configuration
+      summary: Replace a block's content or config, or hide/show it
+      description: |
+        Each supplied member replaces the stored value whole. There is no
+        deep merge. The block type is immutable. The resulting block is
+        validated against its type's variant in its context, exactly as on
+        create.
       security:
         - adminSession: []
       requestBody:
@@ -599,6 +797,8 @@ paths:
                 $ref: '#/components/schemas/BlockEnvelope'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
         '404':
           $ref: '#/components/responses/NotFound'
         '422':
@@ -606,7 +806,10 @@ paths:
     delete:
       tags: [Blocks]
       operationId: deleteBlock
-      summary: Delete a block and its block-media references
+      summary: Delete a block, its children and their block-media references
+      description: |
+        Remaining siblings are renumbered to stay contiguous from 0, in the
+        same transaction. Media Library assets are never deleted.
       security:
         - adminSession: []
       responses:
@@ -614,29 +817,70 @@ paths:
           description: Block deleted; Media Library assets remain intact
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
         '404':
           $ref: '#/components/responses/NotFound'
 
+  /blocks/{blockId}/duplicate:
+    parameters:
+      - $ref: '#/components/parameters/BlockId'
+    post:
+      tags: [Blocks]
+      operationId: duplicateBlock
+      summary: Deep-copy a block directly after itself
+      description: |
+        Copies the block, its children and every `block_media` reference,
+        including placement alt text and posters. The copy is inserted at
+        the source's `position + 1`, and later siblings shift right, in one
+        transaction. No Media Library asset is copied (CLAUDE.md §17.17).
+      security:
+        - adminSession: []
+      responses:
+        '201':
+          description: The copy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ---------------------------------------------------------- Block media
   /blocks/{blockId}/media:
     parameters:
       - $ref: '#/components/parameters/BlockId'
     post:
       tags: [Block Media]
       operationId: addMediaToBlock
-      summary: Add a Media Library asset to a block
+      summary: Place a Media Library asset in a block
       description: |
-        `position` is optional. Omitting it appends the media to the end.
+        This adds a reference to an existing asset. It does not upload or
+        copy the asset.
 
-        Supplying a `position` in `0..N` (where N is the current media count for
-        the block) inserts at that position and shifts existing items at or
-        after it one place to the right. The bounds check, the shift and the
-        insert all occur in one transaction, so a failed insert leaves no
-        shifted siblings committed and positions stay contiguous from 0.
+        `position` follows ADR-0005: omitted appends, `0..N` inserts and
+        shifts right, and a value `> N` is `422`.
 
-        `position > N` returns 422. See ADR-0005.
+        The block type decides what it accepts:
 
-        This adds a reference to an existing Media Library asset; it does not
-        upload or copy the asset.
+        | Block | Accepts | Items |
+        |---|---|---|
+        | IMAGE | IMAGE | exactly one |
+        | VIDEO | VIDEO, EXTERNAL_VIDEO | exactly one |
+        | HERO | IMAGE, VIDEO, EXTERNAL_VIDEO | exactly one |
+        | GALLERY | IMAGE, VIDEO | any number |
+        | TEXT, GRID, SPACER | none | none |
+
+        `EXTERNAL_VIDEO` supports only `CLICK_TO_PLAY`, so it is refused
+        wherever the effective playback mode would autoplay.
+
+        `posterMediaId` (ADR-0015) overrides the video's default poster for
+        this placement only. It must be a live READY IMAGE, and it is valid
+        only on a video placement.
       security:
         - adminSession: []
       requestBody:
@@ -654,6 +898,8 @@ paths:
                 $ref: '#/components/schemas/BlockMediaEnvelope'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
         '404':
           $ref: '#/components/responses/NotFound'
         '422':
@@ -679,10 +925,12 @@ paths:
           description: Media order updated transactionally
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
-          description: Payload contains media references outside the target block or is incomplete
+          description: '`REORDER_SET_MISMATCH` — the payload is incomplete or names references outside the target block.'
           content:
             application/json:
               schema:
@@ -697,7 +945,7 @@ paths:
     patch:
       tags: [Block Media]
       operationId: updateBlockMedia
-      summary: Update per-use media presentation configuration
+      summary: Update a placement's alt text, poster override or presentation
       security:
         - adminSession: []
       requestBody:
@@ -715,6 +963,8 @@ paths:
                 $ref: '#/components/schemas/BlockMediaEnvelope'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
         '404':
           $ref: '#/components/responses/NotFound'
         '422':
@@ -723,6 +973,7 @@ paths:
       tags: [Block Media]
       operationId: removeMediaFromBlock
       summary: Remove a media reference from a block
+      description: Remaining items are renumbered contiguously from 0, in the same transaction.
       security:
         - adminSession: []
       responses:
@@ -730,14 +981,18 @@ paths:
           description: Reference removed; Media Library asset remains intact
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
         '404':
           $ref: '#/components/responses/NotFound'
 
+  # ---------------------------------------------------------------- Media
   /media:
     get:
       tags: [Media]
       operationId: listMedia
       summary: List Media Library assets
+      description: Non-deleted assets, newest first.
       security:
         - adminSession: []
       parameters:
@@ -765,12 +1020,22 @@ paths:
                 $ref: '#/components/schemas/MediaCollectionEnvelope'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
 
   /media/uploads:
     post:
       tags: [Media]
       operationId: createMediaUpload
       summary: Create a media record and authorize a direct-to-storage upload
+      description: |
+        The browser uploads directly to object storage with the returned
+        authorization (CLAUDE.md §12). The file never passes through the
+        application server.
+
+        While no storage provider that can sign uploads is configured, this
+        returns `503 STORAGE_UNAVAILABLE` and creates nothing. Uploads are
+        never simulated (ADR-0014 §6).
       security:
         - adminSession: []
       requestBody:
@@ -788,14 +1053,18 @@ paths:
                 $ref: '#/components/schemas/MediaUploadAuthorizationEnvelope'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
         '413':
-          description: File exceeds configured size limit
+          description: '`FILE_TOO_LARGE` — the file exceeds the size limit for its type.'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
         '422':
           $ref: '#/components/responses/ValidationError'
+        '503':
+          $ref: '#/components/responses/StorageUnavailable'
 
   /media/{mediaId}/complete:
     parameters:
@@ -804,6 +1073,10 @@ paths:
       tags: [Media]
       operationId: completeMediaUpload
       summary: Verify/finalize an uploaded media object
+      description: |
+        Verifies the stored object's size, type and checksum. If the checksum
+        matches a live asset, the response is `409 MEDIA_DUPLICATE`, with the
+        existing asset's id in `details.mediaId` (ADR-0014).
       security:
         - adminSession: []
       responses:
@@ -815,20 +1088,27 @@ paths:
                 $ref: '#/components/schemas/MediaEnvelope'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
-          description: Upload object is missing or cannot be finalized from current state
+          description: '`INVALID_STATE` (object missing or not finalizable) or `MEDIA_DUPLICATE`.'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          $ref: '#/components/responses/StorageUnavailable'
 
   /media/external:
     post:
       tags: [Media]
       operationId: createExternalMedia
-      summary: Register an external Vimeo/YouTube-style video
+      summary: Register an external Vimeo/YouTube video
+      description: |
+        The URL must be an https URL on the provider's own hosts. External
+        video supports only `CLICK_TO_PLAY` (ADR-0008).
       security:
         - adminSession: []
       requestBody:
@@ -846,16 +1126,40 @@ paths:
                 $ref: '#/components/schemas/MediaEnvelope'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
         '422':
           $ref: '#/components/responses/ValidationError'
 
   /media/{mediaId}:
     parameters:
       - $ref: '#/components/parameters/MediaId'
+    get:
+      tags: [Media]
+      operationId: getMedia
+      summary: Get one Media Library asset
+      security:
+        - adminSession: []
+      responses:
+        '200':
+          description: Media
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
     patch:
       tags: [Media]
       operationId: updateMedia
-      summary: Update editable media metadata
+      summary: Update an asset's default alt text or default poster
+      description: |
+        `posterMediaId` sets the asset's default poster (ADR-0009). It is
+        valid only on a VIDEO or EXTERNAL_VIDEO asset, and its target must be
+        a live READY IMAGE other than the asset itself. `null` clears it. An
+        invalid target returns `422 INVALID_POSTER`.
       security:
         - adminSession: []
       requestBody:
@@ -873,6 +1177,8 @@ paths:
                 $ref: '#/components/schemas/MediaEnvelope'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
         '404':
           $ref: '#/components/responses/NotFound'
         '422':
@@ -881,6 +1187,10 @@ paths:
       tags: [Media]
       operationId: softDeleteMedia
       summary: Soft-delete an unused media asset
+      description: |
+        Refused with `409 MEDIA_IN_USE` while any relational reference holds
+        the asset. `details.usages` lists them, in the shape of
+        `GET /media/{mediaId}/usages` (CLAUDE.md §12, ADR-0015).
       security:
         - adminSession: []
       responses:
@@ -888,14 +1198,212 @@ paths:
           description: Media soft-deleted
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
-          description: Media is referenced by a project cover or block
+          description: '`MEDIA_IN_USE`'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+
+  /media/{mediaId}/usages:
+    parameters:
+      - $ref: '#/components/parameters/MediaId'
+    get:
+      tags: [Media]
+      operationId: listMediaUsages
+      summary: List everything that keeps an asset in use
+      description: |
+        Returns every relational reference that holds the asset:
+
+        - project covers and previews;
+        - block placements;
+        - placement posters;
+        - asset default posters;
+        - current published snapshots.
+
+        References held by soft-deleted projects or assets do not count.
+      security:
+        - adminSession: []
+      responses:
+        '200':
+          description: Usages; an empty list means the asset can be deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaUsageCollectionEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ------------------------------------------------------ Public projects
+  /public/projects:
+    get:
+      tags: [Public Projects]
+      operationId: listPublicProjects
+      summary: List published, non-deleted, PUBLIC projects
+      description: |
+        Returns only projects satisfying all of:
+
+            a current published snapshot exists
+            AND status = 'PUBLISHED' AND deleted_at IS NULL AND visibility = 'PUBLIC'
+
+        PRIVATE projects are never enumerated here in V1, not even as locked
+        placeholders. No field of a PRIVATE project, including its cover media,
+        short description, year or category, may appear in this response before
+        project access has been verified.
+
+        A PRIVATE project is reachable only through its direct project URL,
+        where the visitor supplies the project password. See ADR-0003.
+
+        Content fields come from each project's published snapshot. Results
+        are ordered by the live `displayPosition`, ascending.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - name: featured
+          in: query
+          schema:
+            type: boolean
+        - name: category
+          in: query
+          schema:
+            type: string
+            maxLength: 120
+      responses:
+        '200':
+          description: Public project summaries. PRIVATE projects are excluded entirely.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicProjectSummaryCollectionEnvelope'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /public/projects/{slug}:
+    parameters:
+      - $ref: '#/components/parameters/ProjectSlug'
+    get:
+      tags: [Public Projects]
+      operationId: getPublicProject
+      summary: Get a published project by slug
+      description: |
+        Returns the project's published snapshot. PUBLIC projects are returned
+        directly. PRIVATE projects require a valid project-access cookie,
+        previously granted by the access endpoint.
+
+        This is the only way to reach a PRIVATE project in V1. The visitor must
+        already hold the direct URL, because PRIVATE projects are not
+        enumerated by GET /public/projects (ADR-0003). Without a valid access
+        cookie the response is 403, and it carries no project content.
+
+        The media URLs of a PRIVATE project point to the access-checked
+        delivery route below, never to an unrestricted public path.
+      security: []
+      responses:
+        '200':
+          description: Public project detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicProjectEnvelope'
+        '403':
+          description: |
+            `PROJECT_LOCKED`. The body carries the error envelope only: no
+            title, cover, description, blocks or media. The client should
+            present the password prompt and call
+            POST /public/projects/{slug}/access.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /public/projects/{slug}/access:
+    parameters:
+      - $ref: '#/components/parameters/ProjectSlug'
+    post:
+      tags: [Public Projects]
+      operationId: unlockPrivateProject
+      summary: Verify a private-project password and grant temporary access
+      description: |
+        On success, the server sets an HMAC-signed, `HttpOnly`,
+        `SameSite=Lax` project-access cookie, `Secure` in production. It
+        grants access to this project only, and it expires. Replacing the
+        project password invalidates every cookie granted before.
+
+        Attempts are rate-limited per client address and project. Any slug
+        that is not an unlockable project returns 404: missing, draft,
+        deleted and PUBLIC slugs alike, so the endpoint reveals nothing about
+        projects that do not exist.
+
+        This endpoint answers 503 `ACCESS_UNAVAILABLE` while the access
+        signing secret is not configured.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectAccessRequest'
+      responses:
+        '204':
+          description: Access granted; server sets a signed HTTPOnly project-access cookie.
+        '401':
+          description: '`INVALID_PROJECT_PASSWORD`'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          description: '`ACCESS_UNAVAILABLE`'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /public/projects/{slug}/media/{mediaId}:
+    parameters:
+      - $ref: '#/components/parameters/ProjectSlug'
+      - $ref: '#/components/parameters/MediaId'
+    get:
+      tags: [Public Projects]
+      operationId: getPrivateProjectMedia
+      summary: Deliver one asset of a PRIVATE project, after access is verified
+      description: |
+        The asset must be referenced by the project's published snapshot, and
+        the request must carry a valid access cookie for that project.
+        Otherwise the response is 404, so an asset's existence is not
+        revealed. Byte ranges are supported for video.
+
+        With the `local` storage adapter, the file is streamed from the media
+        root. A provider adapter redirects to a short-lived signed URL
+        instead. That path is blocked until a provider is chosen (ADR-0014
+        §4).
+      security: []
+      responses:
+        '200':
+          description: The asset's bytes
+        '206':
+          description: A byte range of the asset
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '416':
+          description: Range not satisfiable
 
 components:
   securitySchemes:
@@ -903,7 +1411,11 @@ components:
       type: apiKey
       in: cookie
       name: portfolio_admin_session
-      description: Secure HTTPOnly admin session cookie.
+      description: |
+        Opaque random session token. Only its SHA-256 is stored server-side,
+        so a database read cannot replay a session. The cookie is `HttpOnly`,
+        `SameSite=Strict` and `Path=/`, and `Secure` in production. The
+        session expires, and logout revokes it.
 
   parameters:
     ProjectId:
@@ -918,9 +1430,15 @@ components:
       in: path
       required: true
       schema:
+        $ref: '#/components/schemas/Slug'
+    PageKey:
+      name: pageKey
+      in: path
+      required: true
+      description: A singleton page key. V1 has only `HOME` (ADR-0007).
+      schema:
         type: string
-        pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
-        maxLength: 200
+        enum: [HOME]
     BlockId:
       name: blockId
       in: path
@@ -960,36 +1478,58 @@ components:
 
   responses:
     Unauthorized:
-      description: Authentication is missing or invalid
+      description: '`UNAUTHENTICATED` (no valid session) or `INVALID_CREDENTIALS`.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    CsrfRejected:
+      description: '`CSRF_REJECTED` — the request did not come from this origin.'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorEnvelope'
     NotFound:
-      description: Resource not found
+      description: '`NOT_FOUND`, or a resource-specific code such as `PROJECT_NOT_FOUND`, `BLOCK_NOT_FOUND`, `MEDIA_NOT_FOUND`, `PAGE_NOT_FOUND`.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    Conflict:
+      description: '`SLUG_TAKEN`, `PROJECT_PASSWORD_REQUIRED` or `INVALID_STATE`.'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorEnvelope'
     ValidationError:
-      description: Request or domain validation failed
+      description: |
+        `VALIDATION_ERROR` with field-level `details.issues`, or a domain rule:
+        `PROJECT_NOT_PUBLISHABLE`, `PAGE_NOT_PUBLISHABLE`, `INVALID_POSTER`,
+        `INVALID_MEDIA_FOR_BLOCK`.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorEnvelope'
     RateLimited:
-      description: Too many requests
+      description: '`RATE_LIMITED`'
       headers:
         Retry-After:
           schema:
             type: integer
-          description: Seconds until retry is allowed, when known.
+          description: Seconds until retry is allowed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    StorageUnavailable:
+      description: '`STORAGE_UNAVAILABLE` — no storage provider that can sign uploads is configured.'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorEnvelope'
 
   schemas:
+    # ------------------------------------------------------------ Enums
     ProjectStatus:
       type: string
       enum: [DRAFT, PUBLISHED, ARCHIVED]
@@ -1010,6 +1550,13 @@ components:
       type: string
       enum: [UPLOADING, PROCESSING, READY, FAILED]
 
+    Slug:
+      type: string
+      minLength: 1
+      maxLength: 200
+      pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+
+    # ----------------------------------------------------------- Errors
     Error:
       type: object
       additionalProperties: false
@@ -1046,6 +1593,7 @@ components:
           type: integer
           minimum: 0
 
+    # ------------------------------------------------------------- Auth
     AdminLoginRequest:
       type: object
       additionalProperties: false
@@ -1057,7 +1605,7 @@ components:
           maxLength: 320
         password:
           type: string
-          minLength: 8
+          minLength: 1
           maxLength: 200
 
     AdminUser:
@@ -1091,22 +1639,12 @@ components:
         data:
           $ref: '#/components/schemas/AdminUser'
 
-    ProjectCredit:
+    # ------------------------------------------------------------ Media
+    MediaRef:
       type: object
       additionalProperties: false
-      required: [role, name]
-      properties:
-        role:
-          type: string
-          maxLength: 120
-        name:
-          type: string
-          maxLength: 200
-
-    Media:
-      type: object
-      additionalProperties: false
-      required: [id, type, status, createdAt, updatedAt]
+      description: A depth-1 media reference. A poster's own poster is never serialised (ADR-0009).
+      required: [id, type, status, deliveryUrl, width, height, altText]
       properties:
         id:
           type: string
@@ -1115,14 +1653,54 @@ components:
           $ref: '#/components/schemas/MediaType'
         status:
           $ref: '#/components/schemas/MediaStatus'
-        url:
+        deliveryUrl:
           type: [string, 'null']
-          format: uri
+          description: Derived at read time from provider + key. Null when not deliverable.
+        width:
+          type: [integer, 'null']
+        height:
+          type: [integer, 'null']
+        altText:
+          type: [string, 'null']
+
+    Media:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - type
+        - status
+        - storageProvider
+        - storageKey
+        - deliveryUrl
+        - checksumSha256
+        - posterMediaId
+        - poster
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          $ref: '#/components/schemas/MediaType'
+        status:
+          $ref: '#/components/schemas/MediaStatus'
+        storageProvider:
+          type: [string, 'null']
+          description: Identity (ADR-0014). Null for EXTERNAL_VIDEO.
+        storageKey:
+          type: [string, 'null']
+          description: Identity (ADR-0014). The original's key. Null for EXTERNAL_VIDEO.
+        deliveryUrl:
+          type: [string, 'null']
+          description: Derived at read time, never stored or accepted as input.
         thumbnailUrl:
           type: [string, 'null']
-          format: uri
+          description: Generated/provider poster fallback (ADR-0009).
         externalProvider:
           type: [string, 'null']
+          enum: [vimeo, youtube, null]
         externalUrl:
           type: [string, 'null']
           format: uri
@@ -1144,8 +1722,20 @@ components:
         fileSizeBytes:
           type: [integer, 'null']
           minimum: 0
+        checksumSha256:
+          type: [string, 'null']
+          pattern: '^[0-9a-f]{64}$'
         altText:
           type: [string, 'null']
+          description: The asset's default description. A placement may override it (ADR-0011).
+        posterMediaId:
+          type: [string, 'null']
+          format: uuid
+          description: The asset's default poster (ADR-0009). VIDEO and EXTERNAL_VIDEO only.
+        poster:
+          oneOf:
+            - $ref: '#/components/schemas/MediaRef'
+            - type: 'null'
         createdAt:
           type: string
           format: date-time
@@ -1173,68 +1763,162 @@ components:
         meta:
           $ref: '#/components/schemas/PaginationMeta'
 
-    BlockMedia:
+    MediaUsage:
       type: object
       additionalProperties: false
-      required: [id, position, config, media, createdAt]
+      required: [kind]
       properties:
-        id:
+        kind:
           type: string
+          enum:
+            - PROJECT_COVER
+            - PROJECT_PREVIEW
+            - BLOCK_MEDIA
+            - PLACEMENT_POSTER
+            - ASSET_POSTER
+            - PUBLISHED_PROJECT
+            - PUBLISHED_PAGE
+        projectId:
+          type: [string, 'null']
           format: uuid
-        position:
-          type: integer
-          minimum: 0
-        config:
-          type: object
-          additionalProperties: true
-        media:
-          $ref: '#/components/schemas/Media'
-        createdAt:
-          type: string
-          format: date-time
+        projectTitle:
+          type: [string, 'null']
+        pageKey:
+          type: [string, 'null']
+        blockId:
+          type: [string, 'null']
+          format: uuid
+        mediaId:
+          type: [string, 'null']
+          format: uuid
+          description: For ASSET_POSTER, the video whose default poster this is.
 
-    BlockMediaEnvelope:
+    MediaUsageCollectionEnvelope:
       type: object
       additionalProperties: false
       required: [data]
       properties:
         data:
-          $ref: '#/components/schemas/BlockMedia'
-
-    ProjectBlock:
-      type: object
-      additionalProperties: false
-      required: [id, type, position, config, media, createdAt, updatedAt]
-      properties:
-        id:
-          type: string
-          format: uuid
-        type:
-          $ref: '#/components/schemas/BlockType'
-        position:
-          type: integer
-          minimum: 0
-        config:
-          type: object
-          additionalProperties: true
-        media:
           type: array
           items:
-            $ref: '#/components/schemas/BlockMedia'
-        createdAt:
+            $ref: '#/components/schemas/MediaUsage'
+
+    CreateMediaUploadRequest:
+      type: object
+      additionalProperties: false
+      required: [filename, mimeType, fileSizeBytes]
+      properties:
+        filename:
           type: string
-          format: date-time
-        updatedAt:
+          minLength: 1
+          maxLength: 255
+        mimeType:
+          type: string
+          enum: [image/jpeg, image/png, image/webp, image/avif, video/mp4, video/webm, video/quicktime]
+        fileSizeBytes:
+          type: integer
+          minimum: 1
+          description: Images up to 50 MB, video up to 5 GB.
+        checksumSha256:
+          type: string
+          pattern: '^[0-9a-f]{64}$'
+          description: Optional. Lets the server detect a duplicate before upload.
+        altText:
+          type: [string, 'null']
+          maxLength: 1000
+
+    MediaUploadAuthorization:
+      type: object
+      additionalProperties: false
+      required: [mediaId, uploadUrl, uploadMethod, headers, expiresAt]
+      properties:
+        mediaId:
+          type: string
+          format: uuid
+        uploadUrl:
+          type: string
+          format: uri
+        uploadMethod:
+          type: string
+          enum: [PUT, POST]
+        headers:
+          type: object
+          additionalProperties:
+            type: string
+          description: Headers the browser must send directly to object storage.
+        expiresAt:
           type: string
           format: date-time
 
-    BlockEnvelope:
+    MediaUploadAuthorizationEnvelope:
       type: object
       additionalProperties: false
       required: [data]
       properties:
         data:
-          $ref: '#/components/schemas/ProjectBlock'
+          $ref: '#/components/schemas/MediaUploadAuthorization'
+
+    CreateExternalMediaRequest:
+      type: object
+      additionalProperties: false
+      required: [provider, url]
+      properties:
+        provider:
+          type: string
+          enum: [vimeo, youtube]
+        url:
+          type: string
+          format: uri
+          maxLength: 2000
+        altText:
+          type: [string, 'null']
+          maxLength: 1000
+
+    UpdateMediaRequest:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        altText:
+          type: [string, 'null']
+          maxLength: 1000
+        posterMediaId:
+          type: [string, 'null']
+          format: uuid
+
+    # ---------------------------------------------------------- Projects
+    ProjectCredit:
+      type: object
+      additionalProperties: false
+      required: [role, name]
+      properties:
+        role:
+          type: string
+          minLength: 1
+          maxLength: 120
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+
+    Publication:
+      type: object
+      additionalProperties: false
+      required: [isPublished, publishedAt, hasUnpublishedChanges, issues]
+      properties:
+        isPublished:
+          type: boolean
+        publishedAt:
+          type: [string, 'null']
+          format: date-time
+        hasUnpublishedChanges:
+          type: boolean
+          description: True when publishing now would change the live snapshot.
+        issues:
+          type: array
+          items:
+            type: string
+          description: Why the working copy cannot be published yet. Empty when it can.
 
     ProjectSummary:
       type: object
@@ -1245,8 +1929,12 @@ components:
         - slug
         - status
         - visibility
+        - hasPassword
+        - cover
         - isFeatured
+        - featuredPosition
         - displayPosition
+        - publishedAt
         - createdAt
         - updatedAt
       properties:
@@ -1267,9 +1955,12 @@ components:
           $ref: '#/components/schemas/ProjectStatus'
         visibility:
           $ref: '#/components/schemas/ProjectVisibility'
+        hasPassword:
+          type: boolean
+          description: Derived. Password hashes are never returned.
         cover:
           oneOf:
-            - $ref: '#/components/schemas/Media'
+            - $ref: '#/components/schemas/MediaRef'
             - type: 'null'
         isFeatured:
           type: boolean
@@ -1279,6 +1970,10 @@ components:
         displayPosition:
           type: integer
           minimum: 0
+        publishedAt:
+          type: [string, 'null']
+          format: date-time
+          description: When the current snapshot was written; null when unpublished.
         createdAt:
           type: string
           format: date-time
@@ -1290,12 +1985,18 @@ components:
       allOf:
         - $ref: '#/components/schemas/ProjectSummary'
         - type: object
-          required: [credits, blocks]
+          required: [credits, coverMediaId, previewMediaId, preview, blocks, publication]
           properties:
             description:
               type: [string, 'null']
             client:
               type: [string, 'null']
+            role:
+              type: [string, 'null']
+              description: The owner's role on the project, as displayed (ADR-0011).
+            runtime:
+              type: [string, 'null']
+              description: As displayed, e.g. "3:42" (ADR-0011).
             credits:
               type: array
               items:
@@ -1304,16 +2005,24 @@ components:
               type: [string, 'null']
             seoDescription:
               type: [string, 'null']
-            publishedAt:
+            coverMediaId:
               type: [string, 'null']
-              format: date-time
-            hasPassword:
-              type: boolean
-              description: Admin-only derived flag. Password hashes are never returned.
+              format: uuid
+            previewMediaId:
+              type: [string, 'null']
+              format: uuid
+            preview:
+              oneOf:
+                - $ref: '#/components/schemas/MediaRef'
+                - type: 'null'
             blocks:
               type: array
+              description: The working copy's root blocks, in position order, hidden blocks included.
               items:
-                $ref: '#/components/schemas/ProjectBlock'
+                $ref: '#/components/schemas/Block'
+            publication:
+              $ref: '#/components/schemas/Publication'
+      unevaluatedProperties: false
 
     ProjectDetailEnvelope:
       type: object
@@ -1335,97 +2044,6 @@ components:
         meta:
           $ref: '#/components/schemas/PaginationMeta'
 
-    PublicProjectSummary:
-      type: object
-      additionalProperties: false
-      description: |
-        A PUBLIC, PUBLISHED, non-deleted project as seen by an anonymous
-        visitor. PRIVATE projects are never represented by this schema in V1;
-        they are excluded from the public listing entirely (ADR-0003).
-
-        The former `requiresPassword` flag was removed: with PRIVATE projects
-        excluded, it could only ever be `false`. Re-introducing it is the
-        forward path if the deferred "locked card" feature is approved.
-      required: [id, title, slug, isFeatured, displayPosition]
-      properties:
-        id:
-          type: string
-          format: uuid
-        title:
-          type: string
-        slug:
-          type: string
-        shortDescription:
-          type: [string, 'null']
-        year:
-          type: [integer, 'null']
-        category:
-          type: [string, 'null']
-        cover:
-          oneOf:
-            - $ref: '#/components/schemas/Media'
-            - type: 'null'
-        isFeatured:
-          type: boolean
-        displayPosition:
-          type: integer
-          minimum: 0
-
-    PublicProjectSummaryCollectionEnvelope:
-      type: object
-      additionalProperties: false
-      required: [data, meta]
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/PublicProjectSummary'
-        meta:
-          $ref: '#/components/schemas/PaginationMeta'
-
-    PublicProject:
-      type: object
-      additionalProperties: false
-      required: [id, title, slug, credits, cover, blocks]
-      properties:
-        id:
-          type: string
-          format: uuid
-        title:
-          type: string
-        slug:
-          type: string
-        shortDescription:
-          type: [string, 'null']
-        description:
-          type: [string, 'null']
-        year:
-          type: [integer, 'null']
-        category:
-          type: [string, 'null']
-        client:
-          type: [string, 'null']
-        credits:
-          type: array
-          items:
-            $ref: '#/components/schemas/ProjectCredit'
-        cover:
-          oneOf:
-            - $ref: '#/components/schemas/Media'
-            - type: 'null'
-        blocks:
-          type: array
-          items:
-            $ref: '#/components/schemas/ProjectBlock'
-
-    PublicProjectEnvelope:
-      type: object
-      additionalProperties: false
-      required: [data]
-      properties:
-        data:
-          $ref: '#/components/schemas/PublicProject'
-
     CreateProjectRequest:
       type: object
       additionalProperties: false
@@ -1436,15 +2054,13 @@ components:
           minLength: 1
           maxLength: 200
         slug:
-          type: string
-          minLength: 1
-          maxLength: 200
-          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+          $ref: '#/components/schemas/Slug'
         shortDescription:
           type: [string, 'null']
           maxLength: 500
         description:
           type: [string, 'null']
+          maxLength: 20000
         year:
           type: [integer, 'null']
           minimum: 1900
@@ -1455,14 +2071,30 @@ components:
         client:
           type: [string, 'null']
           maxLength: 200
+        role:
+          type: [string, 'null']
+          maxLength: 200
+        runtime:
+          type: [string, 'null']
+          maxLength: 100
         credits:
           type: array
+          maxItems: 100
           items:
             $ref: '#/components/schemas/ProjectCredit'
           default: []
         visibility:
           $ref: '#/components/schemas/ProjectVisibility'
+        password:
+          type: string
+          minLength: 8
+          maxLength: 200
+          writeOnly: true
+          description: Required when `visibility` is PRIVATE.
         coverMediaId:
+          type: [string, 'null']
+          format: uuid
+        previewMediaId:
           type: [string, 'null']
           format: uuid
 
@@ -1470,21 +2102,23 @@ components:
       type: object
       additionalProperties: false
       minProperties: 1
+      description: |
+        `displayPosition` and `featuredPosition` are not accepted here. They
+        are written only by the ordering endpoints (ADR-0002), and sending
+        either returns `422 VALIDATION_ERROR`.
       properties:
         title:
           type: string
           minLength: 1
           maxLength: 200
         slug:
-          type: string
-          minLength: 1
-          maxLength: 200
-          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+          $ref: '#/components/schemas/Slug'
         shortDescription:
           type: [string, 'null']
           maxLength: 500
         description:
           type: [string, 'null']
+          maxLength: 20000
         year:
           type: [integer, 'null']
           minimum: 1900
@@ -1495,8 +2129,15 @@ components:
         client:
           type: [string, 'null']
           maxLength: 200
+        role:
+          type: [string, 'null']
+          maxLength: 200
+        runtime:
+          type: [string, 'null']
+          maxLength: 100
         credits:
           type: array
+          maxItems: 100
           items:
             $ref: '#/components/schemas/ProjectCredit'
         visibility:
@@ -1504,6 +2145,11 @@ components:
         coverMediaId:
           type: [string, 'null']
           format: uuid
+          description: A live READY IMAGE.
+        previewMediaId:
+          type: [string, 'null']
+          format: uuid
+          description: A live READY VIDEO, the Works moving preview (ADR-0011).
         isFeatured:
           type: boolean
           description: |
@@ -1547,10 +2193,10 @@ components:
             type: string
             format: uuid
           description: |
-            The complete set of project IDs with `isFeatured = true`, in the
-            desired featured order. `featured_position` is reassigned as
-            contiguous integers from 0. A partial set, or any project that is
-            not featured, is rejected with 409.
+            The complete set of non-deleted project IDs with `isFeatured =
+            true`, in the desired featured order. `featured_position` is
+            reassigned as contiguous integers from 0. A partial set, or any
+            project that is not featured, is rejected with 409.
 
     SetProjectPasswordRequest:
       type: object
@@ -1561,6 +2207,7 @@ components:
           type: string
           minLength: 8
           maxLength: 200
+          writeOnly: true
 
     ProjectAccessRequest:
       type: object
@@ -1571,21 +2218,614 @@ components:
           type: string
           minLength: 1
           maxLength: 200
+          writeOnly: true
 
-    CreateBlockRequest:
+    # ------------------------------------------------------------- Pages
+    Page:
       type: object
       additionalProperties: false
-      required: [type]
+      required: [id, key, title, blocks, publication]
       properties:
+        id:
+          type: string
+          format: uuid
+        key:
+          type: string
+        title:
+          type: string
+        seoTitle:
+          type: [string, 'null']
+        seoDescription:
+          type: [string, 'null']
+        blocks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Block'
+        publication:
+          $ref: '#/components/schemas/Publication'
+
+    PageEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/Page'
+
+    # ---------------------------------------------- Block content & config
+    # These mirror src/features/project-builder/block.schema.ts, which is the
+    # executable form. Every object is closed.
+    InlineRun:
+      description: Plain text, emphasis or a link. No HTML, no Markdown.
+      oneOf:
+        - type: string
+          minLength: 1
+          maxLength: 5000
+        - type: object
+          additionalProperties: false
+          required: [em]
+          properties:
+            em:
+              type: string
+              minLength: 1
+              maxLength: 5000
+        - type: object
+          additionalProperties: false
+          required: [link]
+          properties:
+            link:
+              type: object
+              additionalProperties: false
+              required: [href, text]
+              properties:
+                href:
+                  type: string
+                  maxLength: 2000
+                  description: A site path (`/…`), an https URL or a `mailto:` address.
+                text:
+                  type: string
+                  minLength: 1
+                  maxLength: 500
+
+    Paragraph:
+      type: array
+      minItems: 1
+      maxItems: 200
+      items:
+        $ref: '#/components/schemas/InlineRun'
+
+    ColumnSpan:
+      type: object
+      additionalProperties: false
+      required: [colStart, colSpan]
+      description: Logical columns on the 12-column grid; `colStart + colSpan <= 13`.
+      properties:
+        colStart:
+          type: integer
+          minimum: 1
+          maximum: 12
+        colSpan:
+          type: integer
+          minimum: 1
+          maximum: 12
+
+    Alignment:
+      type: string
+      enum: [start, center, end, stretch]
+
+    Placement:
+      type: object
+      additionalProperties: false
+      required: [desktop]
+      description: |
+        Placement inside a GRID. Tablet derives from desktop, and mobile
+        falls back to full-width stacking in `position` order, unless
+        overridden (ADR-0006).
+      properties:
+        desktop:
+          $ref: '#/components/schemas/ColumnSpan'
+        tablet:
+          $ref: '#/components/schemas/ColumnSpan'
+        mobile:
+          $ref: '#/components/schemas/ColumnSpan'
+        align:
+          $ref: '#/components/schemas/Alignment'
+        valign:
+          $ref: '#/components/schemas/Alignment'
+
+    Playback:
+      description: |
+        One discriminated mode. `autoplay`, `muted`, `playsInline`, `preload`
+        and `pauseWhenOffscreen` are derived from it and are rejected as
+        input. `controls` exists only for CLICK_TO_PLAY (ADR-0008).
+      oneOf:
+        - type: object
+          additionalProperties: false
+          required: [mode]
+          properties:
+            mode:
+              const: CLICK_TO_PLAY
+            loop:
+              type: boolean
+            controls:
+              type: boolean
+        - type: object
+          additionalProperties: false
+          required: [mode]
+          properties:
+            mode:
+              const: AUTOPLAY_VISIBLE
+            loop:
+              type: boolean
+        - type: object
+          additionalProperties: false
+          required: [mode]
+          properties:
+            mode:
+              const: AUTOPLAY_AMBIENT
+            loop:
+              type: boolean
+      discriminator:
+        propertyName: mode
+
+    MultiItemPlayback:
+      description: Playback for a multi-item surface. It never takes AUTOPLAY_AMBIENT, not even as a default.
+      oneOf:
+        - type: object
+          additionalProperties: false
+          required: [mode]
+          properties:
+            mode:
+              const: CLICK_TO_PLAY
+            loop:
+              type: boolean
+            controls:
+              type: boolean
+        - type: object
+          additionalProperties: false
+          required: [mode]
+          properties:
+            mode:
+              const: AUTOPLAY_VISIBLE
+            loop:
+              type: boolean
+      discriminator:
+        propertyName: mode
+
+    Fit:
+      type: string
+      enum: [COVER, CONTAIN]
+
+    HeroContent:
+      type: object
+      additionalProperties: false
+      properties:
+        caption:
+          type: string
+          minLength: 1
+          maxLength: 300
+
+    HeroConfig:
+      type: object
+      additionalProperties: false
+      properties:
+        playback:
+          $ref: '#/components/schemas/Playback'
+        fit:
+          $ref: '#/components/schemas/Fit'
+        overlay:
+          type: object
+          additionalProperties: false
+          description: |
+            The bounded title overlay (ADR-0010). It carries no authored text:
+            the title resolves from `projects.title`. It is valid only on a
+            project-owned HERO whose media is an IMAGE or a CLICK_TO_PLAY
+            video.
+          required: [enabled, anchor, colStart, colSpan, showBackToWorks]
+          properties:
+            enabled:
+              type: boolean
+            anchor:
+              type: string
+              enum: [bottom-start]
+            colStart:
+              type: integer
+              minimum: 1
+              maximum: 12
+            colSpan:
+              type: integer
+              minimum: 1
+              maximum: 12
+            showBackToWorks:
+              type: boolean
+
+    TextContent:
+      description: |
+        Authored rich text, or text derived from the owning project's fields
+        (`projectFacts`, `projectCredits`), which authors nothing and needs a
+        project owner (ADR-0011).
+      oneOf:
+        - type: object
+          additionalProperties: false
+          required: [kind, paragraphs]
+          properties:
+            kind:
+              const: richText
+            paragraphs:
+              type: array
+              minItems: 1
+              maxItems: 50
+              items:
+                $ref: '#/components/schemas/Paragraph'
+        - type: object
+          additionalProperties: false
+          required: [kind]
+          properties:
+            kind:
+              const: projectFacts
+        - type: object
+          additionalProperties: false
+          required: [kind]
+          properties:
+            kind:
+              const: projectCredits
+      discriminator:
+        propertyName: kind
+
+    TextConfig:
+      type: object
+      additionalProperties: false
+      properties:
+        role:
+          type: string
+          enum: [display, lead, aside, body, statement, caption, more]
+          description: A typographic role of the current identity, not a type value (CLAUDE.md §13).
+        placement:
+          $ref: '#/components/schemas/Placement'
+
+    ImageContent:
+      type: object
+      additionalProperties: false
+      properties:
+        caption:
+          type: string
+          minLength: 1
+          maxLength: 500
+
+    ImageConfig:
+      type: object
+      additionalProperties: false
+      properties:
+        fit:
+          $ref: '#/components/schemas/Fit'
+        preset:
+          type: string
+          enum: [projectCoda]
+        placement:
+          $ref: '#/components/schemas/Placement'
+
+    EmptyContent:
+      type: object
+      additionalProperties: false
+
+    VideoConfig:
+      type: object
+      additionalProperties: false
+      required: [playback]
+      properties:
+        playback:
+          $ref: '#/components/schemas/Playback'
+        fit:
+          $ref: '#/components/schemas/Fit'
+        placement:
+          $ref: '#/components/schemas/Placement'
+
+    GridConfig:
+      type: object
+      additionalProperties: false
+      properties:
+        preset:
+          type: string
+          enum: [projectMeta, projectStills, projectLoop, projectCredits, homeIdentity, homeAbout]
+          description: A closed, code-defined presentation preset (ADR-0013).
+
+    GalleryContent:
+      type: object
+      additionalProperties: false
+      properties:
+        label:
+          type: string
+          minLength: 1
+          maxLength: 200
+
+    GalleryConfig:
+      description: Automatic media flow (ADR-0008). Distinct from GRID's manual composition.
+      oneOf:
+        - type: object
+          additionalProperties: false
+          required: [mode]
+          properties:
+            mode:
+              const: JUSTIFIED_ROWS
+        - type: object
+          additionalProperties: false
+          required: [mode]
+          properties:
+            mode:
+              const: HORIZONTAL_STRIP
+        - type: object
+          additionalProperties: false
+          required: [mode]
+          properties:
+            mode:
+              const: SLIDESHOW
+        - type: object
+          additionalProperties: false
+          required: [mode, columns, playback]
+          properties:
+            mode:
+              const: VIDEO_GRID
+            columns:
+              type: object
+              additionalProperties: false
+              required: [desktop, tablet, mobile]
+              description: Bounded at every breakpoint and never growing at narrower ones.
+              properties:
+                desktop:
+                  type: integer
+                  minimum: 1
+                  maximum: 6
+                tablet:
+                  type: integer
+                  minimum: 1
+                  maximum: 4
+                mobile:
+                  type: integer
+                  minimum: 1
+                  maximum: 2
+            playback:
+              $ref: '#/components/schemas/MultiItemPlayback'
+            fit:
+              $ref: '#/components/schemas/Fit'
+            preset:
+              type: string
+              enum: [homeWall]
+      discriminator:
+        propertyName: mode
+
+    SpacerConfig:
+      type: object
+      additionalProperties: false
+      required: [size]
+      properties:
+        size:
+          type: string
+          enum: [S, M, L]
+
+    BlockMediaConfig:
+      type: object
+      additionalProperties: false
+      description: Per-placement presentation. The precedence is item > block default > mode default (CLAUDE.md §13).
+      properties:
+        playback:
+          $ref: '#/components/schemas/Playback'
+        fit:
+          $ref: '#/components/schemas/Fit'
+
+    # ------------------------------------------------------------- Blocks
+    BlockMedia:
+      type: object
+      additionalProperties: false
+      required: [id, position, mediaId, altText, posterMediaId, config, media, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        position:
+          type: integer
+          minimum: 0
+        mediaId:
+          type: string
+          format: uuid
+        altText:
+          type: [string, 'null']
+          description: The placement's alt override. Null inherits the asset default; '' marks the use decorative (ADR-0011).
+        posterMediaId:
+          type: [string, 'null']
+          format: uuid
+          description: The placement's poster override. Null inherits the asset default (ADR-0015).
+        config:
+          $ref: '#/components/schemas/BlockMediaConfig'
+        media:
+          $ref: '#/components/schemas/Media'
+        createdAt:
+          type: string
+          format: date-time
+
+    BlockMediaEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/BlockMedia'
+
+    BlockCommon:
+      type: object
+      required: [id, type, position, parentBlockId, isHidden, media, children, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
         type:
           $ref: '#/components/schemas/BlockType'
         position:
           type: integer
           minimum: 0
-          description: |
-            Optional. Omit to append to the end of the project's blocks.
+          description: Document order within the container. It is not grid placement (CLAUDE.md §7).
+        parentBlockId:
+          type: [string, 'null']
+          format: uuid
+          description: The parent GRID, or null for a root block.
+        isHidden:
+          type: boolean
+        media:
+          type: array
+          items:
+            $ref: '#/components/schemas/BlockMedia'
+        children:
+          type: array
+          description: A GRID's leaf children, in position order. Always empty for other types.
+          items:
+            $ref: '#/components/schemas/Block'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
 
-            Let N be the number of blocks already in the project. A value in
+    HeroBlock:
+      allOf:
+        - $ref: '#/components/schemas/BlockCommon'
+        - type: object
+          required: [type, content, config]
+          properties:
+            type:
+              const: HERO
+            content:
+              $ref: '#/components/schemas/HeroContent'
+            config:
+              $ref: '#/components/schemas/HeroConfig'
+      unevaluatedProperties: false
+
+    TextBlock:
+      allOf:
+        - $ref: '#/components/schemas/BlockCommon'
+        - type: object
+          required: [type, content, config]
+          properties:
+            type:
+              const: TEXT
+            content:
+              $ref: '#/components/schemas/TextContent'
+            config:
+              $ref: '#/components/schemas/TextConfig'
+      unevaluatedProperties: false
+
+    ImageBlock:
+      allOf:
+        - $ref: '#/components/schemas/BlockCommon'
+        - type: object
+          required: [type, content, config]
+          properties:
+            type:
+              const: IMAGE
+            content:
+              $ref: '#/components/schemas/ImageContent'
+            config:
+              $ref: '#/components/schemas/ImageConfig'
+      unevaluatedProperties: false
+
+    VideoBlock:
+      allOf:
+        - $ref: '#/components/schemas/BlockCommon'
+        - type: object
+          required: [type, content, config]
+          properties:
+            type:
+              const: VIDEO
+            content:
+              $ref: '#/components/schemas/EmptyContent'
+            config:
+              $ref: '#/components/schemas/VideoConfig'
+      unevaluatedProperties: false
+
+    GridBlock:
+      allOf:
+        - $ref: '#/components/schemas/BlockCommon'
+        - type: object
+          required: [type, content, config]
+          properties:
+            type:
+              const: GRID
+            content:
+              $ref: '#/components/schemas/EmptyContent'
+            config:
+              $ref: '#/components/schemas/GridConfig'
+      unevaluatedProperties: false
+
+    GalleryBlock:
+      allOf:
+        - $ref: '#/components/schemas/BlockCommon'
+        - type: object
+          required: [type, content, config]
+          properties:
+            type:
+              const: GALLERY
+            content:
+              $ref: '#/components/schemas/GalleryContent'
+            config:
+              $ref: '#/components/schemas/GalleryConfig'
+      unevaluatedProperties: false
+
+    SpacerBlock:
+      allOf:
+        - $ref: '#/components/schemas/BlockCommon'
+        - type: object
+          required: [type, content, config]
+          properties:
+            type:
+              const: SPACER
+            content:
+              $ref: '#/components/schemas/EmptyContent'
+            config:
+              $ref: '#/components/schemas/SpacerConfig'
+      unevaluatedProperties: false
+
+    Block:
+      description: A composer block, discriminated by `type`. The seven types are closed (CLAUDE.md §13).
+      oneOf:
+        - $ref: '#/components/schemas/HeroBlock'
+        - $ref: '#/components/schemas/TextBlock'
+        - $ref: '#/components/schemas/ImageBlock'
+        - $ref: '#/components/schemas/VideoBlock'
+        - $ref: '#/components/schemas/GridBlock'
+        - $ref: '#/components/schemas/GalleryBlock'
+        - $ref: '#/components/schemas/SpacerBlock'
+      discriminator:
+        propertyName: type
+        mapping:
+          HERO: '#/components/schemas/HeroBlock'
+          TEXT: '#/components/schemas/TextBlock'
+          IMAGE: '#/components/schemas/ImageBlock'
+          VIDEO: '#/components/schemas/VideoBlock'
+          GRID: '#/components/schemas/GridBlock'
+          GALLERY: '#/components/schemas/GalleryBlock'
+          SPACER: '#/components/schemas/SpacerBlock'
+
+    BlockEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/Block'
+
+    CreateBlockCommon:
+      type: object
+      properties:
+        parentBlockId:
+          type: [string, 'null']
+          format: uuid
+          description: A GRID of the same owner. Omitted or null targets the root.
+        position:
+          type: integer
+          minimum: 0
+          description: |
+            Optional. Omit to append to the end of the target container.
+
+            Let N be the number of blocks already in the container. A value in
             0..N inserts at that position and shifts every block at or after it
             one place to the right, inside a single transaction. N appends.
 
@@ -1594,25 +2834,123 @@ components:
 
             Positions remain contiguous from 0 after every insert.
             See ADR-0005.
-        config:
-          type: object
-          additionalProperties: true
-          default: {}
+        isHidden:
+          type: boolean
+          default: false
+
+    CreateBlockRequest:
+      description: One variant per block type; `content` and `config` are validated for it.
+      oneOf:
+        - allOf:
+            - $ref: '#/components/schemas/CreateBlockCommon'
+            - type: object
+              required: [type]
+              properties:
+                type:
+                  const: HERO
+                content:
+                  $ref: '#/components/schemas/HeroContent'
+                config:
+                  $ref: '#/components/schemas/HeroConfig'
+          unevaluatedProperties: false
+        - allOf:
+            - $ref: '#/components/schemas/CreateBlockCommon'
+            - type: object
+              required: [type, content]
+              properties:
+                type:
+                  const: TEXT
+                content:
+                  $ref: '#/components/schemas/TextContent'
+                config:
+                  $ref: '#/components/schemas/TextConfig'
+          unevaluatedProperties: false
+        - allOf:
+            - $ref: '#/components/schemas/CreateBlockCommon'
+            - type: object
+              required: [type]
+              properties:
+                type:
+                  const: IMAGE
+                content:
+                  $ref: '#/components/schemas/ImageContent'
+                config:
+                  $ref: '#/components/schemas/ImageConfig'
+          unevaluatedProperties: false
+        - allOf:
+            - $ref: '#/components/schemas/CreateBlockCommon'
+            - type: object
+              required: [type, config]
+              properties:
+                type:
+                  const: VIDEO
+                content:
+                  $ref: '#/components/schemas/EmptyContent'
+                config:
+                  $ref: '#/components/schemas/VideoConfig'
+          unevaluatedProperties: false
+        - allOf:
+            - $ref: '#/components/schemas/CreateBlockCommon'
+            - type: object
+              required: [type]
+              properties:
+                type:
+                  const: GRID
+                content:
+                  $ref: '#/components/schemas/EmptyContent'
+                config:
+                  $ref: '#/components/schemas/GridConfig'
+          unevaluatedProperties: false
+        - allOf:
+            - $ref: '#/components/schemas/CreateBlockCommon'
+            - type: object
+              required: [type, config]
+              properties:
+                type:
+                  const: GALLERY
+                content:
+                  $ref: '#/components/schemas/GalleryContent'
+                config:
+                  $ref: '#/components/schemas/GalleryConfig'
+          unevaluatedProperties: false
+        - allOf:
+            - $ref: '#/components/schemas/CreateBlockCommon'
+            - type: object
+              required: [type, config]
+              properties:
+                type:
+                  const: SPACER
+                content:
+                  $ref: '#/components/schemas/EmptyContent'
+                config:
+                  $ref: '#/components/schemas/SpacerConfig'
+          unevaluatedProperties: false
+      discriminator:
+        propertyName: type
 
     UpdateBlockRequest:
       type: object
       additionalProperties: false
       minProperties: 1
       properties:
+        content:
+          type: object
+          description: Replaces the stored content; validated against the block's type.
         config:
           type: object
-          additionalProperties: true
+          description: Replaces the stored config; validated against the block's type.
+        isHidden:
+          type: boolean
 
     ReorderBlocksRequest:
       type: object
       additionalProperties: false
-      required: [blockIds]
+      required: [parentBlockId, blockIds]
       properties:
+        parentBlockId:
+          type: [string, 'null']
+          format: uuid
+          description: The container, either a GRID of this owner or null for the root.
         blockIds:
           type: array
           minItems: 1
@@ -1644,19 +2982,28 @@ components:
 
             Positions remain contiguous from 0 after every insert.
             See ADR-0005.
+        altText:
+          type: [string, 'null']
+          maxLength: 1000
+        posterMediaId:
+          type: [string, 'null']
+          format: uuid
         config:
-          type: object
-          additionalProperties: true
-          default: {}
+          $ref: '#/components/schemas/BlockMediaConfig'
 
     UpdateBlockMediaRequest:
       type: object
       additionalProperties: false
-      required: [config]
+      minProperties: 1
       properties:
+        altText:
+          type: [string, 'null']
+          maxLength: 1000
+        posterMediaId:
+          type: [string, 'null']
+          format: uuid
         config:
-          type: object
-          additionalProperties: true
+          $ref: '#/components/schemas/BlockMediaConfig'
 
     ReorderBlockMediaRequest:
       type: object
@@ -1671,75 +3018,177 @@ components:
             type: string
             format: uuid
 
-    CreateMediaUploadRequest:
+    # ----------------------------------------------------- Public (published)
+    PublicMedia:
       type: object
       additionalProperties: false
-      required: [filename, mimeType, fileSizeBytes]
+      description: |
+        A media item as published. `alt` is already resolved for its
+        placement, and `poster` for a video (ADR-0011, ADR-0015). For a
+        PRIVATE project, `url` points to the access-checked delivery route.
+      required: [id, type, url, width, height, alt]
       properties:
-        filename:
-          type: string
-          minLength: 1
-          maxLength: 500
-        mimeType:
-          type: string
-          minLength: 1
-          maxLength: 255
-        fileSizeBytes:
-          type: integer
-          minimum: 1
-        altText:
-          type: [string, 'null']
-
-    MediaUploadAuthorization:
-      type: object
-      additionalProperties: false
-      required: [mediaId, uploadUrl, expiresAt]
-      properties:
-        mediaId:
+        id:
           type: string
           format: uuid
-        uploadUrl:
+        type:
+          $ref: '#/components/schemas/MediaType'
+        url:
           type: string
-          format: uri
-        uploadMethod:
+        mimeType:
+          type: [string, 'null']
+        width:
+          type: [integer, 'null']
+        height:
+          type: [integer, 'null']
+        durationMs:
+          type: [integer, 'null']
+        alt:
           type: string
-          enum: [PUT, POST]
-          default: PUT
-        headers:
+        poster:
+          oneOf:
+            - type: object
+              additionalProperties: false
+              required: [url, width, height, alt]
+              properties:
+                url:
+                  type: string
+                width:
+                  type: [integer, 'null']
+                height:
+                  type: [integer, 'null']
+                alt:
+                  type: string
+            - type: 'null'
+
+    PublicBlock:
+      type: object
+      additionalProperties: false
+      description: A visible block of the published snapshot. Hidden blocks are never published.
+      required: [id, type, content, config, media, children]
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          $ref: '#/components/schemas/BlockType'
+        content:
           type: object
-          additionalProperties:
-            type: string
-          description: Headers the browser must send directly to object storage.
-        expiresAt:
+          description: The block type's content, as in `Block`.
+        config:
+          type: object
+          description: The block type's config, as in `Block`.
+        media:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicMedia'
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicBlock'
+
+    PublicProjectSummary:
+      type: object
+      additionalProperties: false
+      description: |
+        A PUBLIC, PUBLISHED, non-deleted project as seen by an anonymous
+        visitor. PRIVATE projects are never represented by this schema in V1;
+        they are excluded from the public listing entirely (ADR-0003).
+
+        The former `requiresPassword` flag was removed: with PRIVATE projects
+        excluded, it could only ever be `false`. Re-introducing it is the
+        forward path if the deferred "locked card" feature is approved.
+      required: [id, title, slug, cover, isFeatured, displayPosition]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        slug:
+          type: string
+        shortDescription:
+          type: [string, 'null']
+        year:
+          type: [integer, 'null']
+        category:
+          type: [string, 'null']
+        cover:
+          oneOf:
+            - $ref: '#/components/schemas/PublicMedia'
+            - type: 'null'
+        preview:
+          oneOf:
+            - $ref: '#/components/schemas/PublicMedia'
+            - type: 'null'
+        isFeatured:
+          type: boolean
+        displayPosition:
+          type: integer
+          minimum: 0
+
+    PublicProjectSummaryCollectionEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicProjectSummary'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    PublicProject:
+      type: object
+      additionalProperties: false
+      required: [id, title, slug, credits, cover, blocks, publishedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        slug:
+          type: string
+        shortDescription:
+          type: [string, 'null']
+        description:
+          type: [string, 'null']
+        year:
+          type: [integer, 'null']
+        category:
+          type: [string, 'null']
+        client:
+          type: [string, 'null']
+        role:
+          type: [string, 'null']
+        runtime:
+          type: [string, 'null']
+        credits:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectCredit'
+        cover:
+          oneOf:
+            - $ref: '#/components/schemas/PublicMedia'
+            - type: 'null'
+        preview:
+          oneOf:
+            - $ref: '#/components/schemas/PublicMedia'
+            - type: 'null'
+        blocks:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicBlock'
+        publishedAt:
           type: string
           format: date-time
 
-    MediaUploadAuthorizationEnvelope:
+    PublicProjectEnvelope:
       type: object
       additionalProperties: false
       required: [data]
       properties:
         data:
-          $ref: '#/components/schemas/MediaUploadAuthorization'
-
-    CreateExternalMediaRequest:
-      type: object
-      additionalProperties: false
-      required: [provider, url]
-      properties:
-        provider:
-          type: string
-          enum: [vimeo, youtube]
-        url:
-          type: string
-          format: uri
-        altText:
-          type: [string, 'null']
-
-    UpdateMediaRequest:
-      type: object
-      additionalProperties: false
-      minProperties: 1
-      properties:
-        altText:
-          type: [string, 'null']
+          $ref: '#/components/schemas/PublicProject'

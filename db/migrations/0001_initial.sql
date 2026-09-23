@@ -1,12 +1,21 @@
-BEGIN;
+-- The initial schema. Applied by the Drizzle migrator (npm run db:migrate),
+-- which runs every migration inside its own transaction, so this file carries
+-- no BEGIN/COMMIT of its own; statement breakpoints let each statement run
+-- separately on every driver. The DDL is unchanged from the reviewed original.
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
+--> statement-breakpoint
 
 CREATE TYPE project_status AS ENUM ('DRAFT', 'PUBLISHED', 'ARCHIVED');
+--> statement-breakpoint
 CREATE TYPE project_visibility AS ENUM ('PUBLIC', 'PRIVATE');
+--> statement-breakpoint
 CREATE TYPE block_type AS ENUM ('HERO', 'TEXT', 'IMAGE', 'VIDEO', 'GRID', 'GALLERY', 'SPACER');
+--> statement-breakpoint
 CREATE TYPE media_type AS ENUM ('IMAGE', 'VIDEO', 'EXTERNAL_VIDEO');
+--> statement-breakpoint
 CREATE TYPE media_status AS ENUM ('UPLOADING', 'PROCESSING', 'READY', 'FAILED');
+--> statement-breakpoint
 
 CREATE TABLE admin_users (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -17,8 +26,10 @@ CREATE TABLE admin_users (
     updated_at timestamptz NOT NULL DEFAULT now(),
     last_login_at timestamptz
 );
+--> statement-breakpoint
 
 CREATE UNIQUE INDEX admin_users_email_uidx ON admin_users (email);
+--> statement-breakpoint
 
 CREATE TABLE media (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -59,10 +70,14 @@ CREATE TABLE media (
         file_size_bytes IS NULL OR file_size_bytes >= 0
     )
 );
+--> statement-breakpoint
 
 CREATE INDEX media_type_idx ON media (type);
+--> statement-breakpoint
 CREATE INDEX media_status_idx ON media (status);
+--> statement-breakpoint
 CREATE INDEX media_created_at_idx ON media (created_at);
+--> statement-breakpoint
 
 CREATE TABLE projects (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -111,12 +126,18 @@ CREATE TABLE projects (
         featured_position IS NULL OR featured_position >= 0
     )
 );
+--> statement-breakpoint
 
 CREATE UNIQUE INDEX projects_slug_uidx ON projects (slug);
+--> statement-breakpoint
 CREATE INDEX projects_status_idx ON projects (status);
+--> statement-breakpoint
 CREATE INDEX projects_visibility_idx ON projects (visibility);
+--> statement-breakpoint
 CREATE INDEX projects_public_order_idx ON projects (status, deleted_at, display_position);
+--> statement-breakpoint
 CREATE INDEX projects_featured_order_idx ON projects (is_featured, featured_position);
+--> statement-breakpoint
 
 CREATE TABLE project_blocks (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -129,9 +150,12 @@ CREATE TABLE project_blocks (
 
     CONSTRAINT project_blocks_position_nonnegative_check CHECK (position >= 0)
 );
+--> statement-breakpoint
 
 CREATE INDEX project_blocks_project_id_idx ON project_blocks (project_id);
+--> statement-breakpoint
 CREATE INDEX project_blocks_project_position_idx ON project_blocks (project_id, position);
+--> statement-breakpoint
 
 CREATE TABLE block_media (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -143,9 +167,10 @@ CREATE TABLE block_media (
 
     CONSTRAINT block_media_position_nonnegative_check CHECK (position >= 0)
 );
+--> statement-breakpoint
 
 CREATE INDEX block_media_block_id_idx ON block_media (block_id);
+--> statement-breakpoint
 CREATE INDEX block_media_block_position_idx ON block_media (block_id, position);
+--> statement-breakpoint
 CREATE INDEX block_media_media_id_idx ON block_media (media_id);
-
-COMMIT;

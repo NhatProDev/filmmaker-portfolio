@@ -1,12 +1,19 @@
 # ADR-0009 — Administrator-selected poster media
 
-- **Status:** Approved
+- **Status:** Approved — **§1 and §3 amended by [ADR-0015](0015-placement-poster-override-and-contract-realignment.md)**
 - **Date:** 2026-09-22
 - **Decided by:** Project Owner / Software Architect
 - **Supersedes:** ADR-0008 §7's deferral of administrator-selected posters
 - **Related:** ADR-0008 (playback model), ADR-0004 (no media identity in config)
 - **Affects:** CLAUDE.md §6, §12, §14, §17 · `db/schema.ts` (deferred) · `openapi.yaml` (deferred)
 - **Change class:** Database table/relationship redesign (CLAUDE.md §20)
+
+> **Amendment notice.** ADR-0015 §1 keeps `media.poster_media_id` as the asset's
+> **default** poster and adds an optional **placement override**,
+> `block_media.poster_media_id`. Resolution becomes placement override → asset
+> default → generated/provider thumbnail → empty frame. The override also
+> participates in `MEDIA_IN_USE`. The "not per-placement" rejection below
+> stands against per-placement posters *as the only mechanism*.
 
 ## Problem
 

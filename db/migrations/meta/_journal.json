@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789948800000,
+      "tag": "0001_initial",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790199206027,
+      "tag": "0002_composer_media_and_content",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790199230541,
+      "tag": "0003_seed_home_page",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790202603962,
+      "tag": "0004_placement_poster_override",
+      "breakpoints": true
+    }
+  ]
+}

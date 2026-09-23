@@ -1,11 +1,16 @@
 # ADR-0007 — Page-owned block compositions (Home)
 
-- **Status:** Approved
+- **Status:** Approved — **§2's SQL clarified by [ADR-0015](0015-placement-poster-override-and-contract-realignment.md)**
 - **Date:** 2026-09-21
 - **Decided by:** Project Owner / Software Architect
 - **Related:** ADR-0006 (composer), ADR-0002 (ordering), ADR-0005 (insertion)
 - **Affects:** CLAUDE.md §6, §13 · `db/schema.ts` (deferred) · `openapi.yaml` (deferred)
 - **Change class:** Database table/relationship redesign (CLAUDE.md §20)
+
+> **Clarification notice.** ADR-0015 §2 replaces the illustrative `CHECK` in §2
+> below with the strict form the prose requires, which the schema implements: a
+> root block names exactly one of project or page and has no parent, and a child
+> names only its parent. Everything else in this ADR stands.
 
 ## Problem
 

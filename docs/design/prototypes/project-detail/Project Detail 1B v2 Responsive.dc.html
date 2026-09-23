@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..600;1,6..72,200..500&amp;display=swap" rel="stylesheet">
+<style>
+[data-viewport]{scrollbar-width:none}
+[data-viewport]::-webkit-scrollbar{width:0;height:0}
+:root{
+  --surface:#F7F3EC; --ink:#16120E; --accent:#C4361C;
+  --surface-dark:#0C0A08; --ink-dark:#EDE7DD; --muted-dark:#97938C; --rule-dark:#2B2926; --frame:#14110F;
+  --font-display:'Marcellus',Georgia,serif; --font-body:'Newsreader',Georgia,serif; --font-ui:'Newsreader',Georgia,serif;
+  --display-track:-0.005em;
+  --edge:56px; --gut:20px; --band:150px;
+}
+body{margin:0;background:#E6E1D8}
+a{color:inherit;text-decoration:none}
+a:hover{color:var(--accent)}
+a:focus-visible{outline:1px solid var(--accent);outline-offset:4px}
+img,video{display:block}
+</style>
+</helmet>
+<div ref="{{ rootRef }}" style="font-family:var(--font-body);color:var(--ink);padding:48px 44px 110px">
+
+  <div style="max-width:84ch;margin-bottom:26px">
+    <h2 style="margin:0;font-family:var(--font-display);font-size:28px;font-weight:400;letter-spacing:var(--display-track);text-transform:uppercase">Project Detail 1B v2 — responsive validation</h2>
+    <p style="margin:12px 0 0;font-size:16px;line-height:1.7;text-wrap:pretty">The locked desktop candidate rendered inside a switchable viewport frame. Consumes JUSTIFIED_ROWS v2 verbatim for the stills and the bounded composition-relative clamp for the project title and the next-project line. Everything else is a Project Detail derivation, labelled in the logic. The desktop candidate file is untouched. The live audit reads the current frame; the matrix below it is re-computed from rendered geometry across every target width and title length.</p>
+  </div>
+
+  <div data-audit="" style="margin-bottom:26px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;font-size:12px;line-height:1.75;color:#2C2822;white-space:pre"></div>
+
+  <div data-viewport="" style="position:relative;container-type:inline-size;background:var(--surface-dark);box-shadow:0 0 0 1px #D6D0C5;overflow-y:auto;overflow-x:hidden">
+    <div data-page="" style="background:var(--surface-dark);color:var(--ink-dark);position:relative">
+
+      <header data-site="" style="display:none;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:baseline;padding:22px var(--edge) 20px">
+        <a href="#top" data-wordmark="" style="grid-column:1/7;font-family:var(--font-ui);font-size:11px;letter-spacing:0.22em;text-transform:uppercase">Nguyen Khanh Nhat</a>
+        <nav data-site-nav="" style="grid-column:7/13;display:flex;justify-content:flex-end;gap:26px;font-size:15px">
+          <a href="#top">Works</a><a href="#top">About</a><a href="#top">Contact</a>
+        </nav>
+      </header>
+
+      <section data-hero="" data-play="click" data-block="1 · HERO / VIDEO · CLICK_TO_PLAY · ADR-0010 overlay" style="position:relative;background:#000;height:780px;cursor:pointer;overflow:hidden">
+        <img data-poster="" src="../../../../media/w/mtm-table.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+        <video data-src="../../../../media/clips/c1.mp4" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;opacity:0"></video>
+        <div data-scrim="bottom" style="position:absolute;inset:auto 0 0 0;height:210px;background:linear-gradient(to top,rgba(0,0,0,0.66),rgba(0,0,0,0));pointer-events:none"></div>
+        <div data-scrim="top" style="position:absolute;inset:0 0 auto 0;height:120px;background:linear-gradient(to bottom,rgba(0,0,0,0.42),rgba(0,0,0,0));pointer-events:none"></div>
+        <a href="#top" data-back="" style="position:absolute;left:var(--edge);top:34px;display:inline-block;font-family:var(--font-ui);font-size:12px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(237,231,221,0.88);border-bottom:1px solid rgba(237,231,221,0.32);padding-bottom:4px">Back to works</a>
+        <span data-affordance="" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:78px;height:78px;border:1px solid rgba(237,231,221,0.78);border-radius:50%;display:flex;align-items:center;justify-content:center;pointer-events:none">
+          <span style="width:0;height:0;border-left:15px solid rgba(237,231,221,0.94);border-top:9px solid transparent;border-bottom:9px solid transparent;margin-left:4px"></span>
+        </span>
+        <div data-overlay="" style="position:absolute;left:0;right:0;bottom:46px;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);padding:0 var(--edge);pointer-events:none">
+          <div data-title-box="overlay" style="grid-column:1/9;container-type:inline-size">
+            <h1 data-title="overlay" style="margin:0;font-family:'Newsreader',Georgia,serif;font-weight:400;font-size:80px;line-height:0.98;letter-spacing:var(--display-track);text-transform:uppercase;color:#F4EFE6;text-wrap:balance">Made to Measure</h1>
+          </div>
+        </div>
+      </section>
+
+      <section data-flow="" data-block="1b · derived title flow (ADR-0010 §6)" style="display:none;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);padding:28px var(--edge) 0">
+        <div style="grid-column:1/-1">
+          <a href="#top" data-back-flow="" style="display:inline-block;font-family:var(--font-ui);font-size:12px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(237,231,221,0.88);border-bottom:1px solid rgba(237,231,221,0.32);padding-bottom:4px">Back to works</a>
+        </div>
+        <div data-title-box="flow" style="grid-column:1/9;container-type:inline-size">
+          <h1 data-title="flow" style="margin:0;font-family:'Newsreader',Georgia,serif;font-weight:400;font-size:80px;line-height:0.98;letter-spacing:var(--display-track);text-transform:uppercase;color:#F4EFE6;text-wrap:balance">Made to Measure</h1>
+        </div>
+      </section>
+
+      <section data-meta-sec="" data-block="2 · GRID · metadata + statement" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:start;padding:var(--band) var(--edge) 0">
+        <dl data-meta="" style="grid-column:1/4;margin:0;font-size:15px">
+          <div style="display:flex;justify-content:space-between;gap:16px;border-top:1px solid var(--rule-dark);padding:9px 0"><dt style="color:var(--muted-dark);font-style:italic">Year</dt><dd style="margin:0;text-align:right">2026</dd></div>
+          <div style="display:flex;justify-content:space-between;gap:16px;border-top:1px solid var(--rule-dark);padding:9px 0"><dt style="color:var(--muted-dark);font-style:italic">Runtime</dt><dd style="margin:0;text-align:right">8 min</dd></div>
+          <div style="display:flex;justify-content:space-between;gap:16px;border-top:1px solid var(--rule-dark);padding:9px 0"><dt style="color:var(--muted-dark);font-style:italic">Client</dt><dd style="margin:0;text-align:right">Trần &amp; Sons</dd></div>
+          <div style="display:flex;justify-content:space-between;gap:16px;border-top:1px solid var(--rule-dark);border-bottom:1px solid var(--rule-dark);padding:9px 0"><dt style="color:var(--muted-dark);font-style:italic">Role</dt><dd style="margin:0;text-align:right">DP, colourist</dd></div>
+        </dl>
+        <div data-statement="" style="grid-column:5/11">
+          <p data-lead="" style="margin:0;font-size:26px;line-height:1.32;max-width:24ch;text-wrap:pretty">A tailor measures the same customer for thirty years. We filmed the last fitting before the shop closed.</p>
+          <p data-body="" style="margin:28px 0 0;font-size:17px;line-height:1.74;max-width:46ch;color:var(--muted-dark);text-wrap:pretty">Four mornings, one prime lens, and the window the shop has always used. Nothing was added to the room, and the grade holds the shadows where the room keeps them.</p>
+        </div>
+      </section>
+
+      <section data-block="3 · GALLERY · JUSTIFIED_ROWS v2" style="margin-top:var(--band)">
+        <div data-rows="" style="display:flex;flex-direction:column;gap:4px"></div>
+      </section>
+
+      <section data-support="" data-block="4 · GRID · AUTOPLAY_VISIBLE loop + caption" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:end;padding:var(--band) var(--edge) 0">
+        <div data-vid="" data-play="visible" style="grid-column:1/9;position:relative;aspect-ratio:16/9;overflow:hidden;background:var(--frame)">
+          <img src="../../../../media/w/mtm-mannequin.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+          <video data-src="../../../../media/clips/n3.mp4" loop="" muted="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 320ms linear"></video>
+        </div>
+        <p data-cap="" style="grid-column:10/13;margin:0;font-size:15px;line-height:1.74;color:var(--muted-dark);text-wrap:pretty">The cutting room on the second morning. Two takes survived; this is the one where nobody looked up.</p>
+      </section>
+
+      <section data-credits-sec="" data-block="5 · GRID · credits" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);padding:var(--band) var(--edge) 0">
+        <dl data-credits="" style="grid-column:1/4;margin:0;font-size:15px;line-height:1.95">
+          <div style="display:flex;gap:16px"><dt style="flex:0 0 8ch;color:var(--muted-dark);font-style:italic">Director</dt><dd style="margin:0;min-width:0">Mai Linh</dd></div>
+          <div style="display:flex;gap:16px"><dt style="flex:0 0 8ch;color:var(--muted-dark);font-style:italic">Camera</dt><dd style="margin:0;min-width:0">Nguyen Khanh Nhat</dd></div>
+          <div style="display:flex;gap:16px"><dt style="flex:0 0 8ch;color:var(--muted-dark);font-style:italic">Sound</dt><dd style="margin:0;min-width:0">Pham Duy</dd></div>
+          <div style="display:flex;gap:16px"><dt style="flex:0 0 8ch;color:var(--muted-dark);font-style:italic">Edit</dt><dd style="margin:0;min-width:0">Hoang Yen</dd></div>
+        </dl>
+      </section>
+
+      <section data-coda="" data-block="6 · IMAGE · full-bleed coda" style="margin-top:var(--band);position:relative;height:540px;background:var(--frame)">
+        <img src="../../../../media/w/mtm-portrait.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 30%">
+      </section>
+
+      <footer data-footer="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:baseline;padding:110px var(--edge) 96px">
+        <span data-f-label="" style="grid-column:1/4;font-size:15px;font-style:italic;color:var(--muted-dark)">Next project</span>
+        <div data-f-box="" style="grid-column:4/11;container-type:inline-size">
+          <a href="#top" data-f-next="" style="display:block;font-family:'Newsreader',Georgia,serif;font-weight:400;font-size:53px;line-height:1.02;letter-spacing:var(--display-track);text-transform:uppercase;color:var(--accent);text-wrap:balance">Tokyo, after rain</a>
+        </div>
+        <a href="#top" data-f-all="" style="grid-column:11/13;justify-self:end;display:inline-block;font-family:var(--font-ui);font-size:12px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted-dark);border-bottom:1px solid var(--rule-dark);padding-bottom:4px">All works</a>
+      </footer>
+    </div>
+  </div>
+
+  <section style="margin-top:56px;max-width:1240px">
+    <h3 style="margin:0;font-family:var(--font-display);font-weight:400;font-size:22px;letter-spacing:var(--display-track);text-transform:uppercase">A · Phone hero presence</h3>
+    <p style="margin:8px 0 14px;font-size:15px;line-height:1.6;max-width:80ch;color:#4A453E">First screen only, rendered from the live page at each phone viewport and each candidate hero height. Poster replaced by a frame of the film itself (c1, captured at run time) so presence is judged on the real picture. Shown at 0.42×.</p>
+    <div data-ev-phone-t="" style="font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;font-size:11.5px;line-height:1.7;color:#2C2822;white-space:pre;margin-bottom:14px"></div>
+    <div data-ev-phone="" style="display:flex;flex-direction:column;gap:18px"></div>
+  </section>
+
+  <section style="margin-top:56px;max-width:1240px">
+    <h3 style="margin:0;font-family:var(--font-display);font-weight:400;font-size:22px;letter-spacing:var(--display-track);text-transform:uppercase">B · Stills — structured grid in page context</h3>
+    <p style="margin:8px 0 14px;font-size:15px;line-height:1.6;max-width:80ch;color:#4A453E">Pass 3: Project Detail structured grid (4 / 2 / 1 columns) replaces JUSTIFIED_ROWS here by Owner decision. Cloned from the live page, end of statement to end of the supporting loop. The 3 + 1 JUSTIFIED_ROWS state stays reachable via the stillsMode tweak.</p>
+    <div data-ev-stills-t="" style="font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;font-size:11.5px;line-height:1.7;color:#2C2822;white-space:pre;margin-bottom:14px"></div>
+    <div data-ev-stills="" style="display:flex;flex-direction:column;gap:22px"></div>
+  </section>
+
+  <section style="margin-top:56px;max-width:1240px">
+    <h3 style="margin:0;font-family:var(--font-display);font-weight:400;font-size:22px;letter-spacing:var(--display-track);text-transform:uppercase">C · Hero fit — controlled, poster = film frame</h3>
+    <p style="margin:8px 0 14px;font-size:15px;line-height:1.6;max-width:80ch;color:#4A453E">The poster is a frame of c1 itself, so idle and playback share geometry and subject. Encoded letterbox measured from the frame's pixels, not compensated. Each pair: idle | after activation.</p>
+    <div data-ev-fit-t="" style="font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;font-size:11.5px;line-height:1.7;color:#2C2822;white-space:pre;margin-bottom:14px"></div>
+    <div data-ev-fit="" style="display:flex;flex-direction:column;gap:14px"></div>
+  </section>
+
+  <section style="margin-top:56px;max-width:1240px">
+    <h3 style="margin:0;font-family:var(--font-display);font-weight:400;font-size:22px;letter-spacing:var(--display-track);text-transform:uppercase">D · Vietnamese in the Marcellus preset</h3>
+    <div style="display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px 18px;align-items:baseline;margin-top:16px;background:#0C0A08;color:#F4EFE6;padding:22px 26px">
+      <span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#97938C">Marcellus · NFC</span>
+      <span data-viet="nfc" style="font-family:'Marcellus',Georgia,serif;font-size:52px;line-height:1.25;letter-spacing:-0.005em">TRẦN · NGUYỄN · ĐẶNG · PHƯƠNG · HÀ NỘI</span>
+      <span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#97938C">Marcellus · NFD</span>
+      <span data-viet="nfd" style="font-family:'Marcellus',Georgia,serif;font-size:52px;line-height:1.25;letter-spacing:-0.005em">TRẦN · NGUYỄN · ĐẶNG · PHƯƠNG · HÀ NỘI</span>
+      <span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#97938C">Newsreader · control</span>
+      <span style="font-family:'Newsreader',Georgia,serif;font-size:52px;line-height:1.25">TRẦN · NGUYỄN · ĐẶNG · PHƯƠNG · HÀ NỘI</span>
+      <span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#97938C">Newsreader preset · wrapped, lh 0.98</span>
+      <span data-viet-wrap="" style="font-family:'Newsreader',Georgia,serif;font-weight:400;font-size:52px;line-height:0.98;letter-spacing:-0.005em;text-transform:uppercase;max-width:9ch">Đặng Ộ Hà Nội Trần Nguyễn</span>
+    </div>
+    <div data-ev-viet-t="" style="font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;font-size:11.5px;line-height:1.7;color:#2C2822;white-space:pre;margin-top:14px"></div>
+  </section>
+
+  <div data-matrix="" style="margin-top:34px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;font-size:11.5px;line-height:1.7;color:#2C2822;white-space:pre"></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;width&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;1440&quot;,&quot;1024&quot;,&quot;768&quot;,&quot;699&quot;,&quot;600&quot;,&quot;540&quot;,&quot;480&quot;,&quot;450&quot;,&quot;430&quot;,&quot;390&quot;,&quot;375&quot;],&quot;default&quot;:&quot;1440&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Viewport&quot;},&quot;height&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;1000&quot;,&quot;900&quot;,&quot;1024&quot;,&quot;932&quot;,&quot;844&quot;,&quot;812&quot;,&quot;600&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Viewport&quot;},&quot;title&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;short&quot;,&quot;medium&quot;,&quot;tran&quot;,&quot;nguyen&quot;,&quot;viMedium&quot;,&quot;long&quot;,&quot;viLong&quot;,&quot;verylong&quot;],&quot;default&quot;:&quot;medium&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Stress&quot;},&quot;stillsMode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;grid&quot;,&quot;justified&quot;],&quot;default&quot;:&quot;grid&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Stress&quot;},&quot;titleFace&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;newsreader&quot;,&quot;marcellus&quot;],&quot;default&quot;:&quot;newsreader&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Hero&quot;},&quot;stills&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;real&quot;,&quot;probe&quot;],&quot;default&quot;:&quot;real&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Stress&quot;},&quot;motion&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;reduced&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Stress&quot;},&quot;titleMode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;overlay&quot;,&quot;stacked&quot;],&quot;default&quot;:&quot;overlay&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Hero&quot;},&quot;fallbackAt&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;1024&quot;,&quot;700&quot;,&quot;600&quot;,&quot;never&quot;],&quot;default&quot;:&quot;700&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Hero&quot;},&quot;guard&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Hero&quot;},&quot;phoneHero&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;25&quot;,&quot;30&quot;,&quot;33&quot;,&quot;36&quot;],&quot;default&quot;:&quot;30&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Hero&quot;},&quot;poster&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;film-frame&quot;,&quot;unrelated&quot;],&quot;default&quot;:&quot;film-frame&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Hero&quot;},&quot;heroFit&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;cover-cover&quot;,&quot;contain-contain&quot;,&quot;cover-contain&quot;],&quot;default&quot;:&quot;cover-cover&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Hero&quot;},&quot;titleLH&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;0.98&quot;,&quot;1.04&quot;,&quot;1.1&quot;],&quot;default&quot;:&quot;0.98&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Hero&quot;},&quot;scrim&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;derived&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;derived&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Hero&quot;},&quot;narrowOrder&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;semantic&quot;,&quot;statement-first&quot;],&quot;default&quot;:&quot;semantic&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Derivation&quot;},&quot;siteHeader&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Derivation&quot;}}">
+class Component extends DCLogic {
+  // Stress titles. "medium" is the desktop candidate's own title.
+  TITLES = {
+    short: "Rain",
+    medium: "Made to Measure",
+    tran: "Trần",
+    nguyen: "Nguyễn",
+    viMedium: "Mùa Thu Hà Nội",
+    viLong: "Người Thợ May Cuối Cùng ở Phố Hàng Bông",
+    long: "The Last Fitting at Trần & Sons",
+    verylong: "Four Mornings in the Cutting Room Before the Shutters Came Down"
+  };
+  PAIR = { 1440: 1000, 1024: 900, 768: 1024, 600: 900, 430: 932, 390: 844, 375: 812 };
+  // Measured file aspects (media/w). The desktop file's authored data-ar values
+  // (1.5 / 0.8 / 2.39 / 1.33) do not describe these files; they are kept only
+  // as a labelled geometry probe.
+  STILLS = {
+    real: [{ src: "mtm-sketch.jpg", ar: 2.041 }, { src: "mtm-shopfront.jpg", ar: 2.012 }, { src: "mtm-atelier.jpg", ar: 2.041 }, { src: "mtm-swatches.jpg", ar: 2.041 }],
+    probe: [{ src: "mtm-sketch.jpg", ar: 1.5 }, { src: "mtm-shopfront.jpg", ar: 0.8 }, { src: "mtm-atelier.jpg", ar: 2.39 }, { src: "mtm-swatches.jpg", ar: 1.33 }]
+  };
+  // PROJECT-DETAIL presets, consuming the shared METHOD. Coefficient = desktop
+  // size / desktop reference box at 1440 (desktop equivalence), Marcellus only.
+  // Title: 88 / 878.67 (cols 1–8).  Next: 58 / 766.33 (cols 4–10).
+  // Pass 3 (Owner decision 4): dynamic project names use a NEWSREADER display
+  // preset. Coefficients re-derived from measured DOM advance (uppercase,
+  // −0.005em): MADE TO MEASURE Marcellus 9.2409 → Newsreader 400 10.1766;
+  // TOKYO, AFTER RAIN 9.2617 → 10.1411. Same optical fill as the locked
+  // candidate: title 0.10015 × 9.2409/10.1766 = 0.09094; next 0.07569 ×
+  // 9.2617/10.1411 = 0.06913. Max = coef × desktop box (80 / 53). Min 27 =
+  // Marcellus's 30 at equal fill (precautionary). Marcellus kept for comparison.
+  FACES = {
+    newsreader: { css: "'Newsreader', Georgia, serif", weight: 400, title: { coef: 0.09094, min: 27, max: 80 }, next: { coef: 0.06913, min: 27, max: 53 } },
+    marcellus: { css: "'Marcellus', Georgia, serif", weight: 400, title: { coef: 0.10015, min: 30, max: 88 }, next: { coef: 0.07569, min: 30, max: 58 } }
+  };
+  get TITLE() { return (this.FACES[this.opt("titleFace", "newsreader")] || this.FACES.newsreader).title; }
+  get NEXT() { return (this.FACES[this.opt("titleFace", "newsreader")] || this.FACES.newsreader).next; }
+  POSTER_AR = 2.0; CODA_AR = 2.004; GAP = 4;
+  ov = null;
+
+  opt(k, d) {
+    if (this.ov && this.ov[k] !== undefined) return this.ov[k];
+    const o = window.__pdr || {};
+    if (o[k] !== undefined) return o[k];
+    return this.props[k] !== undefined ? this.props[k] : d;
+  }
+  renderVals() { return { rootRef: (el) => { this.root = el; } }; }
+
+  componentDidMount() {
+    window.__pdrc = this;
+    this.ctx = document.createElement("canvas").getContext("2d");
+    this.mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    this.mqH = () => this.applySoon();
+    this.mq.addEventListener("change", this.mqH);
+    this.probeFilm("c1", "../../../../media/clips/c1.mp4");
+    this.probeFilm("n3", "../../../../media/clips/n3.mp4");
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => this.applySoon());
+    this.applySoon();
+    setTimeout(() => this.applySoon(), 900);
+  }
+  componentDidUpdate() { this.applySoon(); }
+  applySoon() { clearTimeout(this._as); this._as = setTimeout(() => this.apply(), 60); }
+  componentWillUnmount() { if (this.obs) this.obs.disconnect(); if (this.mq) this.mq.removeEventListener("change", this.mqH); }
+
+  // c1 is also sampled at 25/50/75% of its duration: the 25% frame becomes the
+  // controlled poster (runtime capture, no file written); all three measure the
+  // encoded letterbox from pixels. Nothing is compensated.
+  probeFilm(k, src) {
+    const v = document.createElement("video");
+    v.preload = k === "c1" ? "auto" : "metadata"; v.muted = true; v.playsInline = true;
+    const done = () => { v.removeAttribute("src"); v.load(); this.applySoon(); };
+    v.onloadedmetadata = () => {
+      this._ar = this._ar || {}; this._ar[k] = v.videoWidth / v.videoHeight;
+      this._dims = this._dims || {}; this._dims[k] = v.videoWidth + "×" + v.videoHeight;
+      if (k !== "c1") return done();
+      this._seeks = [0.25, 0.5, 0.75].map((p) => p * v.duration);
+      this._dur = v.duration;
+      v.currentTime = this._seeks.shift();
+    };
+    v.onseeked = () => {
+      if (k !== "c1") return;
+      try { this.grab(v); } catch (e) { console.error("[pd responsive] frame grab failed:", e && e.message); }
+      if (this._seeks.length) v.currentTime = this._seeks.shift(); else done();
+    };
+    v.src = src;
+  }
+
+  grab(v) {
+    const fw = v.videoWidth, fh = v.videoHeight;
+    const c = document.createElement("canvas"); c.width = fw; c.height = fh;
+    const x = c.getContext("2d"); x.drawImage(v, 0, 0, fw, fh);
+    const d = x.getImageData(0, 0, fw, fh).data;
+    const lum = (i) => 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2];
+    const rowMax = (y) => { let m = 0; for (let i = 0; i < fw; i += 2) { const l = lum((y * fw + i) * 4); if (l > m) m = l; } return m; };
+    const colMax = (xx) => { let m = 0; for (let y = 0; y < fh; y += 2) { const l = lum((y * fw + xx) * 4); if (l > m) m = l; } return m; };
+    let t = 0; while (t < fh / 2 && rowMax(t) < 24) t++;
+    let b = 0; while (b < fh / 2 && rowMax(fh - 1 - b) < 24) b++;
+    let l = 0; while (l < fw / 2 && colMax(l) < 24) l++;
+    let r = 0; while (r < fw / 2 && colMax(fw - 1 - r) < 24) r++;
+    let sum = 0, n = 0; for (let i = 0; i < d.length; i += 64) { sum += lum(i); n++; }
+    const s = { t, b, l, r, time: v.currentTime, mean: sum / n };
+    this._samples = (this._samples || []).concat([s]);
+    const A = this._samples;
+    const mn = (key) => Math.min.apply(null, A.map((z) => z[key]));
+    this._active = { t: mn("t"), b: mn("b"), l: mn("l"), r: mn("r"), fw, fh };
+    this._active.aspect = (fw - this._active.l - this._active.r) / (fh - this._active.t - this._active.b);
+    if (!this._frameURL) {
+      this._frameURL = c.toDataURL("image/jpeg", 0.86);
+      // Light copy for the evidence thumbnails (same geometry, 480px wide).
+      const sm = document.createElement("canvas"); sm.width = 480; sm.height = Math.round(480 * fh / fw);
+      sm.getContext("2d").drawImage(c, 0, 0, sm.width, sm.height);
+      this._frameSmall = sm.toDataURL("image/jpeg", 0.7);
+    }
+  }
+
+  q(s) { return this.root.querySelector(s); }
+  qa(s) { return Array.from(this.root.querySelectorAll(s)); }
+  vp() { return this.q("[data-viewport]"); }
+  pg() { return this.q("[data-page]"); }
+  W() { return parseInt(this.opt("width", "1440"), 10); }
+  H() { const h = this.opt("height", "auto"); return h === "auto" ? (this.PAIR[this.W()] || 900) : parseInt(h, 10); }
+  CW() { return this.pg().clientWidth || this.W(); }
+
+  apply() {
+    if (!this.root || this._busy) return;
+    this._busy = true;
+    // Evidence clones are rebuilt after the sweep; clearing them first keeps
+    // every sweep reflow to one page instead of sixteen.
+    ["[data-ev-phone]", "[data-ev-stills]", "[data-ev-fit]"].forEach((s) => { const h = this.q(s); if (h) h.innerHTML = ""; });
+    try {
+      try { this.sweep(); } catch (e) { console.error("[pd responsive] sweep failed:", e && e.message); }
+      try { this.evidence(); } catch (e) { console.error("[pd responsive] evidence failed:", e && e.message); }
+      this.layout();
+      try { this.playback(); } catch (e) { console.error("[pd responsive] playback failed:", e && e.message); }
+      try { this.audit(); } catch (e) { console.error("[pd responsive] audit failed:", e && e.message); }
+    } finally { this._busy = false; }
+  }
+
+  layout() {
+    this._failed = [];
+    ["L_frame", "L_type", "L_mode", "L_scrim", "L_fit", "L_meta", "L_support", "L_credits", "L_coda", "L_footer", "L_site", "L_stills"].forEach((n) => {
+      try { this[n](); } catch (e) { this._failed.push(n); console.error("[pd responsive] " + n + " failed:", (e && e.message) || e); }
+    });
+  }
+
+  // PD-SPECIFIC: frame tiers, hero height, affordance, tap targets.
+  L_frame() {
+    const W = this.W(), H = this.H(), vp = this.vp(), pg = this.pg();
+    vp.style.width = W + "px"; vp.style.height = H + "px";
+    const wide = W >= 1024, mid = W >= 600;
+    pg.style.setProperty("--edge", (wide ? 56 : mid ? 32 : 24) + "px");
+    pg.style.setProperty("--gut", (wide ? 20 : mid ? 14 : 10) + "px");
+    this._band = wide ? 150 : mid ? 104 : 80;
+    pg.style.setProperty("--band", this._band + "px");
+    // Desktop: 780 at 1440×1000 = 0.78H = 0.5417W. Both proportions carried,
+    // the smaller wins, no floor: the frame tracks the film's width at phone.
+    // Phone (< 700): the film's own width-derived height, lifted to a share of
+    // the first screen so the page still opens into the film (pass 2, §A).
+    const share = parseInt(this.opt("phoneHero", "30"), 10) / 100;
+    const hH = W < 700 ? Math.round(Math.max(0.5417 * W, share * H)) : Math.round(Math.min(0.78 * H, 0.5417 * W, 900));
+    this._hH = hH;
+    this.q("[data-hero]").style.height = hH + "px";
+    const aff = Math.min(78, Math.max(56, Math.round(0.3 * hH)));
+    this._aff = aff;
+    const a = this.q("[data-affordance]"); a.style.width = a.style.height = aff + "px";
+    const k = aff / 78, tri = a.firstElementChild;
+    tri.style.borderLeftWidth = Math.round(15 * k) + "px";
+    tri.style.borderTopWidth = tri.style.borderBottomWidth = Math.round(9 * k) + "px";
+    // Hit area ≥44px below desktop without moving the visible underline:
+    // border → text-decoration, then pad. Desktop keeps the locked border.
+    [this.q("[data-back]"), this.q("[data-back-flow]"), this.q("[data-f-all]")].forEach((el) => {
+      const col = el.hasAttribute("data-f-all") ? "var(--rule-dark)" : "rgba(237,231,221,0.32)";
+      if (wide) { el.style.minHeight = ""; el.style.padding = "0 0 4px"; el.style.borderBottom = "1px solid " + col; el.style.textDecoration = "none"; }
+      else { el.style.padding = "12px 0"; el.style.minHeight = "44px"; el.style.boxSizing = "border-box"; el.style.borderBottom = "0"; el.style.textDecoration = "underline"; el.style.textUnderlineOffset = "5px"; el.style.textDecorationThickness = "1px"; el.style.textDecorationColor = col; }
+    });
+    this.q("[data-back]").style.top = (wide ? 34 : 20) + "px";
+  }
+
+  // SHARED METHOD CONSUMED: clamp(preset min, coef × 100cqw, composition max),
+  // container on the box the title aligns to. Length wraps; never shrinks.
+  L_type() {
+    const t = this.TITLES[this.opt("title", "medium")] || this.TITLES.medium;
+    const lh = this.opt("titleLH", "0.98");
+    const fs = "clamp(" + this.TITLE.min + "px, " + (this.TITLE.coef * 100).toFixed(3) + "cqw, " + this.TITLE.max + "px)";
+    const face = this.FACES[this.opt("titleFace", "newsreader")] || this.FACES.newsreader;
+    this.qa("[data-title]").forEach((h) => { if (h.textContent !== t) h.textContent = t; h.style.fontFamily = face.css; h.style.fontWeight = face.weight; h.style.fontSize = fs; h.style.lineHeight = lh; });
+    const nx = this.q("[data-f-next]"); nx.style.fontFamily = face.css; nx.style.fontWeight = face.weight;
+    nx.style.fontSize = "clamp(" + this.NEXT.min + "px, " + (this.NEXT.coef * 100).toFixed(3) + "cqw, " + this.NEXT.max + "px)";
+  }
+
+  // PD-SPECIFIC: overlay validity. Width tier first (derived fallback, ADR-0010
+  // §6); then a safety guard (ADR-0010 §5) — the title may not reach the play
+  // affordance or the Back-to-works line.
+  L_mode() {
+    const W = this.W(), hH = this._hH;
+    const hero = this.q("[data-hero]"), ovl = this.q("[data-overlay]");
+    const bottom = W >= 1024 ? 46 : 32;
+    ovl.style.bottom = bottom + "px";
+    ovl.style.display = "grid";
+    const h2 = this.q('[data-title="overlay"]');
+    const th = h2.getBoundingClientRect().height;
+    const top = hH - bottom - th;
+    const heroR = hero.getBoundingClientRect(), backR = this.q("[data-back]").getBoundingClientRect();
+    const affEdge = hH / 2 + this._aff / 2 + 16;
+    const backEdge = backR.bottom - heroR.top + 16;
+    this._ovg = { th, top, bottom, extent: bottom + th, collAff: top < affEdge, collBack: top < backEdge,
+      size: parseFloat(getComputedStyle(h2).fontSize), box: h2.parentElement.getBoundingClientRect().width,
+      lines: Math.round(th / (parseFloat(getComputedStyle(h2).fontSize) * parseFloat(this.opt("titleLH", "0.98")))) };
+    const fb = this.opt("fallbackAt", "700");
+    const fbW = fb === "never" ? 0 : parseInt(fb, 10);
+    let mode, why = "";
+    if (W < fbW) { mode = "fallback"; why = "width < " + fbW; }
+    else if (this.opt("titleMode", "overlay") === "stacked") { mode = "stacked"; why = "titleMode B"; }
+    else {
+      // LOCKED (Project Owner): overlay only if ≤ 2 rendered lines AND the
+      // affordance and Back to works stay clear. Otherwise stacked, any width.
+      mode = "overlay";
+      const fails = [];
+      if (this._ovg.lines > 2) fails.push("lines > 2");
+      if (this.opt("guard", true) && this._ovg.collAff) fails.push("affordance");
+      if (this.opt("guard", true) && this._ovg.collBack) fails.push("back line");
+      if (fails.length) { mode = "stacked"; why = "rule: " + fails.join(", "); }
+    }
+    this._mode = mode; this._why = why;
+    this.q('[data-title-box="flow"]').style.gridColumn = mode === "fallback" ? "1 / -1" : "1 / 9";
+    this.q("[data-flow]").style.padding = (mode === "fallback" ? "20px" : "44px") + " var(--edge) 0";
+    this.q('[data-title="flow"]').style.marginTop = mode === "fallback" ? "10px" : "0";
+    this.syncChrome();
+  }
+
+  // Hero chrome in ONE place, from (mode, activation). Re-render cannot resurrect it.
+  syncChrome() {
+    const hero = this.q("[data-hero]"); if (!hero) return;
+    const m = this._mode || "overlay", started = hero.dataset.started === "1";
+    const show = (el, on, d) => { if (el) el.style.display = on ? (d || "block") : "none"; };
+    show(this.q("[data-overlay]"), m === "overlay" && !started, "grid");
+    show(this.q('[data-scrim="bottom"]'), m === "overlay" && !started);
+    show(this.q("[data-back]"), m !== "fallback", "inline-block");
+    show(this.q('[data-scrim="top"]'), m !== "fallback");
+    show(this.q("[data-affordance]"), !started, "flex");
+    show(this.q("[data-flow]"), m !== "overlay", "grid");
+    show(this.q("[data-back-flow]"), m === "fallback", "inline-block");
+  }
+
+  // PD-SPECIFIC: scrim derived from the title's own extent, holding the desktop
+  // candidate's alpha at the title cap line (0.244) rather than a fixed px band.
+  L_scrim() {
+    const hH = this._hH, g = this._ovg, s = this.opt("scrim", "derived");
+    let sb, st;
+    if (s === "desktop") { sb = 210; st = 120; }
+    else { sb = Math.min(hH, Math.max(0.269 * hH, 1.588 * g.extent)); st = Math.max(0.154 * hH, 96); }
+    this.q('[data-scrim="bottom"]').style.height = Math.round(sb) + "px";
+    this.q('[data-scrim="top"]').style.height = Math.round(st) + "px";
+    this._scrim = { sb: Math.round(sb), st: Math.round(st), alpha: Math.max(0, 0.66 * (1 - g.extent / sb)), covered: g.extent <= sb };
+  }
+
+  L_fit() {
+    const f = this.opt("heroFit", "cover-cover");
+    const hero = this.q("[data-hero]"), img = hero.querySelector("[data-poster]");
+    const want = this.opt("poster", "film-frame") === "film-frame" && this._frameURL ? this._frameURL : "../../../../media/w/mtm-table.jpg";
+    if (img.getAttribute("src") !== want) img.setAttribute("src", want);
+    img.style.objectFit = f === "contain-contain" ? "contain" : "cover";
+    hero.querySelector("video").style.objectFit = f === "cover-cover" ? "cover" : "contain";
+  }
+
+  // PD-SPECIFIC: metadata/statement. 3|6 desktop, 4|7 tablet, stacked < 700.
+  L_meta() {
+    const W = this.W(), dl = this.q("[data-meta]"), st = this.q("[data-statement]");
+    const stack = W < 700;
+    dl.style.gridColumn = W >= 1024 ? "1/4" : stack ? "1/-1" : "1/5";
+    st.style.gridColumn = W >= 1024 ? "5/11" : stack ? "1/-1" : "6/13";
+    dl.style.maxWidth = stack ? "360px" : "";
+    const sf = stack && this.opt("narrowOrder", "semantic") === "statement-first";
+    st.style.order = sf ? "-1" : "";
+    dl.style.marginTop = sf ? "56px" : "0";
+    st.style.marginTop = stack && !sf ? "56px" : "0";
+    this.q("[data-lead]").style.fontSize = (W < 600 ? 22 : 26) + "px";
+    this._metaStack = stack;
+  }
+
+  // PD-SPECIFIC: caption stacks when its own column cannot hold a caption measure.
+  L_support() {
+    const cap = this.q("[data-cap]"), vid = this.q("[data-vid]"), sec = this.q("[data-support]");
+    vid.style.gridColumn = "1/9"; cap.style.gridColumn = "10/13"; cap.style.maxWidth = ""; cap.style.marginTop = "0"; sec.style.alignItems = "end";
+    const stack = cap.getBoundingClientRect().width < 200;
+    if (stack) { vid.style.gridColumn = "1/-1"; cap.style.gridColumn = "1/-1"; cap.style.maxWidth = "36ch"; cap.style.marginTop = "16px"; sec.style.alignItems = "start"; }
+    this._capStack = stack;
+  }
+
+  L_credits() {
+    const W = this.W();
+    this.q("[data-credits]").style.gridColumn = W >= 1024 ? "1/4" : W >= 700 ? "1/7" : "1/-1";
+  }
+
+  // PD-SPECIFIC: desktop crop (0.375W) at wide, converging on native aspect at narrow.
+  L_coda() {
+    const W = this.CW(), H = this.H();
+    const h = Math.round(Math.max(0.375 * W, Math.min(W / this.CODA_AR, 0.5 * H)));
+    this.q("[data-coda]").style.height = h + "px";
+    this._codaH = h;
+  }
+
+  L_footer() {
+    const W = this.W(), f = this.q("[data-footer]"), lab = this.q("[data-f-label]"), box = this.q("[data-f-box]"), all = this.q("[data-f-all]");
+    const stack = W < 700;
+    lab.style.gridColumn = stack ? "1/-1" : "1/4";
+    box.style.gridColumn = stack ? "1/-1" : "4/11";
+    box.style.marginTop = stack ? "12px" : "0";
+    all.style.gridColumn = stack ? "1/-1" : "11/13";
+    all.style.justifySelf = stack ? "start" : "end";
+    all.style.marginTop = stack ? "24px" : "0";
+    const k = this._band / 150;
+    f.style.padding = Math.round(110 * k) + "px var(--edge) " + Math.round(96 * k) + "px";
+  }
+
+  // Stand-in only: Home's header line, to test coexistence. Not a nav design.
+  L_site() {
+    const on = this.opt("siteHeader", false), W = this.W();
+    const h = this.q("[data-site]"); h.style.display = on ? "grid" : "none";
+    const nav = this.q("[data-site-nav]"), wm = this.q("[data-wordmark]");
+    nav.style.gap = W <= 430 ? "16px" : "26px"; nav.style.fontSize = W <= 430 ? "14px" : "15px";
+    wm.style.gridColumn = W <= 430 ? "1/6" : "1/7"; nav.style.gridColumn = W <= 430 ? "6/13" : "7/13";
+  }
+
+  // SHARED SYSTEM CANDIDATE CONSUMED: JUSTIFIED_ROWS v2, verbatim (as consumed on Home).
+  pack(src, measure) {
+    const gap = this.GAP, ref = 1.6;
+    const T = measure >= 1024 ? 3 : measure >= 700 ? 2 : 1;
+    const target = (measure - gap * (T - 1)) / (T * ref);
+    const floor = Math.max(120, 0.10 * measure);
+    const ceil = 1.25 * measure;
+    const narrowest = (cells, s) => { const h = (measure - gap * (cells.length - 1)) / s; return Math.min.apply(null, cells.map((c) => c.ar * h)); };
+    const items = src.map((c, i) => Object.assign({}, c, { pos: i + 1 }));
+    const rows = []; let row = [], sum = 0;
+    items.forEach((it) => {
+      const nc = row.concat([it]), ns = sum + it.ar;
+      if (row.length && narrowest(nc, ns) < floor) { rows.push({ cells: row, sum }); row = [it]; sum = it.ar; }
+      else { row = nc; sum = ns; }
+      if ((measure - gap * (row.length - 1)) / sum <= target) { rows.push({ cells: row, sum }); row = []; sum = 0; }
+    });
+    if (row.length) rows.push({ cells: row, sum, last: true });
+    for (let p = 0; p < 8; p++) {
+      let moved = false;
+      for (let i = 0; i < rows.length; i++) {
+        const r = rows[i];
+        if (r.cells.length < 2) continue;
+        const h = (measure - gap * (r.cells.length - 1)) / r.sum;
+        if (Math.min.apply(null, r.cells.map((c) => c.ar * h)) >= floor) continue;
+        const m = r.cells.pop(); r.sum -= m.ar;
+        if (rows[i + 1]) { rows[i + 1].cells.unshift(m); rows[i + 1].sum += m.ar; } else rows.push({ cells: [m], sum: m.ar, last: true });
+        moved = true;
+      }
+      if (!moved) break;
+    }
+    if (rows.length > 1) {
+      const tail = rows[rows.length - 1];
+      if (tail.last && tail.cells.length === 1 && tail.sum * target < measure * 0.4) {
+        const prev = rows[rows.length - 2], merged = prev.cells.concat(tail.cells), ms = prev.sum + tail.sum;
+        if (narrowest(merged, ms) >= floor) { prev.cells = merged; prev.sum = ms; rows.pop(); }
+      }
+    }
+    const out = [];
+    rows.forEach((r) => {
+      const avail = measure - gap * (r.cells.length - 1);
+      let h = avail / r.sum, full = true;
+      if (r.last && h > target * 1.2) { h = target; full = false; }
+      if (h > ceil) { h = ceil; full = false; }
+      let used = 0;
+      const cells = r.cells.map((c, j) => { const w = (full && j === r.cells.length - 1) ? avail - used : Math.round(c.ar * h); used += w; return { pos: c.pos, src: c.src, ar: c.ar, w, h: Math.round(h) }; });
+      out.push({ cells, full });
+    });
+    return { rows: out, T, target, floor, ceil };
+  }
+
+  // PD-SPECIFIC (Owner decision 3): STRUCTURED GRID, 4 / 2 / 1 columns at
+  // ≥1024 / 700–1023 / <700. Equal column width, height from each still's own
+  // aspect (no crop, no reorder, no masonry); cells top-aligned. JUSTIFIED_ROWS
+  // remains available as the comparison (stillsMode) and is not modified.
+  grid(set, W) {
+    const cols = W >= 1024 ? 4 : W >= 700 ? 2 : 1, gap = this.GAP;
+    const cw = (W - gap * (cols - 1)) / cols;
+    const rows = [];
+    set.forEach((c, i) => {
+      if (i % cols === 0) rows.push({ cells: [], full: true });
+      rows[rows.length - 1].cells.push({ pos: i + 1, src: c.src, ar: c.ar, w: Math.round(cw), h: Math.round(cw / c.ar) });
+    });
+    return { rows, T: cols, target: 0, floor: 0, grid: true, cw };
+  }
+
+  L_stills() {
+    const host = this.q("[data-rows]");
+    const set = this.STILLS[this.opt("stills", "real")] || this.STILLS.real;
+    const res = this.opt("stillsMode", "grid") === "grid" ? this.grid(set, this.CW()) : this.pack(set, this.CW());
+    if (res.grid) {
+      host.innerHTML = "";
+      res.rows.forEach((r) => {
+        const rowEl = document.createElement("div");
+        rowEl.style.cssText = "display:grid;grid-template-columns:repeat(" + res.T + ",minmax(0,1fr));gap:" + this.GAP + "px;align-items:start";
+        r.cells.forEach((c) => {
+          const img = document.createElement("img");
+          img.src = "../../../../media/w/" + c.src; img.alt = "";
+          img.style.cssText = "display:block;width:100%;height:auto;aspect-ratio:" + c.ar + ";background:var(--frame)";
+          rowEl.appendChild(img);
+        });
+        host.appendChild(rowEl);
+      });
+      this._jr = res;
+      return;
+    }
+    host.innerHTML = "";
+    res.rows.forEach((r) => {
+      const rowEl = document.createElement("div");
+      rowEl.style.cssText = "display:flex;gap:" + this.GAP + "px";
+      r.cells.forEach((c) => {
+        const cell = document.createElement("div");
+        cell.style.cssText = "position:relative;overflow:hidden;background:var(--frame);flex:0 0 auto;width:" + c.w + "px;height:" + c.h + "px";
+        const img = document.createElement("img");
+        img.src = "../../../../media/w/" + c.src; img.alt = "";
+        img.style.cssText = "position:absolute;inset:0;width:100%;height:100%;object-fit:cover";
+        cell.appendChild(img); rowEl.appendChild(cell);
+      });
+      host.appendChild(rowEl);
+    });
+    this._jr = res;
+  }
+
+  reduced() { return this.opt("motion", "auto") === "reduced" || (this.mq && this.mq.matches); }
+
+  playback() {
+    if (this.obs) this.obs.disconnect();
+    const hero = this.q("[data-hero]"), hv = hero.querySelector("video");
+    hv.playsInline = true; hv.setAttribute("playsinline", "playsinline");
+    if (!hero.dataset.wired) {
+      hero.dataset.wired = "1";
+      hero.addEventListener("click", (e) => { if (e.target.closest("a")) return; this.start(hero); });
+      hv.addEventListener("playing", () => { hv.style.opacity = "1"; });
+    }
+    const cells = this.qa('[data-play="visible"]');
+    this.cells = cells;
+    cells.forEach((c) => { const v = c.querySelector("video"); v.loop = true; v.muted = true; v.playsInline = true; v.setAttribute("playsinline", "playsinline"); });
+    if (this.reduced()) { cells.forEach((c) => { c.dataset.want = "0"; c.dataset.state = "released (reduced motion)"; this.release(c); }); return; }
+    this.obs = new IntersectionObserver((es) => es.forEach((e) => {
+      const c = e.target;
+      if (e.isIntersecting && e.intersectionRatio >= 0.2) { c.dataset.want = "1"; c.dataset.state = "visible → playing"; this.prepare(c); this.play(c); }
+      else { c.dataset.want = "0"; const v = c.querySelector("video"); if (v) v.pause(); if (!e.isIntersecting) { c.dataset.state = "off-screen → released"; this.release(c); } else c.dataset.state = "< 20% → paused"; }
+      this.auditSoon();
+    }), { root: this.vp(), threshold: [0, 0.2, 0.5] });
+    cells.forEach((c) => this.obs.observe(c));
+  }
+  auditSoon() { clearTimeout(this._at); this._at = setTimeout(() => { try { this.audit(); } catch (e) {} }, 120); }
+
+  // CLICK_TO_PLAY: dismissal bound to the act (ADR-0010 §4), not to a play event.
+  start(c) {
+    const v = c.querySelector("video");
+    (this.cells || []).forEach((o) => { const ov = o.querySelector("video"); if (ov && !ov.paused) ov.pause(); });
+    c.dataset.started = "1";
+    this.syncChrome();
+    this.L_fit();
+    if (!v.getAttribute("src")) { v.setAttribute("src", v.dataset.src); v.preload = "auto"; v.load(); }
+    v.controls = true; v.muted = false; v.style.opacity = "1";
+    const p = v.play(); if (p && p.catch) p.catch(() => {});
+    this.auditSoon();
+  }
+  prepare(c) { const v = c.querySelector("video"); if (v && !v.getAttribute("src")) { v.setAttribute("src", v.dataset.src); v.preload = "auto"; v.load(); } }
+  play(c) {
+    const v = c.querySelector("video");
+    if (!v || this.reduced() || c.dataset.want !== "1") return;
+    if (v.readyState < 2) { const n = parseInt(c.dataset.tries || "0", 10) + 1; c.dataset.tries = String(n); if (n <= 14) setTimeout(() => this.play(c), 350); return; }
+    c.dataset.tries = "0";
+    const p = v.play(); if (p && p.then) p.then(() => { v.style.opacity = "1"; }).catch(() => {});
+  }
+  release(c) { const v = c.querySelector("video"); if (!v) return; v.pause(); v.style.opacity = "0"; c.dataset.tries = "0"; if (v.getAttribute("src")) { v.removeAttribute("src"); v.load(); } }
+
+  // ---- Pass 2 evidence --------------------------------------------------
+  evidence() {
+    const saved = this.ov;
+    ["E_phone", "E_stills", "E_fit"].forEach((n) => { try { this[n](); } catch (e) { console.error("[pd responsive] " + n + " failed:", (e && e.message) || e); } });
+    this.ov = saved;
+    if (!this._vietDone) { this._vietDone = true; this.E_viet().catch((e) => console.error("[pd responsive] E_viet failed:", e && e.message)); }
+  }
+
+  // Geometry of the c1 frame in a W×h box under a fit, including the
+  // encoded letterbox measured by grab(). s = display scale.
+  fitM(W, h, mode) {
+    const a = this._active || { t: 0, b: 0, l: 0, r: 0, fw: 1280, fh: 720 };
+    const fw = a.fw, fh = a.fh;
+    const s = mode === "cover" ? Math.max(W / fw, h / fh) : Math.min(W / fw, h / fh);
+    const Dw = fw * s, Dh = fh * s, ox = (W - Dw) / 2, oy = (h - Dh) / 2;
+    const ax0 = ox + a.l * s, ax1 = ox + (fw - a.r) * s, ay0 = oy + a.t * s, ay1 = oy + (fh - a.b) * s;
+    const vx = Math.max(0, Math.min(W, ax1) - Math.max(0, ax0)), vy = Math.max(0, Math.min(h, ay1) - Math.max(0, ay0));
+    return { s, frameVis: (Math.min(W, Dw) * Math.min(h, Dh)) / (Dw * Dh), activeVis: (vx * vy) / ((ax1 - ax0) * (ay1 - ay0)), black: 1 - (vx * vy) / (W * h), picW: Math.round(vx), picH: Math.round(vy) };
+  }
+
+  snap() {
+    const c = this.pg().cloneNode(true);
+    c.querySelectorAll("video").forEach((v) => v.remove());
+    const poster = c.querySelector("[data-poster]");
+    [c].concat(Array.from(c.querySelectorAll("*"))).forEach((e) => Array.from(e.attributes).forEach((at) => { if (at.name.indexOf("data-") === 0) e.removeAttribute(at.name); }));
+    return { c, poster };
+  }
+
+  win(c, W, top, h, s, label) {
+    const o = document.createElement("div");
+    o.style.cssText = "display:flex;flex-direction:column;gap:6px;flex:0 0 auto";
+    const f = document.createElement("div");
+    f.style.cssText = "position:relative;overflow:hidden;contain:strict;background:#0C0A08;box-shadow:0 0 0 1px #CFC8BC;width:" + Math.round(W * s) + "px;height:" + Math.round(h * s) + "px";
+    c.style.position = "absolute"; c.style.left = "0"; c.style.top = "0"; c.style.width = W + "px";
+    c.style.transformOrigin = "0 0"; c.style.transform = "scale(" + s + ") translateY(" + (-top) + "px)";
+    f.appendChild(c); o.appendChild(f);
+    if (label) { const l = document.createElement("span"); l.textContent = label; l.style.cssText = "font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#4A453E"; o.appendChild(l); }
+    return o;
+  }
+
+  E_phone() {
+    const host = this.q("[data-ev-phone]"), tbl = this.q("[data-ev-phone-t]"); if (!host) return;
+    host.innerHTML = "";
+    const pad = (s, n) => String(s).padEnd(n);
+    const rows = [pad("viewport", 10) + pad("opt", 5) + pad("hero", 8) + pad("%H", 5) + pad("box", 7) + pad("cover: frame/pic/black", 24) + pad("contain: black", 16) + pad("title btm", 11) + pad("meta rows", 11) + "statement in screen"];
+    [[430, 932], [390, 844], [375, 812]].forEach(([W, H]) => {
+      const line = document.createElement("div"); line.style.cssText = "display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start";
+      ["25", "30", "33", "36"].forEach((k) => {
+        this.ov = { width: String(W), height: String(H), phoneHero: k, title: "medium" }; this.layout();
+        const pR = this.pg().getBoundingClientRect(), hH = this._hH;
+        const tB = Math.round(this.q('[data-title="flow"]').getBoundingClientRect().bottom - pR.top);
+        const meta = Array.from(this.q("[data-meta]").children).filter((r) => r.getBoundingClientRect().bottom - pR.top <= H).length;
+        const leadTop = this.q("[data-lead]").getBoundingClientRect().top - pR.top;
+        const cv = this.fitM(W, hH, "cover"), cn = this.fitM(W, hH, "contain");
+        rows.push(pad(W + "×" + H, 10) + pad(k + "%", 5) + pad(hH + "px", 8) + pad(Math.round(hH / H * 100), 5) + pad((W / hH).toFixed(2), 7) + pad(Math.round(cv.frameVis * 100) + "% / " + Math.round(cv.activeVis * 100) + "% / " + Math.round(cv.black * 100) + "%", 24) + pad(Math.round(cn.black * 100) + "%", 16) + pad(tB + "px", 11) + pad(meta + " / 4", 11) + (leadTop < H ? "✓ starts at " + Math.round(leadTop) : "✗"));
+        const s = this.snap();
+        if (this._frameSmall) { s.poster.src = this._frameSmall; s.poster.style.objectFit = "cover"; }
+        line.appendChild(this.win(s.c, W, 0, H, 0.42, W + "×" + H + " · " + k + "% · " + hH + "px"));
+      });
+      host.appendChild(line);
+    });
+    rows.push("", "cover frame = share of the c1 frame shown · pic = share of the active (non-letterbox) picture shown · black = share of the hero that is black (encoded bars + fit bars)");
+    tbl.textContent = rows.join("\n");
+  }
+
+  E_stills() {
+    const host = this.q("[data-ev-stills]"), tbl = this.q("[data-ev-stills-t]"); if (!host) return;
+    host.innerHTML = "";
+    const pad = (s, n) => String(s).padEnd(n);
+    const rows = [pad("W", 6) + pad("cols", 6) + pad("rows", 7) + pad("cell w", 8) + pad("row heights (per still)", 30) + pad("max Δh in row", 15) + pad("rendered aspect vs native", 27) + pad("order", 7) + pad("block h", 9) + pad("loop", 10) + "left edges (grid | loop)"];
+    [1440, 1024, 768, 600, 430, 390, 375].forEach((W) => {
+      this.ov = { width: String(W), height: "auto", stills: "real", stillsMode: "grid" }; this.layout();
+      const pR0 = this.pg().getBoundingClientRect();
+      const imgs = this.qa("[data-rows] img");
+      const rs = imgs.map((i) => i.getBoundingClientRect());
+      const worst = Math.max.apply(null, rs.map((r, k) => Math.abs(r.width / r.height - this.STILLS.real[k].ar) / this.STILLS.real[k].ar * 100));
+      const g = this._jr;
+      const dH = Math.max.apply(null, g.rows.map((r) => Math.max.apply(null, r.cells.map((c) => c.h)) - Math.min.apply(null, r.cells.map((c) => c.h))));
+      const blk = this.q("[data-rows]").getBoundingClientRect();
+      const vid0 = this.q("[data-vid]").getBoundingClientRect();
+      rows.push(pad(W, 6) + pad(g.T, 6) + pad(g.rows.length, 7) + pad(Math.round(g.cw) + "px", 8) + pad(g.rows.map((r) => r.cells.map((c) => c.h).join("/")).join(" · "), 30) + pad(dH + "px", 15) + pad("worst Δ " + worst.toFixed(2) + "% " + (worst < 2 ? "✓" : "✗"), 27) + pad(imgs.map((i) => i.getAttribute("src").split("/").pop()).every((s, k) => s === this.STILLS.real[k].src) ? "✓" : "✗", 7) + pad(Math.round(blk.height) + "px", 9) + pad(Math.round(vid0.width) + "×" + Math.round(vid0.height), 10) + Math.round(blk.left - pR0.left) + " | " + Math.round(vid0.left - pR0.left));
+      if (W > 768) return;
+    });
+    [1440, 1024, 768].forEach((W) => {
+      this.ov = { width: String(W), height: "auto", stills: "real", stillsMode: "grid" }; this.layout();
+      const pR = this.pg().getBoundingClientRect();
+      const st = this.q("[data-statement]").getBoundingClientRect(), sup = this.q("[data-support]").getBoundingClientRect();
+      const vid = this.q("[data-vid]").getBoundingClientRect();
+      const jr = this._jr;
+      const top = Math.max(0, st.bottom - pR.top - 70), bot = sup.bottom - pR.top + 50;
+      const s = this.snap();
+      if (this._frameSmall && s.poster) s.poster.src = this._frameSmall;
+      host.appendChild(this.win(s.c, W, top, bot - top, Math.min(1, 820 / W), W + " — structured grid (" + jr.rows.map((r) => r.cells.length).join(" + ") + ") into the supporting loop"));
+    });
+    tbl.textContent = rows.join("\n");
+  }
+
+  E_fit() {
+    const host = this.q("[data-ev-fit]"), tbl = this.q("[data-ev-fit-t]"); if (!host || !this._frameURL) return;
+    host.innerHTML = "";
+    const pad = (s, n) => String(s).padEnd(n), P = (v) => Math.round(v * 100) + "%";
+    const a = this._active;
+    const rows = [
+      a ? "c1 " + a.fw + "×" + a.fh + " · encoded bars (min over 3 samples at " + (this._samples || []).map((z) => z.time.toFixed(1) + "s").join(", ") + ") top " + a.t + " · bottom " + a.b + " · left " + a.l + " · right " + a.r + " px · active picture " + a.aspect.toFixed(3) + " · sample mean luminance " + (this._samples || []).map((z) => Math.round(z.mean)).join("/")
+        : "c1 frame: capturing…",
+      "",
+      pad("viewport", 11) + pad("hero", 10) + pad("box", 7) + pad("idle → active", 16) + pad("idle frame/pic/black", 22) + pad("active frame/pic/black", 24) + "activation scale"
+    ];
+    const tile = (W, h, fit) => {
+      const tw = 128, s = tw / W, d = document.createElement("div");
+      d.style.cssText = "position:relative;overflow:hidden;background:#000;width:" + tw + "px;height:" + Math.round(h * s) + "px";
+      const img = document.createElement("img"); img.src = this._frameSmall || ""; img.alt = "";
+      img.style.cssText = "position:absolute;inset:0;width:100%;height:100%;object-fit:" + fit;
+      d.appendChild(img); return d;
+    };
+    [[1440, 1000], [1440, 600], [768, 1024], [390, 844]].forEach(([W, H]) => {
+      this.ov = { width: String(W), height: String(H) }; this.layout();
+      const hH = this._hH;
+      const wrap = document.createElement("div"); wrap.style.cssText = "display:flex;flex-direction:column;gap:6px";
+      const lab = document.createElement("span"); lab.textContent = W + "×" + H + " · hero " + W + "×" + hH; lab.style.cssText = "font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#4A453E";
+      const line = document.createElement("div"); line.style.cssText = "display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start";
+      [["cover", "cover"], ["contain", "contain"], ["cover", "contain"]].forEach(([i, o]) => {
+        const mi = this.fitM(W, hH, i), mo = this.fitM(W, hH, o);
+        rows.push(pad(W + "×" + H, 11) + pad(W + "×" + hH, 10) + pad((W / hH).toFixed(2), 7) + pad(i + " → " + o, 16) + pad(P(mi.frameVis) + " / " + P(mi.activeVis) + " / " + P(mi.black), 22) + pad(P(mo.frameVis) + " / " + P(mo.activeVis) + " / " + P(mo.black), 24) + "×" + (mo.s / mi.s).toFixed(3) + (i === o ? "  (none)" : "  ✗ reframe"));
+        const g = document.createElement("div"); g.style.cssText = "display:flex;flex-direction:column;gap:4px";
+        const pr = document.createElement("div"); pr.style.cssText = "display:flex;gap:3px";
+        pr.appendChild(tile(W, hH, i)); pr.appendChild(tile(W, hH, o));
+        const cap = document.createElement("span"); cap.textContent = i + " → " + o + (i !== o ? " (control)" : ""); cap.style.cssText = "font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:#4A453E";
+        g.appendChild(pr); g.appendChild(cap); line.appendChild(g);
+      });
+      wrap.appendChild(lab); wrap.appendChild(line); host.appendChild(wrap);
+    });
+    rows.push("", "frame = share of the c1 frame visible · pic = share of the active picture visible · black = share of the hero area that is black");
+    tbl.textContent = rows.join("\n");
+  }
+
+  E_viet() {
+    const tbl = this.q("[data-ev-viet-t]"); if (!tbl) return;
+    const nfc = this.q('[data-viet="nfc"]'), nfd = this.q('[data-viet="nfd"]');
+    nfc.textContent = nfc.textContent.normalize("NFC");
+    nfd.textContent = nfd.textContent.normalize("NFD");
+    const chars = ["Ầ", "Ễ", "Đ", "Ặ", "Ư", "Ơ", "À", "Ộ", "Â", "Ê", "Ô", "\u0300", "\u0301", "\u0302", "\u0303", "\u0309", "\u0323", "\u031B"];
+    return Promise.all([document.fonts.load("64px Marcellus", chars.join("")).catch(() => {}), document.fonts.load("64px Newsreader", chars.join("")).catch(() => {})]).then(() => document.fonts.ready).then(() => this.E_viet2(tbl, nfc, chars));
+  }
+
+  E_viet2(tbl, nfc, chars) {
+    const faces = Array.from(document.fonts).filter((f) => /Marcellus/i.test(f.family));
+    const nfaces = Array.from(document.fonts).filter((f) => /Newsreader/i.test(f.family));
+    const parse = (s) => (s || "U+0-10FFFF").split(",").map((p) => { const m = p.trim().replace(/^U\+/i, "").split("-"); const a = parseInt(m[0].replace(/\?/g, "0"), 16), b = parseInt((m[1] || m[0]).replace(/\?/g, "F"), 16); return [a, b]; });
+    const covers = (list, cp) => list.some((f) => parse(f.unicodeRange).some(([a, b]) => cp >= a && cp <= b));
+    const loaded = (list, cp) => list.filter((f) => f.status === "loaded").some((f) => parse(f.unicodeRange).some(([a, b]) => cp >= a && cp <= b));
+    const x = document.createElement("canvas").getContext("2d");
+    const w = (t, fam) => { x.font = "64px " + fam; return x.measureText(t).width; };
+    const px = (t, fam) => { const c = document.createElement("canvas"); c.width = 180; c.height = 150; const g = c.getContext("2d"); g.font = "80px " + fam; g.fillStyle = "#000"; g.fillText(t, 30, 120); return g.getImageData(0, 0, 180, 150).data; };
+    const same = (p, q) => { for (let i = 3; i < p.length; i += 4) if (p[i] !== q[i]) return false; return true; };
+    const pad = (s, n) => String(s).padEnd(n);
+    const out = [
+      "Loaded Marcellus faces: " + faces.length,
+      ...faces.map((f) => "  " + f.family + " " + f.style + " " + f.weight + " · " + f.status + " · unicode-range " + (f.unicodeRange || "(all)")),
+      "Newsreader faces: " + nfaces.length + " · any covering U+1EA6 (Ầ): " + (covers(nfaces, 0x1EA6) ? "yes" : "no"),
+      "Source strings are NFC: " + (nfc.textContent === nfc.textContent.normalize("NFC") ? "yes" : "no"),
+      "",
+      pad("char", 7) + pad("cp", 9) + pad("in Marcellus range", 20) + pad("loaded face", 13) + pad("same w across fallbacks", 25) + pad("NFC px = NFD px", 17) + "width vs base"
+    ];
+    chars.forEach((ch) => {
+      const cp = ch.codePointAt(0), isMark = cp >= 0x300 && cp <= 0x36F;
+      const shown = isMark ? "◌" + ch : ch;
+      const fbSame = Math.abs(w(isMark ? "A" + ch : ch, "Marcellus, monospace") - w(isMark ? "A" + ch : ch, "Marcellus, cursive")) < 0.01;
+      const dec = ch.normalize("NFD");
+      const composed = !isMark && dec.length > 1 ? (same(px(ch, "Marcellus, monospace"), px(dec, "Marcellus, monospace")) ? "identical" : "differs") : "—";
+      const base = dec.charAt(0);
+      const wv = !isMark ? (w(ch, "Marcellus, monospace") - w(base, "Marcellus, monospace")).toFixed(2) : "—";
+      out.push(pad(shown, 7) + pad("U+" + cp.toString(16).toUpperCase().padStart(4, "0"), 9) + pad(covers(faces, cp) ? "yes" : "NO", 20) + pad(loaded(faces, cp) ? "yes" : "no", 13) + pad(fbSame ? "yes (Marcellus)" : "NO → fallback font", 25) + pad(composed, 17) + wv);
+    });
+    // Pass 3: the Newsreader display preset against every dynamic-title test string.
+    const strs = [this.TITLES.medium, this.TITLES.tran, this.TITLES.nguyen, this.TITLES.viMedium, this.TITLES.viLong, this.TITLES.verylong, "Đặng · Phương · Hà Nội"].map((s) => s.toUpperCase());
+    out.push("", "NEWSREADER DISPLAY PRESET (400, uppercase) — per-glyph fallback test inside each dynamic-title string");
+    strs.forEach((s) => {
+      const bad = Array.from(new Set(Array.from(s))).filter((ch) => ch.trim() && Math.abs(w(ch, "400 64px Newsreader, monospace".replace("400 64px ", "")) - 0) >= 0 && (() => { x.font = "400 64px Newsreader, monospace"; const a = x.measureText(ch).width; x.font = "400 64px Newsreader, cursive"; const b = x.measureText(ch).width; return Math.abs(a - b) > 0.01; })());
+      const cov = Array.from(s).every((ch) => !ch.trim() || covers(nfaces, ch.codePointAt(0)));
+      out.push("  " + pad(s.length > 44 ? s.slice(0, 43) + "…" : s, 46) + "range " + (cov ? "✓" : "✗") + "   fallback glyphs " + (bad.length ? "✗ " + bad.join(" ") : "✓ none"));
+    });
+    // Wrapped-line clearance for Vietnamese caps: stacked marks above vs dot-below.
+    x.font = "400 100px Newsreader";
+    const up = x.measureText("ẦỄẤỖ"), dn = x.measureText("ẶỘẬỆ"), cap = x.measureText("H");
+    const need = (up.actualBoundingBoxAscent + dn.actualBoundingBoxDescent) / 100;
+    out.push("", "Wrapped-line clearance @ Newsreader 400: tallest stacked mark ascent " + (up.actualBoundingBoxAscent / 100).toFixed(3) + "em · dot-below descent " + (dn.actualBoundingBoxDescent / 100).toFixed(3) + "em · cap height " + (cap.actualBoundingBoxAscent / 100).toFixed(3) + "em",
+      "  line-height needed for zero ink overlap between a dot-below line and a stacked-mark line: " + need.toFixed(3) + "  ·  0.98 " + (need <= 0.98 ? "✓" : "✗ overlaps by " + ((need - 0.98) * 100).toFixed(1) + "% of size") + "  ·  1.04 " + (need <= 1.04 ? "✓" : "✗") + "  ·  1.1 " + (need <= 1.1 ? "✓" : "✗"));
+    this._lhNeed = need;
+    tbl.textContent = out.join("\n");
+    this._viet = out;
+  }
+
+  cpl(el) {
+    const cs = getComputedStyle(el), t = el.textContent.trim();
+    this.ctx.font = cs.fontStyle + " " + cs.fontWeight + " " + cs.fontSize + " " + cs.fontFamily;
+    const avg = this.ctx.measureText(t).width / t.length;
+    return Math.round(el.getBoundingClientRect().width / avg);
+  }
+  wraps(dl) { return Array.from(dl.children).filter((row) => { const dt = row.children[0].getBoundingClientRect().height, dd = row.children[1].getBoundingClientRect().height; return dd > dt * 1.5; }).length; }
+  lines(el) { const cs = getComputedStyle(el); const lh = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize); return Math.round(el.getBoundingClientRect().height / lh); }
+
+  geo() {
+    const W = this.W(), H = this.H(), vp = this.vp(), pg = this.pg();
+    const flowT = this.q('[data-title="flow"]');
+    const tEl = this._mode === "overlay" ? this.q('[data-title="overlay"]') : flowT;
+    const tR = tEl.getBoundingClientRect(), pR = pg.getBoundingClientRect(), heroR = this.q("[data-hero]").getBoundingClientRect();
+    const size = parseFloat(getComputedStyle(tEl).fontSize), lh = parseFloat(this.opt("titleLH", "0.98"));
+    const cap = this.q("[data-cap]");
+    const nx = this.q("[data-f-next]");
+    return {
+      W, H, pageH: Math.round(pR.height), overflow: vp.scrollWidth - vp.clientWidth,
+      hH: this._hH, heroPct: Math.round(this._hH / H * 100), mode: this._mode, why: this._why,
+      box: Math.round(tEl.parentElement.getBoundingClientRect().width), size: Math.round(size * 10) / 10,
+      lines: Math.round(tR.height / (size * lh)), blockH: Math.round(tR.height),
+      blockPct: Math.round(tR.height / this._hH * 100), titleBottom: Math.round(tR.bottom - pR.top),
+      heroBottom: Math.round(heroR.bottom - pR.top),
+      scrimPct: Math.round(this._scrim.sb / this._hH * 100), alpha: this._scrim.alpha,
+      capStack: this._capStack, capW: Math.round(cap.getBoundingClientRect().width), capCpl: this.cpl(cap),
+      leadCpl: this.cpl(this.q("[data-lead]")), bodyCpl: this.cpl(this.q("[data-body]")),
+      metaW: Math.round(this.q("[data-meta]").getBoundingClientRect().width), metaWrap: this.wraps(this.q("[data-meta]")),
+      credW: Math.round(this.q("[data-credits]").getBoundingClientRect().width), credWrap: this.wraps(this.q("[data-credits]")),
+      codaH: this._codaH, nextSize: Math.round(parseFloat(getComputedStyle(nx).fontSize) * 10) / 10, nextLines: this.lines(nx),
+      vidW: Math.round(this.q("[data-vid]").getBoundingClientRect().width), vidH: Math.round(this.q("[data-vid]").getBoundingClientRect().height)
+    };
+  }
+
+  sweep() {
+    const saved = this.ov;
+    const widths = [1440, 1024, 768, 600, 430, 390, 375];
+    const titles = ["short", "medium", "tran", "nguyen", "viMedium", "long", "viLong", "verylong"];
+    const pad = (s, n) => String(s).padEnd(n);
+    const A = [], B = [], P = [];
+    widths.forEach((w) => {
+      titles.forEach((t) => {
+        this.ov = { width: String(w), height: "auto", title: t }; this.layout();
+        const g = this.geo();
+        A.push(pad(w, 6) + pad(t, 10) + pad(g.mode + (g.why ? " (" + g.why + ")" : ""), 34) + pad(g.box + "px", 8) + pad(g.size + "px", 9) + pad(g.lines, 5) + pad(g.blockH + "px", 8) + pad(g.mode === "overlay" ? g.blockPct + "%" : "—", 7) + pad(g.mode === "overlay" ? g.scrimPct + "% · α" + g.alpha.toFixed(2) : "none", 16) + (g.titleBottom <= g.H ? "✓" : "✗ below fold"));
+        this.ov = { width: String(w), height: "auto", title: t, fallbackAt: "never", guard: false, titleMode: "overlay" }; this.layout();
+        const o = this._ovg;
+        B.push(pad(w, 6) + pad(t, 10) + pad(Math.round(o.box) + "px", 8) + pad(Math.round(o.size * 10) / 10 + "px", 9) + pad(o.lines, 5) + pad(Math.round(o.th) + "/" + this._hH, 10) + pad(Math.round(o.th / this._hH * 100) + "%", 7) + pad(o.collAff ? "✗ affordance" : "✓", 14) + (o.collBack ? "✗ back line" : "✓"));
+      });
+      this.ov = { width: String(w), height: "auto" }; this.layout();
+      const g = this.geo(), jr = this._jr;
+      P.push(pad(w + "×" + g.H, 11) + pad(g.pageH + "px", 9) + pad((g.pageH / g.H).toFixed(1), 6) + pad(g.hH + " (" + g.heroPct + "%)", 12) + pad(g.overflow > 1 ? "✗ " + g.overflow : "✓", 5) + pad(this._metaStack ? "stacked" : "side", 9) + pad(g.leadCpl + "/" + g.bodyCpl, 8) + pad(g.metaWrap ? "✗" + g.metaWrap : "✓", 5) + pad(jr.rows.map((r) => r.cells.length).join("/"), 9) + pad((g.capStack ? "below " : "beside ") + g.capCpl + "cpl", 14) + pad(g.vidW + "×" + g.vidH, 10) + pad(g.credWrap ? "✗" + g.credWrap : "✓", 5) + pad(g.codaH, 6) + g.nextSize + "px/" + g.nextLines + "L");
+    });
+    const J = [];
+    ["real", "probe"].forEach((set) => {
+      [1440, 1024, 768, 699, 600, 540, 480, 450, 430, 390, 375].forEach((w) => {
+        const r = this.pack(this.STILLS[set], w);
+        const just = r.rows.filter((x) => x.full), all = r.rows.reduce((a, x) => a.concat(x.cells), []);
+        const nar = just.length ? Math.min.apply(null, just.reduce((a, x) => a.concat(x.cells.map((c) => c.w)), [])) : 0;
+        const order = all.map((c) => c.pos).every((v, i) => v === i + 1);
+        const aspect = all.every((c) => Math.abs(c.w / c.h - c.ar) / c.ar < 0.02);
+        const starved = just.some((x) => x.cells.length > 1 && x.cells.some((c) => c.w < r.floor - 1));
+        const ragged = r.rows.filter((x) => !x.full).map((x) => x.cells.map((c) => c.w).join("+")).join(" ");
+        J.push(pad(set, 7) + pad(w, 6) + pad(r.T, 3) + pad(Math.round(r.target), 6) + pad(Math.round(r.floor), 6) + pad(r.rows.map((x) => x.cells.length).join("/"), 10) + pad(r.rows.map((x) => x.cells[0].h).join(","), 22) + pad(nar ? nar + "px" : "—", 8) + pad(ragged || "—", 12) + pad(starved ? "✗" : "✓", 4) + pad(order ? "✓" : "✗", 4) + (aspect ? "✓" : "✗"));
+      });
+    });
+    this.ov = saved;
+    const m = this.q("[data-matrix]");
+    m.textContent = [
+      "A · TITLE MATRIX — as derived (fallback < " + this.opt("fallbackAt", "700") + ", guard " + (this.opt("guard", true) ? "on" : "off") + ", lh " + this.opt("titleLH", "0.98") + ", scrim " + this.opt("scrim", "derived") + ")",
+      pad("W", 6) + pad("title", 10) + pad("mode", 34) + pad("box", 8) + pad("size", 9) + pad("ln", 5) + pad("block", 8) + pad("%hero", 7) + pad("scrim · α@cap", 16) + "title in 1st screen",
+      ...A, "",
+      "B · OVERLAY FORCED at every width (fallback never, guard off) — what the overlay would do",
+      pad("W", 6) + pad("title", 10) + pad("box", 8) + pad("size", 9) + pad("ln", 5) + pad("block/hero", 10) + pad("%", 7) + pad("affordance", 14) + "back line",
+      ...B, "",
+      "C · PAGE RHYTHM — medium title, as derived",
+      pad("viewport", 11) + pad("page", 9) + pad("scr", 6) + pad("hero", 12) + pad("ovf", 5) + pad("meta", 9) + pad("cpl L/B", 8) + pad("wrap", 5) + pad("stills", 9) + pad("caption", 14) + pad("video", 10) + pad("cred", 5) + pad("coda", 6) + "next",
+      ...P, "",
+      "D · JUSTIFIED_ROWS v2 on the Project Detail stills — real = measured file aspects · probe = desktop's authored data-ar (geometry only)",
+      pad("set", 7) + pad("W", 6) + pad("T", 3) + pad("tgt", 6) + pad("floor", 6) + pad("rows", 10) + pad("row heights", 22) + pad("narrow", 8) + pad("ragged", 12) + pad("stv", 4) + pad("ord", 4) + "asp",
+      ...J
+    ].join("\n");
+  }
+
+  audit() {
+    const el = this.q("[data-audit]"); if (!el) return;
+    const g = this.geo(), W = g.W, H = g.H, pad = (s, n) => String(s).padEnd(n);
+    const hero = this.q("[data-hero]"), started = hero.dataset.started === "1";
+    const bA = W / this._hH, fA = (this._ar && this._ar.c1) || null, f = this.opt("heroFit", "cover-cover");
+    const ff = this.opt("poster", "film-frame") === "film-frame" && this._frameURL;
+    let fitLine = "poster " + (ff ? "c1 frame " + (fA || 1.778).toFixed(3) : "mtm-table (unrelated) " + this.POSTER_AR.toFixed(3)) + "  ·  box " + bA.toFixed(3);
+    if (fA) {
+      const bars = fA > bA ? Math.round(this._hH - W / fA) + "px vertical (top+bottom)" : Math.round(W - this._hH * fA) + "px horizontal (left+right)";
+      const jump = f === "cover-contain" ? Math.max(bA / fA, fA / bA) : 1;
+      fitLine += "  ·  film c1 " + fA.toFixed(3) + " (" + this._dims.c1 + ")  ·  " + f + "  ·  contain bars " + bars + "  ·  play reframe ×" + jump.toFixed(3) + (f === "cover-contain" ? " (" + Math.round((jump - 1) * 100) + "%)" : "");
+    } else fitLine += "  ·  film aspect: probing…";
+    const back = this._mode === "fallback" ? this.q("[data-back-flow]") : this.q("[data-back]");
+    const bR = back.getBoundingClientRect();
+    const all = this.q("[data-f-all]").getBoundingClientRect();
+    const jr = this._jr, just = jr.rows.filter((r) => r.full);
+    const nar = just.length ? Math.min.apply(null, just.reduce((a, r) => a.concat(r.cells.map((c) => c.w)), [])) : 0;
+    const imgs = this.qa("[data-rows] img"), set = this.opt("stills", "real");
+    const dev = set === "real" && imgs.every((i) => i.naturalWidth) ? Math.max.apply(null, imgs.map((i, k) => { const nat = i.naturalWidth / i.naturalHeight; const c = this.STILLS.real[k]; return Math.abs(nat - c.ar) / nat * 100; })) : null;
+    const codaImg = this.q("[data-coda] img"), cA = W / this._codaH, vis = Math.min(cA / this.CODA_AR, this.CODA_AR / cA);
+    const vc = this.q("[data-vid]");
+    const siteOn = this.opt("siteHeader", false);
+    const navLinks = this.qa("[data-site-nav] a").map((a) => Math.round(a.getBoundingClientRect().height));
+    el.textContent = [
+      pad("viewport", 18) + W + " × " + H + "   ·   page " + g.pageH + "px   ·   " + (g.pageH / H).toFixed(1) + " screens   ·   horizontal overflow " + (g.overflow > 1 ? "✗ " + g.overflow + "px" : "✓ none"),
+      pad("title mode", 18) + g.mode + (g.why ? "  (" + g.why + ")" : "") + "   ·   activation " + (started ? "ACTIVATED — overlay, bottom scrim, affordance dismissed" : "idle"),
+      pad("hero", 18) + W + " × " + this._hH + "px   ·   " + g.heroPct + "% of viewport height   ·   affordance " + this._aff + "px (whole frame is the hit area)",
+      pad("hero fit", 18) + fitLine,
+      pad("title", 18) + "box " + g.box + "px   ·   clamp(" + this.TITLE.min + "px, " + (this.TITLE.coef * 100).toFixed(3) + "cqw, " + this.TITLE.max + "px) → " + g.size + "px" + (g.size >= this.TITLE.max - 0.5 ? " (max engaged)" : g.size <= this.TITLE.min + 0.5 ? " (min engaged)" : "") + "   ·   " + g.lines + " line(s)   ·   lh " + this.opt("titleLH", "0.98") + "   ·   block " + g.blockH + "px" + (g.mode === "overlay" ? " = " + g.blockPct + "% of hero" : ""),
+      pad("", 18) + "overlay geometry: top " + Math.round(this._ovg.top) + "px   ·   affordance " + (this._ovg.collAff ? "✗ collides" : "✓ clear") + "   ·   back line " + (this._ovg.collBack ? "✗ collides" : "✓ clear") + "   ·   title bottom " + g.titleBottom + "px " + (g.titleBottom <= H ? "✓ in first screen" : "✗ below first screen"),
+      pad("scrim", 18) + (g.mode === "overlay" ? "bottom " + this._scrim.sb + "px (" + g.scrimPct + "% of hero)   ·   α at title cap line " + this._scrim.alpha.toFixed(3) + " (desktop 0.244)   ·   " + (this._scrim.covered ? "✓ title inside scrim" : "✗ title exceeds scrim") : "bottom: none (no overlay)") + "   ·   top " + (g.mode !== "fallback" ? this._scrim.st + "px" : "none (back line left the frame)") + "   ·   mode " + this.opt("scrim", "derived"),
+      pad("back to works", 18) + (g.mode === "fallback" ? "in flow under hero" : "in hero frame") + "   ·   hit " + Math.round(bR.width) + " × " + Math.round(bR.height) + "px " + (bR.height >= 44 ? "✓ ≥44" : "✗ <44") + "   ·   site header " + (siteOn ? "ON (stand-in) · link heights " + navLinks.join("/") + "px " + (navLinks.every((h) => h >= 44) ? "✓" : "✗ <44") : "off (as locked)"),
+      pad("meta + statement", 18) + (this._metaStack ? "stacked · " + this.opt("narrowOrder", "semantic") : "side by side") + "   ·   dl " + g.metaW + "px " + (g.metaWrap ? "✗ " + g.metaWrap + " wrapped row(s)" : "✓ no label/value wrap") + "   ·   lead " + g.leadCpl + " cpl   ·   body " + g.bodyCpl + " cpl",
+      pad("JUSTIFIED_ROWS", 18) + "set " + set + "   ·   T " + jr.T + "   ·   target " + Math.round(jr.target) + "   ·   floor " + Math.round(jr.floor) + "   ·   rows " + jr.rows.map((r) => r.cells.length).join("/") + "   ·   heights " + jr.rows.map((r) => r.cells[0].h).join(",") + "   ·   narrowest justified " + (nar ? nar + "px" : "—") + (nar && nar < jr.floor - 1 ? " ✗ STARVED" : " ✓") + (dev !== null ? "   ·   declared vs file aspect max Δ " + dev.toFixed(2) + "%" : ""),
+      pad("supporting loop", 18) + g.vidW + " × " + g.vidH + "px   ·   caption " + (g.capStack ? "below" : "beside") + " · " + g.capW + "px · " + g.capCpl + " cpl   ·   " + (vc.dataset.state || "idle") + "   ·   muted " + (vc.querySelector("video").muted ? "✓" : "✗") + "   ·   n3 " + ((this._dims && this._dims.n3) || "…") + " in 16:9 cover",
+      pad("credits", 18) + g.credW + "px   ·   " + (g.credWrap ? "✗ " + g.credWrap + " wrapped name(s)" : "✓ no wrap"),
+      pad("coda", 18) + W + " × " + g.codaH + "px   ·   box " + cA.toFixed(3) + " vs native " + this.CODA_AR + "   ·   " + Math.round(vis * 100) + "% of the frame visible" + (codaImg.naturalWidth ? "" : " (loading)"),
+      pad("footer", 18) + "next " + g.nextSize + "px" + (g.nextSize <= this.NEXT.min + 0.5 ? " (min engaged)" : g.nextSize >= this.NEXT.max - 0.5 ? " (max engaged)" : "") + " · " + g.nextLines + " line(s)   ·   All works hit " + Math.round(all.height) + "px " + (all.height >= 44 ? "✓" : "✗ <44"),
+      pad("passes", 18) + (this._failed.length ? "✗ FAILED: " + this._failed.join(", ") : "✓ all layout passes ran") + "   ·   motion " + (this.reduced() ? "reduced — supporting loop released to poster; hero still click-to-play" : "auto")
+    ].join("\n");
+  }
+}
+</script>
+</body>
+</html>

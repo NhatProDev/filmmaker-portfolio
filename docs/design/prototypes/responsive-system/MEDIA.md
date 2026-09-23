@@ -44,8 +44,20 @@ support.js                               prototype runtime support
 
 **v2 is the selected shared responsive candidate. It is not approved.** Its own
 header says so. `design-system.md` §11.7 records `JUSTIFIED_ROWS` as **SHARED
-RESPONSIVE CANDIDATE — SYSTEM VALIDATED**, which is a system-level grade: no
-page has been validated with it.
+RESPONSIVE CANDIDATE — SYSTEM VALIDATED**, which is a system-level grade.
+
+**Page-level use, as of 2026-09-23:**
+
+- **Home consumed `JUSTIFIED_ROWS` successfully** at page level
+  (`design-system.md` §11.8, `page-specifications.md` §1.7).
+- **Project Detail tested it successfully as an algorithm** — every invariant
+  held — **but rejected that presentation mode** for its specific
+  four-wide-still authored composition, and uses a structured GRID instead
+  (`design-system.md` §11.9, `page-specifications.md` §3.12).
+- **Art Works remains pending responsive validation.**
+
+Page results do not change the system-level grade, and none of this directory's
+evidence is rewritten by them.
 
 **v1 is retained unchanged as rejected / comparison evidence.** It holds the
 sequence-average reference that v2 replaced, and the starved-cell failure of the

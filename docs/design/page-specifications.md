@@ -26,7 +26,7 @@ implies approval.**
 |---|---|---|---|---|---|
 | **Home** | **VISUALLY EXPLORED** | **RESPONSIVE VALIDATED** | ✅ candidate | ✗ none | A proposed default composition, block by block, validated from 1440 down to 375 |
 | **Art Works** | **VISUALLY EXPLORED** | **PENDING RESPONSIVE VALIDATION** | ✅ candidate (2C v2) | ✅ ref 3 | A proposed structure, element by element |
-| **Project Detail** | **VISUALLY EXPLORED** | **PENDING RESPONSIVE VALIDATION** | ✅ candidate (1B v2) | ✅ ref 4 | A proposed composition, block by block |
+| **Project Detail** | **VISUALLY EXPLORED** | **RESPONSIVE VALIDATED** | ✅ candidate (1B v2) | ✅ ref 4 | A proposed composition, block by block, validated from 1440 down to 375 |
 | **About Me** | **VISUALLY EXPLORED** | **PENDING RESPONSIVE VALIDATION** | ✅ candidate (3B v2) | ✅ refs 1, 2 | A proposed composition, section by section |
 | **Contact** | **VISUALLY EXPLORED** | **PENDING RESPONSIVE VALIDATION** | ✅ candidate (4B v2) | ✗ none | A proposed composition, element by element |
 | **Private Project Gate** | **VISUALLY EXPLORED** | **RESPONSIVE VALIDATED** | ✅ candidate (5B v2) | ✗ none | A proposed composition with six states, exercised at four narrow widths and at constrained height |
@@ -35,15 +35,18 @@ implies approval.**
 candidate recorded in `docs/design/prototypes/`, and every prototype states in
 its own header that it approves nothing.
 
-**Two pages are RESPONSIVE VALIDATED** — the **Private Project Gate** (§6.9)
-and **Home** (§1.7), from
-`prototypes/private-gate/private-gate-5b-responsive.md` and
-`prototypes/home/home-baseline-v2-responsive.md`. Both are **candidates on both
-axes**: validation reproduced and answered real failures, and approves nothing.
-Neither is Design Approved, production-ready or implementation complete.
+**Three pages are RESPONSIVE VALIDATED** — the **Private Project Gate** (§6.9),
+**Home** (§1.7) and **Project Detail** (§3.12), from
+`prototypes/private-gate/private-gate-5b-responsive.md`,
+`prototypes/home/home-baseline-v2-responsive.md` and
+`prototypes/project-detail/project-detail-1b-v2-responsive.md`. All three are
+**candidates on both axes**: validation reproduced and answered real failures,
+and approves nothing. None is Design Approved, production-ready or
+implementation complete.
 
-**The other four remain pending responsive validation** — for them the
-automatic safe-stack floor (`design-system.md` §11.2) is all that is guaranteed.
+**The other three remain pending responsive validation** — Art Works, About Me
+and Contact. For them the automatic safe-stack floor (`design-system.md` §11.2)
+is all that is guaranteed.
 
 Home is the first page to **consume both shared responsive system candidates**
 in real use — `JUSTIFIED_ROWS` (`design-system.md` §11.7) and display
@@ -270,7 +273,7 @@ transition** (with four items the coda is already one-up by 600, so the step
 falls above Home's sensitive range).
 
 **`JUSTIFIED_ROWS` has now been successfully consumed at page level by Home.**
-This says nothing about Project Detail or Art Works, which remain pending.
+This says nothing about any other page. Project Detail later tested `JUSTIFIED_ROWS` and **rejected the presentation mode** for its own four stills (§3.12); Art Works has not been validated with it.
 
 ##### Other Home derivations **[DEFAULT — HOME-SPECIFIC]**
 
@@ -497,6 +500,22 @@ affordance, not a CMS field.
 **Mobile and tablet remain pending visual validation.** The candidate structure
 was exercised at desktop widths only.
 
+**LOCKED INPUT for Art Works responsive validation — Project Owner ruling,
+2026-09-23.** Art Works currently renders dynamic `p.title` strings in
+Marcellus. **Its dynamic project-name strings must use a Newsreader-backed
+`font-display` preset** — the dynamic project-title display preset
+(`design-system.md` §1.1). Marcellus has demonstrated incomplete Vietnamese
+coverage and falls back per glyph inside words (§3.12).
+
+- This is an **input to** the upcoming validation, not a result of it. **Art
+  Works is not responsive validated** by it.
+- **The Art Works prototype is not modified in this pass.** It still renders
+  Marcellus; the validation pass applies the ruling.
+- **Project Detail's numerical values are not reused.** Art Works derives its
+  own coefficient, minimum, maximum and line-height against its own alignment
+  compositions during its page validation. None is decided here.
+- The preset **never switches face by detected language**.
+
 Carried responsive questions, deliberately **not** solved in architecture:
 
 1. **Narrow-width index layout.** Index columns follow project count (1 / 2 / 3);
@@ -555,17 +574,26 @@ cover aspect must be available before layout or the first paint reflows.
 
 ## 3. Project Detail
 
-> **Maturity: VISUALLY EXPLORED.** Candidate composition **1B v2**, **not approved**.
+> **Maturity: VISUALLY EXPLORED** (desktop) · **RESPONSIVE VALIDATED**
+> (narrow width). Candidate composition **1B v2**, **not approved on either
+> axis** — not Design Approved, not production-ready, not implementation
+> complete.
 >
-> Evidence: `docs/design/prototypes/project-detail/Project Detail 1B v2.dc.html`
-> and `project-detail-1b-v2.md`. Sibling directions 1A and 1C are retained in
+> Desktop evidence:
+> `docs/design/prototypes/project-detail/Project Detail 1B v2.dc.html` and
+> `project-detail-1b-v2.md`. Sibling directions 1A and 1C are retained in
 > `Project Detail Directions.dc.html` as exploration record only. Reference 4
 > continues to apply.
 >
-> The bounded HERO title-overlay **capability is approved** (ADR-0010); its
-> visual use here remains candidate. The composition still carries one open
-> media question (poster/film `fit`, §3.9) and mobile, which is identified and
-> not designed.
+> Responsive evidence: `Project Detail 1B v2 Responsive.dc.html` and
+> `project-detail-1b-v2-responsive.md` (§3.12). **The locked desktop candidate
+> is unchanged by it** — the derivative is a separate file.
+>
+> The bounded HERO title-overlay **capability is approved** (ADR-0010), and its
+> narrow-width behaviour is now validated here as a candidate (§3.12). The
+> poster/film `fit` question is **resolved for this page** as `COVER → COVER`
+> (§3.9 item 2). The letterbox method remains an engineering / media-pipeline
+> question and no longer blocks this page.
 
 ### 3.1 Purpose
 
@@ -696,54 +724,64 @@ the anchor and column placement chosen for this page, and the narrow-width
 stacked fallback, which ADR-0010 requires the system to derive but leaves to
 mobile design validation. The prototype's default is evidence, not the design.
 
-**2. Poster / film `fit` mismatch — [CARRIED MEDIA QUESTION].** The hero poster
-renders `COVER` and the film plays `CONTAIN`, so pressing play reframes. This
-follows from §7.3 itself, which lists hero surfaces under `COVER` and primary
-films under `CONTAIN` — the Project Detail hero is both at once. The prototype
-records a **proposed reading, not applied**: a `CLICK_TO_PLAY` poster should
-inherit the film's `fit`. Coupled to the unresolved letterbox method
-(`design-system.md` §16 item 1) and the deferred focal point (§7.6).
+**2. Poster / film `fit` — RESOLVED FOR THIS PAGE: `COVER → COVER`.**
 
-**ADR-0010 deliberately did not decide this** — it fixes no relationship between
-idle framing and playback framing.
+*As originally recorded:* the hero poster rendered `COVER` and the film played
+`CONTAIN`, so pressing play reframed. This followed from §7.3 itself, which
+lists hero surfaces under `COVER` and primary films under `CONTAIN` — the
+Project Detail hero is both at once. The proposed reading was that a
+`CLICK_TO_PLAY` poster should inherit the film's `fit`.
+
+**Resolution (responsive validation, 2026-09-23, §3.12).** A controlled
+same-frame test — the poster drawn from the film itself, so idle and playback
+share geometry and subject — measured the activation scale directly:
+
+| Pairing | Result |
+|---|---|
+| `COVER → COVER` | **×1.000 — no activation reframe** at 1440×1000, 1440×600, 768×1024 and 390×844 |
+| `CONTAIN → CONTAIN` | ×1.000 — also continuous |
+| `COVER → CONTAIN` | **reframes at every viewport, ×0.963 to ×0.578 — rejected** |
+
+- **The proposed reading is confirmed on this page: idle framing must equal
+  playback framing.** A `CLICK_TO_PLAY` poster takes the film's `fit`.
+- **`COVER → CONTAIN` is rejected for this page** on evidence: it introduces a
+  visible activation scale / reframe change.
+- **`COVER → COVER` is selected by Project Owner decision.** Recorded precisely:
+  `CONTAIN → CONTAIN` was *also* continuous, so continuity alone does not choose
+  between the two. The evidence notes that the comparison is dominated by the
+  film's encoded letterbox — under `COVER` 21–24% of the hero is still encoded
+  black at standard viewports, under `CONTAIN` 27–56%.
+- **This departs from §7.3's `[DEFAULT]`** of `CONTAIN` for primary films, and
+  from its `[ADVISORY]` "a film the visitor sits down to watch is shown whole".
+  §7.3's `[INVARIANT]` is only that `fit` is **per-block** — which this honours.
+  The departure is a per-block choice on this page, not a system change.
+
+**The source film carries encoded black bars** (measured from pixels: 87px top
+and bottom, 0 sides, active picture ≈ 2.344 inside a 1.778 frame). **They are
+not compensated with CSS**, and must not be (`design-system.md` §7.5, §13).
+Structural active-area / letterbox handling remains an **engineering /
+media-pipeline question** (`design-system.md` §16 item 1) and **no longer
+blocks this page**.
+
+**ADR-0010 deliberately did not decide idle-vs-playback framing**, and this
+resolution does not amend it — it is a per-block presentation choice within
+`fit`, which ADR-0008 already makes configurable.
 
 ### 3.10 Pending visual exploration **[PENDING VISUAL EXPLORATION]**
 
 Project metadata treatment — year, category, client, credits — and specifically
 **how to present them without the middle-dot meta string** that §13 forbids ·
 the transport/controls design for `CLICK_TO_PLAY` · credits block composition ·
-next/previous project affordance, if any · **mobile composition, including the
-overlaid title's narrow-width fallback** · how the signature transition lands and
-reverses on this page.
+next/previous project affordance, if any · ~~**mobile composition, including the
+overlaid title's narrow-width fallback**~~ — **responsive-validated as a
+candidate, §3.12** · how the signature transition lands and reverses on this
+page.
 
-**`JUSTIFIED_ROWS` — the supporting row may now be tested against the shared
-system candidate** (`design-system.md` §11.7). The risk recorded for this page
-— four stills in one row will not survive 375px — is the case that candidate
-addresses: below 700px the mode resolves to a single column of native-aspect
-items, with no starved cell and no crop.
-
-**Project Detail remains PENDING RESPONSIVE VALIDATION.** The rule is available
-to test against; it has not been tested here, and it touches none of this page's
-other open items — the HERO overlay's narrow-width fallback, the poster/film
-`fit` mismatch and the metadata treatment are all untouched by it.
-
-**Display typography — the project title may use the shared sizing method**
-(`design-system.md` §1.4). Two consequences matter specifically here, because
-**project titles are not known at design time**:
-
-- **An unknown-length title wraps. It does not trigger shrink-to-fit.** The
-  evidence rejects shrink-to-fit outright: it gave one project a 94px title and
-  another a 42px title in the same template, making size encode title length
-  rather than hierarchy. A long title reaching 223% of its box wraps to 2–3
-  lines and stays at full size.
-- **What a wrapped title should look like is unresolved.** **Line-height for
-  wrapped display type and any maximum line count are both open**
-  (`design-system.md` §16 item 18), and the **exact mobile title treatment
-  remains a page-level validation question** — including its interaction with
-  the HERO overlay's derived narrow-width stacked fallback.
-
-**Project Detail is not validated by this experiment.** Its long-title
-composition is explicitly carried forward as a page-level question.
+**The responsive record for this page is §3.12.** The earlier notes here — that
+`JUSTIFIED_ROWS` and the display-typography method were *available to test* —
+were overtaken by that validation, which tested both. **Display typography was
+consumed; `JUSTIFIED_ROWS` was tested and rejected as the presentation mode for
+this page's stills** (§3.12).
 
 ### 3.11 States
 
@@ -753,6 +791,237 @@ composition is explicitly carried forward as a page-level question.
 | **403 locked** | Private, no access cookie → the gate, §6. Error envelope only. |
 | **Loading** | Poster-first. |
 | **Media not ready** | Empty well. |
+
+### 3.12 Responsive — **RESPONSIVE VALIDATED — candidate** (2026-09-23)
+
+Accepted by the Project Owner. Evidence:
+`docs/design/prototypes/project-detail/Project Detail 1B v2 Responsive.dc.html`
+and `project-detail-1b-v2-responsive.md` (three passes; pass 3 is final). **The
+locked desktop candidate `Project Detail 1B v2.dc.html` /
+`project-detail-1b-v2.md` is untouched** — byte-identical to its committed
+version.
+
+**Not** Design Approved, **not** production-ready, **not** implementation
+complete. Every value below is **[DEFAULT]** and **PROJECT-DETAIL-SPECIFIC**
+unless it says otherwise.
+
+**Coverage.** 1440·1024·768·699·600·540·480·450·430·390·375 at auto or fixed
+heights including 1000·900·1024·932·844·812·600. **No horizontal overflow at any
+width**, measured as `scrollWidth − clientWidth`.
+
+#### HERO fit — `COVER → COVER`
+
+Resolved in §3.9 item 2: **no activation reframe** under `COVER → COVER`;
+**`COVER → CONTAIN` rejected** for its visible activation reframe. **Encoded
+letterbox bars are not compensated with CSS**; structural handling remains an
+engineering / media-pipeline question.
+
+#### Phone HERO height **[DEFAULT — PROJECT-DETAIL-SPECIFIC]**
+
+```text
+W >= 700 : h = min(0.78 × H, 0.5417 × W, 900)     (unchanged desktop rule)
+W <  700 : h = max(0.5417 × W, 0.30 × H)
+```
+
+| Viewport | Hero | Share of first screen |
+|---|---|---|
+| 430 × 932 | ~280px | 30% |
+| 390 × 844 | ~253px | 30% |
+| 375 × 812 | ~244px | 30% |
+
+At 600 × 900 the width term governs (325px); only phones change. **30% was the
+first height at which the film reads as the opening event** rather than a strip;
+33–36% added presence mainly by cropping. The gain is real only under `COVER` —
+under `CONTAIN` extra height is pure bar — so **this derivation depends on the
+`COVER → COVER` fit above**.
+
+**This is PROJECT-DETAIL-SPECIFIC. It is not a global HERO-height rule**, and
+it is unrelated to Home's HERO derivation (§1.7).
+
+#### Dynamic project-name typeface — Newsreader-backed `font-display` preset
+
+**Marcellus does not reliably cover Vietnamese.** Diagnosed through the
+browser's own font API, not screenshots: the served Marcellus faces are
+Google's `latin` and `latin-ext` subsets only; the Vietnamese block
+U+1EA0–1EF1 falls outside both, and `Ư`/`Ơ` are claimed by the range but absent
+from the file. The browser handles the gap by **per-glyph fallback inside
+words** — `TRẦN` renders as Marcellus T, R, N plus a fallback `Ầ`. NFC and NFD
+render identically, so normalisation is not the cause.
+
+**Dynamic project-name strings on this page therefore render through the
+Newsreader-backed `font-display` preset** — the dynamic project-title display
+preset (`design-system.md` §1.1) — at minimum:
+
+- the **HERO project title** (overlay and stacked)
+- the **next-project title**
+
+**Newsreader's Vietnamese coverage is verified, not assumed.** Each test string
+was measured under two different fallback stacks (`Newsreader, monospace` and
+`Newsreader, cursive`); identical widths mean Newsreader drew the glyph, any
+difference means a fallback did. **No glyph fell back** in any string —
+`MADE TO MEASURE`, `TRẦN`, `NGUYỄN`, `MÙA THU HÀ NỘI`, the long Vietnamese
+title, the very-long stress title, and `ĐẶNG · PHƯƠNG · HÀ NỘI`. Newsreader
+serves six faces including the Vietnamese range.
+
+**This does not globally replace Marcellus.** Static, Latin-only Marcellus usage
+elsewhere is unaffected. There is no language detection — **the preset never
+switches face by language**, so English and Vietnamese titles share one
+hierarchy — no schema change and no change to the body face.
+
+**The strings remain semantically `font-display`.** They are not moved to
+`font-body`. The role question this first raised is **resolved by Project Owner
+ruling** (`design-system.md` §1.1, §16 item 20).
+
+#### Project Detail typography preset **[DEFAULT — PROJECT-DETAIL-SPECIFIC]**
+
+Consumes the shared composition-relative bounded method (`design-system.md`
+§1.4). Reference box: the Project Detail alignment composition for each role.
+
+These are the **dynamic project-title display preset's own metrics** — separate
+from `font-body`'s, although both use Newsreader. **Body metrics are never
+reused for project titles** (`design-system.md` §1.1).
+
+| Role | Reference box | `font-size` | Line-height |
+|---|---|---|---|
+| **Project title** | its own span (cols 1–8; 1–12 when stacked) | `clamp(27px, 9.094cqw, 80px)` | **0.98** candidate |
+| **Next-project title** | cols 4–10 (1–12 stacked) | `clamp(27px, 6.913cqw, 53px)` | **0.98** candidate |
+
+**The coefficients are re-derived, never inherited.** Newsreader's measured
+advance is about 10% wider than Marcellus's, so each coefficient is the
+Marcellus value scaled by the ratio of advances for **equal optical fill** —
+`MADE TO MEASURE` renders 813px wide in the same 879px box (92.5%) in either
+face, one line in both. The face changes; the composition does not.
+
+- The **maximum is load-bearing**, engaged at 1440 for both roles.
+- The project-title **minimum never engaged** (smallest 29.7px at 375).
+- The next-project-title **minimum engaged at 430 and below**. Recorded as
+  **PAGE-SPECIFIC supporting evidence** only (`design-system.md` §16 item 17).
+
+**None of `27px`, `80px`, `53px`, `9.094cqw`, `6.913cqw` or `0.98` is a
+universal site constant.** They are this page's preset values.
+
+#### Long-title rule
+
+The overlay is used **only when all three hold**:
+
+- the rendered title is **≤ 2 lines**
+- the **play affordance** remains clear
+- **Back to Works** remains clear
+
+**Otherwise the title stacks below the film — at any viewport width.** Below
+700 it always takes ADR-0010's derived stacked fallback.
+
+**Never:** shrink-to-fit by title length · truncate · reduce the coefficient
+because a title is long.
+
+| Width | English long (31 chars) | Vietnamese long (39) | Very long (63) |
+|---|---|---|---|
+| 1440 | overlay · 2 lines | **stacked** · 3 lines | stacked · 5 lines |
+| 768 | overlay · 2 lines | stacked · 3 lines | stacked · 5 lines |
+| 430 / 375 | fallback · 2 lines | fallback · 3 lines | fallback · 5 lines |
+
+**This is the Project Detail realization of ADR-0010.** ADR-0010 §6 says desktop
+"**may** render the bounded in-frame overlay **where it is valid**", that the
+overlay must never obstruct the play affordance, and that the fallback is
+**derived, not authored**. A validity condition that stacks a long title at
+desktop fits all three — no ADR change.
+
+**Engineering implication — recorded, not resolved.** Project Detail title
+**sizing requires no JavaScript** — `design-system.md` §1.4's finding holds.
+**Overlay-versus-stacked selection is different:** it depends on rendered
+geometry — the title's **line count**, **play-control clearance** and **Back to
+Works clearance** — and **may require client-side layout measurement**.
+
+The implementation approach is **not decided here**. The one requirement
+recorded is that **implementation must avoid a visible overlay → stacked jump
+after fonts load**. **This is not a responsive-design blocker.**
+
+#### Project stills — structured GRID **[DEFAULT — PROJECT-DETAIL-SPECIFIC]**
+
+**Project Detail no longer uses `JUSTIFIED_ROWS` for its four-still
+composition.** It uses the existing structured **GRID** capability (ADR-0006):
+
+```text
+>= 1024px       4 columns / 1 row
+700 – 1023px    2 columns / 2 rows
+<  700px        1 column
+```
+
+Equal column widths; each still takes its height from its **own native
+aspect**. **Source order preserved · native aspect preserved (Δ ≤ 0.01%) · no
+crop · nothing hidden · nothing reordered.** Cells top-aligned, 4px gap, full
+bleed. The one ragged edge — `mtm-shopfront` at 2.012 against 2.041 — sits 2–3px
+lower, which is native aspect and invisible at page scale.
+
+**Why.** Project Detail **tested the system-valid `JUSTIFIED_ROWS` presentation
+and rejected that presentation mode for this specific authored media set.** Four
+similarly wide stills packed **3 + 1** at desktop and 1024:
+
+- the tail was **~27% taller** than the justified row above it (tail : row
+  height 1.27) and read as the start of something new, not the end of a sheet
+- **~58% of the measure** sat empty beside the tail
+- at 1440 the tail and the supporting loop below presented two left edges and
+  two widths within one screen
+
+**All of `JUSTIFIED_ROWS`' own invariants held** — zero starved cells, source
+order, native aspect. **Its rules were not broken; the presentation mode was
+wrong for this composition.** The shared candidate is **not weakened**, and
+**Home's successful `JUSTIFIED_ROWS` page validation (§1.7) is unchanged**. See
+`design-system.md` §11.9.
+
+The 1440 strip is short — 177px, ~23% of the hero — because native aspect is
+now honoured where the locked desktop cropped four stills into a 330px row. A
+scale observation, not a failure.
+
+#### Other areas validated as candidate evidence
+
+**Metadata + statement** — stacked below 700 in semantic order (metadata →
+statement), labels never wrap; lead drops 26 → 22px below 600 and holds 34
+characters. **Supporting `AUTOPLAY_VISIBLE` video + caption** — caption stacks
+beneath the video when its own column falls under ~28 characters, capped at
+36ch. **Credits** — no name wraps at any width. **Final image coda** — native
+aspect at phone. **Footer** — stacks below 700. **Back to Works** — a **44px tap
+area** at < 1024 via padding, with its visible underline unchanged. **Scrim** —
+derived from the title's extent, holding the desktop's contrast at the cap
+line; none below 700, where nothing sits over the film.
+
+**ADR-0008 playback semantics hold**: `AUTOPLAY_VISIBLE`, forced muted,
+`playsInline`, released off-screen, poster under reduced motion — **no audible
+autoplay**; audio exists only on the hero after activation, which also pauses
+the loop. **ADR-0010 play-to-dismiss holds**: activation removes the overlay,
+its scrim and the affordance, computed in one place from mode and activation so
+a re-render cannot resurrect them.
+
+**Full-page rhythm** — 2.7–4.1 screens at every tested viewport; the sequence
+film → title / metadata → stills → loop keeps its alternation of reading and
+looking.
+
+#### Vietnamese line-height QA
+
+The tested Vietnamese samples render **without collision** at the 0.98
+candidate. The evidence also computes a **theoretical worst case of ~1.18em**,
+reached only when a dot-below letter sits directly above a stacked-mark letter.
+**Pathological stacked-diacritic combinations remain typography-preset QA** —
+this does **not** block responsive candidate maturity, and **no universal
+Vietnamese line-height rule is created**.
+
+#### Open — non-blocking
+
+- **Structural handling of encoded letterbox bars** (`design-system.md` §16
+  item 1).
+- **A production / administrator-selected poster must match playback
+  geometry** to preserve seamless activation. The frame used here was captured
+  from the film at runtime as **validation evidence only**; an ADR-0009 poster
+  must be a real asset with the film's geometry.
+- **Site-wide mobile navigation** (`design-system.md` §16 item 14). The page
+  carries no site header; its own navigation is Back to Works and All works.
+- **`AUTOPLAY_VISIBLE` visibility threshold** (`design-system.md` §16 item 7).
+- **Vietnamese multi-line display QA**, above.
+- **A possible 600 / 700 breakpoint reconciliation**, only if later cross-page
+  evidence exposes a contradiction. Both Home and Project Detail currently use
+  700.
+
+**None blocks Project Detail's responsive candidate status.**
 
 ---
 
@@ -1624,7 +1893,7 @@ Hold on every page regardless of exploration status.
 | **Video** | Never audible without user action. Multi-video surfaces are `AUTOPLAY_VISIBLE`. `AUTOPLAY_AMBIENT` only on a standalone ambient surface. |
 | **Posters** | `poster_media_id → thumbnail_url → empty well`. Refused autoplay shows the poster. |
 | **Motion** | Content moves; interface does not. One signature transition, shell-owned. |
-| **Responsive** | Three breakpoints. Automatic safe stacking. **Every production page still requires a mobile design review.** Two pages are RESPONSIVE VALIDATED — the Private Project Gate (§6.9) and Home (§1.7); the other four are pending, and must not borrow either page's derivations. Home's HERO height, wall column rule and display bounds are **HOME-SPECIFIC**. `JUSTIFIED_ROWS` has a **shared responsive candidate, system validated** (`design-system.md` §11.7) — one expression for every page, no per-page override. **Display typography** has one too (`design-system.md` §1.4): bounded composition-relative clamp, reference box = the alignment container, coefficient scoped to the preset, long content wraps rather than shrinking. There the **method** is shared and the **numbers are not**. A system candidate is not a page validation. |
+| **Responsive** | Three breakpoints. Automatic safe stacking. **Every production page still requires a mobile design review.** Three pages are RESPONSIVE VALIDATED — the Private Project Gate (§6.9), Home (§1.7) and Project Detail (§3.12); the other three are pending, and must not borrow any validated page's derivations. Home's HERO height, wall column rule and display bounds are **HOME-SPECIFIC**; Project Detail's phone HERO, Newsreader title preset and 4 / 2 / 1 stills grid are **PROJECT-DETAIL-SPECIFIC**. `JUSTIFIED_ROWS` has a **shared responsive candidate, system validated** (`design-system.md` §11.7) — one expression for every page, no per-page override. **Display typography** has one too (`design-system.md` §1.4): bounded composition-relative clamp, reference box = the alignment container, coefficient scoped to the preset, long content wraps rather than shrinking. There the **method** is shared and the **numbers are not**. A system candidate is not a page validation. |
 | **Accessibility** | WCAG AA size-aware · visible focus · reduced motion yields a deterministic still · DOM order follows `position`, never `colStart`. |
 | **Never** | Product UI, card primitives, feed-like surfaces, audible autoplay, invented compositions on pending pages. |
 
@@ -1647,15 +1916,23 @@ Hold on every page regardless of exploration status.
    `VIDEO_GRID` has its column counts, and **`JUSTIFIED_ROWS` now has a shared
    responsive candidate, system validated** (`design-system.md` §11.7). **These
    two modes still have none.**
-   **The Art Works blocker is lifted at system level** (§2.7 item 3) — but Art
-   Works, Home and Project Detail each still require **page-level** responsive
-   validation with the rule, and none has had it.
-4. **Validate the HERO overlay's narrow-width fallback.** The capability is
-   approved (ADR-0010) and requires the system to derive a stacked presentation;
-   the breakpoint and its visual treatment still need mobile design validation
-   (§3.9 item 1).
-5. **Resolve the poster / film `fit` contract** (§3.9 item 2) together with the
-   letterbox method — the two are coupled. ADR-0010 deliberately left it open.
+   **The Art Works blocker is lifted at system level** (§2.7 item 3). At page
+   level: **Home consumed `JUSTIFIED_ROWS` successfully** (§1.7); **Project
+   Detail tested it and rejected the presentation mode** for its four-still set,
+   using a structured GRID instead (§3.12); **Art Works has not been validated
+   with it.**
+4. ~~**Validate the HERO overlay's narrow-width fallback.**~~ — **done for
+   Project Detail, 2026-09-23** (§3.12). Stacked below 700, and at any width
+   when the title exceeds two lines or obstructs the affordance or Back to Works.
+   Derived, not authored, as ADR-0010 requires. **Carried to implementation —
+   not a responsive-design blocker:** overlay-versus-stacked selection depends
+   on rendered geometry and may require client-side layout measurement;
+   implementation must avoid a visible overlay → stacked jump after fonts load
+   (§3.12).
+5. ~~**Resolve the poster / film `fit` contract**~~ — **resolved for Project
+   Detail as `COVER → COVER`** (§3.9 item 2). Idle framing must equal playback
+   framing. **What remains:** an ADR-0009 poster must match the film's playback
+   geometry, and the letterbox method (item 6) is still open.
 6. **Resolve the letterbox method** (`design-system.md` §16 item 1) — it is an
    approved requirement with an unresolved method and it changes what the CMS
    must show.

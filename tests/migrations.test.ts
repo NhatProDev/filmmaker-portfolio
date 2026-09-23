@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { after, before, describe, test } from "node:test";
 import { createTestDatabase } from "./helpers/test-database";
 
@@ -17,10 +18,12 @@ describe("migrations on a real PostgreSQL engine (PGlite)", () => {
     });
   };
 
-  test("all four migrations are recorded, and a second run applies nothing", async () => {
-    assert.equal((await q("select count(*)::int as n from drizzle.__drizzle_migrations")).rows[0].n, 4);
+  test("every journalled migration is recorded, and a second run applies nothing", async () => {
+    const journal = JSON.parse(readFileSync("db/migrations/meta/_journal.json", "utf8")) as { entries: unknown[] };
+    assert.ok(journal.entries.length >= 5);
+    assert.equal((await q("select count(*)::int as n from drizzle.__drizzle_migrations")).rows[0].n, journal.entries.length);
     await database.migrate();
-    assert.equal((await q("select count(*)::int as n from drizzle.__drizzle_migrations")).rows[0].n, 4);
+    assert.equal((await q("select count(*)::int as n from drizzle.__drizzle_migrations")).rows[0].n, journal.entries.length);
   });
 
   test("the HOME page is seeded once", async () => {

@@ -29,6 +29,13 @@
       "when": 1790202603962,
       "tag": "0004_placement_poster_override",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790204295802,
+      "tag": "0005_admin_sessions_and_rate_limits",
+      "breakpoints": true
     }
   ]
 }

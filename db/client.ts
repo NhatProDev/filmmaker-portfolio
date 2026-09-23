@@ -23,14 +23,29 @@ export function createDatabase(url: string, options: { max?: number; prepare?: b
 }
 
 let shared: DatabaseHandle | undefined;
+let substitute: Database | null = null;
+
+// Tests run route handlers against an in-process database.
+export function setDatabaseForTesting(db: Database | null) {
+  substitute = db;
+}
+
+export class DatabaseUnavailableError extends Error {}
 
 // The application's connection, opened on first use. Nothing connects unless
-// the database content adapter is selected.
+// the database content adapter or the Studio needs it.
 export function getDatabase(): Database {
+  if (substitute) return substitute;
   if (!shared) {
     const { DATABASE_URL, DATABASE_POOL_MAX, DATABASE_PREPARE } = serverEnv();
-    if (!DATABASE_URL) throw new Error("DATABASE_URL is not set");
+    if (!DATABASE_URL) throw new DatabaseUnavailableError("DATABASE_URL is not set");
     shared = createDatabase(DATABASE_URL, { max: DATABASE_POOL_MAX, prepare: DATABASE_PREPARE === "true" });
   }
   return shared.db;
+}
+
+// Runs `work` in one transaction (CLAUDE.md §15). Inside a transaction it
+// becomes a savepoint, so services compose.
+export function transaction<T>(db: Database, work: (tx: Database) => Promise<T>): Promise<T> {
+  return db.transaction((tx) => work(tx as unknown as Database));
 }

@@ -441,9 +441,11 @@ Use a secure HTTPOnly session cookie.
 
 There is no public admin registration endpoint, and none may be added.
 
-The initial admin is created out-of-band by `scripts/seed-admin.ts`, which reads
-credentials from environment variables. The path is reserved; the script is not
-yet written.
+The initial admin is created out-of-band by `scripts/seed-admin.ts`
+(`npm run db:seed-admin`), which reads `ADMIN_EMAIL` and `ADMIN_PASSWORD` from
+environment variables. Re-running it for an existing email replaces the password
+and revokes that admin's sessions. Sessions are server-side and revocable
+(`admin_sessions`, token stored as a SHA-256 hash).
 
 ### Private project access
 

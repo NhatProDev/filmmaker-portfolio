@@ -12,7 +12,8 @@
     "db:generate": "drizzle-kit generate",
     "db:check": "drizzle-kit check",
     "db:migrate": "tsx --env-file-if-exists=.env.local scripts/db-migrate.ts",
-    "db:import": "tsx --env-file-if-exists=.env.local scripts/import-static-content.ts"
+    "db:import": "tsx --env-file-if-exists=.env.local scripts/import-static-content.ts",
+    "db:seed-admin": "tsx --env-file-if-exists=.env.local scripts/seed-admin.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.3",

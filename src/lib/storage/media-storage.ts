@@ -64,6 +64,11 @@ export function createLocalMediaStorage(baseUrl: string): MediaStorage {
 
 let storage: MediaStorage | undefined;
 
+// Tests exercise the upload flow against a fake provider.
+export function setMediaStorageForTesting(adapter: MediaStorage | undefined) {
+  storage = adapter;
+}
+
 export function getMediaStorage(): MediaStorage {
   storage ??= createLocalMediaStorage(serverEnv().MEDIA_PUBLIC_BASE_URL);
   return storage;

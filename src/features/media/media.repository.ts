@@ -1,7 +1,7 @@
-import { and, eq, inArray, isNull, or, sql } from "drizzle-orm";
+import { and, count, desc, eq, ilike, inArray, isNull, or, sql, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import type { Database } from "@db/client";
-import { blockMedia, media, pages, projectBlocks, projects } from "@db/schema";
+import { blockMedia, media, pages, projectBlocks, projects, type Media as MediaRow, type NewMedia } from "@db/schema";
 
 export type MediaRecord = {
   id: string;
@@ -46,6 +46,8 @@ const columns = {
   posterMediaId: media.posterMediaId,
 };
 
+const live = isNull(media.deletedAt);
+
 export function createMediaRepository(db: Database) {
   return {
     // Assets that are not soft-deleted, by id.
@@ -54,7 +56,106 @@ export function createMediaRepository(db: Database) {
       return db
         .select(columns)
         .from(media)
-        .where(and(inArray(media.id, [...ids]), isNull(media.deletedAt)));
+        .where(and(inArray(media.id, [...ids]), live));
+    },
+
+    async findRowsByIds(ids: readonly string[]): Promise<MediaRow[]> {
+      if (!ids.length) return [];
+      return db
+        .select()
+        .from(media)
+        .where(and(inArray(media.id, [...new Set(ids)]), live));
+    },
+
+    // A live asset. `lock` takes a row lock for the rest of the transaction:
+    // "update" before deleting, "share" before referencing it, so a delete
+    // and a new reference cannot interleave.
+    async findById(id: string, lock?: "update" | "share"): Promise<MediaRow | null> {
+      const query = db.select().from(media).where(and(eq(media.id, id), live));
+      const [row] = lock ? await query.for(lock) : await query;
+      return row ?? null;
+    },
+
+    async list(filter: {
+      type?: MediaRow["type"];
+      status?: MediaRow["status"];
+      search?: string;
+      page: number;
+      pageSize: number;
+    }): Promise<{ rows: MediaRow[]; total: number }> {
+      const conditions: SQL[] = [live];
+      if (filter.type) conditions.push(eq(media.type, filter.type));
+      if (filter.status) conditions.push(eq(media.status, filter.status));
+      if (filter.search) {
+        const pattern = `%${filter.search.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+        conditions.push(
+          or(
+            ilike(media.filename, pattern),
+            ilike(media.originalFilename, pattern),
+            ilike(media.storageKey, pattern),
+            ilike(media.altText, pattern),
+          )!,
+        );
+      }
+      const where = and(...conditions);
+      const [rows, [{ total }]] = await Promise.all([
+        db
+          .select()
+          .from(media)
+          .where(where)
+          .orderBy(desc(media.createdAt), desc(media.id))
+          .limit(filter.pageSize)
+          .offset((filter.page - 1) * filter.pageSize),
+        db.select({ total: count() }).from(media).where(where),
+      ]);
+      return { rows, total };
+    },
+
+    async insert(values: NewMedia): Promise<MediaRow> {
+      const [row] = await db.insert(media).values(values).returning();
+      return row;
+    },
+
+    async update(id: string, patch: Partial<Pick<MediaRow, "altText" | "posterMediaId">>): Promise<MediaRow> {
+      const [row] = await db
+        .update(media)
+        .set({ ...patch, updatedAt: sql`now()` })
+        .where(eq(media.id, id))
+        .returning();
+      return row;
+    },
+
+    async findByChecksum(checksum: string): Promise<MediaRow | null> {
+      const [row] = await db
+        .select()
+        .from(media)
+        .where(and(eq(media.checksumSha256, checksum), live));
+      return row ?? null;
+    },
+
+    // Images are usable at once; video waits for processing, which a
+    // provider adapter reports later.
+    async markUploaded(
+      id: string,
+      stored: { fileSizeBytes: number; checksumSha256: string | null; mimeType: string | null },
+    ): Promise<MediaRow> {
+      const [row] = await db
+        .update(media)
+        .set({
+          ...stored,
+          status: sql`case when ${media.type} = 'IMAGE' then 'READY'::media_status else 'PROCESSING'::media_status end`,
+          updatedAt: sql`now()`,
+        })
+        .where(eq(media.id, id))
+        .returning();
+      return row;
+    },
+
+    async softDelete(id: string) {
+      await db
+        .update(media)
+        .set({ deletedAt: sql`now()`, updatedAt: sql`now()` })
+        .where(eq(media.id, id));
     },
 
     async findUsages(mediaId: string): Promise<MediaUsage[]> {
@@ -96,7 +197,7 @@ export function createMediaRepository(db: Database) {
         db
           .select({ mediaId: media.id })
           .from(media)
-          .where(and(eq(media.posterMediaId, mediaId), isNull(media.deletedAt))),
+          .where(and(eq(media.posterMediaId, mediaId), live)),
       ]);
 
       return [

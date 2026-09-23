@@ -31,6 +31,20 @@ const serverEnvSchema = z
         .refine((value) => !value.endsWith("/"), "must not end with a slash")
         .default("/media"),
     ),
+    // Extra origins accepted by the CSRF check, comma-separated, for a site
+    // served under more than one host name. The request's own origin is
+    // always accepted.
+    APP_ORIGINS: z.preprocess(
+      emptyAsUnset,
+      z
+        .string()
+        .transform((value) => value.split(",").map((origin) => origin.trim()).filter(Boolean))
+        .pipe(z.array(z.url({ protocol: /^https?$/ }).refine((origin) => new URL(origin).origin === origin, "must be a bare origin")))
+        .default([]),
+    ),
+    // Signs private-project access cookies (CLAUDE.md §11). Without it, no
+    // private project can be unlocked.
+    PROJECT_ACCESS_SECRET: z.preprocess(emptyAsUnset, z.string().min(32, "must be at least 32 characters").optional()),
   })
   .superRefine((env, ctx) => {
     if (env.SITE_CONTENT_ADAPTER === "db" && !env.DATABASE_URL) {

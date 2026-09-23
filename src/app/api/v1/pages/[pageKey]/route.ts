@@ -1,0 +1,7 @@
+import { pageParams } from "../../_lib/params";
+import { adminRoute, json } from "../../_lib/route";
+import { services } from "../../_lib/services";
+
+export const GET = adminRoute(async ({ params, db }) => json({ data: await services(db).pages.get(params.pageKey) }), {
+  params: pageParams,
+});

@@ -4,13 +4,17 @@ A professional filmmaker portfolio: public site (Home, Art Works, About Me,
 Contact), public and password-protected project pages, and an admin CMS with a
 block-based project builder.
 
-**Status: public frontend locked; database and media foundation in place.**
+**Status: public frontend locked; database, admin API and Studio in place.**
 The public site (Home, Art Works, Project Detail, About Me, Contact) is
 implemented and reads all content through a content gateway. By default it
 serves the committed static content and needs no database; a
-PostgreSQL-backed adapter serves the same pages from the database model. The
-Studio (admin CMS), REST handlers, authentication and publishing are not built
-yet.
+PostgreSQL-backed adapter serves the same pages from the database model.
+
+The Studio at `/admin` (projects, the template-shaped project editor, the
+Media Library) works over the REST API in `src/app/api/v1`, with Argon2id
+sign-in, revocable server-side sessions and CSRF-checked mutations. It needs a
+database; the public site does not. Uploads stay unavailable until a storage
+provider is chosen (ADR-0014).
 
 `db/schema.ts` implements ADR-0001 to ADR-0007, ADR-0009, ADR-0011, ADR-0014
 and ADR-0015. `openapi.yaml` was realigned to that domain model by ADR-0015.
@@ -114,6 +118,11 @@ are deliberately not repeated here; a second copy would drift.
 | `npm run db:check` | Verifies the migration history's consistency. |
 | `npm run db:migrate` | Applies migrations — **local development database only**. |
 | `npm run db:import` | Dry run of the static-content import; add `-- --apply` to write (local database only). |
+| `npm run db:seed-admin` | Creates the admin from `ADMIN_EMAIL` / `ADMIN_PASSWORD`, or resets its password and sessions (local database only). |
+
+To use the Studio locally: set `DATABASE_URL` to a local PostgreSQL, then run
+`db:migrate`, `db:import -- --apply` and `db:seed-admin`, start the site, and
+sign in at `/admin/login`.
 
 Configuration is in `.env.local`; see `.env.example`. No database is needed to
 run the site.

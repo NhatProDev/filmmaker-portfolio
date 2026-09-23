@@ -393,6 +393,50 @@ export const blockMedia = pgTable(
   ],
 );
 
+// A revocable admin session (CLAUDE.md §11, §16). The cookie carries a random
+// token; only its SHA-256 is stored, so reading this table cannot replay a
+// session. Logout sets revoked_at; expiry is absolute.
+export const adminSessions = pgTable(
+  "admin_sessions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    adminUserId: uuid("admin_user_id").notNull(),
+    tokenHash: varchar("token_hash", { length: 64 }).notNull(),
+    userAgent: varchar("user_agent", { length: 400 }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    lastSeenAt: timestamp("last_seen_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
+    revokedAt: timestamp("revoked_at", { withTimezone: true, mode: "date" }),
+  },
+  (table) => [
+    foreignKey({
+      name: "admin_sessions_admin_user_id_fkey",
+      columns: [table.adminUserId],
+      foreignColumns: [adminUsers.id],
+    }).onDelete("cascade"),
+    uniqueIndex("admin_sessions_token_hash_uidx").on(table.tokenHash),
+    index("admin_sessions_admin_user_id_idx").on(table.adminUserId),
+    check("admin_sessions_token_hash_format_check", sql`${table.tokenHash} ~ '^[0-9a-f]{64}$'`),
+  ],
+);
+
+// Fixed-window attempt counters for admin login and private-project passwords
+// (CLAUDE.md §11, §16). Kept in PostgreSQL so the limit holds across server
+// instances. A key names the action and its subject, never a password.
+export const rateLimits = pgTable(
+  "rate_limits",
+  {
+    key: varchar("key", { length: 300 }).primaryKey(),
+    count: integer("count").notNull(),
+    windowStartedAt: timestamp("window_started_at", { withTimezone: true, mode: "date" }).notNull(),
+  },
+  (table) => [check("rate_limits_count_positive_check", sql`${table.count} > 0`)],
+);
+
 // Relations are declared after all tables to avoid declaration-order issues.
 export const projectsRelations = relations(projects, ({ one, many }) => ({
   coverMedia: one(media, {
@@ -457,6 +501,7 @@ export const mediaRelations = relations(media, ({ one, many }) => ({
 }));
 
 export type AdminUser = typeof adminUsers.$inferSelect;
+export type AdminSession = typeof adminSessions.$inferSelect;
 export type NewAdminUser = typeof adminUsers.$inferInsert;
 export type Media = typeof media.$inferSelect;
 export type NewMedia = typeof media.$inferInsert;

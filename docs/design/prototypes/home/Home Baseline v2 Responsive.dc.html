@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..600;1,6..72,200..500&amp;family=Spectral:wght@200;300;400&amp;family=Archivo:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+[data-viewport]{scrollbar-width:none}
+[data-viewport]::-webkit-scrollbar{width:0;height:0}
+:root{
+  --surface:#F7F3EC; --ink:#16120E; --accent:#C4361C; --surface-dark:#0C0A08; --ink-dark:#EDE7DD;
+  --muted:#6C6862; --rule:#E2DCD2; --frame:#14110F;
+  --font-display:'Marcellus',Georgia,serif; --font-body:'Newsreader',Georgia,serif; --font-ui:'Newsreader',Georgia,serif;
+  --display-track:-0.005em;
+  --edge:56px; --gut:20px; --band:140px; --wall-cols:3;
+}
+body{margin:0;background:#E6E1D8}
+a{color:inherit;text-decoration:none}
+a:hover{color:var(--accent)}
+img,video{display:block}
+</style>
+</helmet>
+<div ref="{{ rootRef }}" style="font-family:var(--font-body);color:var(--ink);padding:48px 44px 110px">
+
+  <div style="max-width:82ch;margin-bottom:28px">
+    <h2 style="margin:0;font-family:var(--font-display);font-size:28px;letter-spacing:var(--display-track);text-transform:uppercase">Home — responsive validation</h2>
+    <p style="margin:12px 0 0;font-size:16px;line-height:1.7">The locked desktop composition rendered inside a switchable viewport frame, consuming both system candidates: JUSTIFIED_ROWS packing (ref 1.6) for the coda and bounded composition-relative clamp for the display type. The desktop candidate file is untouched. Metrics come from rendered geometry.</p>
+  </div>
+
+  <div data-audit="" style="margin-bottom:26px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;font-size:12px;line-height:1.75;color:#2C2822;white-space:pre"></div>
+
+  <div data-viewport="" style="position:relative;container-type:inline-size;background:var(--surface);box-shadow:0 0 0 1px #D6D0C5;overflow-y:auto;overflow-x:hidden">
+    <div data-page="" style="background:var(--surface);color:var(--ink);position:relative;padding-bottom:56px">
+
+      <header data-chrome="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:baseline;padding:28px var(--edge) 0">
+        <a href="#top" data-wordmark="" style="grid-column:1/7;font-family:var(--font-ui);font-size:11px;letter-spacing:0.22em;text-transform:uppercase">Nguyen Khanh Nhat</a>
+        <nav data-nav="" style="grid-column:7/13;display:flex;justify-content:flex-end;gap:30px;font-size:15px">
+          <a href="#work">Works</a><a href="#about">About</a><a href="#contact">Contact</a>
+        </nav>
+      </header>
+
+      <section data-block="1 · HERO" data-hero="" data-play="ambient" style="position:relative;overflow:hidden;background:var(--frame);margin-top:26px">
+        <img src="../../../../media/w/mtm-atelier.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+        <video data-src="../../../../media/clips/n1.mp4" loop="" muted="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 320ms linear"></video>
+        <span data-hero-cap="" style="position:absolute;left:18px;bottom:14px;font-size:13px;font-style:italic;color:rgba(237,231,221,0.86);text-shadow:0 1px 14px rgba(0,0,0,0.6)">Studio, 2026</span>
+      </section>
+
+      <section data-block="2 · GRID identity" data-identity="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);padding:var(--band) var(--edge) 0">
+        <div data-display-box="" style="grid-column:1/13;container-type:inline-size">
+          <h1 data-display="" style="margin:0;font-family:var(--font-display);font-weight:400;line-height:0.92;letter-spacing:var(--display-track);text-transform:uppercase">Portfolio</h1>
+        </div>
+        <p data-col="1/6" style="grid-column:1/6;margin:42px 0 0;max-width:46ch;font-size:17px;line-height:1.74">Cinematographer and photographer in Hanoi. I shoot, light and grade: full stage, from the first frame to the final pass.</p>
+        <p data-col="9/13" data-second="" style="grid-column:9/13;margin:42px 0 0;max-width:46ch;font-size:16px;line-height:1.74;color:var(--muted)">Commercial films, documentary work and stills. Sound stays off until you open a project.</p>
+      </section>
+
+      <section id="work" data-block="3 · VIDEO_GRID" style="margin-top:var(--band)">
+        <h2 style="margin:0 0 22px;padding:0 var(--edge);font-family:var(--font-body);font-weight:400;font-size:16px;font-style:italic;color:var(--muted)">Everything moving, this year</h2>
+        <div data-wall="" style="display:grid;grid-template-columns:repeat(var(--wall-cols,3),minmax(0,1fr));gap:4px">
+          <div data-cell="1" data-play="visible" style="position:relative;overflow:hidden;aspect-ratio:16/9;background:var(--frame)">
+            <img src="../../../../media/w/desk-01.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+            <video data-src="../../../../media/clips/n2.mp4" loop="" muted="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 320ms linear"></video>
+          </div>
+          <div data-cell="2" style="position:relative;overflow:hidden;aspect-ratio:16/9;background:var(--frame)"><img src="../../../../media/w/mtm-swatches.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
+          <div data-cell="3" data-play="visible" style="position:relative;overflow:hidden;aspect-ratio:16/9;background:var(--frame)">
+            <img src="../../../../media/w/desk-03.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+            <video data-src="../../../../media/clips/c2.mp4" loop="" muted="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 320ms linear"></video>
+          </div>
+          <div data-cell="4" data-play="visible" style="position:relative;overflow:hidden;aspect-ratio:16/9;background:var(--frame)">
+            <img src="../../../../media/w/mtm-table.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+            <video data-src="../../../../media/clips/n3.mp4" loop="" muted="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 320ms linear"></video>
+          </div>
+          <div data-cell="5" style="position:relative;overflow:hidden;aspect-ratio:16/9;background:var(--frame)"><img src="../../../../media/w/nike-lacing.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
+          <div data-cell="6" data-play="visible" style="position:relative;overflow:hidden;aspect-ratio:16/9;background:var(--frame)">
+            <img src="../../../../media/w/nike-court.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+            <video data-src="../../../../media/clips/c3.mp4" loop="" muted="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 320ms linear"></video>
+          </div>
+          <div data-cell="7" style="position:relative;overflow:hidden;aspect-ratio:16/9;background:var(--frame)"><img src="../../../../media/w/desk-04.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
+          <div data-cell="8" data-play="visible" style="position:relative;overflow:hidden;aspect-ratio:16/9;background:var(--frame)">
+            <img src="../../../../media/w/mtm-atelier.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+            <video data-src="../../../../media/clips/n4.mp4" loop="" muted="" preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 320ms linear"></video>
+          </div>
+          <div data-cell="9" data-tail-cell="" style="position:relative;overflow:hidden;aspect-ratio:16/9;background:var(--frame)"><img src="../../../../media/w/mtm-sketch.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
+        </div>
+      </section>
+
+      <section id="about" data-block="4 · About" data-about="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:end;margin-top:var(--band);padding:0 var(--edge)">
+        <div data-col="1/7" data-about-text="" style="grid-column:1/7">
+          <p style="margin:0;max-width:46ch;font-size:17px;line-height:1.74">I work small and close: one camera, available light where it serves the frame, and a grade that keeps the dark parts dark. Most of what is here was shot in Hanoi, some of it in Japan, all of it in the last three years.</p>
+          <p style="margin:22px 0 0;font-size:16px;line-height:1.74;color:var(--muted)"><a href="#about" style="border-bottom:1px solid var(--rule);padding-bottom:2px">More about the work</a></p>
+        </div>
+        <div data-col="10/13" data-portrait="" style="grid-column:10/13;background:var(--frame)">
+          <img src="../../../../media/w/portrait.jpg" alt="Portrait of the filmmaker" style="width:100%;height:auto">
+        </div>
+      </section>
+
+      <section data-block="5 · JUSTIFIED_ROWS coda" style="margin-top:var(--band)">
+        <h2 style="margin:0 0 22px;padding:0 var(--edge);font-family:var(--font-body);font-weight:400;font-size:16px;font-style:italic;color:var(--muted)">Frames, not films</h2>
+        <div data-coda="" style="display:flex;flex-direction:column;gap:4px"></div>
+      </section>
+
+      <footer id="contact" data-block="6 · footer" data-footer="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:baseline;margin-top:var(--band);padding:0 var(--edge)">
+        <div data-col="1/8" style="grid-column:1/8">
+          <a data-email="" href="mailto:hello@khanhnhat.film" style="font-family:var(--font-display);letter-spacing:var(--display-track);color:var(--accent)">hello@khanhnhat.film</a>
+          <p style="margin:14px 0 0;font-size:14px;color:var(--muted)">Hanoi, Vietnam. Open to work through early 2027.</p>
+        </div>
+        <div data-col="9/13" data-footer-nav="" style="grid-column:9/13;display:flex;justify-content:flex-end;gap:28px;font-size:15px">
+          <a href="#work">Works</a><a href="#about">About</a>
+        </div>
+      </footer>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;width&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;1440&quot;,&quot;1024&quot;,&quot;768&quot;,&quot;699&quot;,&quot;600&quot;,&quot;540&quot;,&quot;480&quot;,&quot;450&quot;,&quot;430&quot;,&quot;390&quot;,&quot;375&quot;],&quot;default&quot;:&quot;1440&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Viewport&quot;},&quot;height&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;1000&quot;,&quot;900&quot;,&quot;1024&quot;,&quot;844&quot;,&quot;932&quot;,&quot;812&quot;,&quot;600&quot;],&quot;default&quot;:&quot;1000&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Viewport&quot;},&quot;face&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Marcellus&quot;,&quot;Spectral&quot;,&quot;Archivo&quot;],&quot;default&quot;:&quot;Marcellus&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Stress&quot;},&quot;tailSpan&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Derivation&quot;},&quot;codaFullBleed&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Derivation&quot;},&quot;allowWrap&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Derivation&quot;},&quot;motion&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;reduced&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Stress&quot;}}">
+class Component extends DCLogic {
+  // The coda's true file aspects. The locked desktop file carries authored
+  // data-ar values (2.39 / 1.5 / 0.8 / 1.78) that do not match these files —
+  // a discrepancy already recorded. A native-aspect rule can only be tested
+  // against real measurements, so the real ones are used here.
+  CODA = [
+    { src: "desk-02.jpg", ar: 1.776 },
+    { src: "desk-05.jpg", ar: 1.776 },
+    { src: "mtm-shopfront.jpg", ar: 2.012 },
+    { src: "mtm-mannequin.jpg", ar: 2.041 }
+  ];
+  FACES = {
+    Marcellus: { css: "'Marcellus', Georgia, serif", weight: 400 },
+    Spectral: { css: "'Spectral', Georgia, serif", weight: 300 },
+    Archivo: { css: "'Archivo', system-ui, sans-serif", weight: 500 }
+  };
+  // Home display preset, consuming the shared method. Coefficient is per face.
+  // Desktop equivalence first: the locked candidate is clamp(40px, 13.3cqw,
+  // 250px) against the 12-column span, so Marcellus keeps exactly that. The
+  // other two are the same optical fill re-derived from their own measured
+  // advance for "PORTFOLIO" — the face-scoped coefficient the shared method
+  // requires, not a reuse of Marcellus's number.
+  PRESET = { Marcellus: 0.1330, Spectral: 0.1235, Archivo: 0.1262 };
+  BOUNDS = { min: 40, max: 250 };
+  GAP = 4;
+
+  opt(k, d) { const o = window.__hr || {}; return o[k] !== undefined ? o[k] : (this.props[k] !== undefined ? this.props[k] : d); }
+  renderVals() { return { rootRef: (el) => { this.root = el; } }; }
+
+  componentDidMount() {
+    window.__hrc = this;
+    this.ctx = document.createElement("canvas").getContext("2d");
+    this.mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    this.mq.addEventListener("change", () => this.apply());
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => this.apply());
+    setTimeout(() => this.apply(), 0);
+    setTimeout(() => this.apply(), 700);
+  }
+  componentDidUpdate() { setTimeout(() => this.apply(), 0); }
+
+  vp() { return this.root && this.root.querySelector("[data-viewport]"); }
+  W() { return parseInt(this.opt("width", "1440"), 10); }
+  // The measurable content width. Using the nominal viewport number instead
+  // put the coda 15px wider than its own container and reported it as page
+  // overflow — the instrument creating the defect it was measuring.
+  CW() { const p2 = this.root && this.root.querySelector("[data-page]"); return (p2 && p2.clientWidth) || this.W(); }
+  H() { return parseInt(this.opt("height", "1000"), 10); }
+
+  apply() {
+    [["frame", () => this.frame()], ["type", () => this.type()], ["wall", () => this.wall()],
+     ["stackCols", () => this.stackCols()], ["about", () => this.about()], ["coda", () => this.coda()], ["chrome", () => this.chrome()],
+     ["playback", () => this.playback()], ["audit", () => this.audit()]]
+      .forEach(([n, f]) => {
+        try { f(); this._failed = (this._failed || []).filter((x) => x !== n); }
+        catch (e) {
+          this._failed = ((this._failed || []).filter((x) => x !== n)).concat([n]);
+          console.error("[home responsive] " + n + " failed:", (e && e.message) || e);
+        }
+      });
+  }
+
+  // HOME-SPECIFIC DERIVATIONS. All computed from the frame, none authored per device.
+  frame() {
+    const vp = this.vp(); if (!vp) return;
+    const W = this.W(), H = this.H();
+    vp.style.width = W + "px";
+    vp.style.height = H + "px";
+    const r = document.documentElement.style;
+    const narrow = W <= 430, mid = W <= 768;
+    r.setProperty("--edge", (narrow ? 24 : mid ? 32 : 56) + "px");
+    r.setProperty("--gut", (narrow ? 10 : mid ? 14 : 20) + "px");
+    r.setProperty("--band", (narrow ? 72 : mid ? 96 : 140) + "px");
+    // Hero: a proportion of the frame's own height, floored so it stays
+    // cinematic and capped so it never eats a short viewport whole.
+    const hero = this.root.querySelector("[data-hero]");
+    const h = Math.max(240, Math.min(0.72 * H, 0.62 * this.CW(), 900));
+    hero.style.height = Math.round(h) + "px";
+  }
+
+  // SHARED SYSTEM CANDIDATE CONSUMED: bounded composition-relative clamp.
+  // The reference box is the element the display actually aligns to — the
+  // 12-column span — not the viewport and not the page.
+  type() {
+    const face = this.FACES[this.opt("face", "Marcellus")];
+    const coef = this.PRESET[this.opt("face", "Marcellus")];
+    const box = this.root.querySelector("[data-display-box]");
+    const h1 = this.root.querySelector("[data-display]");
+    h1.style.fontFamily = face.css;
+    h1.style.fontWeight = face.weight;
+    h1.style.fontSize = "clamp(" + this.BOUNDS.min + "px, " + (coef * 100).toFixed(2) + "cqw, " + this.BOUNDS.max + "px)";
+    h1.style.whiteSpace = this.opt("allowWrap", true) ? "normal" : "nowrap";
+    this._box = box;
+  }
+
+  wall() {
+    const W = this.CW();
+    const s = this.opt("wallStrategy", "B");
+    // A — the locked control: 3/2/1 at 1024/640, no tail treatment.
+    // B — two columns all the way down, ninth item spans the row.
+    // C — two columns until cells stop being usable, then one, tail spans.
+    const oneColAt = parseInt(this.opt("oneColAt", "460"), 10);
+    let cols;
+    if (s === "A") cols = W >= 1024 ? 3 : W >= 640 ? 2 : 1;
+    else if (s === "B") cols = W >= 1024 ? 3 : 2;
+    else cols = W >= 1024 ? 3 : W >= oneColAt ? 2 : 1;
+    document.documentElement.style.setProperty("--wall-cols", String(cols));
+    const tail = this.root.querySelector("[data-tail-cell]");
+    const span = cols === 2 && (s === "A" ? false : this.opt("tailSpan", true));
+    tail.style.gridColumn = span ? "1 / -1" : "auto";
+    tail.style.aspectRatio = span ? "2.4 / 1" : "16 / 9";
+    this._cols = cols;
+    this._span = span;
+  }
+
+  // Restored. A previous patch spliced the source between wall() and about()
+  // and removed this with it; apply() kept calling it and the per-pass
+  // try/catch swallowed the throw into a logged {} while everything else went
+  // on working — which is exactly why the page still looked plausible.
+  stackCols() {
+    const stack = this.CW() < 700;
+    this.root.querySelectorAll("[data-page] [data-col]").forEach((el) => {
+      el.style.gridColumn = stack ? "1 / -1" : el.dataset.col;
+    });
+    // A breakpoint alone is not enough for reading columns. At 768 and 1024
+    // the identity paragraphs sit above the stack threshold yet measure
+    // 285/225px and 368/288px. Stack any reading pair whose own measure falls
+    // below a legible minimum, then let max-width hold it at 46ch. The pair
+    // stacks together or not at all.
+    const MIN = 300;
+    const pair = Array.from(this.root.querySelectorAll("[data-identity] p"));
+    if (pair.some((el) => el.getBoundingClientRect().width < MIN)) {
+      pair.forEach((el) => { el.style.gridColumn = "1 / -1"; });
+    }
+    const second = this.root.querySelector("[data-second]");
+    if (second) second.style.marginTop = second.style.gridColumn === "1 / -1" ? "22px" : "42px";
+  }
+
+  about() {
+    const W = this.W();
+    const stack = W < 700;
+    const text = this.root.querySelector("[data-about-text]");
+    const port = this.root.querySelector("[data-portrait]");
+    const sec = this.root.querySelector("[data-about]");
+    sec.style.alignItems = stack ? "start" : "end";
+    text.style.gridColumn = stack ? "1 / -1" : "1/7";
+    port.style.gridColumn = stack ? "1 / -1" : "10/13";
+    // Width mode rather than a crop: the portrait keeps native aspect and
+    // simply does not claim the full measure when stacked.
+    port.style.maxWidth = stack ? "58%" : "";
+    port.style.marginTop = stack ? "40px" : "0";
+  }
+
+  // SHARED SYSTEM CANDIDATE CONSUMED: JUSTIFIED_ROWS v2, verbatim.
+  coda() {
+    const host = this.root.querySelector("[data-coda]");
+    const W = this.CW();
+    const edge = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--edge")) || 56;
+    const measure = this.opt("codaFullBleed", true) ? W : W - 2 * edge;
+    const gap = this.GAP, ref = 1.6;
+    const T = measure >= 1024 ? 3 : measure >= 700 ? 2 : 1;
+    const target = (measure - gap * (T - 1)) / (T * ref);
+    const floor = Math.max(120, 0.10 * measure);
+    const ceil = 1.25 * measure;
+    const narrowest = (cells, s) => { const h = (measure - gap * (cells.length - 1)) / s; return Math.min.apply(null, cells.map((c) => c.ar * h)); };
+    const items = this.CODA.map((c, i) => Object.assign({}, c, { pos: i + 1 }));
+    const rows = []; let row = [], sum = 0;
+    items.forEach((it) => {
+      const nc = row.concat([it]), ns = sum + it.ar;
+      if (row.length && narrowest(nc, ns) < floor) { rows.push({ cells: row, sum }); row = [it]; sum = it.ar; }
+      else { row = nc; sum = ns; }
+      if ((measure - gap * (row.length - 1)) / sum <= target) { rows.push({ cells: row, sum }); row = []; sum = 0; }
+    });
+    if (row.length) rows.push({ cells: row, sum, last: true });
+    for (let p = 0; p < 8; p++) {
+      let moved = false;
+      for (let i = 0; i < rows.length; i++) {
+        const r = rows[i];
+        if (r.cells.length < 2) continue;
+        const h = (measure - gap * (r.cells.length - 1)) / r.sum;
+        if (Math.min.apply(null, r.cells.map((c) => c.ar * h)) >= floor) continue;
+        const m = r.cells.pop(); r.sum -= m.ar;
+        if (rows[i + 1]) { rows[i + 1].cells.unshift(m); rows[i + 1].sum += m.ar; } else rows.push({ cells: [m], sum: m.ar, last: true });
+        moved = true;
+      }
+      if (!moved) break;
+    }
+    if (rows.length > 1) {
+      const tail = rows[rows.length - 1];
+      if (tail.last && tail.cells.length === 1 && tail.sum * target < measure * 0.4) {
+        const prev = rows[rows.length - 2], merged = prev.cells.concat(tail.cells), ms = prev.sum + tail.sum;
+        if (narrowest(merged, ms) >= floor) { prev.cells = merged; prev.sum = ms; rows.pop(); }
+      }
+    }
+    host.style.padding = this.opt("codaFullBleed", true) ? "0" : "0 " + edge + "px";
+    host.innerHTML = "";
+    this._codaRows = [];
+    rows.forEach((r) => {
+      const avail = measure - gap * (r.cells.length - 1);
+      let h = avail / r.sum, full = true;
+      if (r.last && h > target * 1.2) { h = target; full = false; }
+      if (h > ceil) { h = ceil; full = false; }
+      const rowEl = document.createElement("div");
+      rowEl.style.cssText = "display:flex;gap:" + gap + "px";
+      let used = 0;
+      const rec = [];
+      r.cells.forEach((c, j) => {
+        const w = (full && j === r.cells.length - 1) ? avail - used : Math.round(c.ar * h);
+        used += w;
+        rec.push({ pos: c.pos, w, h: Math.round(h), ar: c.ar });
+        const cell = document.createElement("div");
+        cell.style.cssText = "position:relative;overflow:hidden;background:var(--frame);width:" + w + "px;height:" + Math.round(h) + "px;flex:0 0 auto";
+        const img = document.createElement("img");
+        img.src = "../../../../media/w/" + c.src; img.alt = "";
+        img.style.cssText = "position:absolute;inset:0;width:100%;height:100%;object-fit:cover";
+        cell.appendChild(img);
+        rowEl.appendChild(cell);
+      });
+      this._codaRows.push({ cells: rec, full, target: Math.round(target), floor: Math.round(floor) });
+      host.appendChild(rowEl);
+    });
+  }
+
+  chrome() {
+    const W = this.W();
+    const nav = this.root.querySelector("[data-nav]");
+    const wm = this.root.querySelector("[data-wordmark]");
+    // HOME-SPECIFIC DERIVATION, deliberately minimal: the nav line does not
+    // change structure, only density. Whether it needs more is §8's question.
+    nav.style.gap = W <= 430 ? "16px" : W <= 768 ? "22px" : "30px";
+    nav.style.fontSize = W <= 430 ? "14px" : "15px";
+    wm.style.fontSize = W <= 430 ? "10px" : "11px";
+    wm.style.gridColumn = W <= 430 ? "1/6" : "1/7";
+    nav.style.gridColumn = W <= 430 ? "6/13" : "7/13";
+    const email = this.root.querySelector("[data-email]");
+    // Sized against the column it sits in, not the viewport: at 375 a
+    // viewport-derived 20px email was 194px wide inside a 187px column.
+    const emailBox = email.parentElement.getBoundingClientRect().width || W;
+    email.style.fontSize = Math.max(18, Math.min(40, emailBox * 0.105)) + "px";
+    email.style.wordBreak = "break-word";
+    const fn = this.root.querySelector("[data-footer-nav]");
+    fn.style.gridColumn = W < 700 ? "1/13" : "9/13";
+    fn.style.justifyContent = W < 700 ? "flex-start" : "flex-end";
+    fn.style.marginTop = W < 700 ? "26px" : "0";
+  }
+
+  reduced() { return this.opt("motion", "auto") === "reduced" || (this.mq && this.mq.matches); }
+
+  playback() {
+    if (this.obs) this.obs.disconnect();
+    const cells = Array.from(this.root.querySelectorAll("[data-play]"));
+    this.cells = cells;
+    cells.forEach((c) => {
+      const v = c.querySelector("video"); if (!v) return;
+      v.loop = true; v.muted = true; v.playsInline = true;
+      v.setAttribute("playsinline", "playsinline");
+    });
+    if (this.reduced()) { cells.forEach((c) => this.release(c)); return; }
+    const vp = this.vp();
+    this.obs = new IntersectionObserver((es) => es.forEach((e) => {
+      const c = e.target;
+      if (e.isIntersecting && e.intersectionRatio >= 0.2) { c.dataset.want = "1"; this.prepare(c); this.play(c); }
+      else { c.dataset.want = "0"; const v = c.querySelector("video"); if (v) v.pause(); if (!e.isIntersecting) this.release(c); }
+    }), { root: vp, threshold: [0, 0.2, 0.5] });
+    cells.forEach((c) => this.obs.observe(c));
+  }
+  prepare(c) { const v = c.querySelector("video"); if (v && !v.getAttribute("src")) { v.setAttribute("src", v.dataset.src); v.preload = "auto"; v.load(); } }
+  play(c) {
+    const v = c.querySelector("video");
+    if (!v || this.reduced() || c.dataset.want !== "1") return;
+    if (v.readyState < 2) { const n = (parseInt(c.dataset.tries || "0", 10)) + 1; c.dataset.tries = String(n); if (n <= 14) setTimeout(() => this.play(c), 350); return; }
+    c.dataset.tries = "0";
+    const p = v.play();
+    if (p && p.then) p.then(() => { v.style.opacity = "1"; }).catch(() => {});
+  }
+  release(c) { const v = c.querySelector("video"); if (!v) return; v.pause(); v.style.opacity = "0"; c.dataset.tries = "0"; if (v.getAttribute("src")) { v.removeAttribute("src"); v.load(); } }
+
+  audit() {
+    const el = this.root.querySelector("[data-audit]"); if (!el) return;
+    const W = this.W(), H = this.H();
+    const vp = this.vp(), page = this.root.querySelector("[data-page]");
+    const box = this.root.querySelector("[data-display-box]");
+    const h1 = this.root.querySelector("[data-display]");
+    const face = this.FACES[this.opt("face", "Marcellus")];
+    const cs = getComputedStyle(h1);
+    const size = parseFloat(cs.fontSize);
+    this.ctx.font = cs.fontWeight + " 100px " + face.css;
+    const adv = this.ctx.measureText(h1.textContent).width / 100;
+    const textW = adv * size;
+    const boxW = box.getBoundingClientRect().width;
+    const lines = Math.round(h1.getBoundingClientRect().height / (size * 0.92));
+    const hero = this.root.querySelector("[data-hero]").getBoundingClientRect();
+    const wallCells = Array.from(this.root.querySelectorAll("[data-wall] [data-cell]"));
+    const wallRect = this.root.querySelector("[data-wall]").getBoundingClientRect();
+    const tops = {}; wallCells.forEach((c) => { const t = Math.round(c.getBoundingClientRect().top); (tops[t] = tops[t] || []).push(c.dataset.cell); });
+    const wallRows = Object.values(tops);
+    const orphan = wallRows.length > 1 && wallRows[wallRows.length - 1].length < this._cols && !(this._cols === 2 && this.opt("tailSpan", true));
+    const codaRows = this._codaRows || [];
+    const justified = codaRows.filter((r) => r.full);
+    const codaNarrow = justified.length ? Math.min.apply(null, justified.reduce((a, r) => a.concat(r.cells.map((c) => c.w)), [])) : 0;
+    const codaOrder = codaRows.reduce((a, r) => a.concat(r.cells.map((c) => c.pos)), []);
+    const port = this.root.querySelector("[data-portrait] img");
+    const pr = port.getBoundingClientRect();
+    const pad = (s, n) => String(s).padEnd(n);
+    el.textContent = [
+      pad("viewport", 20) + W + " × " + H + "   ·   page height " + Math.round(page.getBoundingClientRect().height) + "px   ·   " + Math.round(page.getBoundingClientRect().height / H * 10) / 10 + " screens",
+      pad("horizontal overflow", 20) + (vp.scrollWidth > vp.clientWidth + 1 ? "✗ " + (vp.scrollWidth - vp.clientWidth) + "px" : "✓ none"),
+      pad("hero", 20) + Math.round(hero.width) + " × " + Math.round(hero.height) + "px   ·   " + Math.round(hero.height / H * 100) + "% of viewport height",
+      pad("display box", 20) + Math.round(boxW) + "px (12-col span)   ·   size " + Math.round(size) + "px   ·   " + Math.round(textW / boxW * 100) + "% utilisation   ·   " + lines + " line(s)" + (textW > boxW + 1 ? "   ✗ OVERFLOWS" : "   ✓"),
+      pad("display bounds", 20) + "clamp(" + this.BOUNDS.min + ", " + (this.PRESET[this.opt("face", "Marcellus")] * 100).toFixed(2) + "cqw, " + this.BOUNDS.max + ")   ·   " + (size <= this.BOUNDS.min + 0.5 ? "min engaged" : size >= this.BOUNDS.max - 0.5 ? "max engaged" : "—") + "   ·   face " + this.opt("face", "Marcellus"),
+      pad("VIDEO_GRID", 20) + this._cols + " col   ·   rows " + wallRows.map((r) => r.length).join("/") + "   ·   cell " + Math.round(wallCells[0].getBoundingClientRect().width) + "px   ·   wall " + Math.round(wallRect.height) + "px   ·   " + (orphan ? "✗ orphan tail" : "✓ no orphan"),
+      pad("About", 20) + "portrait " + Math.round(pr.width) + " × " + Math.round(pr.height) + "px   ·   aspect " + (pr.width / pr.height).toFixed(3) + " vs native " + (port.naturalWidth / port.naturalHeight).toFixed(3) + (Math.abs(pr.width / pr.height - port.naturalWidth / port.naturalHeight) < 0.01 ? "   ✓ uncropped" : "   ✗"),
+      pad("JUSTIFIED_ROWS", 20) + codaRows.length + " row(s) " + codaRows.map((r) => r.cells.length).join("/") + "   ·   heights " + codaRows.map((r) => r.cells[0].h).join(",") + "   ·   narrowest " + Math.round(codaNarrow) + "px vs floor " + (codaRows[0] ? codaRows[0].floor : "-") + (codaNarrow && codaRows[0] && codaNarrow < codaRows[0].floor - 1 ? "   ✗ STARVED" : "   ✓"),
+      pad("", 20) + "order " + codaOrder.join(" ") + (codaOrder.every((v, i) => v === i + 1) ? "   ✓ source order" : "   ✗ REORDERED"),
+      pad("passes", 20) + ((this._failed && this._failed.length) ? "✗ FAILED: " + this._failed.join(", ") : "✓ all layout passes ran"),
+      pad("motion", 20) + (this.reduced() ? "reduced · all playback released to poster" : "ambient hero + " + (this.cells || []).length + " visible-autoplay surfaces")
+    ].join("\n");
+  }
+}
+
+</script>
+</body>
+</html>

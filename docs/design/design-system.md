@@ -1137,6 +1137,43 @@ supported by this evidence.
 **No administrator control is introduced or required, and no per-page algorithm
 override is permitted.** One expression, one set of constants, every page.
 
+### 11.8 Shared candidates under real page use — first page-level consumption
+
+**Home is the first page to consume both shared responsive system candidates in
+real use, and neither failed** (2026-09-22,
+`page-specifications.md` §1.7, from
+`prototypes/home/home-baseline-v2-responsive.md`).
+
+Three observations generalise. **None creates a new rule, and none of Home's
+numbers is promoted.**
+
+1. **The shared display-typography METHOD survived real page use.** Applied to
+   Home's actual composition across eleven widths, utilisation held at 51%
+   throughout and no face clipped at either extreme once the reference box and
+   the coefficient were scoped correctly (§1.4).
+2. **The shared `JUSTIFIED_ROWS` candidate survived real page use.** Applied
+   verbatim to Home's real coda — real media, real aspects — with source order
+   and native aspect preserved, no starved cells, no crop, and no page-level
+   failure at the 480 → 450 system transition (§11.7).
+3. **The display minimum guard engaged for the first time on a real validated
+   page.** The typography experiment recorded the minimum as never engaging and
+   therefore untested (§16 item 17); Home's own floor engaged at 390px and
+   below. This is **HOME-SPECIFIC supporting evidence** that a guard is worth
+   keeping — **it establishes no global numerical minimum**, and Home's `40px`
+   is no more universal than the experiment's `26px`.
+
+**What is explicitly NOT created by Home's validation:**
+
+- **No global `VIDEO_GRID` rule.** Home's column derivation is one page's answer
+  for one nine-item wall; the global maximum remains unresolved (§16 item 6).
+- **No global HERO-height rule.** Home's
+  `max(240, min(0.72H, 0.62W, 900))` is tuned to Home's opening alone.
+- **No universal 40px display minimum.**
+
+**A page validation is not a system rule.** One page consuming a shared
+candidate successfully is evidence the candidate works; it is not licence to
+lift that page's constants into the system.
+
 ---
 
 ## 12. Accessibility floor **[INVARIANT]**
@@ -1247,18 +1284,19 @@ Carried forward. **Do not close these by inference during implementation.**
 | 3 | **`font-ui`** — does navigation leave the serif? Title card vs Plate; both read well. | Unresolved |
 | 4 | **Wall cell count and still/moving ratio** — retest with a fuller library. | Unresolved |
 | 5 | **Overlap primitive** | Deferred, not a V1 blocker |
-| 6 | **`VIDEO_GRID` column maximum** — a bound must exist; the number does not. | Unresolved |
+| 6 | **`VIDEO_GRID` column maximum** — a bound must exist; the number does not. **Home's responsive validation does not supply it.** Home's `3 at ≥1024, 2 below, never one column` is a **HOME-SPECIFIC** derivation for one nine-item wall (`page-specifications.md` §1.7) — it is not a global maximum, not a universal breakpoint contract, and not a rule that `VIDEO_GRID` never reaches one column. Validation still cannot ship without a number. | **Unresolved** |
 | 7 | **`AUTOPLAY_VISIBLE` visibility threshold** — what counts as "sufficiently visible". | Unresolved |
-| 8 | **Mobile composition for every page** — no reference evidence exists. **One page is now validated:** the Private Project Gate, at 768 / 430 / 390 / 375 and at constrained height (§11.6, `page-specifications.md` §6.9). Home, Art Works, Project Detail, About Me and Contact remain pending, and must not borrow the gate's derivations. | **1 of 6 validated as candidate; 5 pending** |
+| 8 | **Mobile composition for every page** — no reference evidence exists. **Two pages are now validated as candidates:** the Private Project Gate (§11.6, `page-specifications.md` §6.9) and **Home**, from 1440 down to 375 (`page-specifications.md` §1.7). Art Works, Project Detail, About Me and Contact remain pending, and must not borrow either page's derivations — Home's HERO height, wall column rule and display bounds are **HOME-SPECIFIC**. | **2 of 6 validated as candidates; 4 pending** |
 | 9 | **All six pages now have a candidate** — Home, Art Works (2C v2), Project Detail (1B v2), About Me (3B v2), Contact (4B v2), Private Gate (5B v2). None is approved. The gate theme conflict was resolved on 2026-09-22 in favour of a route-independent pre-auth surface (`page-specifications.md` §6.3). | **Exploration complete; no candidate conflicts open** |
-| 10 | **GALLERY narrow-width behaviour per presentation mode** — the *principle* is approved (§11.5): GALLERY does not inherit GRID child stacking and every mode owes bounded narrow-width behaviour. `VIDEO_GRID` satisfies it via column counts. **`JUSTIFIED_ROWS` now satisfies it** as a shared responsive candidate, system validated (§11.7) — no page has yet been validated with it. **`HORIZONTAL_STRIP` and `SLIDESHOW` still need theirs defined.** | **2 of 4 modes answered; `HORIZONTAL_STRIP` and `SLIDESHOW` pending** |
+| 10 | **GALLERY narrow-width behaviour per presentation mode** — the *principle* is approved (§11.5): GALLERY does not inherit GRID child stacking and every mode owes bounded narrow-width behaviour. `VIDEO_GRID` satisfies it via column counts. **`JUSTIFIED_ROWS` now satisfies it** as a shared responsive candidate, system validated (§11.7), and **now consumed successfully at page level by Home** (§11.8, `page-specifications.md` §1.7). Project Detail and Art Works have not been validated with it. **`HORIZONTAL_STRIP` and `SLIDESHOW` still need theirs defined.** | **2 of 4 modes answered; `HORIZONTAL_STRIP` and `SLIDESHOW` pending** |
 | 11 | **Display coefficient as a preset property** — `13.3cqw` is tuned to one face; face substitution changes clipping without anyone authoring it (§1.4). **The method question is now answered** by the Display Typography Scaling experiment (§1.4, SHARED RESPONSIVE CANDIDATE — SYSTEM VALIDATED): bounded composition-relative clamp, reference box = the alignment container, coefficient scoped to the preset, wrap rather than shrink, no JS. **What remains open is the numbers, not the method** — no preset's coefficient is derived by that experiment, and the amendment making coefficient and bounds a preset property is still raised rather than applied. | **Method validated at system level; per-preset values still not derived, amendment not applied** |
 | 12 | **Bounded HERO overlay content** — the *capability* is approved (ADR-0010): intra-block, title from `projects.title`, closed config, dismissal on media activation, `CLICK_TO_PLAY` or IMAGE only. Its **visual use on Project Detail remains candidate**, and the narrow-width stacked treatment awaits mobile validation. | **Capability approved; visual use candidate** |
 | 13 | **Constrained-height behaviour for interactive surfaces** — the Private Gate showed that centring a growing element inside a shrinking viewport pushes its action off screen, and answered it with top-aligned flow below ~620px (§11.6). Whether that becomes a general rule, at what threshold, and for which surfaces, is **not decided on one page's evidence**. | **Evidence recorded on one page; not a system rule** |
-| 14 | **Site-wide mobile navigation** — the gate hides the public nav at ≤430 because it has one job and never removes its escape route. Home, Art Works, Project Detail, About Me and Contact each need their own answer. **Explicitly not resolved by the gate, and not to be inherited from it** (§11.6). | **Unresolved** |
+| 14 | **Site-wide mobile navigation** — the gate hides the public nav at ≤430 because it has one job and never removes its escape route. Home, Art Works, Project Detail, About Me and Contact each need their own answer. **Explicitly not resolved by the gate, and not to be inherited from it** (§11.6). **Home adds evidence without settling it:** Home’s existing navigation survived 430 / 390 / 375 with density derivation only and no structural change, but its links sit at 14px with a 16px gap — **legible and below a 44px touch target**, with the wordmark wrapping to two lines. **Touch-target sizing is a site-wide question, carried here rather than answered by Home**, and it is **non-blocking** for Home’s responsive candidate status (`page-specifications.md` §1.7). | **Unresolved — now with touch-target evidence** |
 | 15 | **`JUSTIFIED_ROWS` carried uncertainties** (§11.7) — `ref = 1.6` remains an **empirical** constant, not a derived one; **2.39 and 0.50 were exercised as labelled geometry probes, not real masters**, and a true cinematic master should be run before specification; and whether the **480 → 450 step** is *desirable* is a visual judgement, not a defect. | **System validated; constants empirical, judgement open** |
 | 16 | **`AUTOPLAY_VISIBLE` on one-up `JUSTIFIED_ROWS` rows** — below 700px the mode becomes a single column of native-aspect items. Art Works' one-preview-at-a-time policy will meet those one-up rows at mobile, and the two have **never been validated together**: §11.7's prototype is imagery only. | **Untested interaction** |
-| 17 | **Display minimum bound** — the minimum **never engaged** anywhere in the Display Typography matrix (smallest size 35px at 375). It is carried as a **precautionary preset guard**; the prototype's `26px` is an experiment value and **must not be presented as a validated universal threshold** (§1.4). | **Precautionary, unvalidated** |
+| 17 | **Display minimum bound** — the minimum **never engaged** anywhere in the Display Typography matrix (smallest size 35px at 375), so it was carried as a **precautionary preset guard**. **Home's responsive validation is the first case where a minimum actually engaged on a real validated page** — Home's own `40px` floor took effect at 390px and below. That is **HOME-SPECIFIC supporting evidence**: it strengthens the case for *retaining a minimum guard* without establishing any global numerical minimum. **Neither `26px` nor `40px` is a universal threshold** (§1.4, §11.8). | **Guard justified by one real page; no global value** |
+
 | 18 | **Wrapped display typography** — the evidence establishes that long display content **wraps** rather than shrinking (§1.4), but **not what a wrapped display line should look like**. **Line-height for wrapped display type is unresolved, and no maximum line-count policy exists.** | **Unresolved** |
 | 19 | **Display typography test material** — the experiment used **uppercase strings at fixed `−0.005em` tracking**, matching current usage. Mixed case changes glyph advance, and tracking changes it too, so **preset coefficient and tracking must be tuned together** and coefficients derived here would not transfer to mixed-case display type. | **Scope limit on the evidence** |
 

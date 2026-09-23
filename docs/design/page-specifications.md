@@ -24,7 +24,7 @@ implies approval.**
 
 | Page | Desktop maturity | Responsive maturity | Exploration | Reference | What exists |
 |---|---|---|---|---|---|
-| **Home** | **VISUALLY EXPLORED** | **PENDING RESPONSIVE VALIDATION** | ✅ candidate | ✗ none | A proposed default composition, block by block |
+| **Home** | **VISUALLY EXPLORED** | **RESPONSIVE VALIDATED** | ✅ candidate | ✗ none | A proposed default composition, block by block, validated from 1440 down to 375 |
 | **Art Works** | **VISUALLY EXPLORED** | **PENDING RESPONSIVE VALIDATION** | ✅ candidate (2C v2) | ✅ ref 3 | A proposed structure, element by element |
 | **Project Detail** | **VISUALLY EXPLORED** | **PENDING RESPONSIVE VALIDATION** | ✅ candidate (1B v2) | ✅ ref 4 | A proposed composition, block by block |
 | **About Me** | **VISUALLY EXPLORED** | **PENDING RESPONSIVE VALIDATION** | ✅ candidate (3B v2) | ✅ refs 1, 2 | A proposed composition, section by section |
@@ -35,11 +35,19 @@ implies approval.**
 candidate recorded in `docs/design/prototypes/`, and every prototype states in
 its own header that it approves nothing.
 
-**One page is RESPONSIVE VALIDATED — the Private Project Gate** (§6.9, from
-`prototypes/private-gate/private-gate-5b-responsive.md`). It is a **candidate on
-both axes**: validation reproduced and answered a real failure, and approves
-nothing. **The other five remain pending responsive validation** — for them the
+**Two pages are RESPONSIVE VALIDATED** — the **Private Project Gate** (§6.9)
+and **Home** (§1.7), from
+`prototypes/private-gate/private-gate-5b-responsive.md` and
+`prototypes/home/home-baseline-v2-responsive.md`. Both are **candidates on both
+axes**: validation reproduced and answered real failures, and approves nothing.
+Neither is Design Approved, production-ready or implementation complete.
+
+**The other four remain pending responsive validation** — for them the
 automatic safe-stack floor (`design-system.md` §11.2) is all that is guaranteed.
+
+Home is the first page to **consume both shared responsive system candidates**
+in real use — `JUSTIFIED_ROWS` (`design-system.md` §11.7) and display
+typography scaling (§1.4). **Neither failed.**
 
 ### What each grade permits
 
@@ -161,37 +169,120 @@ units, no breakpoint rule.
 **[INVARIANT]** Home still requires a mobile design review. The automatic
 fallback guarantees nothing is broken, not that anything is good.
 
-**Home remains PENDING RESPONSIVE VALIDATION.**
+#### **RESPONSIVE VALIDATED — candidate** (2026-09-22)
 
-**Display typography — Home's large display may now be evaluated against the
-shared method** (`design-system.md` §1.4, SHARED RESPONSIVE CANDIDATE — SYSTEM
-VALIDATED): bounded composition-relative clamp, sized against the box the type
-aligns to.
+Accepted by the Project Owner. Evidence:
+`docs/design/prototypes/home/Home Baseline v2 Responsive.dc.html` and
+`home-baseline-v2-responsive.md`. **The locked desktop candidate
+`Home Baseline v2.dc.html` / `home-baseline-v2.md` is untouched** — the
+responsive artifact is a derivative, not a replacement.
 
-**The previous clipping under a face swap is now explained**, and by two causes
-rather than one: the coefficient is tuned to a single face, **and Home sizes
-against a container wider than its own alignment target** — a reference-box
-mismatch. Measured, a viewport- or page-wider reference drifts 3–6% across
-widths even on the composition it was tuned for, because edge padding is a fixed
-pixel value.
+Home remains **not** Design Approved, **not** production-ready, **not**
+implementation complete. Every value below is **[DEFAULT]** and
+**HOME-SPECIFIC** unless it says otherwise.
 
-**Do not rewrite Home's page-specific values yet.** Correcting the reference box
-is a page change and belongs to Home's own responsive validation, not to the
-system pass. Home is not validated by this experiment.
+**Coverage.** 1440×1000 · 1024×900 · 768×1024 · 600×900 · 540×900 · 480×900 ·
+430×932 · 430×600 · 390×844 · 375×812, with 699 and 450 also switchable.
+**No horizontal overflow at any tested viewport**, measured as
+`scrollWidth > clientWidth`, not assumed.
 
-**`JUSTIFIED_ROWS` — block 5 may now be tested against the shared system
-candidate.** The mode's narrow-width behaviour is settled at system level
-(`design-system.md` §11.7): derived target height, minimum-cell floor, height
-ceiling, ragged tails, source order preserved, no crop. The gap this block hit
-at 375 — a 4:5 still at 45×176, which the block-level stack could not reach —
-is what that candidate exists to close.
+**Both shared system candidates were consumed in real page use, and neither
+failed** — `JUSTIFIED_ROWS` verbatim for the coda, and the bounded
+composition-relative display-typography method for the wordmark.
 
-**That is an opportunity to test, not a result.** Nothing here is validated
-until Home is run through it. Page validation should specifically check that
-block 5's authored "one row" desktop intent still reads correctly once the
-target height is derived from `T` rather than authored, and that the
-`VIDEO_GRID` wall and the justified row still sit well together at tablet, where
-nine cells already leave an orphan.
+##### HERO height **[DEFAULT — HOME-SPECIFIC]**
+
+```text
+height = max(240px, min(0.72 × viewport-height, 0.62 × viewport-width, 900px))
+```
+
+**The width term is why this works.** Without it a tall phone would hand the
+hero 670px of a 932px screen and the page would open on nothing but a crop. At
+29–30% of viewport height on phones the hero still reads as an opening frame
+and the identity block below is visible on the first screen.
+
+**Do not promote this formula to other pages.** It is tuned to Home's opening
+and to nothing else. The playback model is unchanged (ambient, muted, inline,
+lifecycle-aware, poster under reduced motion), and **no letterbox work was
+required** — no Home composition produced a failure needing the unresolved
+active-area rule (`design-system.md` §16 item 1).
+
+##### Display typography **[DEFAULT — HOME-SPECIFIC]**
+
+Home consumes the shared method (`design-system.md` §1.4) with the reference box
+set to **the Home display alignment composition** — the 12-column span the
+wordmark actually aligns to.
+
+```text
+clamp(40px, 13.30cqw, 250px)      Marcellus, Home preset
+```
+
+- **Coefficient `0.1330` is Home / Marcellus preset-specific** — it is exactly
+  the locked `13.3cqw`, preserved, not re-derived.
+- **`40px` is not a global minimum.** **`250px` is not a universal maximum.**
+- Utilisation is **51% at every tested width**, so the relationship to the
+  layout is invariant — the property the method exists for.
+- **The minimum engaged at 390px and below** (43 → 40px). Carried as
+  **HOME-SPECIFIC SUPPORTING EVIDENCE** — see §9 cross-cutting note below.
+- **Spectral and Archivo are stress tests only. Home remains Marcellus.** Both
+  were re-derived from their own measured advances (0.1235 / 0.1262), never by
+  reusing Marcellus's, and neither clipped at either extreme.
+
+##### `VIDEO_GRID` **[DEFAULT — HOME-SPECIFIC]**
+
+```text
+>= 1024px  ->  3 columns
+<  1024px  ->  2 columns
+```
+
+**There is no one-column Home mode.** Verified: source order preserved, nothing
+hidden, nothing reordered, and **item 9 spans the final row** at 2.4:1 — at 375
+that is 375 × 156px, roughly 1.5× a normal cell, reading as a **closing frame
+rather than an accidental orphan**. With the span disabled the instrument still
+reports `✗ orphan tail`.
+
+The previous one-column transition at 640 created a **page-height cliff**: a
+40px narrowing from 640 to 600 lengthened the page by 2,046px — 2.3 screens —
+and made the page at 600 *longer than the same page at 375*. **Every tested
+lower one-column threshold still cost 1.5–2.0 screens**, so the cliff is a
+property of the switch itself, not of where it is placed. Staying two-column
+**resolves the 480–540 weakness**: 6.1–6.4 screens becomes 4.2–4.4, and page
+length now falls monotonically as the viewport narrows.
+
+**Cells reach 186 × 104px at 375, and the Project Owner accepts that for this
+Home candidate** — the wall is an **index / preview surface**, not the primary
+viewing surface; a film is watched on its project page.
+
+**This is HOME-SPECIFIC.** It is **not** the global `VIDEO_GRID` column
+maximum, **not** a universal `VIDEO_GRID` breakpoint contract, and **not** a
+global rule that `VIDEO_GRID` never becomes one column. **The engineering-level
+global `VIDEO_GRID` maximum remains separately unresolved**
+(`design-system.md` §16 item 6).
+
+##### `JUSTIFIED_ROWS` at page level
+
+The shared candidate was applied **verbatim** — `ref 1.6`, the same `T`, floor
+and ceiling, against the coda's composition box rather than the raw viewport.
+Across 1440 / 1024 / 768 / 600 / 430 / 375: **source order preserved · native
+aspect preserved · no starved cells · no crop to satisfy packing · ragged and
+tail semantics valid · no Home-level failure at the 480 → 450 system
+transition** (with four items the coda is already one-up by 600, so the step
+falls above Home's sensitive range).
+
+**`JUSTIFIED_ROWS` has now been successfully consumed at page level by Home.**
+This says nothing about Project Detail or Art Works, which remain pending.
+
+##### Other Home derivations **[DEFAULT — HOME-SPECIFIC]**
+
+About stacks below 700 with the portrait at a **58% width mode, never a crop**
+(0.645 rendered against 0.645 native at every width) · navigation derives
+**density only**, no structural change · footer nav stacks below 700 · footer
+email sized against **its own column** · edge/gutter/band step
+56/20/140 → 32/14/96 → 24/10/72 · reading columns stack **by measure**, not by
+breakpoint alone, keeping 38–51 characters at every tested viewport.
+
+Reduced motion is deterministic: **0 videos playing, 0 sources loaded**, every
+surface resolved to its poster.
 
 ### 1.8 Media behaviour
 
@@ -1533,7 +1624,7 @@ Hold on every page regardless of exploration status.
 | **Video** | Never audible without user action. Multi-video surfaces are `AUTOPLAY_VISIBLE`. `AUTOPLAY_AMBIENT` only on a standalone ambient surface. |
 | **Posters** | `poster_media_id → thumbnail_url → empty well`. Refused autoplay shows the poster. |
 | **Motion** | Content moves; interface does not. One signature transition, shell-owned. |
-| **Responsive** | Three breakpoints. Automatic safe stacking. **Every production page still requires a mobile design review.** One page is RESPONSIVE VALIDATED — the Private Project Gate (§6.9); the other five are pending, and must not borrow its derivations. `JUSTIFIED_ROWS` has a **shared responsive candidate, system validated** (`design-system.md` §11.7) — one expression for every page, no per-page override. **Display typography** has one too (`design-system.md` §1.4): bounded composition-relative clamp, reference box = the alignment container, coefficient scoped to the preset, long content wraps rather than shrinking. There the **method** is shared and the **numbers are not**. A system candidate is not a page validation. |
+| **Responsive** | Three breakpoints. Automatic safe stacking. **Every production page still requires a mobile design review.** Two pages are RESPONSIVE VALIDATED — the Private Project Gate (§6.9) and Home (§1.7); the other four are pending, and must not borrow either page's derivations. Home's HERO height, wall column rule and display bounds are **HOME-SPECIFIC**. `JUSTIFIED_ROWS` has a **shared responsive candidate, system validated** (`design-system.md` §11.7) — one expression for every page, no per-page override. **Display typography** has one too (`design-system.md` §1.4): bounded composition-relative clamp, reference box = the alignment container, coefficient scoped to the preset, long content wraps rather than shrinking. There the **method** is shared and the **numbers are not**. A system candidate is not a page validation. |
 | **Accessibility** | WCAG AA size-aware · visible focus · reduced motion yields a deterministic still · DOM order follows `position`, never `colStart`. |
 | **Never** | Product UI, card primitives, feed-like surfaces, audible autoplay, invented compositions on pending pages. |
 

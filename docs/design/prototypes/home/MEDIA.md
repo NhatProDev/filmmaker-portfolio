@@ -106,18 +106,51 @@ above is not recorded anywhere and remains unverified.** `home-baseline-v2.md`
 and the superseded legacy prototype:
 
 ```text
-Home Baseline v2.dc.html     current Home prototype
-home-baseline-v2.md          its validation report
-support.js                   prototype runtime support
-legacy/Home Baseline.dc.html superseded, retained as record
-legacy/home-baseline.md      superseded, retained as record
-legacy/image-slot.js         legacy dependency, not used by v2
-legacy/support.js            legacy runtime support
+Home Baseline v2.dc.html            locked desktop candidate
+home-baseline-v2.md                 its validation report
+Home Baseline v2 Responsive.dc.html responsive derivative of the above
+home-baseline-v2-responsive.md      its validation record
+support.js                          prototype runtime support
+legacy/Home Baseline.dc.html        superseded, retained as record
+legacy/home-baseline.md             superseded, retained as record
+legacy/image-slot.js                legacy dependency, not used by v2
+legacy/support.js                   legacy runtime support
 ```
 
 **Home Baseline v2 is the current Home candidate baseline. It is not approved.**
 Its own report says so, and `page-specifications.md` §1 records Home as
-VISUALLY EXPLORED — candidate.
+VISUALLY EXPLORED — candidate on the desktop axis.
+
+**A responsive derivative now exists.** `Home Baseline v2 Responsive.dc.html`
+validates the locked candidate from 1440 down to 375 and consumes both shared
+responsive system candidates. `page-specifications.md` §1 records Home as
+RESPONSIVE VALIDATED — candidate on the responsive axis. **Neither axis is
+approved.**
+
+**The locked desktop candidate is not modified by it.** The derivative is a
+separate file; `Home Baseline v2.dc.html` and `home-baseline-v2.md` are
+byte-identical to the versions committed with the desktop candidate.
+
+### Runtime media differences in the responsive derivative
+
+Three Project Owner rulings (2026-09-22) mean the derivative's media differs
+from the historical desktop artifact. **In each case the historical file keeps
+what it had — history is not rewritten to match the derivative.**
+
+| | Historical desktop artifact | Responsive derivative |
+|---|---|---|
+| **About portrait** | `media/w/about-portrait.png` — a **stale reference**, not present in the runtime set | **`media/w/portrait.jpg`**, native aspect **~0.645** preserved, no crop |
+| **Coda aspects** | authored `data-ar` values `2.39 / 1.5 / 0.8 / 1.78` that **do not match the real files** | **actual / native** aspects `1.776 / 1.776 / 2.012 / 2.041` |
+| **`ABOUT ME` heading** | fixed `width: 1340px; height: 208px` — a **prototype / direct-edit artifact, not design intent** | composition-relative width, content-driven height |
+
+**`about-portrait.png` is the same stale filename `../art-works/MEDIA.md` and
+`../responsive-system/MEDIA.md` both record.** Its presence in the historical
+Home artifact is retained deliberately as evidence of what was run.
+
+**Native-aspect correctness overrides pixel equivalence with stale geometry.**
+Validating a native-aspect rule against invented ratios would prove nothing, so
+the responsive derivative uses the real file aspects — which is also why its
+desktop coda renders as two rows rather than the historical one row.
 
 `legacy/` was previously reported missing. It has since been placed here. Only
 its relative media paths were rewritten (`./media/` → `../../../../../media/`)

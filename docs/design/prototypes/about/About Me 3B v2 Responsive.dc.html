@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..600;1,6..72,200..500&amp;display=swap" rel="stylesheet">
+<style>
+[data-viewport]{scrollbar-width:none}
+[data-viewport]::-webkit-scrollbar{width:0;height:0}
+:root{
+  --surface:#F7F3EC; --ink:#16120E; --accent:#C4361C; --muted:#6C6862; --rule:#E2DCD2; --frame:#14110F;
+  --font-display:'Marcellus',Georgia,serif; --font-body:'Newsreader',Georgia,serif; --font-ui:'Newsreader',Georgia,serif;
+  --display-track:-0.005em; --edge:56px; --gut:20px; --band:112px;
+}
+body{margin:0;background:#E6E1D8}
+a{color:inherit;text-decoration:none}
+a:hover{color:var(--accent)}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+img{display:block}
+</style>
+</helmet>
+<div ref="{{ rootRef }}" style="font-family:var(--font-body);color:var(--ink);padding:48px 44px 110px">
+
+  <div style="max-width:84ch;margin-bottom:26px">
+    <h2 style="margin:0;font-family:var(--font-display);font-size:28px;font-weight:400;letter-spacing:var(--display-track);text-transform:uppercase">About Me 3B v2 — responsive validation</h2>
+    <p style="margin:12px 0 0;font-size:16px;line-height:1.7;text-wrap:pretty">The locked editorial profile rendered inside a switchable viewport frame. The desktop candidate file is untouched. Opening content is authored in the narrow reading order (statement → portrait → biography → evidence) and placed on the locked 12-column grid at desktop, so DOM, reading and visual order agree at every width. The live audit reads the current frame; the matrix below it is re-computed from rendered geometry across every target width.</p>
+  </div>
+
+  <div data-audit="" style="margin-bottom:26px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;font-size:12px;line-height:1.75;color:#2C2822;white-space:pre"></div>
+
+  <div data-viewport="" style="position:relative;background:var(--surface);box-shadow:0 0 0 1px #D6D0C5;overflow-y:auto;overflow-x:hidden">
+    <div data-page="" style="background:var(--surface);padding-bottom:120px">
+
+      <header data-head="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:baseline;padding:30px var(--edge) 0">
+        <a href="#top" data-wordmark="" style="grid-column:1/6;font-family:var(--font-ui);font-size:12px;letter-spacing:0.22em;text-transform:uppercase">Nguyen Khanh Nhat</a>
+        <nav data-nav="" style="grid-column:7/13;display:flex;justify-content:flex-end;gap:34px;font-size:16px">
+          <a href="#top">Works</a><a href="#top" style="color:var(--accent)" aria-current="page">About</a><a href="#top">Contact</a>
+        </nav>
+      </header>
+
+      <section data-open="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:start;padding:74px var(--edge) 0">
+        <div data-datum="" style="grid-column:1/13;grid-row:1;height:1px;background:var(--rule);margin-bottom:26px"></div>
+        <div data-o="lead" style="grid-column:1/8;grid-row:2">
+          <h1 data-marker="" style="margin:0;font-family:var(--font-ui);font-weight:400;font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted)">About me</h1>
+          <p data-lead="" style="margin:22px 0 0;font-size:24px;line-height:1.38;max-width:30ch;text-wrap:pretty">I started shooting weddings to pay for a camera, and stayed for the part where nobody is performing.</p>
+        </div>
+        <figure data-portrait="" style="grid-column:9/13;grid-row:2 / span 3;margin:58px 0 0">
+          <img data-portrait-img="" src="../../../../media/w/portrait.jpg" alt="Nguyen Khanh Nhat" style="width:100%;height:auto">
+          <figcaption data-cap="" style="margin:12px 0 0;font-size:13px;font-style:italic;color:var(--muted)">Hanoi, 2025</figcaption>
+        </figure>
+        <div data-o="bio" style="grid-column:1/8;grid-row:3">
+          <p data-body="" style="margin:26px 0 0;font-size:17px;line-height:1.78;max-width:54ch;text-wrap:pretty">Most of my work is documentary and commercial — tailors, kitchens, courts, workshops. I shoot with one camera and available light where it serves the frame, and I grade my own material, because the grade is where the intent either survives or it does not.</p>
+          <p data-body="" style="margin:18px 0 0;font-size:17px;line-height:1.78;max-width:54ch;color:var(--muted);text-wrap:pretty">Before this I cut other people's footage for three years, which is the best training there is for knowing what you actually need to shoot — and how little of it that usually is.</p>
+          <div data-close-rule="" style="width:46%;height:1px;background:var(--rule);margin:34px 0 0"></div>
+        </div>
+        <div data-o="ev" style="grid-column:1/8;grid-row:4">
+          <figure data-ev="" style="width:70.6%;margin:46px 0 0">
+            <img data-img="desk" src="../../../../media/w/desk-01.jpg" alt="" style="width:100%;height:auto">
+            <figcaption data-cap="" style="margin-top:11px;font-size:13px;font-style:italic;color:var(--muted)">Grading at home, second pass</figcaption>
+            <p data-answer="" style="margin:20px 0 0;font-size:17px;line-height:1.78;max-width:42ch;text-wrap:pretty">The grade happens here, usually at night, usually twice. The first pass is for the story; the second is for the parts of the room the camera got wrong.</p>
+          </figure>
+        </div>
+      </section>
+
+      <section data-proc="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:start;padding:86px var(--edge) 0">
+        <p data-proc-text="" style="grid-column:1/5;grid-row:1;margin:0;padding-top:52px;font-size:17px;line-height:1.78;max-width:42ch;color:var(--muted);text-wrap:pretty">I photograph a room before I light it. Most of the time the room has already solved it.</p>
+        <figure data-proc-fig="" style="grid-column:6/13;grid-row:1;margin:0">
+          <img data-img="atelier" src="../../../../media/w/mtm-atelier.jpg" alt="" style="width:100%;height:auto">
+          <figcaption data-cap="" style="margin-top:11px;font-size:13px;font-style:italic;color:var(--muted)">The tailor's workroom, before the lights went in</figcaption>
+        </figure>
+      </section>
+
+      <section data-miss="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:end;padding:86px var(--edge) 0">
+        <figure data-miss-fig="" style="grid-column:1/5;grid-row:1;margin:0">
+          <div style="aspect-ratio:3/2;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);display:flex;align-items:center;justify-content:center">
+            <span style="font-family:var(--font-ui);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted)">Image to come — on set</span>
+          </div>
+          <figcaption data-cap="" style="margin-top:11px;font-size:13px;font-style:italic;color:var(--muted)">Placeholder, not imagery</figcaption>
+        </figure>
+        <p data-miss-text="" style="grid-column:6/11;grid-row:1;margin:0;font-size:17px;line-height:1.78;max-width:42ch;text-wrap:pretty">I work small and close, usually alone, occasionally with a gaffer when the room is bigger than the light.</p>
+      </section>
+
+      <section data-exp="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);padding:var(--band) var(--edge) 0">
+        <h2 data-exp-h="" style="grid-column:1/3;margin:0;font-family:var(--font-body);font-weight:400;font-style:italic;font-size:17px;color:var(--muted)">Selected experience</h2>
+        <dl data-exp-dl="" style="grid-column:4/11;margin:0;font-size:16px">
+          <div data-exp-row="" style="display:flex;gap:26px;border-top:1px solid var(--rule);padding:12px 0"><dt style="flex:0 0 5ch;color:var(--muted)">2026</dt><dd style="margin:0;min-width:0">DP and colourist — <em>Made to Measure</em>, Trần &amp; Sons</dd></div>
+          <div data-exp-row="" style="display:flex;gap:26px;border-top:1px solid var(--rule);padding:12px 0"><dt style="flex:0 0 5ch;color:var(--muted)">2025</dt><dd style="margin:0;min-width:0">DP — <em>Court</em>, Nike Vietnam</dd></div>
+          <div data-exp-row="" style="display:flex;gap:26px;border-top:1px solid var(--rule);padding:12px 0"><dt style="flex:0 0 5ch;color:var(--muted)">2024</dt><dd style="margin:0;min-width:0">Editor and colourist — freelance, Hanoi</dd></div>
+          <div data-exp-row="" style="display:flex;gap:26px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:12px 0"><dt style="flex:0 0 5ch;color:var(--muted)">2019</dt><dd style="margin:0;min-width:0">First paid shoot</dd></div>
+        </dl>
+      </section>
+
+      <section data-contact="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:baseline;padding:var(--band) var(--edge) 0">
+        <p data-contact-text="" style="grid-column:1/8;margin:0;font-size:17px;line-height:1.74;color:var(--muted)">Open to work through early 2027. Hanoi, and anywhere the flight is justified.</p>
+        <p data-email-box="" style="grid-column:9/13;margin:0;text-align:right;container-type:inline-size"><a data-email="" href="mailto:hello@khanhnhat.film" style="font-family:var(--font-display);font-size:26px;letter-spacing:var(--display-track);color:var(--accent);white-space:nowrap">hello@khanhnhat.film</a></p>
+      </section>
+    </div>
+  </div>
+
+  <div data-matrix="" style="margin-top:34px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;font-size:11.5px;line-height:1.7;color:#2C2822;white-space:pre"></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;width&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;1440&quot;,&quot;1024&quot;,&quot;768&quot;,&quot;699&quot;,&quot;600&quot;,&quot;540&quot;,&quot;480&quot;,&quot;430&quot;,&quot;390&quot;,&quot;375&quot;],&quot;default&quot;:&quot;1440&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Viewport&quot;},&quot;height&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;1000&quot;,&quot;900&quot;,&quot;1024&quot;,&quot;932&quot;,&quot;844&quot;,&quot;812&quot;,&quot;600&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Viewport&quot;},&quot;narrowOrder&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;afterLead&quot;,&quot;dom&quot;,&quot;first&quot;],&quot;default&quot;:&quot;afterLead&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Derivation&quot;},&quot;portraitCap&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;46&quot;,&quot;58pct&quot;,&quot;full&quot;],&quot;default&quot;:&quot;46&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Derivation&quot;},&quot;marginCaption&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Derivation&quot;},&quot;experience&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;sample&quot;,&quot;long&quot;],&quot;default&quot;:&quot;sample&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Stress&quot;}}">
+class Component extends DCLogic {
+  PAIR = { 1440: 1000, 1024: 900, 768: 1024, 699: 900, 600: 900, 540: 900, 480: 900, 430: 932, 390: 844, 375: 812 };
+  WIDTHS = [1440, 1024, 768, 699, 600, 540, 480, 430, 390, 375];
+  PORTRAIT_AR = 970 / 1505;
+  // ABOUT-SPECIFIC: phone portrait height cap as a share of viewport height.
+  PCAP = 0.46;
+  // Email line (static Latin display, Marcellus kept): 26 / 429 (cols 9–12 at 1440).
+  EMAIL = { coef: 0.0606, min: 20, max: 26 };
+  LONG_EXP = [
+    "Director of photography and colourist — <em>Người Thợ May Cuối Cùng ở Phố Hàng Bông</em>, Trần &amp; Sons Tailoring Company, Hanoi",
+    "Second-unit director of photography — <em>Court: A Season Inside the Hanoi Youth League</em>, Nike Vietnam",
+    "Offline editor, assistant colourist and conform — freelance for Hanoi commercial post-production houses",
+    "First paid shoot"
+  ];
+  ov = null;
+
+  opt(k, d) {
+    if (this.ov && this.ov[k] !== undefined) return this.ov[k];
+    const o = window.__abr || {};
+    if (o[k] !== undefined) return o[k];
+    return this.props[k] !== undefined ? this.props[k] : d;
+  }
+  renderVals() { return { rootRef: (el) => { this.root = el; } }; }
+
+  componentDidMount() {
+    window.__abrc = this;
+    this.ctx = document.createElement("canvas").getContext("2d");
+    this._expOrig = this.qa("[data-exp-row] dd").map((d) => d.innerHTML);
+    this.qa("img").forEach((i) => i.addEventListener("load", () => this.applySoon()));
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => this.applySoon());
+    this.applySoon();
+    setTimeout(() => this.applySoon(), 900);
+  }
+  componentDidUpdate() { this.applySoon(); }
+  applySoon() { clearTimeout(this._as); this._as = setTimeout(() => this.apply(), 60); }
+
+  q(s) { return this.root.querySelector(s); }
+  qa(s) { return Array.from(this.root.querySelectorAll(s)); }
+  vp() { return this.q("[data-viewport]"); }
+  pg() { return this.q("[data-page]"); }
+  W() { return parseInt(this.opt("width", "1440"), 10); }
+  H() { const h = this.opt("height", "auto"); return h === "auto" ? (this.PAIR[this.W()] || 900) : parseInt(h, 10); }
+
+  apply() {
+    if (!this.root || this._busy) return;
+    this._busy = true;
+    try {
+      try { this.sweep(); } catch (e) { console.error("[about responsive] sweep failed:", e && e.message); }
+      this._failed = [];
+      [["layout", () => this.layout()], ["audit", () => this.audit()]].forEach(([n, f]) => { try { f(); } catch (e) { this._failed.push(n); console.error("[about responsive] " + n + " failed:", (e && e.message) || e); } });
+    } finally { this._busy = false; }
+  }
+
+  tier() { const W = this.W(); return W >= 1024 ? "desk" : W >= 700 ? "tab" : "phone"; }
+
+  layout() {
+    const W = this.W(), H = this.H(), vp = this.vp(), pg = this.pg(), t = this.tier();
+    vp.style.width = W + "px"; vp.style.height = H + "px";
+    const k = t === "desk" ? 0 : t === "tab" ? 1 : 2;
+    pg.style.setProperty("--edge", [56, 32, 24][k] + "px");
+    pg.style.setProperty("--gut", [20, 14, 10][k] + "px");
+    pg.style.setProperty("--band", [112, 96, 72][k] + "px");
+    pg.style.paddingBottom = [120, 96, 72][k] + "px";
+    this.q("[data-open]").style.paddingTop = [74, 60, 44][k] + "px";
+    this.q("[data-proc]").style.paddingTop = [86, 72, 56][k] + "px";
+    this.q("[data-miss]").style.paddingTop = [86, 72, 56][k] + "px";
+    this.q("[data-lead]").style.fontSize = (W < 600 ? 21 : 24) + "px";
+    // Header density only — site-wide mobile nav is not designed here.
+    const nav = this.q("[data-nav]"), wm = this.q("[data-wordmark]");
+    nav.style.gap = W <= 430 ? "16px" : W <= 768 ? "24px" : "34px";
+    nav.style.fontSize = W <= 430 ? "14px" : "16px";
+    wm.style.fontSize = W <= 430 ? "10px" : "12px";
+    nav.style.gridColumn = W <= 430 ? "6 / 13" : "7 / 13";
+    this.expContent();
+    this.opening(t, W, H);
+    this.pairs(t);
+    this.experience(t);
+    this.contact(t);
+  }
+
+  expContent() {
+    const long = this.opt("experience", "sample") === "long";
+    this.qa("[data-exp-row] dd").forEach((d, i) => { const v = long ? this.LONG_EXP[i] : this._expOrig[i]; if (d.innerHTML !== v) d.innerHTML = v; });
+  }
+
+  // ABOUT-SPECIFIC: opening. Desktop/tablet = locked grid placement. Phone =
+  // one column in authored order; the portrait keeps the desktop asymmetry by
+  // hanging from the right edge at a height-derived width.
+  opening(t, W, H) {
+    const s = this.q("[data-open]"), lead = this.q('[data-o="lead"]'), bio = this.q('[data-o="bio"]'), ev = this.q('[data-o="ev"]');
+    const por = this.q("[data-portrait]"), fig = this.q("[data-ev]"), datum = this.q("[data-datum]"), rule = this.q("[data-close-rule]");
+    const order = this.opt("narrowOrder", "afterLead");
+    if (t !== "phone") {
+      s.style.gridTemplateColumns = "repeat(12,minmax(0,1fr))";
+      datum.style.gridColumn = "1 / 13"; datum.style.gridRow = "1";
+      lead.style.gridColumn = "1 / 8"; lead.style.gridRow = "2";
+      bio.style.gridColumn = "1 / 8"; bio.style.gridRow = "3";
+      ev.style.gridColumn = "1 / 8"; ev.style.gridRow = "4";
+      por.style.gridColumn = "9 / 13"; por.style.gridRow = "2 / span 3";
+      por.style.margin = "58px 0 0"; por.style.width = ""; por.style.justifySelf = "";
+      por.style.display = "block"; this._marginCap = false;
+      const c0 = por.querySelector("[data-cap]"); c0.style.textAlign = "left"; c0.style.margin = "12px 0 0";
+      [lead, bio, ev, por].forEach((e) => { e.style.order = ""; });
+      fig.style.width = "70.6%"; fig.style.marginTop = "46px";
+      rule.style.width = "46%";
+      this._pw = null;
+      return;
+    }
+    s.style.gridTemplateColumns = "minmax(0,1fr)";
+    [datum, lead, bio, ev, por].forEach((e) => { e.style.gridColumn = "1 / -1"; e.style.gridRow = "auto"; });
+    const content = W - 2 * 24;
+    const cap = this.opt("portraitCap", "46");
+    const pw = cap === "full" ? content : cap === "58pct" ? Math.round(content * 0.58) : Math.round(Math.min(content, this.PCAP * H * this.PORTRAIT_AR));
+    this._pw = pw;
+    // The right-hung portrait leaves a lateral void on its left. When the
+    // caption fits there it sits in that void, bottom-aligned beside the
+    // image, as a margin note; otherwise it stays below the portrait.
+    const capEl = por.querySelector("[data-cap]");
+    this.ctx.font = "italic 400 13px Newsreader";
+    const capW = Math.ceil(this.ctx.measureText(capEl.textContent).width);
+    const margin = this.opt("marginCaption", true) && content - pw - 16 >= capW;
+    this._marginCap = margin;
+    if (margin) {
+      por.style.width = "100%"; por.style.justifySelf = "stretch";
+      por.style.display = "grid"; por.style.gridTemplateColumns = "minmax(0,1fr) " + pw + "px"; por.style.columnGap = "16px"; por.style.alignItems = "end";
+      const img = por.querySelector("img"); img.style.gridColumn = "2"; img.style.gridRow = "1";
+      capEl.style.gridColumn = "1"; capEl.style.gridRow = "1"; capEl.style.textAlign = "right"; capEl.style.margin = "0";
+    } else {
+      por.style.display = "block"; por.style.width = pw + "px"; por.style.justifySelf = "end";
+      capEl.style.textAlign = "left"; capEl.style.margin = "12px 0 0";
+    }
+    por.style.margin = "32px 0 0";
+    const ord = order === "first" ? { por: 0, lead: 1, bio: 2, ev: 3 } : order === "dom" ? { lead: 0, bio: 1, ev: 2, por: 3 } : { lead: 0, por: 1, bio: 2, ev: 3 };
+    lead.style.order = String(ord.lead + 1); por.style.order = String(ord.por + 1); bio.style.order = String(ord.bio + 1); ev.style.order = String(ord.ev + 1);
+    datum.style.order = "0";
+    if (order === "first") por.style.margin = "0 0 28px";
+    fig.style.width = "100%"; fig.style.marginTop = "40px";
+    rule.style.width = "46%";
+  }
+
+  // ABOUT-SPECIFIC: image ↔ line pairs. Side by side while the text column holds
+  // a reading measure (≥ 300px); otherwise stacked, with the image offset toward
+  // the opposite side on tablet and full width on phone.
+  pairs(t) {
+    const pt = this.q("[data-proc-text]"), pf = this.q("[data-proc-fig]"), ps = this.q("[data-proc]");
+    const mt = this.q("[data-miss-text]"), mf = this.q("[data-miss-fig]"), ms = this.q("[data-miss]");
+    pt.style.gridColumn = "1 / 5"; pt.style.gridRow = "1"; pt.style.paddingTop = "52px"; pt.style.marginTop = "0";
+    pf.style.gridColumn = "6 / 13"; pf.style.gridRow = "1"; pf.style.marginTop = "0";
+    mf.style.gridColumn = "1 / 5"; mf.style.gridRow = "1";
+    mt.style.gridColumn = "6 / 11"; mt.style.gridRow = "1"; mt.style.marginTop = "0";
+    ps.style.alignItems = "start"; ms.style.alignItems = "end";
+    const stackP = pt.getBoundingClientRect().width < 300, stackM = mt.getBoundingClientRect().width < 300;
+    this._stackP = stackP; this._stackM = stackM;
+    if (stackP) {
+      pt.style.gridColumn = t === "phone" ? "1 / -1" : "1 / 9"; pt.style.paddingTop = "0";
+      pf.style.gridColumn = t === "phone" ? "1 / -1" : "4 / 13"; pf.style.gridRow = "2"; pf.style.marginTop = "22px";
+    }
+    if (stackM) {
+      ms.style.alignItems = "start";
+      mf.style.gridColumn = t === "phone" ? "1 / -1" : "1 / 10";
+      mt.style.gridColumn = t === "phone" ? "1 / -1" : "1 / 9"; mt.style.gridRow = "2"; mt.style.marginTop = "22px";
+    }
+  }
+
+  experience(t) {
+    const h = this.q("[data-exp-h]"), dl = this.q("[data-exp-dl]");
+    if (t === "desk") { h.style.gridColumn = "1 / 3"; h.style.marginBottom = "0"; dl.style.gridColumn = "4 / 11"; }
+    else { h.style.gridColumn = "1 / -1"; h.style.marginBottom = "16px"; dl.style.gridColumn = t === "tab" ? "1 / 11" : "1 / -1"; }
+    this.qa("[data-exp-row]").forEach((r) => { r.style.gap = t === "phone" ? "16px" : "26px"; });
+  }
+
+  contact(t) {
+    const tx = this.q("[data-contact-text]"), eb = this.q("[data-email-box]"), em = this.q("[data-email]");
+    em.style.fontSize = "clamp(" + this.EMAIL.min + "px, " + (this.EMAIL.coef * 100).toFixed(2) + "cqw, " + this.EMAIL.max + "px)";
+    if (t === "desk") { tx.style.gridColumn = "1 / 8"; eb.style.gridColumn = "9 / 13"; eb.style.textAlign = "right"; eb.style.marginTop = "0"; }
+    else { tx.style.gridColumn = "1 / -1"; eb.style.gridColumn = "1 / -1"; eb.style.textAlign = "left"; eb.style.marginTop = "14px"; }
+  }
+
+  // ---- measurement ------------------------------------------------------
+  cpl(el) {
+    const cs = getComputedStyle(el), t = el.textContent.trim();
+    this.ctx.font = cs.fontStyle + " " + cs.fontWeight + " " + cs.fontSize + " " + cs.fontFamily;
+    const avg = this.ctx.measureText(t).width / t.length;
+    return Math.round(el.getBoundingClientRect().width / avg);
+  }
+  lines(el) { const cs = getComputedStyle(el); const lh = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.3; return Math.round(el.getBoundingClientRect().height / lh); }
+
+  metrics() {
+    const vp = this.vp(), pg = this.pg(), H = this.H(), W = this.W();
+    const pR = pg.getBoundingClientRect(), y = (r) => r.top - pR.top;
+    const img = this.q("[data-portrait-img]"), ir = img.getBoundingClientRect();
+    const nat = img.naturalWidth ? img.naturalWidth / img.naturalHeight : this.PORTRAIT_AR;
+    const aspectOK = Math.abs(ir.width / ir.height - nat) < 0.004 && getComputedStyle(img).objectFit !== "cover";
+    const lead = this.q("[data-lead]"), bodies = this.qa("[data-body]");
+    const pTop = y(ir), pBot = pTop + ir.height;
+    // first-screen composition
+    const leadVis = y(lead.getBoundingClientRect()) + lead.getBoundingClientRect().height <= H;
+    const lh = parseFloat(getComputedStyle(bodies[0]).lineHeight);
+    let bioLines = 0, bioTotal = 0;
+    bodies.forEach((b) => { const r = b.getBoundingClientRect(), n = Math.round(r.height / lh); bioTotal += n; const t0 = y(r); for (let i = 0; i < n; i++) if (t0 + (i + 1) * lh <= H) bioLines++; });
+    const portVis = Math.max(0, Math.min(pBot, H) - Math.max(pTop, 0)) / ir.height;
+    // blank intervals, in visual order
+    const boxes = this.qa("[data-page] header, [data-page] h1, [data-page] h2, [data-page] p, [data-page] figcaption, [data-page] img, [data-page] [data-exp-row], [data-miss-fig] > div, [data-datum], [data-close-rule]")
+      .map((e) => { const r = e.getBoundingClientRect(); return { t: y(r), b: y(r) + r.height, e }; }).filter((b) => b.b > b.t).sort((a, b) => a.t - b.t);
+    let maxB = 0, gap = 0, gapAt = "";
+    boxes.forEach((b) => { if (maxB && b.t - maxB > gap) { gap = b.t - maxB; gapAt = (b.e.dataset && Object.keys(b.e.dataset)[0]) || b.e.tagName.toLowerCase(); } maxB = Math.max(maxB, b.b); });
+    const imgs = this.qa("[data-page] img, [data-miss-fig] > div").map((e) => e.getBoundingClientRect());
+    const bigImg = Math.max.apply(null, imgs.map((r) => r.height));
+    const exp = this.qa("[data-exp-row]"), expLines = exp.map((r) => this.lines(r.querySelector("dd")));
+    const expYearOK = exp.every((r) => Math.abs(r.querySelector("dt").getBoundingClientRect().left - exp[0].querySelector("dt").getBoundingClientRect().left) < 1);
+    const caps = this.qa("figcaption").map((c) => { const im = c.previousElementSibling.getBoundingClientRect(), cr = c.getBoundingClientRect(); const side = cr.right <= im.left + 1; return { w: Math.round(cr.width), cpl: this.cpl(c), gap: side ? "side " + Math.round(im.left - cr.right) : "+" + Math.round(cr.top - im.bottom) }; });
+    const pr = this.q("[data-portrait-img]").getBoundingClientRect(), cb = this.q("[data-open]").getBoundingClientRect();
+    const voidW = Math.round(pr.left - cb.left - parseFloat(getComputedStyle(this.q("[data-open]")).paddingLeft));
+    const em = this.q("[data-email]"), eb = this.q("[data-email-box]");
+    const wm = this.q("[data-wordmark]"), navA = this.qa("[data-nav] a");
+    const head = this.q("[data-head]").getBoundingClientRect();
+    return {
+      W, H, pageH: Math.round(pR.height), overflow: vp.scrollWidth - vp.clientWidth,
+      pw: Math.round(ir.width), ph: Math.round(ir.height), pPct: Math.round(ir.height / H * 100), aspect: (ir.width / ir.height).toFixed(4), aspectOK, pTop: Math.round(pTop), pVis: Math.round(portVis * 100),
+      leadVis, bioLines, bioTotal, leadCpl: this.cpl(lead), bodyCpl: this.cpl(bodies[0]), answerCpl: this.cpl(this.q("[data-answer]")),
+      procCpl: this.cpl(this.q("[data-proc-text]")), missCpl: this.cpl(this.q("[data-miss-text]")), bodyW: Math.round(bodies[0].getBoundingClientRect().width),
+      gap: Math.round(gap), gapAt, bigImg: Math.round(bigImg), bigPct: Math.round(bigImg / H * 100),
+      expLines, expYearOK, caps,
+      email: parseFloat(getComputedStyle(em).fontSize).toFixed(1), emailFit: em.getBoundingClientRect().width <= eb.getBoundingClientRect().width + 1, emailUtil: Math.round(em.getBoundingClientRect().width / eb.getBoundingClientRect().width * 100),
+      wmLines: this.lines(wm), navH: Math.round(Math.min.apply(null, navA.map((a) => a.getBoundingClientRect().height))), headH: Math.round(head.height),
+      stackP: this._stackP, stackM: this._stackM, voidW, marginCap: this._marginCap
+    };
+  }
+
+  order() {
+    const vis = this.qa('[data-open] > [data-o], [data-open] > [data-portrait]').map((e) => ({ k: e.dataset.o || "portrait", t: e.getBoundingClientRect().top, l: e.getBoundingClientRect().left }))
+      .sort((a, b) => (Math.abs(a.t - b.t) < 2 ? a.l - b.l : a.t - b.t)).map((x) => x.k);
+    const dom = this.qa('[data-open] > [data-o], [data-open] > [data-portrait]').map((e) => e.dataset.o || "portrait");
+    return { vis, dom, same: vis.join() === dom.join() };
+  }
+
+  sweep() {
+    this._sweeping = true;
+    const saved = this.ov, pad = (s, n) => String(s).padEnd(n);
+    const A = [], B = [], C = [], D = [];
+    this.WIDTHS.forEach((w) => {
+      this.ov = { width: String(w), height: "auto" }; this.layout();
+      const m = this.metrics(), o = this.order();
+      A.push(pad(w + "×" + m.H, 11) + pad(this.tier(), 7) + pad(m.pageH, 7) + pad((m.pageH / m.H).toFixed(1), 5) + pad(m.pw + "×" + m.ph, 10) + pad(m.pPct + "%", 6) + pad(m.aspectOK ? "✓" : "✗", 4) + pad(this.tier() === "phone" ? m.voidW + (m.marginCap ? "c" : "") : "—", 6) + pad(m.pTop, 6) + pad((m.leadVis ? "L" : "–") + " bio " + m.bioLines + "/" + m.bioTotal + " · P " + m.pVis + "%", 22) + pad(m.bodyW, 6) + pad(m.leadCpl + "/" + m.bodyCpl + "/" + m.answerCpl + "/" + m.procCpl + "/" + m.missCpl, 18) + pad(m.gap + " " + m.gapAt, 20) + pad(m.bigImg + " (" + m.bigPct + "%)", 12) + pad((m.stackP ? "S" : "·") + (m.stackM ? "S" : "·"), 5) + pad(m.email + (m.emailFit ? "" : "✗"), 7) + pad(o.same ? "✓" : "✗", 4) + (m.overflow > 1 ? "✗ " + m.overflow : "✓"));
+      B.push(pad(w, 6) + pad(m.expLines.join("/"), 10) + pad(m.expYearOK ? "✓" : "✗", 5) + m.caps.map((c) => c.w + "px·" + c.cpl + "cpl·" + c.gap).join("   "));
+      this.ov = { width: String(w), height: "auto", experience: "long" }; this.layout();
+      const m2 = this.metrics();
+      B[B.length - 1] += "   | long: " + m2.expLines.join("/") + (m2.expYearOK ? " ✓" : " ✗") + (m2.overflow > 1 ? " ✗ovf" : "");
+      D.push(pad(w, 6) + pad(m.wmLines, 4) + pad(m.navH + "px", 7) + pad(m.headH + "px", 7) + (m.navH >= 44 ? "✓" : "✗ <44"));
+    });
+    [[600, 900], [430, 932], [390, 844], [375, 812]].forEach(([w, h]) => ["afterLead", "dom", "first"].forEach((or) => ["46", "58pct", "full"].forEach((pc) => {
+      if (or !== "afterLead" && pc !== "46") return;
+      this.ov = { width: String(w), height: String(h), narrowOrder: or, portraitCap: pc }; this.layout();
+      const m = this.metrics();
+      C.push(pad(w + "×" + h, 10) + pad(or, 11) + pad(pc === "46" ? "0.46H" : pc === "58pct" ? "58% (Home)" : "full width", 12) + pad(m.pw + "×" + m.ph, 10) + pad(m.pPct + "%", 6) + pad(m.pTop, 6) + pad(m.leadVis ? "✓" : "✗", 6) + pad(m.bioLines + "/" + m.bioTotal, 7) + pad(m.pVis + "%", 6) + m.pageH);
+    })));
+    this.ov = saved; this._sweeping = false;
+    this.q("[data-matrix]").textContent = [
+      "A · PAGE MATRIX — as derived (narrow order afterLead, portrait cap 0.46H)",
+      pad("viewport", 11) + pad("tier", 7) + pad("page", 7) + pad("scr", 5) + pad("portrait", 10) + pad("%H", 6) + pad("asp", 4) + pad("void", 6) + pad("pTop", 6) + pad("first screen", 22) + pad("bodyW", 6) + pad("cpl lead/bio/ans/pr/ms", 18) + pad("largest blank", 20) + pad("largest img", 12) + pad("stk", 5) + pad("email", 7) + pad("ord", 4) + "ovf",
+      ...A, "",
+      "  first screen: L = opening statement fully visible · bio = biography lines inside the first screen / total · P = share of the portrait inside the first screen",
+      "  void = lateral space left of the right-hung phone portrait (c = portrait caption sits there as a margin note)",
+      "  stk: process pair / missing-slot pair stacked (S) or side by side (·) · ord = DOM order = visual order in the opening", "",
+      "B · EXPERIENCE + CAPTIONS — dd line counts (4 rows), year column aligned; captions: width · cpl · gap to image",
+      ...B, "",
+      "C · NARROW ORDER / PORTRAIT CAP — comparison",
+      pad("viewport", 10) + pad("order", 11) + pad("cap", 12) + pad("portrait", 10) + pad("%H", 6) + pad("pTop", 6) + pad("lead", 6) + pad("bio", 7) + pad("P vis", 6) + "page",
+      ...C, "",
+      "D · HEADER (not designed here) — wordmark lines · smallest nav link height · header height",
+      ...D
+    ].join("\n");
+  }
+
+  audit() {
+    const el = this.q("[data-audit]"); if (!el) return;
+    const m = this.metrics(), o = this.order(), pad = (s, n) => String(s).padEnd(n);
+    el.textContent = [
+      pad("viewport", 18) + m.W + " × " + m.H + "   ·   tier " + this.tier() + "   ·   page " + m.pageH + "px   ·   " + (m.pageH / m.H).toFixed(1) + " screens   ·   horizontal overflow " + (m.overflow > 1 ? "✗ " + m.overflow + "px" : "✓ none"),
+      pad("portrait", 18) + m.pw + " × " + m.ph + "px   ·   aspect " + m.aspect + " vs native " + this.PORTRAIT_AR.toFixed(4) + "   " + (m.aspectOK ? "✓ uncropped" : "✗ ALTERED") + "   ·   " + m.pPct + "% of viewport height   ·   top " + m.pTop + "px",
+      pad("opening order", 18) + "DOM " + o.dom.join(" → ") + "   ·   visual " + o.vis.join(" → ") + "   " + (o.same ? "✓ agree" : "✗ differ (comparison order)"),
+      pad("first screen", 18) + "statement " + (m.leadVis ? "✓" : "✗") + "   ·   biography " + m.bioLines + " / " + m.bioTotal + " lines   ·   portrait " + m.pVis + "% visible",
+      pad("measure", 18) + "statement " + m.leadCpl + " cpl · biography " + m.bodyCpl + " cpl (" + m.bodyW + "px) · answer " + m.answerCpl + " · process " + m.procCpl + " · slot line " + m.missCpl,
+      pad("pairs", 18) + "process " + (m.stackP ? "stacked" : "side by side") + "   ·   missing slot " + (m.stackM ? "stacked" : "side by side"),
+      pad("experience", 18) + "lines " + m.expLines.join("/") + "   ·   year column " + (m.expYearOK ? "✓ aligned" : "✗"),
+      pad("captions", 18) + m.caps.map((c) => c.w + "px · " + c.cpl + " cpl · " + c.gap + "px").join("   |   "),
+      pad("email", 18) + m.email + "px Marcellus · " + m.emailUtil + "% of its box " + (m.emailFit ? "✓ fits" : "✗ OVERFLOWS"),
+      pad("rhythm", 18) + "largest blank " + m.gap + "px before " + m.gapAt + "   ·   largest image " + m.bigImg + "px (" + m.bigPct + "% of H)",
+      pad("header", 18) + "wordmark " + m.wmLines + " line(s) · nav link " + m.navH + "px " + (m.navH >= 44 ? "✓" : "✗ <44") + " · header " + m.headH + "px",
+      pad("passes", 18) + (this._failed && this._failed.length ? "✗ FAILED: " + this._failed.join(", ") : "✓ all passes ran")
+    ].join("\n");
+  }
+}
+</script>
+</body>
+</html>

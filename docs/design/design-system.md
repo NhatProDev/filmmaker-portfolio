@@ -1024,7 +1024,7 @@ that would settle that is listed in `page-specifications.md` §6.9.
 expression, exercised across 5 datasets × 11 widths with zero starved cells. It
 is **not Design Approved, not production-ready, and not page-validated.** At page level, **Home** has since consumed it successfully (§11.8);
 **Project Detail** tested it and rejected the presentation mode for its own
-four-still composition (§11.9); **Art Works** has not been validated with it.
+four-still composition (§11.9); **Art Works** consumed it verbatim in two of its four bands and uses page-specific layouts in the other two (§11.10).
 Page results do not change this system-level grade.
 
 Evidence: `prototypes/responsive-system/Justified Rows Narrow Width v2.dc.html`
@@ -1232,10 +1232,10 @@ Detail's numbers is promoted.**
    **Resolved by Project Owner ruling** (§1.1, §16 item 20): dynamic project
    names render through a **Newsreader-backed `font-display` preset** — the
    role is unchanged, and the face never switches by language.
-   **Art Works is directly exposed** — its typographic index renders project
-   titles in Marcellus — and now carries the ruling as a **locked input** for
-   its responsive validation (`page-specifications.md` §2.7). Each page derives
-   its own metrics; Project Detail's values are not reused.
+   **Art Works was directly exposed** — its desktop index rendered project
+   titles in Marcellus — and its responsive validation has since **applied and
+   verified** the ruling with its own metrics (§11.10). Each page derives its
+   own metrics; Project Detail's values were not reused.
 3. **A system-valid gallery algorithm can still be the wrong presentation mode
    for a specific authored composition.** Project Detail's four similarly wide
    stills packed 3 + 1 under `JUSTIFIED_ROWS` with **every invariant intact** —
@@ -1265,6 +1265,51 @@ from rendered layout (`page-specifications.md` §3.12).
 - **No global `0.98` line-height rule.**
 
 **Home's successful `JUSTIFIED_ROWS` page validation (§11.8) is unchanged.**
+
+### 11.10 Art Works — third page-level use
+
+**Art Works is the third page validated against the shared candidates**
+(2026-09-23, `page-specifications.md` §2.9, from
+`prototypes/art-works/art-works-2c-v2-responsive.md`). It consumed
+`JUSTIFIED_ROWS` verbatim in two of its four bands, used page-specific layouts
+in the other two, and applied the Newsreader-backed dynamic project-title preset
+under the typography ruling (§1.1).
+
+Five observations generalise. **None creates a new rule, and none of Art Works'
+numbers is promoted.**
+
+1. **The Newsreader-backed dynamic project-title display preset works for
+   multilingual project names on a second page.** English and Vietnamese titles
+   rendered from one face with no per-glyph fallback or clipping — at index
+   scale as well as at Project Detail's hero scale. No face was switched by
+   language.
+2. **Hover-only identity is insufficient on touch layouts.** Without hover, a
+   stacked desktop index identified only 22–78% of frames at rest; placing each
+   row's index entries directly above its frames identified 100%. Touch layouts
+   need identity present at rest.
+3. **The one-moving-preview policy survives responsive layout.** At every width
+   and count — one-up rows included — at most one preview moved and at most one
+   clip source was loaded. This answers §16 item 16 at page level.
+4. **System-valid row packing may still require page-specific authored layout
+   choices.** `JUSTIFIED_ROWS` held every invariant wherever it ran, yet Art
+   Works used its own packer at ≥ 1171 and pairs at 540–699, because density and
+   composition — not algorithm correctness — decided those bands. It is the same
+   lesson as Project Detail (§11.9), now across a range of counts and widths
+   rather than one composition. **The shared candidate is not weakened.**
+5. **Page-specific evidence breakpoints do not automatically become global
+   tokens.** 1171 was found by exhaustive computation for this packer and this
+   content; 540 is where this page's pairs give way to one-up. Neither is a
+   system breakpoint, and the fixed breakpoint set (§11.1) is unchanged.
+
+**What is explicitly NOT created by Art Works' validation:**
+
+- **No global 1171 or 540 breakpoint.**
+- **No global pairs mode**, and **no global one-up rule**.
+- **No global Art Works title coefficient** (`1.506cqw`) and **no global
+  line-height** (`1.15`).
+
+**Home's successful `JUSTIFIED_ROWS` page validation (§11.8) and Project
+Detail's rejection of it for its own stills (§11.9) are both unchanged.**
 
 ---
 
@@ -1378,20 +1423,20 @@ Carried forward. **Do not close these by inference during implementation.**
 | 5 | **Overlap primitive** | Deferred, not a V1 blocker |
 | 6 | **`VIDEO_GRID` column maximum** — a bound must exist; the number does not. **Home's responsive validation does not supply it.** Home's `3 at ≥1024, 2 below, never one column` is a **HOME-SPECIFIC** derivation for one nine-item wall (`page-specifications.md` §1.7) — it is not a global maximum, not a universal breakpoint contract, and not a rule that `VIDEO_GRID` never reaches one column. Validation still cannot ship without a number. | **Unresolved** |
 | 7 | **`AUTOPLAY_VISIBLE` visibility threshold** — what counts as "sufficiently visible". | Unresolved |
-| 8 | **Mobile composition for every page** — no reference evidence exists. **Three pages are now validated as candidates:** the Private Project Gate (§11.6, `page-specifications.md` §6.9), **Home** (`page-specifications.md` §1.7) and **Project Detail** (`page-specifications.md` §3.12), each from 1440 down to 375. Art Works, About Me and Contact remain pending, and must not borrow any validated page's derivations — Home's are **HOME-SPECIFIC** and Project Detail's are **PROJECT-DETAIL-SPECIFIC**. | **3 of 6 validated as candidates; 3 pending** |
+| 8 | **Mobile composition for every page** — no reference evidence exists. **Four pages are now validated as candidates:** the Private Project Gate (§11.6, `page-specifications.md` §6.9), **Home** (`page-specifications.md` §1.7), **Project Detail** (`page-specifications.md` §3.12) and **Art Works** (`page-specifications.md` §2.9), each from 1440 down to 375. About Me and Contact remain pending, and must not borrow any validated page's derivations — each page's are specific to it. | **4 of 6 validated as candidates; 2 pending** |
 | 9 | **All six pages now have a candidate** — Home, Art Works (2C v2), Project Detail (1B v2), About Me (3B v2), Contact (4B v2), Private Gate (5B v2). None is approved. The gate theme conflict was resolved on 2026-09-22 in favour of a route-independent pre-auth surface (`page-specifications.md` §6.3). | **Exploration complete; no candidate conflicts open** |
-| 10 | **GALLERY narrow-width behaviour per presentation mode** — the *principle* is approved (§11.5): GALLERY does not inherit GRID child stacking and every mode owes bounded narrow-width behaviour. `VIDEO_GRID` satisfies it via column counts. **`JUSTIFIED_ROWS` now satisfies it** as a shared responsive candidate, system validated (§11.7), and **now consumed successfully at page level by Home** (§11.8, `page-specifications.md` §1.7). **Project Detail tested it and rejected that presentation mode** for its specific four-still set — the algorithm's invariants all held, the mode was wrong for the composition (§11.9). Art Works has not been validated with it. **`HORIZONTAL_STRIP` and `SLIDESHOW` still need theirs defined.** | **2 of 4 modes answered; `HORIZONTAL_STRIP` and `SLIDESHOW` pending** |
+| 10 | **GALLERY narrow-width behaviour per presentation mode** — the *principle* is approved (§11.5): GALLERY does not inherit GRID child stacking and every mode owes bounded narrow-width behaviour. `VIDEO_GRID` satisfies it via column counts. **`JUSTIFIED_ROWS` now satisfies it** as a shared responsive candidate, system validated (§11.7), and **now consumed successfully at page level by Home** (§11.8, `page-specifications.md` §1.7). **Project Detail tested it and rejected that presentation mode** for its specific four-still set — the algorithm's invariants all held, the mode was wrong for the composition (§11.9). **Art Works consumed it** verbatim in two of its four bands and used page-specific layouts in the other two (§11.10). **`HORIZONTAL_STRIP` and `SLIDESHOW` still need theirs defined.** | **2 of 4 modes answered; `HORIZONTAL_STRIP` and `SLIDESHOW` pending** |
 | 11 | **Display coefficient as a preset property** — `13.3cqw` is tuned to one face; face substitution changes clipping without anyone authoring it (§1.4). **The method question is now answered** by the Display Typography Scaling experiment (§1.4, SHARED RESPONSIVE CANDIDATE — SYSTEM VALIDATED): bounded composition-relative clamp, reference box = the alignment container, coefficient scoped to the preset, wrap rather than shrink, no JS. **What remains open is the numbers, not the method** — no preset's coefficient is derived by that experiment, and the amendment making coefficient and bounds a preset property is still raised rather than applied. | **Method validated at system level; per-preset values still not derived, amendment not applied** |
 | 12 | **Bounded HERO overlay content** — the *capability* is approved (ADR-0010): intra-block, title from `projects.title`, closed config, dismissal on media activation, `CLICK_TO_PLAY` or IMAGE only. Its **visual use on Project Detail remains candidate**, and its **narrow-width behaviour is now validated there as a candidate** (`page-specifications.md` §3.12): stacked below 700, and at any width when the title exceeds two lines or obstructs the affordance or Back to Works — derived, never authored. The overlay-or-stacked decision depends on rendered layout, which is an implementation question. | **Capability approved; visual use and narrow-width behaviour candidate** |
 | 13 | **Constrained-height behaviour for interactive surfaces** — the Private Gate showed that centring a growing element inside a shrinking viewport pushes its action off screen, and answered it with top-aligned flow below ~620px (§11.6). Whether that becomes a general rule, at what threshold, and for which surfaces, is **not decided on one page's evidence**. | **Evidence recorded on one page; not a system rule** |
 | 14 | **Site-wide mobile navigation** — the gate hides the public nav at ≤430 because it has one job and never removes its escape route. Home, Art Works, Project Detail, About Me and Contact each need their own answer. **Explicitly not resolved by the gate, and not to be inherited from it** (§11.6). **Home adds evidence without settling it:** Home’s existing navigation survived 430 / 390 / 375 with density derivation only and no structural change, but its links sit at 14px with a 16px gap — **legible and below a 44px touch target**, with the wordmark wrapping to two lines. **Touch-target sizing is a site-wide question, carried here rather than answered by Home**, and it is **non-blocking** for Home’s responsive candidate status (`page-specifications.md` §1.7). | **Unresolved — now with touch-target evidence** |
-| 15 | **`JUSTIFIED_ROWS` carried uncertainties** (§11.7) — `ref = 1.6` remains an **empirical** constant, not a derived one; **2.39 and 0.50 were exercised as labelled geometry probes, not real masters**, and a true cinematic master should be run before specification; and whether the **480 → 450 step** is *desirable* is a visual judgement, not a defect. | **System validated; constants empirical, judgement open** |
-| 16 | **`AUTOPLAY_VISIBLE` on one-up `JUSTIFIED_ROWS` rows** — below 700px the mode becomes a single column of native-aspect items. Art Works' one-preview-at-a-time policy will meet those one-up rows at mobile, and the two have **never been validated together**: §11.7's prototype is imagery only. | **Untested interaction** |
-| 17 | **Display minimum bound** — the minimum **never engaged** anywhere in the Display Typography matrix (smallest size 35px at 375), so it was carried as a **precautionary preset guard**. **Home's responsive validation is the first case where a minimum actually engaged on a real validated page** — Home's own `40px` floor took effect at 390px and below. That is **HOME-SPECIFIC supporting evidence**: it strengthens the case for *retaining a minimum guard* without establishing any global numerical minimum. **Neither `26px` nor `40px` is a universal threshold** (§1.4, §11.8). **Project Detail is a second case:** its next-project title's `27px` floor engaged at 430 and below, while its project-title floor never engaged (`page-specifications.md` §3.12) — again **PAGE-SPECIFIC supporting evidence** only. **`27px` is not a universal threshold either.** | **Guard justified by two real pages; no global value** |
+| 15 | **`JUSTIFIED_ROWS` carried uncertainties** (§11.7) — `ref = 1.6` remains an **empirical** constant, not a derived one; **2.39 and 0.50 were exercised as labelled geometry probes, not real masters**, and a true cinematic master should be run before specification; and whether the **480 → 450 step** is *desirable* is a visual judgement, not a defect. **Art Works is the first page where that step occurs in an accepted composition**: at 18 projects in its one-up band a lone portrait stands at the ceiling, 363 × 563 at 450 — 63% of a 900px screen (`page-specifications.md` §2.9); still a by-eye judgement. **A second carried observation, now seen on two pages:** a ragged tail held at `target` can overtop full rows that solve below target — Project Detail's four stills (§11.9), and Art Works' `JUSTIFIED_ROWS` comparison state at 18 projects, 1440 (a 298px tail against 229–257px rows, 45% empty). Every §11.7 invariant held in both; **§11.7 is not changed**, and whether a system-level tail rule is wanted is an open question, not a decision. | **System validated; constants empirical, judgement open** |
+| 16 | **`AUTOPLAY_VISIBLE` on one-up `JUSTIFIED_ROWS` rows** — below 700px the mode becomes a single column of native-aspect items, and Art Works' one-preview-at-a-time policy meets those rows at mobile. **Now validated together on Art Works** (`page-specifications.md` §2.9, §11.10): at every width and count, one-up rows included, at most one preview moved and at most one clip source was loaded; one-up rows made "nearest the viewport centre" unambiguous; tapping opens rather than plays; reduced motion loads no clip. Eligibility stays the locked desktop page policy — **no global `AUTOPLAY_VISIBLE` threshold** is set (§16 item 7). | **Resolved at page level on Art Works** |
+| 17 | **Display minimum bound** — the minimum **never engaged** anywhere in the Display Typography matrix (smallest size 35px at 375), so it was carried as a **precautionary preset guard**. **Home's responsive validation is the first case where a minimum actually engaged on a real validated page** — Home's own `40px` floor took effect at 390px and below. That is **HOME-SPECIFIC supporting evidence**: it strengthens the case for *retaining a minimum guard* without establishing any global numerical minimum. **Neither `26px` nor `40px` is a universal threshold** (§1.4, §11.8). **Project Detail is a second case:** its next-project title's `27px` floor engaged at 430 and below, while its project-title floor never engaged (`page-specifications.md` §3.12) — again **PAGE-SPECIFIC supporting evidence** only. **`27px` is not a universal threshold either.** **Art Works is a third case:** its index-scale title preset's `18px` floor engaged at every width below about 1195px — at that small display size the bounds carry the preset (`page-specifications.md` §2.9). Page-specific supporting evidence only; **`18px` is not a universal threshold**. | **Guard justified by three real pages; no global value** |
 
 | 18 | **Wrapped display typography** — the evidence establishes that long display content **wraps** rather than shrinking (§1.4), but **not what a wrapped display line should look like**. **Line-height for wrapped display type is unresolved, and no maximum line-count policy exists.** Project Detail now has **page-level** values — a `0.98` line-height candidate, and a two-line limit that governs only whether its HERO title may overlay the film (`page-specifications.md` §3.12). **Neither is a system rule**: `0.98` is not a universal display line-height, and the two-line condition is an overlay-validity test, not a maximum line count for display type. Vietnamese stacked diacritics add a theoretical worst case of ~1.18em, carried as preset QA. | **Unresolved at system level; one page has candidate values** |
 | 19 | **Display typography test material** — the experiment used **uppercase strings at fixed `−0.005em` tracking**, matching current usage. Mixed case changes glyph advance, and tracking changes it too, so **preset coefficient and tracking must be tuned together** and coefficients derived here would not transfer to mixed-case display type. | **Scope limit on the evidence** |
-| 20 | **Typography role model vs dynamic-content language coverage** — *raised as a tension:* §1.1 assigns project titles to `font-display` and allows three roles only, while Project Detail rendered dynamic project names in Newsreader, the Title card preset's `font-body` face. **Resolved by Project Owner ruling, 2026-09-23 (§1.1):** roles are **semantic**, not physical faces; there are still **exactly three**, and **no fourth role** is created. `font-display` carries two presets in the current identity — **static / authored Latin display** (Marcellus may remain) and **dynamic project-title display** (Newsreader). Dynamic project names **remain `font-display`**, are **not** moved to `font-body`, and **never reuse body metrics**; the dynamic preset **never switches face by detected language**. **Reasons:** project titles are dynamic content; product content may contain Vietnamese; Marcellus has demonstrated incomplete Vietnamese glyph coverage; and per-language face switching would make visual hierarchy content-dependent. **Carried consequences:** the eventual **self-hosted** library (§1.1) must verify language coverage per face against the actual font files, since the evidence establishes Marcellus's gap **as served** by Google's subsets; **Art Works** carries the ruling as a locked input for its responsive validation (`page-specifications.md` §2.7). **Not yet addressed:** how the alternate presets in §1.3 resolve the dynamic project-title preset, and whether their faces cover Vietnamese — a question for the theme-system work. | **Resolved — Project Owner ruling, 2026-09-23** |
+| 20 | **Typography role model vs dynamic-content language coverage** — *raised as a tension:* §1.1 assigns project titles to `font-display` and allows three roles only, while Project Detail rendered dynamic project names in Newsreader, the Title card preset's `font-body` face. **Resolved by Project Owner ruling, 2026-09-23 (§1.1):** roles are **semantic**, not physical faces; there are still **exactly three**, and **no fourth role** is created. `font-display` carries two presets in the current identity — **static / authored Latin display** (Marcellus may remain) and **dynamic project-title display** (Newsreader). Dynamic project names **remain `font-display`**, are **not** moved to `font-body`, and **never reuse body metrics**; the dynamic preset **never switches face by detected language**. **Reasons:** project titles are dynamic content; product content may contain Vietnamese; Marcellus has demonstrated incomplete Vietnamese glyph coverage; and per-language face switching would make visual hierarchy content-dependent. **Carried consequences:** the eventual **self-hosted** library (§1.1) must verify language coverage per face against the actual font files, since the evidence establishes Marcellus's gap **as served** by Google's subsets; **Art Works** has applied and verified the ruling in its responsive validation, with its own metrics (`page-specifications.md` §2.9). **Carried for implementation:** the Art Works prototype names its token `--font-title`; under this ruling that token is a **preset under `font-display`, not a fourth role**, and implementation naming should not present it as a peer of the three roles. **Not yet addressed:** how the alternate presets in §1.3 resolve the dynamic project-title preset, and whether their faces cover Vietnamese — a question for the theme-system work. | **Resolved — Project Owner ruling, 2026-09-23** |
 
 ---
 

@@ -54,7 +54,9 @@ RESPONSIVE CANDIDATE — SYSTEM VALIDATED**, which is a system-level grade.
   held — **but rejected that presentation mode** for its specific
   four-wide-still authored composition, and uses a structured GRID instead
   (`design-system.md` §11.9, `page-specifications.md` §3.12).
-- **Art Works remains pending responsive validation.**
+- **Art Works consumed it verbatim in two of its four bands** — 700–1170, and
+  one-up below 540 — and uses page-specific layouts in the other two
+  (`design-system.md` §11.10, `page-specifications.md` §2.9).
 
 Page results do not change the system-level grade, and none of this directory's
 evidence is rewritten by them.

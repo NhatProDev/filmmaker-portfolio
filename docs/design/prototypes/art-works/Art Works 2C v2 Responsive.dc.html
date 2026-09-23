@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..600;1,6..72,200..500&amp;display=swap" rel="stylesheet">
+<style>
+[data-viewport]{scrollbar-width:none}
+[data-viewport]::-webkit-scrollbar{width:0;height:0}
+:root{
+  --surface:#F7F3EC; --ink:#16120E; --accent:#C4361C; --muted:#6C6862; --rule:#E2DCD2; --frame:#14110F;
+  --font-display:'Marcellus',Georgia,serif; --font-body:'Newsreader',Georgia,serif; --font-ui:'Newsreader',Georgia,serif;
+  --font-title:'Newsreader',Georgia,serif;
+  --display-track:-0.005em;
+  --edge:56px; --gut:20px;
+}
+body{margin:0;background:#E6E1D8}
+a{color:inherit;text-decoration:none}
+a:hover{color:var(--accent)}
+a:focus-visible{outline:2px solid var(--accent)}
+img,video{display:block}
+</style>
+</helmet>
+<div ref="{{ rootRef }}" style="font-family:var(--font-body);color:var(--ink);padding:48px 44px 110px">
+
+  <div style="max-width:84ch;margin-bottom:26px">
+    <h2 style="margin:0;font-family:var(--font-display);font-size:28px;font-weight:400;letter-spacing:var(--display-track);text-transform:uppercase">Art Works 2C v2 — responsive validation</h2>
+    <p style="margin:12px 0 0;font-size:16px;line-height:1.7;text-wrap:pretty">The locked index-and-sheet candidate rendered inside a switchable viewport frame. The sheet consumes JUSTIFIED_ROWS v2 verbatim; dynamic project names use an Art Works Newsreader-backed display preset. Below the grouping threshold the index is derived into the sheet: each packed row carries its own index entries directly above its frames, in displayPosition order. The desktop candidate file is untouched. The live audit reads the current frame; the matrix below is re-computed from rendered geometry at 3 / 9 / 18 projects across every target width.</p>
+  </div>
+
+  <div data-audit="" style="margin-bottom:26px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;font-size:12px;line-height:1.75;color:#2C2822;white-space:pre"></div>
+
+  <div data-viewport="" style="position:relative;background:var(--surface);box-shadow:0 0 0 1px #D6D0C5;overflow-y:auto;overflow-x:hidden">
+    <div data-page="" style="background:var(--surface);color:var(--ink);padding-bottom:120px">
+
+      <header data-head="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:baseline;padding:30px var(--edge) 0">
+        <a href="#top" data-wordmark="" style="grid-column:1/6;font-family:var(--font-ui);font-size:12px;letter-spacing:0.22em;text-transform:uppercase">Nguyen Khanh Nhat</a>
+        <nav data-nav="" style="grid-column:7/13;display:flex;justify-content:flex-end;gap:34px;font-size:16px">
+          <a href="#top" style="color:var(--accent)">Works</a><a href="#top">About</a><a href="#top">Contact</a>
+        </nav>
+      </header>
+
+      <div data-mast="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);align-items:end;padding:78px var(--edge) 34px">
+        <div data-mast-box="" style="grid-column:1/7;container-type:inline-size">
+          <h1 data-works="" style="margin:0;font-family:var(--font-display);font-weight:400;font-size:58px;line-height:1;letter-spacing:var(--display-track);text-transform:uppercase">Works</h1>
+        </div>
+        <p data-count="" style="grid-column:9/13;margin:0;font-size:15px;line-height:1.7;color:var(--muted);text-align:right">9 projects, 2023–2026</p>
+      </div>
+
+      <div data-comp="" style="container-type:inline-size;padding:0 var(--edge)">
+        <div data-index-host=""></div>
+        <div data-sheet-host="" style="margin:0 calc(-1 * var(--edge))"></div>
+      </div>
+    </div>
+  </div>
+
+  <div data-matrix="" style="margin-top:34px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;font-size:11.5px;line-height:1.7;color:#2C2822;white-space:pre"></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;width&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;1440&quot;,&quot;1366&quot;,&quot;1280&quot;,&quot;1200&quot;,&quot;1171&quot;,&quot;1170&quot;,&quot;1152&quot;,&quot;1100&quot;,&quot;1024&quot;,&quot;768&quot;,&quot;699&quot;,&quot;600&quot;,&quot;540&quot;,&quot;480&quot;,&quot;450&quot;,&quot;430&quot;,&quot;390&quot;,&quot;375&quot;],&quot;default&quot;:&quot;1440&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Viewport&quot;},&quot;height&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;1000&quot;,&quot;900&quot;,&quot;1024&quot;,&quot;932&quot;,&quot;844&quot;,&quot;812&quot;,&quot;600&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Viewport&quot;},&quot;projectCount&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;3&quot;,&quot;9&quot;,&quot;18&quot;],&quot;default&quot;:&quot;9&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Data&quot;},&quot;titles&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;sample&quot;,&quot;vietnamese&quot;],&quot;default&quot;:&quot;sample&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Data&quot;},&quot;groupAt&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;desk&quot;,&quot;1024&quot;,&quot;700&quot;,&quot;never&quot;],&quot;default&quot;:&quot;desk&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Derivation&quot;},&quot;midBand&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;pairs&quot;,&quot;oneUp&quot;,&quot;portraitRow&quot;],&quot;default&quot;:&quot;pairs&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Derivation&quot;},&quot;sheet&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;locked&quot;,&quot;verbatim&quot;],&quot;default&quot;:&quot;locked&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Derivation&quot;},&quot;narrowProbe&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;off&quot;,&quot;twoUp&quot;],&quot;default&quot;:&quot;off&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Derivation&quot;},&quot;numerals&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;on&quot;,&quot;off&quot;],&quot;default&quot;:&quot;on&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Identification&quot;},&quot;previews&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;restrained&quot;,&quot;none&quot;],&quot;default&quot;:&quot;restrained&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Data&quot;},&quot;motion&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;reduced&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Data&quot;}}">
+class Component extends DCLogic {
+  // Locked desktop data, unchanged.
+  LIB = [
+    { title: "Made to Measure", year: "2026", cover: "mtm-atelier.jpg",   ar: 2.041, clip: "n3.mp4" },
+    { title: "Court",           year: "2026", cover: "nike-court.jpg",    ar: 2.008, clip: "c3.mp4" },
+    { title: "The Desk",        year: "2025", cover: "desk-01.jpg",       ar: 1.776, clip: "n2.mp4" },
+    { title: "Honey, Slowly",   year: "2025", cover: "desk-03.jpg",       ar: 1.778, clip: "n1.mp4" },
+    { title: "Shopfront",       year: "2025", cover: "mtm-shopfront.jpg", ar: 2.012, clip: "" },
+    { title: "Lacing",          year: "2024", cover: "nike-lacing.jpg",   ar: 1.778, clip: "c2.mp4" },
+    { title: "Sketch",          year: "2024", cover: "mtm-sketch.jpg",    ar: 2.041, clip: "" },
+    { title: "Night Shift",     year: "2023", cover: "desk-04.jpg",       ar: 1.776, clip: "n4.mp4" },
+    { title: "Sitting",         year: "2023", cover: "portrait.jpg",      ar: 0.645, clip: "" }
+  ];
+  EXTRA = [["desk-02.jpg", 1.776], ["mtm-table.jpg", 2.0], ["desk-05.jpg", 1.776], ["mtm-swatches.jpg", 2.041],
+           ["mtm-mannequin.jpg", 2.041], ["mtm-portrait.jpg", 2.004], ["desk-03.jpg", 1.778], ["nike-court.jpg", 2.008], ["portrait.jpg", 0.645]];
+  // Title stress (positions 1–7): medium EN · VI short ×2 · medium VI · long EN · long VI · short EN.
+  VI = { 1: "Made to Measure", 2: "Trần", 3: "Nguyễn", 4: "Mùa Thu Hà Nội", 5: "The Last Fitting at Trần & Sons", 6: "Người Thợ May Cuối Cùng ở Phố Hàng Bông" };
+  PAIR = { 1440: 1000, 1366: 900, 1280: 900, 1200: 900, 1171: 900, 1170: 900, 1152: 900, 1100: 900, 1024: 900, 768: 1024, 699: 900, 600: 900, 540: 900, 480: 900, 450: 900, 430: 932, 390: 844, 375: 812 };
+  WIDTHS = [1440, 1024, 768, 699, 600, 540, 480, 450, 430, 390, 375];
+  // ART-WORKS dynamic-title preset (Newsreader-backed font-display role).
+  // Reference box: the 12-column index composition (content box of [data-comp]).
+  // Desktop equivalence: 22px Marcellus → 20px Newsreader at equal fill
+  // (measured advance ratio 0.908); 20 / 1328 = 1.506cqw. Min 18 = phone floor.
+  TITLE = { coef: 0.01506, min: 18, max: 20, lh: 1.15 };
+  CAP = 17;          // desktop hover caption, same face, 19px Marcellus → 17px
+  WORKS = { coef: 0.0887, min: 34, max: 58 };   // static Latin masthead — Marcellus kept
+  // Pass 3: desktop takeover. Locked packer + stacked index from 1171px — the
+  // lowest width above which every count keeps every cell ≥120px (plate +
+  // scrim). Last failing width: 1170. Below it, grouped JUSTIFIED_ROWS.
+  DESK = 1171;
+  ov = null;
+
+  opt(k, d) {
+    if (this.ov && this.ov[k] !== undefined) return this.ov[k];
+    const o = window.__awr || {};
+    if (o[k] !== undefined) return o[k];
+    return this.props[k] !== undefined ? this.props[k] : d;
+  }
+  renderVals() { return { rootRef: (el) => { this.root = el; } }; }
+
+  componentDidMount() {
+    window.__awrc = this;
+    this.ctx = document.createElement("canvas").getContext("2d");
+    this.mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    this.mqH = () => this.applySoon();
+    this.mq.addEventListener("change", this.mqH);
+    this.onScroll = () => { this.choose(); this.auditSoon(); };
+    this.vp().addEventListener("scroll", this.onScroll, { passive: true });
+    this.watch = setInterval(() => {
+      if (this.reduced() || !this.active) return;
+      const v = this.active.querySelector("video");
+      if (v && v.paused && v.readyState >= 2) this.play(this.active);
+    }, 1200);
+    const text = Object.values(this.VI).join(" ").toUpperCase() + this.LIB.map((p) => p.title).join(" ").toUpperCase();
+    Promise.all([document.fonts.load("400 20px Newsreader", text), document.fonts.load("400 58px Marcellus", "WORKS")]).catch(() => {}).then(() => document.fonts.ready).then(() => this.applySoon());
+    this.applySoon();
+  }
+  componentDidUpdate() { this.applySoon(); }
+  componentWillUnmount() {
+    if (this.obs) this.obs.disconnect();
+    if (this.mq) this.mq.removeEventListener("change", this.mqH);
+    if (this.watch) clearInterval(this.watch);
+  }
+  applySoon() { clearTimeout(this._as); this._as = setTimeout(() => this.apply(), 60); }
+  auditSoon() { clearTimeout(this._at); this._at = setTimeout(() => { try { this.audit(); } catch (e) {} }, 150); }
+
+  q(s) { return this.root.querySelector(s); }
+  qa(s) { return Array.from(this.root.querySelectorAll(s)); }
+  vp() { return this.q("[data-viewport]"); }
+  pg() { return this.q("[data-page]"); }
+  W() { return parseInt(this.opt("width", "1440"), 10); }
+  H() { const h = this.opt("height", "auto"); return h === "auto" ? (this.PAIR[this.W()] || 900) : parseInt(h, 10); }
+  CW() { return this.pg().clientWidth || this.W(); }
+  N() { return parseInt(this.opt("projectCount", "9"), 10); }
+
+  apply() {
+    if (!this.root || this._busy) return;
+    this._busy = true;
+    try {
+      try { this.sweep(); } catch (e) { console.error("[aw responsive] sweep failed:", e && e.message); }
+      this._failed = [];
+      [["frame", () => this.frame()], ["build", () => this.build(false)], ["wire", () => this.wire()], ["plates", () => this.plates()], ["playback", () => this.setupPlayback()], ["audit", () => this.audit()]]
+        .forEach(([n, f]) => { try { f(); } catch (e) { this._failed.push(n); console.error("[aw responsive] " + n + " failed:", (e && e.message) || e); } });
+    } finally { this._busy = false; }
+  }
+
+  // Semantic order is displayPosition. Built in order, never re-sorted.
+  projects(n, set) {
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      const base = this.LIB[i % this.LIB.length];
+      const p = Object.assign({}, base);
+      if (i >= this.LIB.length) { const e = this.EXTRA[(i - this.LIB.length) % this.EXTRA.length]; p.cover = e[0]; p.ar = e[1]; p.title = base.title + " II"; }
+      if (set === "vietnamese" && this.VI[i + 1]) p.title = this.VI[i + 1];
+      p.i = String(i); p.pos = i + 1; p.num = String(i + 1).padStart(2, "0");
+      p.src = "../../../../media/w/" + p.cover;
+      p.clipSrc = p.clip ? "../../../../media/clips/" + p.clip : "";
+      p.preview = this.opt("previews", "restrained") !== "none" && p.clip ? "1" : "0";
+      out.push(p);
+    }
+    return out;
+  }
+
+  // ART-WORKS-SPECIFIC: frame tiers and masthead.
+  frame() {
+    const W = this.W(), H = this.H(), vp = this.vp(), pg = this.pg(), n = this.N();
+    vp.style.width = W + "px"; vp.style.height = H + "px";
+    const wide = W >= 1024, mid = W >= 600;
+    pg.style.setProperty("--edge", (wide ? 56 : mid ? 32 : 24) + "px");
+    pg.style.setProperty("--gut", (wide ? 20 : mid ? 14 : 10) + "px");
+    pg.style.paddingBottom = (wide ? 120 : mid ? 96 : 72) + "px";
+    const narrow = W < 600;
+    this.q("[data-mast]").style.padding = (wide ? 78 : mid ? 60 : 44) + "px var(--edge) " + (wide ? 34 : 26) + "px";
+    this.q("[data-mast-box]").style.gridColumn = narrow ? "1 / -1" : "1 / 7";
+    const c = this.q("[data-count]");
+    c.style.gridColumn = narrow ? "1 / -1" : "9 / 13"; c.style.textAlign = narrow ? "left" : "right"; c.style.marginTop = narrow ? "8px" : "0";
+    c.textContent = n + (n === 1 ? " project" : " projects") + ", 2023–2026";
+    this.q("[data-works]").style.fontSize = "clamp(" + this.WORKS.min + "px, " + (this.WORKS.coef * 100).toFixed(2) + "cqw, " + this.WORKS.max + "px)";
+    // Nav: density only (site-wide mobile nav is unresolved, not solved here).
+    const nav = this.q("[data-nav]"), wm = this.q("[data-wordmark]");
+    nav.style.gap = W <= 430 ? "16px" : W <= 768 ? "24px" : "34px";
+    nav.style.fontSize = W <= 430 ? "14px" : "16px";
+    wm.style.fontSize = W <= 430 ? "10px" : "12px";
+    wm.style.gridColumn = W <= 430 ? "1 / 6" : "1 / 6";
+    nav.style.gridColumn = W <= 430 ? "6 / 13" : "7 / 13";
+  }
+
+  // SHARED SYSTEM CANDIDATE CONSUMED: JUSTIFIED_ROWS v2, verbatim.
+  // forceT exists only for the labelled two-up density probe.
+  pack(list, measure, forceT) {
+    const gap = 4, ref = 1.6;
+    const T = forceT || (measure >= 1024 ? 3 : measure >= 700 ? 2 : 1);
+    const target = (measure - gap * (T - 1)) / (T * ref);
+    const floor = Math.max(120, 0.10 * measure);
+    const ceil = 1.25 * measure;
+    const narrowest = (cells, s) => { const h = (measure - gap * (cells.length - 1)) / s; return Math.min.apply(null, cells.map((c) => c.ar * h)); };
+    const items = list.map((p) => ({ ar: p.ar, pos: p.pos, p }));
+    const rows = []; let row = [], sum = 0;
+    items.forEach((it) => {
+      const nc = row.concat([it]), ns = sum + it.ar;
+      if (row.length && narrowest(nc, ns) < floor) { rows.push({ cells: row, sum }); row = [it]; sum = it.ar; }
+      else { row = nc; sum = ns; }
+      if ((measure - gap * (row.length - 1)) / sum <= target) { rows.push({ cells: row, sum }); row = []; sum = 0; }
+    });
+    if (row.length) rows.push({ cells: row, sum, last: true });
+    for (let k = 0; k < 8; k++) {
+      let moved = false;
+      for (let i = 0; i < rows.length; i++) {
+        const r = rows[i];
+        if (r.cells.length < 2) continue;
+        const h = (measure - gap * (r.cells.length - 1)) / r.sum;
+        if (Math.min.apply(null, r.cells.map((c) => c.ar * h)) >= floor) continue;
+        const m = r.cells.pop(); r.sum -= m.ar;
+        if (rows[i + 1]) { rows[i + 1].cells.unshift(m); rows[i + 1].sum += m.ar; } else rows.push({ cells: [m], sum: m.ar, last: true });
+        moved = true;
+      }
+      if (!moved) break;
+    }
+    if (rows.length > 1) {
+      const tail = rows[rows.length - 1];
+      if (tail.last && tail.cells.length === 1 && tail.sum * target < measure * 0.4) {
+        const prev = rows[rows.length - 2], merged = prev.cells.concat(tail.cells), ms = prev.sum + tail.sum;
+        if (narrowest(merged, ms) >= floor) { prev.cells = merged; prev.sum = ms; rows.pop(); }
+      }
+    }
+    return { T, target, floor, ceil, rows: this.solve(rows, measure, target, ceil) };
+  }
+
+  // The locked desktop packer (count-dependent target, 40% orphan merge), kept
+  // only as the desktop-equivalence comparison.
+  packLocked(list, W) {
+    const gap = 4, n = list.length;
+    let target = 300; if (n <= 4) target = 420; else if (n >= 16) target = 250;
+    const rows = []; let row = [], sum = 0;
+    list.forEach((p) => { row.push({ ar: p.ar, pos: p.pos, p }); sum += p.ar; if ((W - gap * (row.length - 1)) / sum <= target) { rows.push({ cells: row, sum }); row = []; sum = 0; } });
+    if (row.length) rows.push({ cells: row, sum, last: true });
+    if (rows.length > 1) { const t = rows[rows.length - 1]; if (t.last && t.sum * target < W * 0.4) { const pv = rows[rows.length - 2]; pv.cells = pv.cells.concat(t.cells); pv.sum += t.sum; rows.pop(); } }
+    return { T: 0, target, floor: 0, ceil: Infinity, rows: this.solve(rows, W, target, Infinity), locked: true };
+  }
+
+  // ART-WORKS-SPECIFIC mid-band (540–699) candidates. Consecutive items pair
+  // in displayPosition order at one shared height, widths from native aspect
+  // (no crop, no masonry). A lone tail takes the height it would have with a
+  // 2:1 partner, so it reads as half a pair, not as a new scale.
+  // portraitRow: an item with ar < 1 always stands alone, capped at 0.6H.
+  pairs(list, W, variant) {
+    const gap = 4, H = this.H(), rows = [];
+    const pairH = (a, b) => (W - gap) / (a + b);
+    const lone = (p) => variant === "portraitRow" && p.ar < 1;
+    let i = 0;
+    while (i < list.length) {
+      const p = list[i], q = list[i + 1];
+      if (lone(p)) { rows.push({ items: [p], h: Math.min(W / p.ar, 0.6 * H), full: false }); i++; continue; }
+      if (q && !lone(q)) { rows.push({ items: [p, q], h: pairH(p.ar, q.ar), full: true }); i += 2; }
+      else {
+        // Lone tail: keeps the preceding row's height; grows only as far as the
+        // plate minimum (120px wide) requires. Never a new, larger scale.
+        const prev = rows.length ? rows[rows.length - 1].h : pairH(p.ar, 2.0);
+        rows.push({ items: [p], h: Math.max(prev, 120 / p.ar), full: false }); i++;
+      }
+    }
+    return { T: 2, target: 0, floor: 0, ceil: 0, mid: variant, rows: rows.map((r) => {
+      const h = Math.round(r.h);
+      if (r.full) { const w1 = Math.round(r.items[0].ar * r.h); return { full: true, cells: [{ p: r.items[0], pos: r.items[0].pos, ar: r.items[0].ar, w: w1, h }, { p: r.items[1], pos: r.items[1].pos, ar: r.items[1].ar, w: W - gap - w1, h }] }; }
+      return { full: false, cells: [{ p: r.items[0], pos: r.items[0].pos, ar: r.items[0].ar, w: Math.round(r.items[0].ar * r.h), h }] };
+    }) };
+  }
+
+  solve(rows, measure, target, ceil) {
+    const gap = 4;
+    return rows.map((r) => {
+      const avail = measure - gap * (r.cells.length - 1);
+      let h = avail / r.sum, full = true;
+      if (r.last && h > target * 1.2) { h = target; full = false; }
+      if (h > ceil) { h = ceil; full = false; }
+      let used = 0;
+      const cells = r.cells.map((c, j) => { const w = (full && j === r.cells.length - 1) ? avail - used : Math.round(c.ar * h); used += w; return { p: c.p, pos: c.pos, ar: c.ar, w, h: Math.round(h) }; });
+      return { cells, full };
+    });
+  }
+
+  mode() {
+    const g = this.opt("groupAt", "desk");
+    const t = g === "desk" ? this.DESK : g === "never" ? 0 : parseInt(g, 10);
+    return this.W() < t ? "grouped" : "stacked";
+  }
+
+  el(tag, css) { const e = document.createElement(tag); if (css) e.style.cssText = css; return e; }
+
+  // ART-WORKS-SPECIFIC DERIVATION: below the grouping threshold the index is
+  // not stacked above the sheet — each packed row carries its own index
+  // entries directly above its frames. Same entries, same order, same numerals.
+  build(fast) {
+    const n = this.N(), list = this.projects(n, this.opt("titles", "sample"));
+    const mode = this.mode(), CW = this.CW();
+    // Final structure (Owner decisions 1–2 + pass 2):
+    //   ≥1171 locked count-aware packer · 700–1170 JUSTIFIED_ROWS verbatim (grouped)
+    //   540–699 Art Works mid-band composition · <540 JUSTIFIED_ROWS verbatim one-up
+    const probe = this.opt("narrowProbe", "off") === "twoUp" && CW < 700;
+    const mid = this.opt("midBand", "pairs");
+    let res;
+    if (CW >= this.DESK) res = this.opt("sheet", "locked") === "locked" ? this.packLocked(list, CW) : this.pack(list, CW, 0);
+    else if (CW >= 540 && CW < 700 && mid !== "oneUp" && !probe) res = this.pairs(list, CW, mid);
+    else res = this.pack(list, CW, probe ? 2 : 0);
+    this._mode = mode; this._res = res; this._n = n;
+    this._fs = "clamp(" + this.TITLE.min + "px, " + (this.TITLE.coef * 100).toFixed(3) + "cqw, " + this.TITLE.max + "px)";
+    const idx = this.q("[data-index-host]"), sh = this.q("[data-sheet-host]");
+    idx.innerHTML = ""; sh.innerHTML = "";
+    if (mode === "stacked") {
+      const cols = n <= 4 ? 1 : n <= 12 ? 2 : 3;
+      const wrap = this.el("div", "display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--gut);padding-bottom:56px");
+      wrap.setAttribute("data-index", "");
+      const ol = this.el("ol", "margin:0;padding:0;list-style:none;column-gap:var(--gut);columns:" + cols + ";grid-column:" + (cols === 1 ? "1 / 7" : "1 / 13"));
+      list.forEach((p) => { const li = this.el("li", "break-inside:avoid"); li.appendChild(this.mkRow(p, "index", 0)); ol.appendChild(li); });
+      wrap.appendChild(ol); idx.appendChild(wrap);
+    }
+    res.rows.forEach((r, ri) => {
+      const grp = this.el("div", "display:flex;flex-direction:column;gap:4px;margin-top:" + (ri === 0 ? "0" : mode === "grouped" ? "22px" : "4px"));
+      grp.setAttribute("data-group", "");
+      if (mode === "grouped") {
+        const strip = this.el("div", "display:flex;gap:4px;align-items:stretch");
+        strip.setAttribute("data-strip", "");
+        r.cells.forEach((c) => strip.appendChild(this.mkRow(c.p, "label", c.w)));
+        grp.appendChild(strip);
+      }
+      const row = this.el("div", "display:flex;gap:4px");
+      r.cells.forEach((c) => row.appendChild(this.mkFrame(c.p, c.w, c.h, mode, fast)));
+      grp.appendChild(row); sh.appendChild(grp);
+    });
+  }
+
+  mkRow(p, kind, w) {
+    const a = this.el("a");
+    a.href = "#top"; a.setAttribute("data-row", ""); a.dataset.i = p.i; a.dataset.pos = String(p.pos);
+    const narrow = kind === "label" && w < 260;
+    if (kind === "index") a.style.cssText = "display:flex;align-items:baseline;gap:16px;border-top:1px solid var(--rule);padding:12px 2px;outline-offset:3px";
+    else a.style.cssText = "box-sizing:border-box;flex:0 0 auto;width:" + w + "px;min-height:44px;border-top:1px solid var(--ink);padding:10px 13px 8px;outline-offset:-2px;" + (narrow ? "display:grid;grid-template-columns:auto 1fr;align-items:baseline;gap:3px 10px" : "display:flex;align-items:baseline;gap:14px");
+    const num = this.el("span", "font-family:var(--font-ui);font-size:12px;letter-spacing:0.14em;color:var(--muted);min-width:2.2ch" + (narrow ? ";grid-column:1;grid-row:1" : ""));
+    num.setAttribute("data-num", ""); num.textContent = p.num;
+    const t = this.el("span", "flex:1;min-width:0;font-family:var(--font-title);font-weight:400;font-size:" + this._fs + ";line-height:" + this.TITLE.lh + ";letter-spacing:var(--display-track);text-transform:uppercase;overflow-wrap:break-word;text-wrap:pretty" + (narrow ? ";grid-column:1 / -1;grid-row:2" : ""));
+    t.setAttribute("data-title", ""); t.textContent = p.title;
+    const mark = this.el("span", "width:7px;height:7px;border-radius:50%;background:var(--accent);opacity:0;transition:opacity 160ms linear;flex:0 0 auto" + (narrow ? ";display:none" : ""));
+    mark.setAttribute("data-mark", "");
+    const yr = this.el("span", "font-size:14px;color:var(--muted);min-width:4ch;text-align:right" + (narrow ? ";grid-column:2;grid-row:1;justify-self:end" : ""));
+    yr.textContent = p.year;
+    a.appendChild(num); a.appendChild(t); a.appendChild(mark); a.appendChild(yr);
+    return a;
+  }
+
+  mkFrame(p, w, h, mode, fast) {
+    const a = this.el("a", "position:relative;display:block;overflow:hidden;background:var(--frame);outline-offset:-3px;flex:0 0 auto;width:" + w + "px;height:" + h + "px");
+    a.href = "#top"; a.setAttribute("data-item", ""); a.dataset.i = p.i; a.dataset.pos = String(p.pos); a.dataset.ar = String(p.ar); a.dataset.clip = p.clipSrc; a.dataset.preview = p.preview;
+    const img = this.el("img", "position:absolute;inset:0;width:100%;height:100%;object-fit:cover"); img.alt = p.title; if (!fast) img.src = p.src;
+    const v = this.el("video", "position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 320ms linear"); v.muted = true; v.loop = true; v.preload = "none";
+    const ps = this.el("span", "position:absolute;left:0;bottom:0;width:120px;height:62px;background:radial-gradient(120% 100% at 0% 100%,rgba(0,0,0,0.6),rgba(0,0,0,0));pointer-events:none"); ps.setAttribute("data-plate-scrim", "");
+    const pl = this.el("span", "position:absolute;left:13px;bottom:11px;font-family:var(--font-ui);font-size:12px;letter-spacing:0.14em;color:rgba(244,239,230,0.94);pointer-events:none"); pl.setAttribute("data-plate", ""); pl.textContent = p.num;
+    a.appendChild(img); a.appendChild(v); a.appendChild(ps); a.appendChild(pl);
+    if (mode === "stacked") {
+      const sc = this.el("span", "position:absolute;inset:auto 0 0 0;height:92px;background:linear-gradient(to top,rgba(0,0,0,0.66),rgba(0,0,0,0));opacity:0;transition:opacity 170ms linear;pointer-events:none"); sc.setAttribute("data-scrim", "");
+      const cap = this.el("span", "position:absolute;left:40px;right:14px;bottom:10px;display:flex;align-items:baseline;justify-content:space-between;gap:12px;opacity:0;transition:opacity 170ms linear;pointer-events:none"); cap.setAttribute("data-cap", "");
+      const ct = this.el("span", "font-family:var(--font-title);font-weight:400;font-size:" + this.CAP + "px;line-height:1.15;letter-spacing:var(--display-track);text-transform:uppercase;color:#F4EFE6"); ct.textContent = p.title;
+      const cy = this.el("span", "font-size:13px;color:rgba(244,239,230,0.86)"); cy.textContent = p.year;
+      cap.appendChild(ct); cap.appendChild(cy); a.appendChild(sc); a.appendChild(cap);
+    }
+    return a;
+  }
+
+  plates() {
+    const on = this.opt("numerals", "on") === "on";
+    this.qa("[data-plate],[data-plate-scrim]").forEach((el) => { el.style.opacity = on ? "1" : "0"; });
+    this.qa("[data-cap]").forEach((el) => { el.style.left = on ? "40px" : "14px"; });
+  }
+
+  // One pairing routine, both surfaces, pointer and keyboard (locked).
+  wire() {
+    this.qa("[data-row],[data-item]").forEach((t) => {
+      const on = () => this.pair(t.dataset.i, true), off = () => this.pair(t.dataset.i, false);
+      t.addEventListener("mouseenter", on); t.addEventListener("mouseleave", off);
+      t.addEventListener("focus", on); t.addEventListener("blur", off);
+      t.addEventListener("click", (e) => { e.preventDefault(); this.open(t.dataset.i, t.hasAttribute("data-row") ? "index" : "frame"); });
+    });
+  }
+  pair(i, on) {
+    this.qa("[data-item]").forEach((el) => {
+      const hit = el.dataset.i === i;
+      el.style.transition = "opacity 170ms linear";
+      el.style.opacity = on && !hit ? "0.34" : "1";
+      const cap = el.querySelector("[data-cap]"), sc = el.querySelector("[data-scrim]");
+      if (cap) cap.style.opacity = on && hit ? "1" : "0";
+      if (sc) sc.style.opacity = on && hit ? "1" : "0";
+      el.style.outline = on && hit ? "2px solid #F4EFE6" : "none";
+    });
+    this.qa("[data-row]").forEach((el) => {
+      const hit = el.dataset.i === i;
+      el.style.transition = "opacity 170ms linear,color 170ms linear";
+      el.style.opacity = on && !hit ? "0.34" : "1";
+      el.style.color = on && hit ? "var(--accent)" : "";
+      const m = el.querySelector("[data-mark]"); if (m) m.style.opacity = on && hit ? "1" : "0";
+    });
+  }
+  open(i, from) {
+    const frame = this.q('[data-item][data-i="' + i + '"]');
+    const on = this.opt("numerals", "on") === "on";
+    this.qa("[data-item]").forEach((el) => { el.removeAttribute("data-origin"); el.querySelectorAll("[data-plate],[data-plate-scrim]").forEach((x) => { x.style.opacity = on ? "1" : "0"; }); });
+    if (frame) { frame.setAttribute("data-origin", "1"); frame.querySelectorAll("[data-plate],[data-plate-scrim]").forEach((x) => { x.style.transition = "opacity 140ms linear"; x.style.opacity = "0"; }); }
+    this.lastOpen = { pos: frame ? frame.dataset.pos : "?", via: from };
+    this.auditSoon();
+  }
+
+  reduced() { return this.opt("motion", "auto") === "reduced" || (this.mq && this.mq.matches); }
+
+  // Locked Art Works policy, consumed: at most ONE moving preview — the
+  // eligible frame ≥ 50% visible nearest the viewport centre. Same rule on
+  // pointer and touch; the viewport here is the frame, not the window.
+  setupPlayback() {
+    if (this.obs) this.obs.disconnect();
+    const cells = this.qa('[data-item][data-preview="1"]');
+    this.cells = cells; this.active = null;
+    if (this.reduced() || !cells.length) { cells.forEach((c) => this.release(c)); return; }
+    this.obs = new IntersectionObserver(() => this.choose(), { root: this.vp(), threshold: [0, 0.25, 0.5, 0.6, 1] });
+    cells.forEach((c) => this.obs.observe(c));
+    this.choose();
+  }
+  choose() {
+    if (!this.root || this.reduced() || this._sweeping) return;
+    const vr = this.vp().getBoundingClientRect(), mid = vr.top + vr.height / 2;
+    let best = null, bestD = Infinity;
+    (this.cells || []).forEach((c) => {
+      const r = c.getBoundingClientRect();
+      if (r.bottom < vr.top || r.top > vr.bottom) return;
+      const vis = Math.min(r.bottom, vr.bottom) - Math.max(r.top, vr.top);
+      if (vis < r.height * 0.5) return;
+      const d = Math.abs(r.top + r.height / 2 - mid);
+      if (d < bestD) { bestD = d; best = c; }
+    });
+    if (this.active && this.active !== best) { this.release(this.active); this.active = null; }
+    if (best) { this.active = best; this.prepare(best); this.play(best); }
+  }
+  prepare(c) { const v = c.querySelector("video"); if (!v) return; v.loop = true; v.muted = true; v.playsInline = true; v.setAttribute("playsinline", "playsinline"); if (!v.getAttribute("src")) { v.setAttribute("src", c.dataset.clip); v.preload = "auto"; v.load(); } }
+  play(c) {
+    const v = c.querySelector("video");
+    if (!v || this.reduced() || this.active !== c) return;
+    if (v.readyState < 2) { const k = parseInt(c.dataset.tries || "0", 10) + 1; c.dataset.tries = String(k); if (k <= 14) setTimeout(() => this.play(c), 350); return; }
+    c.dataset.tries = "0";
+    const pr = v.play(); if (pr && pr.then) pr.then(() => { v.style.opacity = "1"; this.auditSoon(); }).catch(() => {});
+  }
+  release(c) { const v = c.querySelector("video"); if (!v) return; v.pause(); v.style.opacity = "0"; c.dataset.tries = "0"; if (v.getAttribute("src")) { v.removeAttribute("src"); v.load(); } }
+
+  // ---- measurement ------------------------------------------------------
+  lines(el) { const cs = getComputedStyle(el); const lh = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.15; return Math.round(el.getBoundingClientRect().height / lh); }
+
+  metrics(withIdent) {
+    const vp = this.vp(), pg = this.pg(), H = this.H();
+    const pR = pg.getBoundingClientRect(), vR = vp.getBoundingClientRect();
+    const frames = this.qa("[data-item]"), rows = this.qa("[data-row]");
+    const fr = frames.map((f) => f.getBoundingClientRect());
+    const idx = this.q("[data-index]");
+    const strips = this.qa("[data-strip]");
+    const indexH = idx ? idx.getBoundingClientRect().height : strips.reduce((a, s) => a + s.getBoundingClientRect().height, 0);
+    const sheetH = this.q("[data-sheet-host]").getBoundingClientRect().height;
+    const sheetTop = this.q("[data-sheet-host]").getBoundingClientRect().top - pR.top;
+    const narrow = Math.min.apply(null, fr.map((r) => r.width));
+    let big = fr[0]; fr.forEach((r) => { if (r.width * r.height > big.width * big.height) big = r; });
+    const first = fr.filter((r) => { const t = r.top - pR.top, b = r.bottom - pR.top; return Math.min(b, H) - Math.max(t, 0) >= r.height * 0.5; }).length;
+    const ord = (a) => a.every((v, k) => parseInt(v.dataset.pos, 10) === k + 1);
+    const titles = this.qa("[data-row] [data-title]");
+    const maxLines = Math.max.apply(null, titles.map((t) => this.lines(t)));
+    const clipped = titles.filter((t) => t.scrollWidth > t.clientWidth + 1).length;
+    const plateOK = fr.every((r) => r.width >= 120 && r.height >= 62);
+    const rowMinH = Math.min.apply(null, rows.map((r) => r.getBoundingClientRect().height));
+    const aspectOK = frames.every((f, k) => { const r = fr[k], ar = parseFloat(f.dataset.ar); return Math.abs(r.width / r.height - ar) / ar < 0.02; });
+    let ident = null;
+    if (withIdent) {
+      const save = vp.scrollTop; let ok = 0;
+      frames.forEach((f, k) => {
+        const top = fr[k].top - pR.top;
+        vp.scrollTop = Math.max(0, top + fr[k].height / 2 - H / 2);
+        const row = this.q('[data-row][data-pos="' + f.dataset.pos + '"]');
+        const rr = row.getBoundingClientRect(), v2 = vp.getBoundingClientRect();
+        const vis = Math.min(rr.bottom, v2.bottom) - Math.max(rr.top, v2.top);
+        if (vis >= rr.height * 0.6) ok++;
+      });
+      vp.scrollTop = save;
+      ident = Math.round(ok / frames.length * 100);
+    }
+    return {
+      pageH: Math.round(pR.height), overflow: vp.scrollWidth - vp.clientWidth, indexH: Math.round(indexH), sheetH: Math.round(sheetH), sheetTop: Math.round(sheetTop),
+      narrow: Math.round(narrow), big: Math.round(big.width) + "×" + Math.round(big.height), first, ident, orderOK: ord(rows.filter((r, k, a) => true)) && ord(frames),
+      rowsOrder: rows.map((r) => r.dataset.pos), maxLines, clipped, plateOK, rowMinH: Math.round(rowMinH), aspectOK,
+      frameMin: Math.round(Math.min.apply(null, fr.map((r) => Math.min(r.width, r.height))))
+    };
+  }
+
+  // Glyph fallback test: a character drawn from the face measures identically
+  // under two different fallback stacks; a fallback glyph does not.
+  fallback(str) {
+    const x = this.ctx, out = [];
+    Array.from(new Set(Array.from(str.toUpperCase()))).forEach((ch) => {
+      if (!ch.trim()) return;
+      x.font = "400 64px Newsreader, monospace"; const a = x.measureText(ch).width;
+      x.font = "400 64px Newsreader, cursive"; const b = x.measureText(ch).width;
+      if (Math.abs(a - b) > 0.01) out.push(ch);
+    });
+    return out;
+  }
+
+  sweep() {
+    this._sweeping = true;
+    const saved = this.ov, pad = (s, n) => String(s).padEnd(n);
+    const A = [], B = [], C = [], D = [];
+    [3, 9, 18].forEach((n) => this.WIDTHS.forEach((w) => {
+      this.ov = { width: String(w), height: "auto", projectCount: String(n), titles: "sample", narrowProbe: "off", sheet: "locked", midBand: "pairs" };
+      this.frame(); this.build(true);
+      const m = this.metrics(true), r = this._res;
+      const ragged = r.rows.filter((x) => !x.full).map((x) => x.cells.map((c) => c.w + "×" + c.h).join("+")).join(" ");
+      A.push(pad(n, 4) + pad(w + "×" + this.H(), 11) + pad(this._mode, 9) + pad(m.pageH, 7) + pad((m.pageH / this.H()).toFixed(1), 5) + pad(m.indexH, 7) + pad(m.sheetH, 7) + pad(r.rows.map((x) => x.cells.length).join("/"), 20) + pad(m.narrow, 6) + pad(m.big, 10) + pad(ragged || "—", 11) + pad(m.first, 5) + pad(m.ident + "%", 6) + pad(m.plateOK ? "✓" : "✗", 4) + pad(m.aspectOK ? "✓" : "✗", 4) + pad(m.orderOK ? "✓" : "✗", 4) + (m.overflow > 1 ? "✗ " + m.overflow : "✓"));
+    }));
+    [1440, 1024].forEach((w) => [3, 9, 18].forEach((n) => {
+      const list = this.projects(n, "sample"), a = this.pack(list, w), b = this.packLocked(list, w);
+      const f = (r) => r.rows.map((x) => "[" + x.cells.map((c) => c.pos).join(" ") + "]" + x.cells[0].h + (x.full ? "" : "r")).join(" ");
+      B.push(pad(w, 6) + pad(n, 4) + "verbatim  " + f(a)); B.push(pad("", 10) + "locked    " + f(b));
+    }));
+    [1440, 768, 430, 375].forEach((w) => {
+      this.ov = { width: String(w), height: "auto", projectCount: "9", titles: "vietnamese", narrowProbe: "off", sheet: "verbatim" };
+      this.frame(); this.build(true);
+      [7, 1, 5, 2, 3, 4, 6].forEach((pos) => {
+        const row = this.q('[data-row][data-pos="' + pos + '"]'), t = row.querySelector("[data-title]");
+        const fs = parseFloat(getComputedStyle(t).fontSize), fb = this.fallback(t.textContent);
+        C.push(pad(w, 6) + pad(this._mode, 9) + pad(t.textContent.length > 40 ? t.textContent.slice(0, 39) + "…" : t.textContent, 42) + pad(Math.round(row.getBoundingClientRect().width) + "px", 8) + pad(fs.toFixed(1) + "px", 9) + (fs <= this.TITLE.min + 0.05 ? pad("min", 5) : fs >= this.TITLE.max - 0.05 ? pad("max", 5) : pad("—", 5)) + pad(this.lines(t), 4) + pad(Math.round(row.getBoundingClientRect().height) + "px", 7) + pad(t.scrollWidth > t.clientWidth + 1 ? "✗" : "✓", 5) + (fb.length ? "✗ fallback " + fb.join(" ") : "✓ one face"));
+      });
+    });
+    [[9, 430], [9, 375], [18, 430], [18, 375]].forEach(([n, w]) => {
+      ["off", "twoUp"].forEach((pr) => {
+        this.ov = { width: String(w), height: "auto", projectCount: String(n), titles: "sample", narrowProbe: pr, sheet: "verbatim" };
+        this.frame(); this.build(true);
+        const m = this.metrics(false), r = this._res;
+        D.push(pad(n, 4) + pad(w, 6) + pad(pr === "off" ? "verbatim (1-up)" : "two-up PROBE", 17) + pad(r.rows.map((x) => x.cells.length).join("/"), 20) + pad(Math.round(r.rows[0].cells[0].h) + "px", 8) + pad(m.narrow + "px", 8) + pad(m.maxLines, 6) + pad(m.pageH, 7) + pad(m.first, 6) + (m.plateOK ? "✓" : "✗ plate"));
+      });
+    });
+    // Pass 2 — 540–699 band: A one-up vs B pairs vs C portrait-own-row.
+    const E = [], F = [];
+    [699, 600, 540].forEach((w) => [3, 9, 18].forEach((n) => ["oneUp", "pairs", "portraitRow"].forEach((mb) => {
+      this.ov = { width: String(w), height: "900", projectCount: String(n), titles: "sample", narrowProbe: "off", sheet: "locked", midBand: mb };
+      this.frame(); this.build(true);
+      const m = this.metrics(true), r = this._res, H = 900, vp = this.vp(), pR = this.pg().getBoundingClientRect();
+      const fr = this.qa("[data-item]").map((f) => ({ f, r: f.getBoundingClientRect() }));
+      const minW = Math.round(Math.min.apply(null, fr.map((x) => x.r.width))), minH = Math.round(Math.min.apply(null, fr.map((x) => x.r.height)));
+      const por = fr.filter((x) => parseFloat(x.f.dataset.ar) < 1).map((x) => Math.round(x.r.width) + "×" + Math.round(x.r.height) + " " + Math.round(x.r.height / H * 100) + "%");
+      const sh = this.q("[data-sheet-host]").getBoundingClientRect(), save = vp.scrollTop;
+      vp.scrollTop = Math.max(0, sh.top - pR.top + sh.height / 2 - H / 2);
+      const v2 = vp.getBoundingClientRect();
+      const midCount = this.qa("[data-item]").filter((f) => { const b = f.getBoundingClientRect(); return Math.min(b.bottom, v2.bottom) - Math.max(b.top, v2.top) >= b.height * 0.5; }).length;
+      vp.scrollTop = save;
+      const emptyTail = r.rows.filter((x) => !x.full).map((x) => Math.round((1 - x.cells[0].w / w) * 100) + "%").join(",");
+      const elig = this.qa('[data-item][data-preview="1"]').length;
+      E.push(pad(w, 5) + pad(n, 4) + pad(mb === "oneUp" ? "A one-up" : mb === "pairs" ? "B pairs" : "C portrait-row", 16) + pad(r.rows.map((x) => x.cells.length).join(""), 20) + pad(m.pageH, 7) + pad((m.pageH / H).toFixed(1), 5) + pad(minW, 5) + pad(minH, 5) + pad(m.plateOK ? "✓" : "✗", 4) + pad(m.maxLines, 4) + pad(m.first + "/" + midCount, 7) + pad(por.join(" ") || "—", 22) + pad(emptyTail || "—", 12) + pad(m.ident + "%", 6) + pad(elig, 4) + pad(m.aspectOK ? "✓" : "✗", 4) + (m.orderOK ? "✓" : "✗"));
+    })));
+    [699, 600, 540].forEach((w) => {
+      this.ov = { width: String(w), height: "900", projectCount: "9", titles: "vietnamese", narrowProbe: "off", sheet: "locked", midBand: "pairs" };
+      this.frame(); this.build(true);
+      const rows = this.qa("[data-row]");
+      const worst = rows.map((row) => { const t = row.querySelector("[data-title]"); return { t: t.textContent, w: Math.round(row.getBoundingClientRect().width), h: Math.round(row.getBoundingClientRect().height), ln: this.lines(t), clip: t.scrollWidth > t.clientWidth + 1, fb: this.fallback(t.textContent).length }; });
+      worst.filter((x) => [1, 2, 3, 4, 5, 6, 9].indexOf(worst.indexOf(x) + 1) >= 0).forEach((x) => {
+        F.push(pad(w, 5) + pad(x.t.length > 40 ? x.t.slice(0, 39) + "…" : x.t, 42) + pad(x.w + "px", 8) + pad(x.ln, 4) + pad(x.h + "px", 7) + pad(x.h >= 44 ? "✓" : "✗", 4) + pad(x.clip ? "✗" : "✓", 5) + (x.fb ? "✗ fallback" : "✓ one face"));
+      });
+    });
+    const G = [];
+    [1024, 1100, 1152, 1170, 1171, 1200, 1280, 1366, 1440].forEach((w) => [3, 9, 18].forEach((n) => {
+      this.ov = { width: String(w), height: "900", projectCount: String(n), titles: "sample", narrowProbe: "off", sheet: "locked", midBand: "pairs" };
+      this.frame(); this.build(true);
+      const m = this.metrics(true), r = this._res;
+      const fr = this.qa("[data-item]").map((f) => f.getBoundingClientRect());
+      const minH = Math.round(Math.min.apply(null, fr.map((x) => x.height)));
+      G.push(pad(w, 6) + pad(n, 4) + pad(r.locked ? "LOCKED" : "grouped JR", 12) + pad(r.rows.map((x) => x.cells.length + (x.full ? "" : "r")).join("/"), 16) + pad(r.rows.map((x) => x.cells[0].h).join(","), 30) + pad(m.narrow + "×" + minH, 10) + pad(m.plateOK ? "✓" : "✗", 4) + pad(m.pageH, 7) + pad((m.pageH / 900).toFixed(1), 5) + pad(m.first, 5) + pad(m.ident + "%", 6) + pad(m.orderOK ? "✓" : "✗", 4) + (m.overflow > 1 ? "✗" : "✓"));
+    }));
+    this.ov = saved; this._sweeping = false;
+    const mx = this.q("[data-matrix]");
+    mx.textContent = [
+      "G · DESKTOP TAKEOVER — locked packer at ≥ " + this.DESK + "px, grouped JUSTIFIED_ROWS below · H 900",
+      pad("W", 6) + pad("n", 4) + pad("sheet", 12) + pad("rows", 16) + pad("row heights", 30) + pad("min cell", 10) + pad("plt", 4) + pad("page", 7) + pad("scr", 5) + pad("1st", 5) + pad("id", 6) + pad("ord", 4) + "ovf",
+      ...G, "",
+      "E · 540–699 BAND — A one-up (JUSTIFIED_ROWS verbatim) vs B pairs vs C portrait-own-row · sample titles · H 900",
+      pad("W", 5) + pad("n", 4) + pad("candidate", 16) + pad("row sizes", 20) + pad("page", 7) + pad("scr", 5) + pad("minW", 5) + pad("minH", 5) + pad("plt", 4) + pad("ln", 4) + pad("1st/mid", 7) + pad("portrait(s) w×h %H", 22) + pad("tail empty", 12) + pad("id", 6) + pad("elg", 4) + pad("asp", 4) + "ord",
+      ...E, "",
+      "  1st/mid = frames ≥50% visible in the first screen / in a screen centred on the middle of the sheet · tail empty = share of width beside a lone row item",
+      "",
+      "F · B pairs with stress titles (9 projects, positions 1–6 + portrait 9)",
+      pad("W", 5) + pad("title", 42) + pad("entry", 8) + pad("ln", 4) + pad("h", 7) + pad("44", 4) + pad("clip", 5) + "glyphs",
+      ...F, "",
+      "A · PAGE MATRIX — final structure · sample titles · desktop packer ≥ " + this.DESK,
+      pad("n", 4) + pad("viewport", 11) + pad("mode", 9) + pad("page", 7) + pad("scr", 5) + pad("index", 7) + pad("sheet", 7) + pad("rows", 20) + pad("narr", 6) + pad("largest", 10) + pad("ragged", 11) + pad("1st", 5) + pad("id", 6) + pad("plt", 4) + pad("asp", 4) + pad("ord", 4) + "ovf",
+      ...A, "",
+      "  index = stacked index height, or the sum of per-row index strips when grouped · 1st = frames ≥50% inside the first screen",
+      "  id = frames whose own index entry is ≥60% on screen when the frame is centred (no hover) · plt = every cell ≥120×62 (plate + its scrim fit)", "",
+      "B · DESKTOP EQUIVALENCE — verbatim JUSTIFIED_ROWS vs the locked desktop packer ([positions] height, r = ragged)",
+      ...B, "",
+      "C · ART WORKS TITLE PRESET — Newsreader 400 · clamp(" + this.TITLE.min + "px, " + (this.TITLE.coef * 100).toFixed(3) + "cqw, " + this.TITLE.max + "px) · lh " + this.TITLE.lh + " · 9 projects, stress titles",
+      pad("W", 6) + pad("mode", 9) + pad("title", 42) + pad("entry", 8) + pad("size", 9) + pad("bnd", 5) + pad("ln", 4) + pad("row h", 7) + pad("clip", 5) + "glyphs",
+      ...C, "",
+      "D · NARROW DENSITY — verbatim one-up vs a two-up PROBE (T forced to 2; not a candidate, the system constant is unchanged)",
+      pad("n", 4) + pad("W", 6) + pad("sheet", 17) + pad("rows", 20) + pad("row h", 8) + pad("narr", 8) + pad("ttl ln", 6) + pad("page", 7) + pad("1st", 6) + "plate",
+      ...D
+    ].join("\n");
+  }
+
+  audit() {
+    const el = this.q("[data-audit]"); if (!el || this._sweeping) return;
+    const W = this.W(), H = this.H(), m = this.metrics(false), r = this._res, pad = (s, n) => String(s).padEnd(n);
+    const vids = this.qa("[data-item] video");
+    const moving = vids.filter((v) => !v.paused && v.readyState > 2).length, loaded = vids.filter((v) => v.getAttribute("src")).length;
+    const rows = this.qa("[data-row]"), fr = this.qa("[data-item]");
+    const tMin = Math.min.apply(null, rows.map((x) => x.getBoundingClientRect().height));
+    const tW = Math.min.apply(null, rows.map((x) => x.getBoundingClientRect().width));
+    const titleEl = this.q("[data-row] [data-title]");
+    const fs = titleEl ? parseFloat(getComputedStyle(titleEl).fontSize) : 0;
+    const allTitles = rows.map((x) => x.querySelector("[data-title]").textContent).join(" ");
+    const fb = this.fallback(allTitles);
+    el.textContent = [
+      pad("viewport", 18) + W + " × " + H + "   ·   " + this._n + " projects   ·   page " + m.pageH + "px   ·   " + (m.pageH / H).toFixed(1) + " screens   ·   horizontal overflow " + (m.overflow > 1 ? "✗ " + m.overflow + "px" : "✓ none"),
+      pad("structure", 18) + (this._mode === "grouped" ? "GROUPED — each packed row carries its index entries above its frames" : "STACKED — index above sheet (locked desktop)") + "   ·   index " + m.indexH + "px   ·   sheet " + m.sheetH + "px from y=" + m.sheetTop,
+      pad("sheet", 18) + (r.locked ? "locked Art Works desktop packer (≥1024, Owner decision 1)" : r.mid ? "Art Works mid-band " + r.mid + " (540–699)" : "JUSTIFIED_ROWS v2 verbatim") + (this.opt("narrowProbe", "off") === "twoUp" && this.CW() < 700 ? " · TWO-UP PROBE" : "") + "   ·   T " + r.T + " · target " + Math.round(r.target) + " · floor " + Math.round(r.floor) + "   ·   rows " + r.rows.map((x) => x.cells.length).join("/") + "   ·   heights " + r.rows.map((x) => x.cells[0].h).join(",") + "   ·   narrowest " + m.narrow + "px · largest " + m.big,
+      pad("", 18) + "first screen " + m.first + " frame(s)   ·   aspect " + (m.aspectOK ? "✓ native" : "✗") + "   ·   plate fits every cell " + (m.plateOK ? "✓" : "✗") + "   ·   order index " + m.rowsOrder.join(" ") + (m.orderOK ? "  ✓ displayPosition (DOM = tab order)" : "  ✗"),
+      pad("titles", 18) + "Newsreader 400 · " + this._fs + " → " + fs.toFixed(1) + "px" + (fs <= this.TITLE.min + 0.05 ? " (min engaged)" : fs >= this.TITLE.max - 0.05 ? " (max engaged)" : "") + " · lh " + this.TITLE.lh + "   ·   max lines " + m.maxLines + "   ·   clipped " + (m.clipped ? "✗ " + m.clipped : "✓ 0") + "   ·   glyphs " + (fb.length ? "✗ fallback " + fb.join(" ") : "✓ one face"),
+      pad("touch", 18) + "index entry " + Math.round(tW) + " × " + Math.round(tMin) + "px min " + (tMin >= 44 ? "✓ ≥44" : "✗ <44") + "   ·   smallest frame side " + m.frameMin + "px " + (m.frameMin >= 44 ? "✓" : "✗"),
+      pad("previews", 18) + moving + " moving · " + loaded + " source(s) loaded · " + (this.cells || []).length + " eligible · active " + (this.active ? "#" + this.active.dataset.pos : "none") + (moving > 1 ? "   ✗ MORE THAN ONE" : "   ✓ ≤ 1") + (this.reduced() ? "   ·   reduced motion — all posters, all sources released" : ""),
+      pad("last open", 18) + (this.lastOpen ? "#" + this.lastOpen.pos + " via " + this.lastOpen.via + " → transition origin: frame" : "—"),
+      pad("passes", 18) + (this._failed && this._failed.length ? "✗ FAILED: " + this._failed.join(", ") : "✓ all passes ran")
+    ].join("\n");
+  }
+}
+</script>
+</body>
+</html>

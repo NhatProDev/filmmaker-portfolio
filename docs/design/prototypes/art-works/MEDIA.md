@@ -14,24 +14,36 @@ default, and carries no grade.
 ## Artifacts in this directory
 
 ```text
-Art Works 2C v2.dc.html        candidate baseline prototype
-art-works-2c-v2.md             its review record
-Art Works Directions.dc.html   exploration record — directions 2A / 2B / 2C v1
-support.js                     prototype runtime support
+Art Works 2C v2.dc.html             locked desktop candidate
+art-works-2c-v2.md                  its review record
+Art Works 2C v2 Responsive.dc.html  responsive derivative of the above
+art-works-2c-v2-responsive.md       its validation record (three passes)
+Art Works Directions.dc.html        exploration record — directions 2A / 2B / 2C v1
+support.js                          prototype runtime support
 ```
 
 **2C v2 is the selected candidate baseline. It is not approved.** Its own header
 says so, and `page-specifications.md` §2 records Art Works as VISUALLY EXPLORED
-— candidate.
+— candidate on the desktop axis.
+
+**A responsive derivative now exists.** `Art Works 2C v2 Responsive.dc.html`
+validates the locked candidate from 1440 down to 375 at 3, 9 and 18 projects;
+`page-specifications.md` §2.9 records Art Works as RESPONSIVE VALIDATED —
+candidate on the responsive axis. **Neither axis is approved.**
+
+**No historical desktop prototype was rewritten.** `Art Works 2C v2.dc.html` and
+`art-works-2c-v2.md` are byte-identical to their committed versions (22,552 and
+12,028 bytes), and still render project titles in Marcellus.
 
 `Art Works Directions.dc.html` is **exploration evidence, retained as record**.
 `art-works-2c-v2.md` supersedes its 2C v1 for review purposes; 2A and 2B are kept
 so the alternatives that were considered remain visible. Do not treat any
 direction in it as current.
 
-`support.js` is byte-identical to the copies in `../home/` and
-`../project-detail/`. Each prototype directory carries its own copy so the files
-render standalone.
+`support.js` is byte-identical to the copies in every other prototype
+directory. Each carries its own copy so the files render standalone. Its
+modification time changed when the responsive derivative was produced; **its
+content did not**, and Git correctly reports no change.
 
 **Cited but not present:** `art-works-2c-v2.md`'s header lists
 `art-works-directions.md` as retained record. That file is **not in this
@@ -91,6 +103,51 @@ The change is **cover only**. Layout, ordering, aspect handling, interaction,
 numerals, preview scheduling, packing order and transition behaviour are
 unchanged — independently confirmed here by re-checking the prototype's
 structural code and props, which are byte-for-byte in the same positions.
+
+### Referenced by `Art Works 2C v2 Responsive.dc.html`
+
+The same nine covers and six clips, **plus six further covers** used to build
+the 18-project dataset: `desk-02.jpg`, `mtm-table.jpg`, `desk-05.jpg`,
+`mtm-swatches.jpg`, `mtm-mannequin.jpg` and `mtm-portrait.jpg`. **All 15 covers
+and all 6 clips resolve.** The portrait is `portrait.jpg` throughout; the stale
+`about-portrait.png` does not appear.
+
+---
+
+## The responsive derivative
+
+**Final structure** (`page-specifications.md` §2.9), all Art Works-specific:
+
+```text
+>= 1171px      locked count-aware desktop packer   ·  desktop index
+700 – 1170px   JUSTIFIED_ROWS v2, verbatim         ·  per-row index
+540 – 699px    Art Works PAIRS                     ·  per-row index
+<  540px       JUSTIFIED_ROWS v2, verbatim, T = 1  ·  per-row index (one-up)
+```
+
+- **1171px desktop takeover** — the lowest width above which the locked packer
+  passes at every count, for the current content.
+- **540–699px pairs** — consecutive projects share one row height, widths from
+  native aspect, no crop, no reordering, no portrait special case.
+- **Below 540px, one frame per row.**
+
+**Dynamic project names use a Newsreader-backed `font-display` preset.** The
+"Works" heading stays Marcellus. Fonts are loaded from Google Fonts for evidence
+only; production faces come from a self-hosted library (`design-system.md`
+§1.1).
+
+### Rejected probe states remain evidence only
+
+The derivative keeps each rejected or superseded alternative reachable as a
+comparison switch. **None of them is a candidate:**
+
+| Switch | State | Why it is not the candidate |
+|---|---|---|
+| `sheet: verbatim` | `JUSTIFIED_ROWS` at desktop instead of the locked packer | the locked count-aware desktop is Owner-locked |
+| `midBand: oneUp` | one-up at 540–699 | 51–65% more page height, two frames on screen |
+| `midBand: portraitRow` | a portrait on its own row | a lone portrait took 60% of the screen; a special case |
+| `narrowProbe: twoUp` | two-up below 540 | frames too small, plate scrim failed, identification weakened |
+| `groupAt: 1024 / 700 / never` | a different index-grouping threshold | superseded — the index switches with the packer at 1171 |
 
 ---
 

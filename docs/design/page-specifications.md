@@ -25,7 +25,7 @@ implies approval.**
 | Page | Desktop maturity | Responsive maturity | Exploration | Reference | What exists |
 |---|---|---|---|---|---|
 | **Home** | **VISUALLY EXPLORED** | **RESPONSIVE VALIDATED** | ✅ candidate | ✗ none | A proposed default composition, block by block, validated from 1440 down to 375 |
-| **Art Works** | **VISUALLY EXPLORED** | **PENDING RESPONSIVE VALIDATION** | ✅ candidate (2C v2) | ✅ ref 3 | A proposed structure, element by element |
+| **Art Works** | **VISUALLY EXPLORED** | **RESPONSIVE VALIDATED** | ✅ candidate (2C v2) | ✅ ref 3 | A proposed structure, element by element, validated from 1440 down to 375 at 3, 9 and 18 projects |
 | **Project Detail** | **VISUALLY EXPLORED** | **RESPONSIVE VALIDATED** | ✅ candidate (1B v2) | ✅ ref 4 | A proposed composition, block by block, validated from 1440 down to 375 |
 | **About Me** | **VISUALLY EXPLORED** | **PENDING RESPONSIVE VALIDATION** | ✅ candidate (3B v2) | ✅ refs 1, 2 | A proposed composition, section by section |
 | **Contact** | **VISUALLY EXPLORED** | **PENDING RESPONSIVE VALIDATION** | ✅ candidate (4B v2) | ✗ none | A proposed composition, element by element |
@@ -35,18 +35,18 @@ implies approval.**
 candidate recorded in `docs/design/prototypes/`, and every prototype states in
 its own header that it approves nothing.
 
-**Three pages are RESPONSIVE VALIDATED** — the **Private Project Gate** (§6.9),
-**Home** (§1.7) and **Project Detail** (§3.12), from
+**Four pages are RESPONSIVE VALIDATED** — the **Private Project Gate** (§6.9),
+**Home** (§1.7), **Project Detail** (§3.12) and **Art Works** (§2.9), from
 `prototypes/private-gate/private-gate-5b-responsive.md`,
-`prototypes/home/home-baseline-v2-responsive.md` and
-`prototypes/project-detail/project-detail-1b-v2-responsive.md`. All three are
-**candidates on both axes**: validation reproduced and answered real failures,
-and approves nothing. None is Design Approved, production-ready or
-implementation complete.
+`prototypes/home/home-baseline-v2-responsive.md`,
+`prototypes/project-detail/project-detail-1b-v2-responsive.md` and
+`prototypes/art-works/art-works-2c-v2-responsive.md`. All four are **candidates
+on both axes**: validation reproduced and answered real failures, and approves
+nothing. None is Design Approved, production-ready or implementation complete.
 
-**The other three remain pending responsive validation** — Art Works, About Me
-and Contact. For them the automatic safe-stack floor (`design-system.md` §11.2)
-is all that is guaranteed.
+**The other two remain pending responsive validation** — About Me and Contact.
+For them the automatic safe-stack floor (`design-system.md` §11.2) is all that
+is guaranteed.
 
 Home is the first page to **consume both shared responsive system candidates**
 in real use — `JUSTIFIED_ROWS` (`design-system.md` §11.7) and display
@@ -273,7 +273,7 @@ transition** (with four items the coda is already one-up by 600, so the step
 falls above Home's sensitive range).
 
 **`JUSTIFIED_ROWS` has now been successfully consumed at page level by Home.**
-This says nothing about any other page. Project Detail later tested `JUSTIFIED_ROWS` and **rejected the presentation mode** for its own four stills (§3.12); Art Works has not been validated with it.
+This says nothing about any other page. Project Detail later tested `JUSTIFIED_ROWS` and **rejected the presentation mode** for its own four stills (§3.12); Art Works consumed it in two of its four bands and uses page-specific layouts in the other two (§2.9).
 
 ##### Other Home derivations **[DEFAULT — HOME-SPECIFIC]**
 
@@ -327,15 +327,22 @@ rule, no pill, no frosted panel, no arrows.
 
 ## 2. Art Works
 
-> **Maturity: VISUALLY EXPLORED.** Candidate structure **2C v2**, **not approved**.
+> **Maturity: VISUALLY EXPLORED** (desktop) · **RESPONSIVE VALIDATED** (narrow
+> width). Candidate structure **2C v2**, **not approved on either axis** — not
+> Design Approved, not production-ready, not implementation complete.
 >
-> Evidence: `docs/design/prototypes/art-works/Art Works 2C v2.dc.html` and
-> `art-works-2c-v2.md`. Sibling directions 2A, 2B and 2C v1 are retained in
+> Desktop evidence: `docs/design/prototypes/art-works/Art Works 2C v2.dc.html`
+> and `art-works-2c-v2.md`. Sibling directions 2A, 2B and 2C v1 are retained in
 > `Art Works Directions.dc.html` as exploration record only. Reference 3
 > continues to apply.
 >
+> Responsive evidence: `Art Works 2C v2 Responsive.dc.html` and
+> `art-works-2c-v2-responsive.md` (§2.9). **The locked desktop candidate is
+> unchanged by it** — the derivative is a separate file.
+>
 > Art Works remains **data-driven** (§2.2). Exploring it produced a candidate
-> *structure*, not a composed page, and added no block types.
+> *structure*, not a composed page, and added no block types; validating it
+> responsively added none either.
 
 ### 2.1 Purpose
 
@@ -497,61 +504,37 @@ affordance, not a CMS field.
 
 ### 2.7 Unresolved **[PENDING VISUAL EXPLORATION]**
 
-**Mobile and tablet remain pending visual validation.** The candidate structure
-was exercised at desktop widths only.
+**Responsive validation is recorded in §2.9 — RESPONSIVE VALIDATED —
+candidate.** The items below are kept as the record of what was open, with their
+outcomes.
 
-**LOCKED INPUT for Art Works responsive validation — Project Owner ruling,
-2026-09-23.** Art Works currently renders dynamic `p.title` strings in
-Marcellus. **Its dynamic project-name strings must use a Newsreader-backed
-`font-display` preset** — the dynamic project-title display preset
-(`design-system.md` §1.1). Marcellus has demonstrated incomplete Vietnamese
-coverage and falls back per glyph inside words (§3.12).
+**LOCKED INPUT — Project Owner ruling, 2026-09-23 — applied and verified.** Art
+Works' dynamic project-name strings use a Newsreader-backed `font-display`
+preset (`design-system.md` §1.1). The responsive derivative applies it (§2.9).
+The locked desktop prototype still renders Marcellus and is **not** rewritten.
+Art Works derived its own metrics; Project Detail's were not reused. The preset
+never switches face by detected language.
 
-- This is an **input to** the upcoming validation, not a result of it. **Art
-  Works is not responsive validated** by it.
-- **The Art Works prototype is not modified in this pass.** It still renders
-  Marcellus; the validation pass applies the ruling.
-- **Project Detail's numerical values are not reused.** Art Works derives its
-  own coefficient, minimum, maximum and line-height against its own alignment
-  compositions during its page validation. None is decided here.
-- The preset **never switches face by detected language**.
+Carried responsive questions and their outcomes:
 
-Carried responsive questions, deliberately **not** solved in architecture:
-
-1. **Narrow-width index layout.** Index columns follow project count (1 / 2 / 3);
-   at tablet and mobile this must fall to one column, and an 18-project list then
-   pushes the sheet far below the fold. Whether the index stays above, becomes a
-   collapsible summary, or moves beside the sheet is undesigned.
-2. **Identification without hover.** The plate numeral is the answer to this, and
-   is why it exists — but it needs the index reachable while looking at the
-   sheet, which one-column stacking breaks.
-3. **`JUSTIFIED_ROWS` narrow-width behaviour — RESOLVED AT SYSTEM LEVEL.**
-   The missing system behaviour that previously blocked this page now exists as
-   a **shared responsive candidate, system validated**
-   (`design-system.md` §11.7): derived target height, a minimum-cell floor that
-   removes the starved sliver, a height ceiling bounding tall media, ragged
-   tails permitted, source order and native aspect preserved, no crop, and a
-   single column below 700px. It also fixes a starved-cell defect the desktop
-   sheet already had.
-   **Art Works itself is NOT responsive validated.** The system rule has never
-   been run through this page's composition, its 18-project density, or its
-   index↔sheet relationship. The blocker is lifted; the validation is not done.
-4. **Density at different project counts.** 18 projects at a small target row
-   height is a very long page; pagination or lazy extension is unresolved.
-5. **Transition behaviour on touch/mobile**, where there is no hover state to
-   precede the tap.
-6. **`AUTOPLAY_VISIBLE` on one-up rows — untested.** Below 700px
-   `JUSTIFIED_ROWS` becomes a single column, and this page runs at most one
-   moving preview at a time, selected by proximity to the viewport centre. That
-   policy has **never been validated against one-up rows**: §11.7's prototype is
-   imagery only, with no video in it at all. Carried as `design-system.md`
-   §16 item 16.
-
-**Items 1 and 2 remain fully open.** The narrow-width index layout and
-identification-without-hover are **not** addressed by the `JUSTIFIED_ROWS`
-resolution — that rule governs how the sheet packs, not whether the index is
-reachable while looking at it. Item 2 is still the decision that will force
-itself first.
+1. **Narrow-width index layout — RESOLVED (§2.9).** Below the desktop takeover
+   the index is neither collapsed nor removed: it is distributed into the
+   sheet, each row carrying its own index entries directly above its frames.
+2. **Identification without hover — RESOLVED (§2.9).** Per-row index entries,
+   plate numerals, titles, years and order identify every frame at rest.
+   Nothing below the takeover depends on hover.
+3. **`JUSTIFIED_ROWS` narrow-width behaviour — RESOLVED, and consumed at page
+   level.** The shared candidate runs verbatim in two of Art Works' four bands
+   — 700–1170 and one-up below 540 — and page-specific layouts serve the other
+   two (§2.9).
+4. **Density at different project counts — RESOLVED for the tested counts**
+   (3 / 9 / 18, §2.9). Pagination or lazy extension for libraries larger than
+   18 remains unresolved.
+5. **Transition behaviour on touch/mobile — still open.** Tap opens the project
+   and the frame remains the transition origin, but the shell-owned signature
+   transition has not been exercised on touch by any prototype.
+6. **`AUTOPLAY_VISIBLE` on one-up rows — RESOLVED at page level (§2.9).** The
+   one-moving-preview policy holds on one-up rows.
 
 Also still open from earlier: filtering or category affordances · whether the
 sheet presentation should be switchable at all.
@@ -569,6 +552,212 @@ cover aspect must be available before layout or the first paint reflows.
 | **Empty** | No published public projects. **[PENDING]** — must be designed; an empty screen is an invitation to act, not a blank. |
 | **Loading** | Posters first, as Home. |
 | **Partial** | Some media not `READY` → empty wells in flow. |
+
+### 2.9 Responsive — **RESPONSIVE VALIDATED — candidate** (2026-09-23)
+
+Accepted by the Project Owner. Evidence:
+`docs/design/prototypes/art-works/Art Works 2C v2 Responsive.dc.html` and
+`art-works-2c-v2-responsive.md` (three passes; pass 3 is final). **The locked
+desktop candidate `Art Works 2C v2.dc.html` / `art-works-2c-v2.md` is
+untouched** — byte-identical to its committed version.
+
+**Not** Design Approved, **not** production-ready, **not** implementation
+complete. Every value below is **[DEFAULT]** and **ART-WORKS-SPECIFIC** unless it
+says otherwise.
+
+**Coverage.** Eighteen widths from 1440 down to 375 — including 1366, 1280,
+1200, 1171, 1170, 1152, 1100 and 1024 around the desktop takeover — at 3, 9 and
+18 projects, with English and Vietnamese title sets. **No horizontal overflow in
+any state**, measured as `scrollWidth − clientWidth`.
+
+#### Final responsive structure **[DEFAULT — ART-WORKS-SPECIFIC]**
+
+```text
+>= 1171px      locked count-aware desktop packer   ·  desktop index
+700 – 1170px   JUSTIFIED_ROWS v2, verbatim         ·  per-row index   (T 3 at >= 1024, T 2 below)
+540 – 699px    Art Works PAIRS                     ·  per-row index
+<  540px       JUSTIFIED_ROWS v2, verbatim, T = 1  ·  per-row index   (one frame per row)
+```
+
+Bands are measured against the sheet's own content width, which is full bleed.
+**The index structure switches at the same width as the packer**, so no
+desktop-index / shared-rows hybrid exists.
+
+**`1171px` and `540px` are Art Works-specific evidence, not global breakpoints.**
+
+#### Desktop takeover at 1171px
+
+**1171px is the lowest continuous passing width** for the current 3, 9 and 18
+project datasets. The locked packer was computed at every integer width from
+1024 to 1440, with the pass condition that every cell be at least 120px wide and
+62px tall — the plate numeral and its scrim:
+
+| Result | Widths | Cause |
+|---|---|---|
+| fails | 1024 | 18 projects: a four-item tail solves to a 101px cell |
+| fails | 1124–1167 | 9 and 18: a four-item row holding the 0.645 portrait solves to 115–119px |
+| fails | 1170 | 9 projects: the same row, 119px |
+| **passes** | **every width from 1171 to 1440** | — |
+
+**The failure is not monotonic** — the packer passes at 1025–1123 and again at
+1168–1169, between failing bands — so **any takeover below 1171 would admit a
+failing band**. That is why the locked packer does not take over earlier.
+
+At 1171: all three counts pass · the smallest 18-project frame is **120 × 186**
+(rows 3 / 3 / 4 / 3 / 3 / 2) · the plate fits · displayPosition order holds · no
+horizontal overflow.
+
+**The 1170 → 1171 transition is not smoothed.** For 9 and 18 projects page height
+changes by 5–8%; for 3 projects the page roughly doubles, because the locked
+desktop deliberately shows three projects large. That is the locked composition
+taking over, not a defect.
+
+#### 540–699px — PAIRS **[DEFAULT — ART-WORKS-SPECIFIC]**
+
+```text
+h = (W − 4) / (ar₁ + ar₂)
+```
+
+- Consecutive projects **pair in displayPosition order** and share one row
+  height.
+- Widths come from each frame's **native aspect**.
+- **No crop to fill the row, no masonry, nothing hidden, nothing reordered.**
+- Plate numerals stay legible, and each pair keeps its own per-row index
+  entries.
+- **The portrait stays part of an ordinary pair — there is no portrait-only
+  special case.** A portrait-on-its-own-row variant was tested and rejected: it
+  gave a lone portrait 60% of the screen and cost nearly a screen more at 18
+  projects.
+
+**It materially reduced page height while preserving identification** — 51–65%
+lower than one-up: 9 projects from 4.7 to 1.7 screens at 699, 18 projects from
+8.5 to 3.0, with six frames on screen instead of two and identification at
+100%.
+
+A lone last item keeps the previous row's height and grows only as far as the
+plate minimum. With an odd count it can leave 56–83% of the row empty; this is
+bounded and deterministic, and recorded as a non-blocking observation.
+
+#### Below 540px — one frame per row
+
+**One frame per row**, from the shared `JUSTIFIED_ROWS` candidate at T = 1. A
+two-up probe below 540 was **rejected**: frames fell to 92–105px tall, the plate
+scrim no longer fit in cells of 75–86px wide, titles wrapped more, and
+identification weakened.
+
+**The layout jump at 540** — from paired frames of about 132px to one-up frames of
+about 265px — **is accepted as non-blocking evidence**.
+
+#### Dynamic project-name typography **[DEFAULT — ART-WORKS-SPECIFIC]**
+
+Dynamic project-name strings remain semantically **`font-display`**, through a
+**Newsreader-backed Art Works preset** (`design-system.md` §1.1):
+
+| | Value |
+|---|---|
+| Face | Newsreader 400, uppercase |
+| `font-size` | `clamp(18px, 1.506cqw, 20px)` |
+| Line-height | **1.15** |
+| Reference box | the 12-column index composition |
+
+- **The "Works" heading stays Marcellus** — it is static, authored Latin text.
+- **No face is switched by detected language.** One preset covers English and
+  Vietnamese.
+- **Project Detail's values are not reused**, and Newsreader is **not** made a
+  universal display face.
+- The coefficient is Art Works' own: 22px Marcellus at equal fill became 20px
+  Newsreader, and 20 / 1328 = 1.506cqw. The reference box is deliberately the
+  whole index composition, not an index column — sizing against the column would
+  have shrunk 18-project titles by 34% against 9 projects.
+- **At this small display size the bounds carry the preset**: 20px on desktop,
+  18px below about 1195px. The coefficient operates only between roughly 1195
+  and 1328px of content width. Recorded as honest evidence, not a defect.
+
+**Tested English and Vietnamese titles render without per-glyph fallback or
+clipping** — verified by the same two-fallback-stack test Project Detail used,
+and by `scrollWidth ≤ clientWidth` on every title. The long Vietnamese title
+wraps to two or three lines at narrower widths; every entry stays at least 44px
+tall.
+
+The prototype names its implementation token `--font-title`. Under
+`design-system.md` §1.1 that token is a **preset under `font-display`, not a
+fourth role** (§16 item 20).
+
+#### Identification without hover
+
+| Mode | How a frame is identified |
+|---|---|
+| **Desktop (≥ 1171)** | the desktop project index · plate-numeral correspondence · hover / focus pairing, one code path for both |
+| **Below the takeover** | a **per-row index** directly above its media row — plate numeral, title and year — so identity is present **at rest**, with **no hover-only dependency** |
+
+Identification coverage without hover is **100% at every width and count** below
+the takeover. **Touching a media or project surface opens the project**; no
+selected-state system is introduced.
+
+#### Moving preview and reduced motion
+
+Both are **enforced in code, not only displayed**:
+
+- **At most one moving preview, and at most one loaded clip.** A single active
+  frame — the eligible frame nearest the viewport centre — is chosen from scroll
+  position; the previous frame is paused and its source removed before the next
+  is prepared.
+- **No audible autoplay** — previews are muted and `playsinline`.
+- **Tapping does not start a preview**; it opens the project.
+- **Reduced motion loads no moving clip.** Selection returns before any frame is
+  chosen, so no clip source is ever set; every frame shows its deterministic
+  poster.
+
+Eligibility — at least 50% visible — is the **locked desktop page policy,
+carried unchanged**. It is **not a new global `AUTOPLAY_VISIBLE` threshold**.
+
+#### Semantic order
+
+**Project order is `displayPosition`.** The project list is built in that order
+and **never re-sorted**; no responsive mode reorders projects. Index entries,
+frames, tab order and visual order each run 1…n in every state. Below the
+takeover each row emits its index entries and then its frames — the desktop's
+entries-then-frames sequence applied per row — so keyboard, touch and navigation
+order follow the authored project sequence at row granularity. **Packing changes
+only where rows break.**
+
+#### `JUSTIFIED_ROWS` system boundary
+
+**`JUSTIFIED_ROWS` remains a valid shared responsive candidate**, unchanged. Art
+Works uses it where the accepted composition calls for it — 700–1170, and one-up
+below 540. It also uses its locked count-aware desktop packer at ≥ 1171 and
+page-specific pairs at 540–699. **This neither weakens nor replaces the shared
+system.** It is further evidence that a valid packing algorithm may still not be
+the right authored presentation at every count and width
+(`design-system.md` §11.10).
+
+#### Plate numeral — current-content limit
+
+**1171px passes with the current content**, at the current minimum observed
+frame width of **120px** — exactly the plate minimum. **That is not proof that
+arbitrary future aspect ratios will always pass.** The locked desktop packer has
+**no minimum-cell floor**, so a portrait narrower than the current 0.645 could
+starve a cell above 1171. **More extreme portrait media requires content QA.** No
+global aspect-ratio restriction is created.
+
+#### Open — non-blocking
+
+- **More extreme future portrait aspects** require content QA, above.
+- **Touch-only wide devices at ≥ 1171px** receive the desktop index, where
+  at-rest identification coverage is 28–67% and hover is unavailable; they need
+  real-device QA.
+- **Site-wide mobile navigation** (`design-system.md` §16 item 14).
+- **The global `AUTOPLAY_VISIBLE` threshold** (`design-system.md` §16 item 7).
+- **Multiple media per project** — untested; the data has one frame per project.
+- **The accepted 540 layout jump**, above.
+- **Phone autoplay and data cost** — the policy permits previews on phones; data
+  cost was not assessed.
+- **The `JUSTIFIED_ROWS` 480 → 450 step occurs here.** At 18 projects in the
+  one-up band a lone portrait stands at the ceiling — 363 × 563 at 450, 63% of a
+  900px screen. Bounded and deterministic; carried as a by-eye judgement
+  (`design-system.md` §16 item 15).
+
+**None blocks Art Works' responsive candidate status.**
 
 ---
 
@@ -1893,7 +2082,7 @@ Hold on every page regardless of exploration status.
 | **Video** | Never audible without user action. Multi-video surfaces are `AUTOPLAY_VISIBLE`. `AUTOPLAY_AMBIENT` only on a standalone ambient surface. |
 | **Posters** | `poster_media_id → thumbnail_url → empty well`. Refused autoplay shows the poster. |
 | **Motion** | Content moves; interface does not. One signature transition, shell-owned. |
-| **Responsive** | Three breakpoints. Automatic safe stacking. **Every production page still requires a mobile design review.** Three pages are RESPONSIVE VALIDATED — the Private Project Gate (§6.9), Home (§1.7) and Project Detail (§3.12); the other three are pending, and must not borrow any validated page's derivations. Home's HERO height, wall column rule and display bounds are **HOME-SPECIFIC**; Project Detail's phone HERO, Newsreader title preset and 4 / 2 / 1 stills grid are **PROJECT-DETAIL-SPECIFIC**. `JUSTIFIED_ROWS` has a **shared responsive candidate, system validated** (`design-system.md` §11.7) — one expression for every page, no per-page override. **Display typography** has one too (`design-system.md` §1.4): bounded composition-relative clamp, reference box = the alignment container, coefficient scoped to the preset, long content wraps rather than shrinking. There the **method** is shared and the **numbers are not**. A system candidate is not a page validation. |
+| **Responsive** | Three breakpoints. Automatic safe stacking. **Every production page still requires a mobile design review.** Four pages are RESPONSIVE VALIDATED — the Private Project Gate (§6.9), Home (§1.7), Project Detail (§3.12) and Art Works (§2.9); the other two are pending, and must not borrow any validated page's derivations. Home's HERO height, wall column rule and display bounds are **HOME-SPECIFIC**; Project Detail's phone HERO, Newsreader title preset and 4 / 2 / 1 stills grid are **PROJECT-DETAIL-SPECIFIC**; Art Works' 1171 and 540 thresholds, pairs mode and title preset are **ART-WORKS-SPECIFIC**. `JUSTIFIED_ROWS` has a **shared responsive candidate, system validated** (`design-system.md` §11.7) — one expression for every page, no per-page override. **Display typography** has one too (`design-system.md` §1.4): bounded composition-relative clamp, reference box = the alignment container, coefficient scoped to the preset, long content wraps rather than shrinking. There the **method** is shared and the **numbers are not**. A system candidate is not a page validation. |
 | **Accessibility** | WCAG AA size-aware · visible focus · reduced motion yields a deterministic still · DOM order follows `position`, never `colStart`. |
 | **Never** | Product UI, card primitives, feed-like surfaces, audible autoplay, invented compositions on pending pages. |
 
@@ -1919,8 +2108,8 @@ Hold on every page regardless of exploration status.
    **The Art Works blocker is lifted at system level** (§2.7 item 3). At page
    level: **Home consumed `JUSTIFIED_ROWS` successfully** (§1.7); **Project
    Detail tested it and rejected the presentation mode** for its four-still set,
-   using a structured GRID instead (§3.12); **Art Works has not been validated
-   with it.**
+   using a structured GRID instead (§3.12); **Art Works consumed it** in two of
+   its four bands and uses page-specific layouts in the other two (§2.9).
 4. ~~**Validate the HERO overlay's narrow-width fallback.**~~ — **done for
    Project Detail, 2026-09-23** (§3.12). Stacked below 700, and at any width
    when the title exceeds two lines or obstructs the affordance or Back to Works.

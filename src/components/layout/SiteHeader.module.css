@@ -1,0 +1,46 @@
+.header {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gut);
+  align-items: baseline;
+  padding: 30px var(--edge) 0;
+}
+
+.wordmark {
+  grid-column: 1 / 6;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.nav {
+  grid-column: 7 / 13;
+  display: flex;
+  justify-content: flex-end;
+  gap: 34px;
+  font-size: 16px;
+}
+
+.current {
+  color: var(--accent);
+}
+
+/* Density only, as in the prototype. Structure is unchanged. */
+@container page (width <= 768px) {
+  .nav {
+    gap: 24px;
+  }
+}
+
+@container page (width <= 430px) {
+  .nav {
+    grid-column: 6 / 13;
+    gap: 16px;
+    font-size: 14px;
+  }
+
+  .wordmark {
+    font-size: 10px;
+  }
+}

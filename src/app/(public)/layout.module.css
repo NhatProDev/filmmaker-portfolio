@@ -1,0 +1,29 @@
+/* The public page is the composition container. Responsive tiers are measured
+   against its layout width, as the prototypes measure them — not against the
+   viewport, which also counts a classic scrollbar. */
+.shell {
+  container: page / inline-size;
+}
+
+/* Tier spacing tokens (design-system.md §4.1). The tier breakpoints follow the
+   About prototype (desk >= 1024, tab 700-1023, phone < 700). Other page
+   prototypes place the lower breakpoint differently; reconciling them is a
+   site-wide follow-up, not settled here. */
+.frame {
+  --edge: 56px;
+  --gut: 20px;
+}
+
+@container page (width < 1024px) {
+  .frame {
+    --edge: 32px;
+    --gut: 14px;
+  }
+}
+
+@container page (width < 700px) {
+  .frame {
+    --edge: 24px;
+    --gut: 10px;
+  }
+}

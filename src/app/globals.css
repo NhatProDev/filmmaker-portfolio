@@ -9,6 +9,10 @@
   --frame: #14110f;
 
   --font-display: var(--font-marcellus), Georgia, serif;
+  /* The dynamic project-title preset of font-display (design-system.md §1.1):
+     a preset under that role, not a fourth role. Newsreader carries the
+     Vietnamese subset that project names may need. */
+  --font-display-title: var(--font-newsreader), Georgia, serif;
   --font-body: var(--font-newsreader), Georgia, serif;
   --font-ui: var(--font-newsreader), Georgia, serif;
   --display-track: -0.005em;

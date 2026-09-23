@@ -122,11 +122,14 @@ export function packJustifiedRows(aspects: readonly number[], measure: number): 
 const MIN_MEASURE = 240;
 const MAX_MEASURE = 3840;
 
-type Range = { from: number | null; to: number | null; packing: Packing };
+export type MeasureRange<T> = { from: number | null; to: number | null; layout: T };
 
-function packingRanges(aspects: readonly number[]): Range[] {
-  const key = (measure: number) => JSON.stringify(packJustifiedRows(aspects, measure));
-  const ranges: Range[] = [{ from: null, to: null, packing: packJustifiedRows(aspects, MIN_MEASURE) }];
+// The stretches of measure over which layoutAt() returns the same layout. Any
+// layout that is a pure function of the measure can be delivered this way; the
+// ranges are open-ended at both extremes.
+export function measureRanges<T>(layoutAt: (measure: number) => T): MeasureRange<T>[] {
+  const key = (measure: number) => JSON.stringify(layoutAt(measure));
+  const ranges: MeasureRange<T>[] = [{ from: null, to: null, layout: layoutAt(MIN_MEASURE) }];
   let current = key(MIN_MEASURE);
   for (let measure = MIN_MEASURE + 1; measure <= MAX_MEASURE; measure++) {
     const next = key(measure);
@@ -140,13 +143,21 @@ function packingRanges(aspects: readonly number[]): Range[] {
     }
     const boundary = Math.round(hi * 1000) / 1000;
     ranges[ranges.length - 1].to = boundary;
-    ranges.push({ from: boundary, to: null, packing: packJustifiedRows(aspects, hi) });
+    ranges.push({ from: boundary, to: null, layout: layoutAt(hi) });
     current = next;
   }
   return ranges;
 }
 
 const num = (value: number) => String(Math.round(value * 10000) / 10000);
+
+// The container-query condition for one range; empty when it spans every
+// measure.
+export function rangeCondition({ from, to }: { from: number | null; to: number | null }): string {
+  return [from !== null && `(width >= ${num(from)}px)`, to !== null && `(width < ${num(to)}px)`]
+    .filter(Boolean)
+    .join(" and ");
+}
 
 // The height a ragged row is held at, in the container's own width units.
 function heldHeight(height: RowHeight, tiers: number) {
@@ -164,7 +175,8 @@ function heldHeight(height: RowHeight, tiers: number) {
 // shared height.
 export function justifiedRowsCss(scope: string, aspects: readonly number[]): string {
   let css = "";
-  for (const { from, to, packing } of packingRanges(aspects)) {
+  for (const range of measureRanges((measure) => packJustifiedRows(aspects, measure))) {
+    const packing = range.layout;
     const hidden: string[] = [];
     const held: string[] = [];
     for (const row of packing.rows) {
@@ -177,9 +189,7 @@ export function justifiedRowsCss(scope: string, aspects: readonly number[]): str
     }
     const body = (hidden.length ? `${hidden.join(",")}{display:none}` : "") + held.join("");
     if (!body) continue;
-    const query = [from !== null && `(width >= ${num(from)}px)`, to !== null && `(width < ${num(to)}px)`]
-      .filter(Boolean)
-      .join(" and ");
+    const query = rangeCondition(range);
     css += query ? `@container justified-rows ${query}{${body}}` : body;
   }
   return css;

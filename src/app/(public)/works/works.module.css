@@ -1,0 +1,441 @@
+/* Art Works. Reproduces docs/design/prototypes/art-works/Art Works 2C v2 Responsive.dc.html.
+   Every derivation here is ART-WORKS-SPECIFIC (art-works-2c-v2-responsive.md
+   §000, page-specifications.md §2.9) and none is promoted to the system.
+   Tiers are measured on the `page` container; the sheet's bands on the sheet
+   itself, which is full bleed and so the same width. */
+
+/* The dynamic-title size is resolved once, against the index composition, and
+   inherited as a length so that the containers nested below cannot re-resolve
+   it against themselves. */
+@property --title-size {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 18px;
+}
+
+/* Art Works' own spacing tiers: 56/20/120 at 1024 and above, 32/14/96 at 600
+   and above, 24/10/72 below. The shared header keeps the shell's tiers
+   (layout.module.css); reconciling the two is a site-wide follow-up. */
+.works {
+  --edge: 56px;
+  --gut: 20px;
+  padding-bottom: 120px;
+}
+
+@container page (width < 1024px) {
+  .works {
+    --edge: 32px;
+    --gut: 14px;
+    padding-bottom: 96px;
+  }
+}
+
+@container page (width < 600px) {
+  .works {
+    --edge: 24px;
+    --gut: 10px;
+    padding-bottom: 72px;
+  }
+}
+
+/* ---- Masthead: one display line and a right-aligned count ---- */
+
+.mast {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gut);
+  align-items: end;
+  padding: 78px var(--edge) 34px;
+}
+
+.mastBox {
+  grid-column: 1 / 7;
+  container-type: inline-size;
+}
+
+/* Static, authored Latin display: Marcellus, sized against its own columns. */
+.heading {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(34px, 8.87cqw, 58px);
+  line-height: 1;
+  letter-spacing: var(--display-track);
+  text-transform: uppercase;
+}
+
+.count {
+  grid-column: 9 / 13;
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--muted);
+  text-align: right;
+}
+
+@container page (width < 1024px) {
+  .mast {
+    padding-top: 60px;
+    padding-bottom: 26px;
+  }
+}
+
+@container page (width < 600px) {
+  .mast {
+    padding-top: 44px;
+  }
+
+  .mastBox,
+  .count {
+    grid-column: 1 / -1;
+  }
+
+  .count {
+    margin-top: 8px;
+    text-align: left;
+  }
+}
+
+/* ---- The index composition ---- */
+
+/* The 12-column index composition is the reference box for project titles:
+   the Art Works dynamic-title preset is clamp(18px, 1.506cqw, 20px). */
+.comp {
+  container-type: inline-size;
+  padding: 0 var(--edge);
+}
+
+.index,
+.sheet {
+  --title-size: clamp(18px, 1.506cqw, 20px);
+}
+
+/* Desktop index, from the takeover width. Its column count follows the
+   project count. Below the takeover the index is distributed into the sheet
+   instead, one label above each frame. */
+.index {
+  display: none;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gut);
+  padding-bottom: 56px;
+}
+
+@container page (width >= 1171px) {
+  .index {
+    display: grid;
+  }
+}
+
+.indexList {
+  grid-column: 1 / 13;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  column-gap: var(--gut);
+}
+
+.indexList[data-columns="1"] {
+  grid-column: 1 / 7;
+  columns: 1;
+}
+
+.indexList[data-columns="2"] {
+  columns: 2;
+}
+
+.indexList[data-columns="3"] {
+  columns: 3;
+}
+
+.indexList li {
+  break-inside: avoid;
+}
+
+.entry {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  padding: 12px 2px;
+  border-top: 1px solid var(--rule);
+}
+
+/* Numeral, title, mark and year: the same parts in the desktop index and in
+   the per-row labels. */
+.num {
+  min-width: 2.2ch;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+}
+
+.title {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-display-title);
+  font-weight: 400;
+  font-size: var(--title-size);
+  line-height: 1.15;
+  letter-spacing: var(--display-track);
+  text-transform: uppercase;
+  overflow-wrap: break-word;
+  text-wrap: pretty;
+}
+
+.mark {
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 160ms linear;
+}
+
+.year {
+  min-width: 4ch;
+  font-size: 14px;
+  color: var(--muted);
+  text-align: right;
+}
+
+/* ---- The sheet ---- */
+
+/* Full bleed. Units flow in project order; breaks between them own their line,
+   and the container queries from worksLayout.ts show only the breaks that are
+   row boundaries at the current width. Without container queries every unit
+   stands on its own row, at full width and native aspect. */
+.sheet {
+  container: works-sheet / inline-size;
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 4px;
+  margin: 0 calc(-1 * var(--edge));
+}
+
+/* Between rows: 22px under the per-row index, 4px on desktop. */
+.break {
+  flex: 0 0 100%;
+  height: 22px;
+}
+
+/* One project: its label above its frame. Units in a row stretch to the same
+   height, so every label in the row takes the tallest one's height and the
+   frames line up, as the prototype's label strip does. */
+.unit {
+  container: works-unit / inline-size;
+  display: flex;
+  flex: var(--ar) 0 0%;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.label {
+  flex: 1 0 auto;
+  box-sizing: border-box;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  min-height: 44px;
+  padding: 10px 13px 8px;
+  border-top: 1px solid var(--ink);
+}
+
+.label:focus-visible {
+  outline-offset: -2px;
+}
+
+/* Under 260px the numeral and year sit above the title. */
+@container works-unit (width < 260px) {
+  .label {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 3px 10px;
+  }
+
+  .label .num {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .label .title {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .label .mark {
+    display: none;
+  }
+
+  .label .year {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+  }
+}
+
+/* Native aspect, no card chrome. */
+.frame {
+  position: relative;
+  display: block;
+  flex: none;
+  width: 100%;
+  aspect-ratio: var(--ar);
+  overflow: hidden;
+  background: var(--frame);
+  transition: opacity 170ms linear;
+}
+
+.frame:focus-visible {
+  outline-offset: -3px;
+}
+
+.cover {
+  object-fit: cover;
+}
+
+/* A preview fades in over its poster once playback has actually started. */
+.video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 320ms linear;
+}
+
+.video[data-playing] {
+  opacity: 1;
+}
+
+/* The plate numeral: an identification mark, not a caption, with a small
+   derived corner scrim for contrast over unknown footage. */
+.plateScrim {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 120px;
+  height: 62px;
+  background: radial-gradient(120% 100% at 0% 100%, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0));
+  pointer-events: none;
+}
+
+.plate {
+  position: absolute;
+  left: 13px;
+  bottom: 11px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: rgba(244, 239, 230, 0.94);
+  pointer-events: none;
+}
+
+.plate,
+.plateScrim {
+  transition: opacity 140ms linear;
+}
+
+/* Desktop hover caption, shown only while its project is paired. */
+.scrim {
+  display: none;
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 92px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.66), rgba(0, 0, 0, 0));
+  opacity: 0;
+  transition: opacity 170ms linear;
+  pointer-events: none;
+}
+
+.caption {
+  display: none;
+  position: absolute;
+  left: 40px;
+  right: 14px;
+  bottom: 10px;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  opacity: 0;
+  transition: opacity 170ms linear;
+  pointer-events: none;
+}
+
+.captionTitle {
+  font-family: var(--font-display-title);
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.15;
+  letter-spacing: var(--display-track);
+  text-transform: uppercase;
+  color: #f4efe6;
+}
+
+.captionYear {
+  font-size: 13px;
+  color: rgba(244, 239, 230, 0.86);
+}
+
+/* Desktop, from the takeover width: the index sits above the sheet, so frames
+   carry no labels, rows are 4px apart and the hover caption applies. */
+@container works-sheet (width >= 1171px) {
+  .break {
+    height: 4px;
+  }
+
+  .label {
+    display: none;
+  }
+
+  .scrim {
+    display: block;
+  }
+
+  .caption {
+    display: flex;
+  }
+}
+
+/* ---- Pairing (IndexSheet.tsx): hover and focus alike ---- */
+
+.entry,
+.label {
+  transition:
+    opacity 170ms linear,
+    color 170ms linear;
+}
+
+[data-paired] .entry:not([data-hit]),
+[data-paired] .label:not([data-hit]),
+[data-paired] .frame:not([data-hit]) {
+  opacity: 0.34;
+}
+
+.entry[data-hit],
+.label[data-hit] {
+  color: var(--accent);
+}
+
+.entry[data-hit] .mark,
+.label[data-hit] .mark {
+  opacity: 1;
+}
+
+.frame[data-hit] {
+  outline: 2px solid #f4efe6;
+  outline-offset: -3px;
+}
+
+.frame[data-hit] .scrim,
+.frame[data-hit] .caption {
+  opacity: 1;
+}
+
+/* The numeral leaves as the handoff to Project Detail begins. */
+.frame[data-origin] .plate,
+.frame[data-origin] .plateScrim {
+  opacity: 0;
+}

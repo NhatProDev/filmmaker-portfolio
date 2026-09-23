@@ -1,0 +1,329 @@
+/* Contact. Reproduces docs/design/prototypes/contact/Contact 4B v2 Responsive.dc.html.
+   Every rule here is CONTACT-SPECIFIC (contact-4b-v2-responsive.md §12) and
+   none is promoted to the system. Tiers are measured on the `page` container:
+
+     desk    >= 1024      locked geometry · edge 56 · gutter 20
+     grid    685 - 1023   locked 12-col grid (spine 1-7, still 9-12) · 32 · 14
+     single  < 685        one column · edge 32 (>= 600) / 24 (< 600) · 14 / 10
+
+   The 685 collapse is measured, not a round tier. The grid holds while its
+   7-column spine can carry the statement's own measure, 34ch at 19px (356px).
+   With c = (W - 2e - 11g) / 12 at edge 32 and gutter 14, 7c + 6g >= 356 holds
+   from W = 684.3: 684 is the last single-column width, 685 the first grid one.
+   Recompute if the tier edge, gutter or statement measure changes. */
+
+/* Contact's own tiers and page height apply to the whole public frame, so the
+   shared header sits on the same edge as the sheet, as in the prototype. The
+   frame is this page's parent (app/(public)/layout.tsx); the selector matches
+   nothing on any other route. */
+div:has(> .page) {
+  --edge: 56px;
+  --gut: 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 940px;
+}
+
+/* Contact's focus ring: ink, not the shared accent (§11.3). The primary link
+   is accent-coloured, so an accent ring would read as part of the link. */
+div:has(> .page) a:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 4px;
+}
+
+.page {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+}
+
+/* ---- Sheet ---- */
+
+.sheet {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gut);
+  align-items: start;
+  padding: 74px var(--edge) 0;
+}
+
+.datum {
+  grid-column: 1 / 13;
+  height: 1px;
+  margin-bottom: 28px;
+  background: var(--rule);
+}
+
+/* The spine is the reference box for both display sizes. */
+.spine {
+  grid-column: 1 / 8;
+  container-type: inline-size;
+}
+
+/* Static Latin display (Marcellus), sized by the shared display-typography
+   method against the spine: 21.3% of it, so the word ends on the spine edge.
+   The maximum is its 1440 value. */
+.heading {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(40px, 21.3cqw, 164px);
+  line-height: 0.9;
+  letter-spacing: var(--display-track);
+  text-transform: uppercase;
+}
+
+.statement {
+  margin: 30px 0 0;
+  max-width: 34ch;
+  font-size: 19px;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+/* ---- Primary action: the email ---- */
+
+.primary {
+  margin-top: 54px;
+  padding-top: 18px;
+  border-top: 1px solid var(--ink);
+}
+
+.label {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* The box keeps the inherited body size, as the prototype renders it: only the
+   link is display-sized, so the line box follows the address. */
+.emailBox {
+  margin: 10px 0 0;
+  font-family: var(--font-display);
+  line-height: 1.14;
+  letter-spacing: var(--display-track);
+  container-type: inline-size;
+}
+
+/* 8.2% of the spine, so the address can never exceed it: one line at every
+   width, never split. The maximum is the locked 38px. */
+.email {
+  display: inline-block;
+  font-size: clamp(22px, 8.2cqw, 38px);
+  white-space: nowrap;
+  color: var(--accent);
+}
+
+div:has(> .page) .email:focus-visible {
+  outline-offset: 6px;
+}
+
+.reply {
+  margin: 12px 0 0;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+/* ---- Secondary rows ---- */
+
+.rows {
+  margin: 40px 0 0;
+  font-size: 16px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 20px;
+  padding: 11px 0;
+  border-top: 1px solid var(--rule);
+}
+
+.row:last-child {
+  border-bottom: 1px solid var(--rule);
+}
+
+/* All four rows stack together when any one cannot hold one line (ContactRows). */
+.rows[data-rows="stack"] .row {
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rowLabel {
+  font-style: italic;
+  color: var(--muted);
+}
+
+.rowValue {
+  margin: 0;
+}
+
+.rowLink {
+  display: inline-block;
+  padding-bottom: 2px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.note {
+  margin: 44px 0 0;
+  max-width: 52ch;
+  font-size: 17px;
+  line-height: 1.78;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+
+/* ---- Identity still: a margin figure, never the loudest element ---- */
+
+.identity {
+  grid-column: 9 / 13;
+  margin: 86px 0 0;
+}
+
+.identity img {
+  width: 100%;
+  height: auto;
+}
+
+.caption {
+  margin-top: 11px;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--muted);
+}
+
+/* ---- Footer: this page's chrome ---- */
+
+.footer {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gut);
+  align-items: baseline;
+  margin-top: auto;
+  padding: 90px var(--edge) 54px;
+}
+
+.footName,
+.footCopy {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.footName {
+  grid-column: 1 / 6;
+}
+
+/* The name breaks only at the dash, never mid-phrase. */
+.keep {
+  white-space: nowrap;
+}
+
+.footCopy {
+  grid-column: 11 / 13;
+  justify-self: end;
+  white-space: nowrap;
+}
+
+/* ---- Grid tier and below (< 1024) ---- */
+
+@container page (width < 1024px) {
+  div:has(> .page) {
+    --edge: 32px;
+    --gut: 14px;
+    min-height: 100svh;
+  }
+
+  .sheet {
+    padding-top: 60px;
+  }
+
+  .primary {
+    margin-top: 48px;
+  }
+
+  /* 44px touch targets without moving the visible underline: the rule moves
+     from border to text-decoration, then padding with a negative margin. */
+  .rowLink {
+    padding: 14px 0;
+    margin: -14px 0;
+    border-bottom: 0;
+    text-decoration: underline 1px var(--rule);
+    text-underline-offset: 4px;
+  }
+
+  .email {
+    padding: 8px 0;
+    margin: -8px 0;
+  }
+
+  /* One justified line; © stays on the first line. */
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 72px var(--edge) 43px;
+  }
+
+  .footName {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}
+
+/* ---- Single column (< 685, measured) ---- */
+
+@container page (width < 685px) {
+  .sheet {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .datum,
+  .spine {
+    grid-column: 1 / -1;
+  }
+
+  /* The spine becomes the full measure; the desktop coefficient alone would
+     make CONTACT grow as the viewport shrinks. */
+  .heading {
+    font-size: clamp(40px, 21.3cqw, 96px);
+  }
+
+  .primary {
+    margin-top: 40px;
+  }
+
+  /* After the closing note (its source position), hung from the right edge at
+     60% of the measure: never full width, never above the action. */
+  .identity {
+    grid-column: 1 / -1;
+    justify-self: end;
+    width: 60%;
+    margin: 48px 0 0;
+  }
+
+  .footer {
+    padding: 54px var(--edge) 32px;
+  }
+}
+
+/* Edge, gutter and sheet top step down at 600, inside the single column. */
+@container page (width < 600px) {
+  div:has(> .page) {
+    --edge: 24px;
+    --gut: 10px;
+  }
+
+  .sheet {
+    padding-top: 40px;
+  }
+}
+
+@container page (width < 480px) {
+  .statement {
+    font-size: 18px;
+  }
+}

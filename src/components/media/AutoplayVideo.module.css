@@ -1,0 +1,10 @@
+/* The frame fades in over its poster once playback has actually started, and
+   out again when the source is released. */
+.video {
+  opacity: 0;
+  transition: opacity 320ms linear;
+}
+
+.video[data-playing] {
+  opacity: 1;
+}

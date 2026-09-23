@@ -82,7 +82,9 @@ imgs & videos/
 
 # Local copies of runtime media used by implemented pages. Same local-only
 # policy as /media/: never committed. A fresh clone must restore them by copying
-# from media/w/ (About uses portrait.jpg, desk-01.jpg and mtm-atelier.jpg).
+# from media/w/ and media/clips/ into public/media/<page>/ (About uses
+# portrait.jpg, desk-01.jpg and mtm-atelier.jpg; Home's files are listed in
+# src/content/home.ts).
 /public/media/
 
 # Local preview tooling: this machine's launch configurations for the dev,

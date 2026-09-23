@@ -1,0 +1,289 @@
+/* Home. Reproduces docs/design/prototypes/home/Home Baseline v2 Responsive.dc.html.
+   Every derivation here is HOME-SPECIFIC (home-baseline-v2-responsive.md §14,
+   page-specifications.md §1.7) and none is promoted to the system. Tiers are
+   measured on the `page` container, as the prototype measures its content box. */
+
+/* Home's own spacing tiers: 56/20/140, then 32/14/96 at 768 and below, then
+   24/10/72 at 430 and below. They differ from the shell tiers the shared
+   header uses (layout.module.css); reconciling the two is a site-wide
+   follow-up, not settled here. */
+.home {
+  --edge: 56px;
+  --gut: 20px;
+  --band: 140px;
+  padding-bottom: 56px;
+}
+
+@container page (width <= 768px) {
+  .home {
+    --edge: 32px;
+    --gut: 14px;
+    --band: 96px;
+  }
+}
+
+@container page (width <= 430px) {
+  .home {
+    --edge: 24px;
+    --gut: 10px;
+    --band: 72px;
+  }
+}
+
+.identity,
+.about,
+.footer {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gut);
+}
+
+/* Poster and video fill their frame under COVER. */
+.media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ---- Block 1: HERO / VIDEO ---- */
+
+/* max(240, min(0.72 × viewport height, 0.62 × width, 900)). The width term
+   keeps a tall phone from opening on nothing but a crop. svh keeps the first
+   screen stable while mobile browser chrome changes, and cqw is the page
+   container's width. */
+.hero {
+  position: relative;
+  overflow: hidden;
+  height: max(240px, min(72svh, 62cqw, 900px));
+  margin: 26px 0 0;
+  background: var(--frame);
+}
+
+/* The prototype rounds the hero to a whole pixel. round() is newer than the
+   build's browser targets, so it is layered on where supported, as About does. */
+@supports (height: round(1px, 1px)) {
+  .hero {
+    height: round(max(240px, min(72svh, 62cqw, 900px)), 1px);
+  }
+}
+
+.heroCaption {
+  position: absolute;
+  left: 18px;
+  bottom: 14px;
+  font-size: 13px;
+  font-style: italic;
+  color: rgba(237, 231, 221, 0.86);
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.6);
+}
+
+/* ---- Block 2: GRID identity ---- */
+
+.identity {
+  padding: var(--band) var(--edge) 0;
+}
+
+/* The display's reference box is the 12-column span it aligns to
+   (design-system.md §1.4). Home / Marcellus preset: coefficient 0.1330,
+   bounds 40px and 250px. */
+.displayBox {
+  grid-column: 1 / 13;
+  container-type: inline-size;
+}
+
+.display {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(40px, 13.3cqw, 250px);
+  line-height: 0.92;
+  letter-spacing: var(--display-track);
+  text-transform: uppercase;
+}
+
+.lead,
+.aside {
+  margin: 42px 0 0;
+  max-width: 46ch;
+  line-height: 1.74;
+}
+
+.lead {
+  grid-column: 1 / 6;
+  font-size: 17px;
+}
+
+.aside {
+  grid-column: 9 / 13;
+  font-size: 16px;
+  color: var(--muted);
+}
+
+/* Reading columns stack by measure, and the pair stacks together. The aside is
+   the narrower column, so the prototype's measured rule — stack when either
+   paragraph falls under 300px — reduces to a fixed width. With
+   c = (W - 2e - 11g) / 12 the aside measures 4c + 3g = (W - 2e - 2g) / 3,
+   under 300px when W < 900 + 2e + 2g: 1052 at Home's desktop tier, and at
+   every width of the narrower tiers. Recompute if the tier values change. */
+@container page (width < 1052px) {
+  .lead,
+  .aside {
+    grid-column: 1 / -1;
+  }
+
+  .aside {
+    margin-top: 22px;
+  }
+}
+
+/* ---- Blocks 3 and 5: gallery sections ---- */
+
+.gallery {
+  margin-top: var(--band);
+}
+
+.label {
+  margin: 0 0 22px;
+  padding: 0 var(--edge);
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 16px;
+  font-style: italic;
+  color: var(--muted);
+}
+
+/* ---- Block 3: GALLERY VIDEO_GRID ---- */
+
+/* Three columns at 1024 and above, two below. Home has no one-column mode. */
+.wall {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.cell {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  background: var(--frame);
+}
+
+@container page (width < 1024px) {
+  .wall {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* A lone tail at two columns spans the row as a 2.4:1 closing frame, in
+     source position, rather than standing as an orphan. */
+  .cell:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    aspect-ratio: 2.4 / 1;
+  }
+}
+
+/* ---- Block 4: GRID text + portrait ---- */
+
+.about {
+  align-items: end;
+  margin-top: var(--band);
+  padding: 0 var(--edge);
+}
+
+.aboutText {
+  grid-column: 1 / 7;
+}
+
+.aboutBody {
+  margin: 0;
+  max-width: 46ch;
+  font-size: 17px;
+  line-height: 1.74;
+}
+
+.aboutMore {
+  margin: 22px 0 0;
+  font-size: 16px;
+  line-height: 1.74;
+  color: var(--muted);
+}
+
+.aboutMore a {
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 2px;
+}
+
+/* Native aspect at every width; the portrait is never cropped. */
+.portrait {
+  grid-column: 10 / 13;
+  background: var(--frame);
+}
+
+.portrait img {
+  width: 100%;
+  height: auto;
+}
+
+/* ---- Site footer ---- */
+
+.footer {
+  align-items: baseline;
+  margin-top: var(--band);
+  padding: 0 var(--edge);
+}
+
+.contact {
+  grid-column: 1 / 8;
+  container-type: inline-size;
+}
+
+/* Sized against its own column, not the viewport: 10.5% of it, 18px to 40px. */
+.email {
+  font-family: var(--font-display);
+  font-size: clamp(18px, 10.5cqw, 40px);
+  letter-spacing: var(--display-track);
+  color: var(--accent);
+  overflow-wrap: anywhere;
+}
+
+.note {
+  margin: 14px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.footerNav {
+  grid-column: 9 / 13;
+  display: flex;
+  justify-content: flex-end;
+  gap: 28px;
+  font-size: 15px;
+}
+
+/* ---- Phone (< 700) ---- */
+
+@container page (width < 700px) {
+  .about {
+    align-items: start;
+  }
+
+  .aboutText,
+  .contact {
+    grid-column: 1 / -1;
+  }
+
+  /* A width mode, not a crop: stacked, the portrait keeps native aspect and
+     does not claim the full measure. */
+  .portrait {
+    grid-column: 1 / -1;
+    max-width: 58%;
+    margin-top: 40px;
+  }
+
+  .footerNav {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+    margin-top: 26px;
+  }
+}

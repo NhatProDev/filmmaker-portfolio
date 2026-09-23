@@ -22,7 +22,10 @@ const newsreader = Newsreader({
 });
 
 export const metadata: Metadata = {
-  title: "Nguyen Khanh Nhat",
+  title: {
+    default: "Nguyen Khanh Nhat",
+    template: "%s — Nguyen Khanh Nhat",
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

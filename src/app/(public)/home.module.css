@@ -4,29 +4,51 @@
    measured on the `page` container, as the prototype measures its content box. */
 
 /* Home's own spacing tiers: 56/20/140, then 32/14/96 at 768 and below, then
-   24/10/72 at 430 and below. They differ from the shell tiers the shared
-   header uses (layout.module.css); reconciling the two is a site-wide
-   follow-up, not settled here. */
-.home {
+   24/10/72 at 430 and below. Edge and gutter apply to the whole public frame,
+   so the shared header sits on Home's columns, as in the prototype; Art Works
+   and Contact do the same. The frame is this page's parent
+   (app/(public)/layout.tsx); the selector matches nothing on any other route. */
+div:has(> .home) {
   --edge: 56px;
   --gut: 20px;
+}
+
+.home {
   --band: 140px;
   padding-bottom: 56px;
 }
 
 @container page (width <= 768px) {
-  .home {
+  div:has(> .home) {
     --edge: 32px;
     --gut: 14px;
+  }
+
+  .home {
     --band: 96px;
   }
 }
 
 @container page (width <= 430px) {
-  .home {
+  div:has(> .home) {
     --edge: 24px;
     --gut: 10px;
+  }
+
+  .home {
     --band: 72px;
+  }
+}
+
+/* Below the shell's 700 step Home's 32/14 is wider than the shell's 24/10, so
+   it narrows the header's wordmark columns: cols 1-5 hold the one-line
+   wordmark (190.6px) only from 541, where the shell's tier held it from 520.
+   From 520 the wordmark takes cols 1-6 instead, so its line state, the
+   header's height and the page below are what they were. Recompute if the
+   wordmark or the tier values change. */
+@container page (520px <= width < 700px) {
+  div:has(> .home) {
+    --wordmark-end: 7;
   }
 }
 

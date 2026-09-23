@@ -11,6 +11,7 @@ import styles from "./home.module.css";
 // it sits outside <main>; only Home's prototype carries one so far.
 export default function HomePage() {
   const { hero, identity, wall, about, coda, footer } = home;
+  const [mailbox, domain] = footer.email.split("@");
 
   return (
     <div className={styles.home}>
@@ -74,8 +75,11 @@ export default function HomePage() {
 
       <footer className={styles.footer}>
         <div className={styles.contact}>
+          {/* A column too narrow for the address breaks it after the @, never
+              inside a word. */}
           <a className={styles.email} href={`mailto:${footer.email}`}>
-            {footer.email}
+            {mailbox}@<wbr />
+            {domain}
           </a>
           <p className={styles.note}>{footer.note}</p>
         </div>

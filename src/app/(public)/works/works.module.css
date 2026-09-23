@@ -14,26 +14,37 @@
 }
 
 /* Art Works' own spacing tiers: 56/20/120 at 1024 and above, 32/14/96 at 600
-   and above, 24/10/72 below. The shared header keeps the shell's tiers
-   (layout.module.css); reconciling the two is a site-wide follow-up. */
-.works {
+   and above, 24/10/72 below. Edge and gutter apply to the whole public frame,
+   so the shared header sits on the same columns as the page, as in the
+   prototype; Contact does the same. The frame is this page's parent
+   (app/(public)/layout.tsx); the selector matches nothing on any other route. */
+div:has(> .works) {
   --edge: 56px;
   --gut: 20px;
+}
+
+.works {
   padding-bottom: 120px;
 }
 
 @container page (width < 1024px) {
-  .works {
+  div:has(> .works) {
     --edge: 32px;
     --gut: 14px;
+  }
+
+  .works {
     padding-bottom: 96px;
   }
 }
 
 @container page (width < 600px) {
-  .works {
+  div:has(> .works) {
     --edge: 24px;
     --gut: 10px;
+  }
+
+  .works {
     padding-bottom: 72px;
   }
 }

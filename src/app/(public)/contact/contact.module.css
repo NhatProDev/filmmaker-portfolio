@@ -327,3 +327,14 @@ div:has(> .page) .email:focus-visible {
     font-size: 18px;
   }
 }
+
+/* Below 375, the narrowest validated width, the role can be wider than its
+   line (223px in a 204px box at 320). It still starts after the dash, as one
+   unit, and wraps inside itself, in balanced lines, only when it has to. */
+@container page (width < 375px) {
+  .keep {
+    display: inline-block;
+    white-space: normal;
+    text-wrap: balance;
+  }
+}

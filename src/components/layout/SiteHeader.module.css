@@ -6,8 +6,10 @@
   padding: 30px var(--edge) 0;
 }
 
+/* A page may widen the wordmark's span through --wordmark-end; Home does
+   (home.module.css). */
 .wordmark {
-  grid-column: 1 / 6;
+  grid-column: 1 / var(--wordmark-end, 6);
   font-family: var(--font-ui);
   font-size: 12px;
   letter-spacing: 0.22em;
@@ -42,5 +44,29 @@
 
   .wordmark {
     font-size: 10px;
+  }
+}
+
+/* 44px hit areas below 1024 without moving the visible text: padding with an
+   equal negative margin, as on Contact and Project Detail. The wordmark hugs
+   its text, so its hit area does not run across the empty columns. The links
+   are positioned so that the part of a hit area below the header stays on top
+   of the page that follows, which Contact's flex frame would otherwise paint
+   over it. */
+@container page (width < 1024px) {
+  .wordmark,
+  .nav a {
+    position: relative;
+  }
+
+  .wordmark {
+    justify-self: start;
+    padding: 16px 0;
+    margin: -16px 0;
+  }
+
+  .nav a {
+    padding: 15px 4px;
+    margin: -15px -4px;
   }
 }

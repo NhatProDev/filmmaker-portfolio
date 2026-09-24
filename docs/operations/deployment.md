@@ -97,3 +97,12 @@ the Vercel plan terms or cost do not fit — the code needs no change, only
    none exist today).
 
 The exact provisioning sequence is §5 of `runbook.md`.
+
+## 5. Owner decisions (2G-B, 2026-09-24)
+
+| Decision | Chosen | Consequence |
+|---|---|---|
+| Vercel plan | Hobby | Terms limit Hobby to non-commercial use; a portfolio promoting paid work is likely commercial. Upgrading to Pro is a billing change, not a migration. |
+| Neon plan | Free | 6-hour point-in-time restore window; the `pg_dump` backups in `runbook.md` §4 are the real recovery path. |
+| Regions | Vercel `sin1` (`vercel.json`), Neon `aws-ap-southeast-1`, R2 location hint `apac` | App and database colocated in Singapore; visitors are served by the global CDNs. Neon's region is permanent. |
+| Domain | None yet | `SITE_URL` is the `*.vercel.app` origin and public media use the bucket's rate-limited `r2.dev` URL until a domain on Cloudflare DNS exists. Both are build-time: changing them needs a rebuild. |

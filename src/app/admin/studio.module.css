@@ -821,6 +821,16 @@
   text-decoration: none;
 }
 
+/* A status can be longer than a narrow card is wide: it wraps there rather
+   than widening the page. */
+.overviewCard {
+  min-width: 0;
+}
+
+.overviewCard .badge {
+  white-space: normal;
+}
+
 .overviewCard:hover {
   border-color: var(--s-line-strong);
 }

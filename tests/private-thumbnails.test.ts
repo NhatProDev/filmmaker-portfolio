@@ -2,6 +2,7 @@ import "./helpers/access-secret";
 import assert from "node:assert/strict";
 import { after, before, describe, test } from "node:test";
 import { createS3MediaStorage, setMediaStorageForTesting } from "@/lib/storage/media-storage";
+import { thumbnailUrl } from "@/app/admin/_components/thumbnail";
 import { api, createApiTestContext } from "./helpers/api";
 
 // Phase 3B: the Studio previews private media through an admin-only route that
@@ -41,6 +42,22 @@ describe("private media previews in the Studio (Phase 3B)", () => {
   after(async () => {
     setMediaStorageForTesting(undefined);
     await ctx.close();
+  });
+
+  // Production regression (Phase 3B release): assets imported as `local` but
+  // served from R2 have no URL in the Studio; the admin route refuses them
+  // too, so the Studio must not request it — only private originals go there.
+  test("the Studio asks the admin route only for private originals", async () => {
+    const legacy = (
+      await ctx.q<{ id: string }>(
+        `insert into media (type, status, storage_provider, storage_key, mime_type, width, height)
+         values ('IMAGE', 'READY', 'local', 'w/legacy.jpg', 'image/jpeg', 1600, 900) returning id`,
+      )
+    )[0].id;
+    const dto = async (id: string) => (await ctx.as("GET", `/media/${id}`)).body.data;
+    assert.equal(thumbnailUrl(await dto(legacy)), null);
+    assert.equal((await ctx.as("GET", `/media/${legacy}/content`)).status, 404);
+    assert.equal(thumbnailUrl(await dto(privateImage)), `/api/v1/media/${privateImage}/content`);
   });
 
   test("the DTO still carries no public URL for a private asset", async () => {

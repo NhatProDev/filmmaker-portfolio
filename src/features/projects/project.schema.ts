@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PROJECT_TEMPLATES } from "@/features/project-builder/templates";
 
 // projects.credits is JSONB; this is its contract.
 export const projectCreditsSchema = z
@@ -38,8 +39,10 @@ const metadata = {
   previewMediaId: z.uuid().nullable().optional(),
 };
 
+// A template seeds the new project's blocks once; it is not linked afterwards
+// (ADR-0013). Omitted: no blocks, the page shows the project's identity.
 export const createProjectSchema = z
-  .strictObject({ ...metadata, password: projectPasswordSchema.optional() })
+  .strictObject({ ...metadata, password: projectPasswordSchema.optional(), template: z.enum(PROJECT_TEMPLATES).optional() })
   .superRefine((value, ctx) => {
     if (value.visibility === "PRIVATE" && !value.password) {
       ctx.addIssue({ code: "custom", path: ["password"], message: "is required for a PRIVATE project" });

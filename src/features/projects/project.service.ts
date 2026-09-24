@@ -1,6 +1,8 @@
 import { transaction, type Database } from "@db/client";
 import { createMediaRepository } from "@/features/media/media.repository";
 import { createCompositionService } from "@/features/project-builder/composition.service";
+import { seedProjectTemplate } from "@/features/project-builder/template-seeding";
+import type { ProjectTemplate } from "@/features/project-builder/templates";
 import { hashPassword } from "@/lib/auth/password";
 import { conflict, notFound, validationError } from "@/lib/errors/domain-error";
 import { toProjectDetailDto, toProjectSummaryDto, type PublicationDto } from "./project.mapper";
@@ -130,12 +132,12 @@ export function createProjectService(db: Database, options: ProjectServiceOption
     },
 
     // A new project is a DRAFT at the end of the display order.
-    async create(input: ProjectMetadataInput & { title: string; slug: string; password?: string }) {
+    async create(input: ProjectMetadataInput & { title: string; slug: string; password?: string; template?: ProjectTemplate }) {
       return transaction(db, async (tx) => {
         const projects = createProjectRepository(tx);
         await projects.lockOrdering();
         await checkReferences(tx, input);
-        const { password, isFeatured, ...fields } = input;
+        const { password, isFeatured, template, ...fields } = input;
         const featured = isFeatured === true;
         const row = await projects.insert({
           ...fields,
@@ -146,6 +148,8 @@ export function createProjectService(db: Database, options: ProjectServiceOption
           isFeatured: featured,
           featuredPosition: featured ? await projects.countFeatured() : null,
         });
+        // Copied once, in the same transaction; never linked afterwards.
+        if (template) await seedProjectTemplate(tx, row.id, template);
         return detail(tx, row);
       });
     },

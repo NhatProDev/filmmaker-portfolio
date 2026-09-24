@@ -9,9 +9,9 @@
 //   (titlePlacement.ts). Nothing else is allowed to execute, and no
 //   third-party script origin is listed.
 // - Media and uploads may come from the configured storage/CDN origins only.
-// - Frames: the only embeddable providers are the external video players the
-//   contract names (ADR-0008 EXTERNAL_VIDEO, CLICK_TO_PLAY only). The site may
-//   be framed only by itself — the Studio's responsive preview.
+// - Frames: the site may frame itself (the Studio's responsive preview) and
+//   the external video players the contract names (ADR-0008 EXTERNAL_VIDEO,
+//   CLICK_TO_PLAY only), and may be framed only by itself.
 // - HSTS and upgrade-insecure-requests only for a production build whose
 //   public origin is https, so a local `next start` on http keeps working.
 
@@ -66,7 +66,8 @@ export function contentSecurityPolicy({ production, siteUrl, mediaOrigins }: Sec
     ["media-src", `'self' blob: ${media}`],
     ["font-src", "'self' data:"],
     ["connect-src", production ? `'self' ${media}` : `'self' ws: ${media}`],
-    ["frame-src", EMBED_ORIGINS.join(" ")],
+    // The site itself (the Studio's responsive preview) and the video players.
+    ["frame-src", `'self' ${EMBED_ORIGINS.join(" ")}`],
     ["frame-ancestors", "'self'"],
     ["worker-src", "'self' blob:"],
     ["manifest-src", "'self'"],

@@ -604,3 +604,19 @@
     display: none;
   }
 }
+
+/* ---- New project: template choice ---- */
+
+.templates {
+  display: grid;
+  gap: 6px;
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border: 1px solid var(--s-line);
+  border-radius: var(--s-radius);
+}
+
+.templates legend {
+  padding: 0 4px;
+  font-weight: 600;
+}

@@ -14,6 +14,7 @@ export function PublishingPanel({
   previewHref,
   canUnpublish,
   live,
+  blockLabels,
 }: {
   publication: PublicationDto;
   // e.g. /projects/<id> or /pages/HOME
@@ -21,15 +22,26 @@ export function PublishingPanel({
   previewHref: string;
   canUnpublish: boolean;
   live?: string;
+  // Names blocks in the reasons, instead of their ids.
+  blockLabels?: Record<string, string>;
 }) {
   const { run, pending, error } = useAction();
   const { isPublished, publishedAt, hasUnpublishedChanges, issues } = publication;
   const when = publishedAt ? new Date(publishedAt).toLocaleString() : null;
 
   let status: { text: string; className: string };
-  if (!isPublished) status = { text: "Not on the site", className: styles.badgeWarn };
-  else if (hasUnpublishedChanges) status = { text: "Changes not yet published", className: styles.badgeInfo };
-  else status = { text: "Live and up to date", className: styles.badgeOk };
+  if (!isPublished) status = { text: "Draft — not on the site", className: styles.badgeWarn };
+  else if (hasUnpublishedChanges) status = { text: "Published — with unpublished changes", className: styles.badgeInfo };
+  else status = { text: "Published — up to date", className: styles.badgeOk };
+
+  // "project x, block <id>: reason" reads as "“Label”: reason".
+  const readable = (issue: string) =>
+    issue
+      .replace(/^(project|page) [^,:]+(, |: )/, "")
+      .replace(/block ([0-9a-f-]{36})(, block ([0-9a-f-]{36}))?/g, (match, outer: string, _inner, inner?: string) => {
+        const name = (id?: string) => (id && blockLabels?.[id] ? `“${blockLabels[id]}”` : null);
+        return [name(outer), name(inner)].filter(Boolean).join(" › ") || match;
+      });
 
   return (
     <section className={styles.panel}>
@@ -41,7 +53,7 @@ export function PublishingPanel({
         <p className={styles.hint}>
           {isPublished
             ? `The site shows the version published ${when}. Edits here stay private until you publish again.`
-            : "Nothing of this is on the site. Publishing checks it against its page template first."}
+            : "Nothing of this is on the site yet. Publishing first checks that every visible block can be shown."}
           {live && isPublished ? ` Address: ${live}` : ""}
         </p>
         {issues.length > 0 && (
@@ -49,7 +61,7 @@ export function PublishingPanel({
             <p className={styles.notice}>It cannot be published yet:</p>
             <ul className={styles.issues}>
               {issues.map((issue) => (
-                <li key={issue}>{issue}</li>
+                <li key={issue}>{readable(issue)}</li>
               ))}
             </ul>
           </>

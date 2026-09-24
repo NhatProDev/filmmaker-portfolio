@@ -33,16 +33,22 @@
 
 ## 2. Revalidation
 
-The public pages are static. After a change a visitor can see, the whole
-public tree is revalidated (`revalidatePath("/", "layout")`). Such changes are:
+The public pages are static. After a change a visitor can see, every page
+such a change can reach is revalidated: Home, Art Works, every Project Detail
+page (their next-project links follow the order) and the sitemap
+(`src/lib/cache/revalidate.ts`). Such changes are:
 
 - publish, unpublish and archive;
 - deletion;
 - reordering;
 - a live slug or visibility change on a published project.
 
-The site is small enough that guessing which pages a change reaches is not
-worth the risk of missing one.
+About and Contact are content files and are not revalidated. Nor is the
+prerendered 404: until Phase 3A the whole tree was revalidated
+(`revalidatePath("/", "layout")`), which also invalidated the 404, and the next
+missing address regenerated it with its own navigation state — after a publish,
+a request for an unknown `/works/…` address made every later 404 mark "Works"
+as the current page. Found by the Phase 3A regression; present since 2E.
 
 ## 3. Routing `/works/<slug>` (`src/proxy.ts`)
 
@@ -97,6 +103,12 @@ the working copy only when **draft mode is on and an admin session is valid**.
 It then adds a floating admin banner. When the working copy cannot be rendered,
 the page shows the same reason Publish would give. Visitors never see preview
 output: without both conditions the page is the static published one.
+
+A project that has never been published has no route in the proxy's index.
+The proxy lets such an address through to the page only when the request
+carries the draft-mode cookie **and** an admin session it has verified against
+the database (Phase 3A; before, such a draft could not be previewed). The
+Studio's composer frames this preview at desktop, tablet and phone widths.
 
 ## 6. Limitations and choices open for review
 

@@ -1,0 +1,218 @@
+"use client";
+
+import { useState } from "react";
+import type { BlockDto } from "@/features/project-builder/composition.mapper";
+import { PRESETS } from "@/features/project-builder/presets";
+import { openingSeed } from "@/features/project-builder/templates";
+import { api } from "../../../../_components/api";
+import { ErrorLine } from "../../../../_components/composition";
+import { useAction } from "../../../../_components/useAction";
+import studio from "../../../../studio.module.css";
+import styles from "./composer.module.css";
+
+// Inserting a block (ADR-0005: at a position, siblings shift in one
+// transaction). Every choice creates a block the contract accepts as it
+// stands; a block that still needs media says so on its card, and Publish
+// refuses it until it has some. Text is written before it is created, so no
+// placeholder copy is ever saved.
+
+type Choice = {
+  key: string;
+  label: string;
+  hint: string;
+  // Text blocks ask for their words first.
+  needsText?: "text" | "caption";
+  body: (text?: string) => Record<string, unknown>;
+};
+
+const col = (colStart: number, colSpan: number) => ({ placement: { desktop: { colStart, colSpan } } });
+const paragraphs = (text: string) =>
+  text
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .map((p) => [p]);
+
+const PRESET_CHOICES: Choice[] = [
+  {
+    key: "projectMeta",
+    label: PRESETS.projectMeta.label,
+    hint: PRESETS.projectMeta.description,
+    body: () => ({ type: "GRID", config: { preset: "projectMeta" }, children: [{ type: "TEXT", content: { kind: "projectFacts" }, config: col(1, 3) }] }),
+  },
+  {
+    key: "projectStills",
+    label: PRESETS.projectStills.label,
+    hint: PRESETS.projectStills.description,
+    body: () => ({ type: "GRID", config: { preset: "projectStills" } }),
+  },
+  {
+    key: "projectLoop",
+    label: PRESETS.projectLoop.label,
+    hint: `${PRESETS.projectLoop.description} Write the caption; choose the video next.`,
+    needsText: "caption",
+    body: (text = "") => ({
+      type: "GRID",
+      config: { preset: "projectLoop" },
+      children: [
+        { type: "VIDEO", config: { playback: { mode: "AUTOPLAY_VISIBLE" }, fit: "COVER", ...col(1, 8) } },
+        { type: "TEXT", content: { kind: "richText", paragraphs: [[text.trim()]] }, config: { role: "caption", ...col(10, 3) } },
+      ],
+    }),
+  },
+  {
+    key: "projectCredits",
+    label: PRESETS.projectCredits.label,
+    hint: PRESETS.projectCredits.description,
+    body: () => ({ type: "GRID", config: { preset: "projectCredits" }, children: [{ type: "TEXT", content: { kind: "projectCredits" }, config: col(1, 3) }] }),
+  },
+  {
+    key: "projectCoda",
+    label: PRESETS.projectCoda.label,
+    hint: PRESETS.projectCoda.description,
+    body: () => ({ type: "IMAGE", config: { fit: "COVER", preset: "projectCoda" } }),
+  },
+];
+
+const ROOT_CHOICES: Choice[] = [
+  { key: "text", label: "Text", hint: "Paragraphs in the page's text column.", needsText: "text", body: (text = "") => ({ type: "TEXT", content: { kind: "richText", paragraphs: paragraphs(text) }, config: { role: "body" } }) },
+  { key: "image", label: "Image", hint: "One image at its own proportions, with an optional caption.", body: () => ({ type: "IMAGE", config: { fit: "CONTAIN" } }) },
+  { key: "video", label: "Video", hint: "One video in its own frame; plays on request unless you choose otherwise.", body: () => ({ type: "VIDEO", config: { playback: { mode: "CLICK_TO_PLAY" }, fit: "COVER" } }) },
+  { key: "hero", label: "Full-bleed media", hint: "An image or film across the whole width.", body: () => ({ type: "HERO", config: { fit: "COVER" } }) },
+  { key: "grid", label: "Columns", hint: "Place text, images and video side by side on 12 columns; phones stack them.", body: () => ({ type: "GRID" }) },
+  { key: "gallery", label: "Gallery", hint: "A flow of media: justified rows, a strip, a slideshow or a video wall.", body: () => ({ type: "GALLERY", config: { mode: "JUSTIFIED_ROWS" } }) },
+  { key: "spacer", label: "Space", hint: "Extra breathing room between blocks.", body: () => ({ type: "SPACER", config: { size: "M" } }) },
+];
+
+const CHILD_CHOICES: Choice[] = [
+  { key: "text", label: "Text", hint: "Paragraphs in a column.", needsText: "text", body: (text = "") => ({ type: "TEXT", content: { kind: "richText", paragraphs: paragraphs(text) }, config: { role: "body", ...col(1, 6) } }) },
+  { key: "image", label: "Image", hint: "An image in a column.", body: () => ({ type: "IMAGE", config: { fit: "CONTAIN", ...col(1, 6) } }) },
+  { key: "video", label: "Video", hint: "A video in a column.", body: () => ({ type: "VIDEO", config: { playback: { mode: "CLICK_TO_PLAY" }, fit: "COVER", ...col(1, 6) } }) },
+  { key: "facts", label: "Facts", hint: "Year, runtime, client and role from Details.", body: () => ({ type: "TEXT", content: { kind: "projectFacts" }, config: col(1, 4) }) },
+  { key: "credits", label: "Credits", hint: "The credit list from Details.", body: () => ({ type: "TEXT", content: { kind: "projectCredits" }, config: col(1, 4) }) },
+  { key: "spacer", label: "Space", hint: "An empty cell.", body: () => ({ type: "SPACER", config: { size: "S" } }) },
+];
+
+export function AddBlock({
+  projectId,
+  parentBlockId,
+  position,
+  hasOpening,
+  label = "Add block",
+  initiallyOpen = false,
+  onCreated,
+  onCancel,
+}: {
+  projectId: string;
+  // null: the page's top level; a GRID's id: inside its columns.
+  parentBlockId: string | null;
+  // Where the new block goes; omitted appends.
+  position?: number;
+  hasOpening: boolean;
+  label?: string;
+  initiallyOpen?: boolean;
+  onCreated?: (block: BlockDto) => void;
+  onCancel?: () => void;
+}) {
+  const [open, setOpen] = useState(initiallyOpen);
+  const [asking, setAsking] = useState<Choice | null>(null);
+  const [text, setText] = useState("");
+  const close = () => {
+    setOpen(false);
+    setAsking(null);
+    onCancel?.();
+  };
+  const { run, pending, error } = useAction();
+  const nested = parentBlockId !== null;
+
+  const create = (choice: Choice, words?: string) =>
+    run(async () => {
+      const block = await api<BlockDto>("POST", `/projects/${projectId}/blocks`, {
+        ...choice.body(words),
+        ...(nested ? { parentBlockId } : {}),
+        ...(position === undefined ? {} : { position }),
+      });
+      setOpen(false);
+      setAsking(null);
+      setText("");
+      onCreated?.(block);
+    });
+
+  const addOpening = () =>
+    run(async () => {
+      const block = await api<BlockDto>("POST", `/projects/${projectId}/blocks`, { ...openingSeed(true), position: 0 });
+      setOpen(false);
+      onCreated?.(block);
+    });
+
+  const pick = (choice: Choice) => (choice.needsText ? setAsking(choice) : create(choice));
+
+  const choiceButton = (choice: Choice) => (
+    <button key={choice.key} type="button" className={styles.choice} disabled={pending} onClick={() => pick(choice)}>
+      <strong>{choice.label}</strong>
+      <span>{choice.hint}</span>
+    </button>
+  );
+
+  if (!open) {
+    return (
+      <div className={styles.addRow}>
+        <button type="button" className={`${studio.button} ${studio.small} ${styles.add}`} onClick={() => setOpen(true)}>
+          + {label}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.addPanel} role="group" aria-label={label}>
+      {asking ? (
+        <form
+          className={styles.stack}
+          onSubmit={(event) => {
+            event.preventDefault();
+            void create(asking, text);
+          }}
+        >
+          <label className={studio.field}>
+            <span>{asking.needsText === "caption" ? "Caption" : "Text — leave a blank line between paragraphs"}</span>
+            <textarea className={studio.textarea} rows={4} value={text} maxLength={5000} autoFocus onChange={(event) => setText(event.target.value)} />
+          </label>
+          <div className={studio.row}>
+            <button type="submit" className={`${studio.button} ${studio.small} ${studio.primary}`} disabled={pending || !text.trim()}>
+              Add {asking.label.toLowerCase()}
+            </button>
+            <button type="button" className={`${studio.button} ${studio.small}`} onClick={() => setAsking(null)}>
+              Back
+            </button>
+          </div>
+        </form>
+      ) : (
+        <>
+          {!nested && (
+            <>
+              <p className={styles.groupLabel}>Project Detail presets</p>
+              <div className={styles.choices}>
+                {!hasOpening && (
+                  <button type="button" className={styles.choice} disabled={pending} onClick={addOpening}>
+                    <strong>Opening</strong>
+                    <span>A film or image under the title, always first.</span>
+                  </button>
+                )}
+                {PRESET_CHOICES.map(choiceButton)}
+              </div>
+              <p className={styles.groupLabel}>Blocks</p>
+            </>
+          )}
+          <div className={styles.choices}>{(nested ? CHILD_CHOICES : ROOT_CHOICES).map(choiceButton)}</div>
+          <div className={studio.row}>
+            <button type="button" className={`${studio.button} ${studio.small}`} onClick={close}>
+              Cancel
+            </button>
+          </div>
+        </>
+      )}
+      <ErrorLine error={error} />
+    </div>
+  );
+}

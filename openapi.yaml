@@ -2163,6 +2163,8 @@ components:
         previewMediaId:
           type: [string, 'null']
           format: uuid
+        template:
+          $ref: '#/components/schemas/ProjectTemplate'
 
     UpdateProjectRequest:
       type: object
@@ -2883,6 +2885,31 @@ components:
         data:
           $ref: '#/components/schemas/Block'
 
+    CreateGridChild:
+      type: object
+      additionalProperties: false
+      required: [type]
+      properties:
+        type:
+          type: string
+          enum: [HERO, TEXT, IMAGE, VIDEO, SPACER]
+        content:
+          type: object
+        config:
+          type: object
+        isHidden:
+          type: boolean
+          default: false
+
+    ProjectTemplate:
+      type: string
+      enum: [FILM_FIRST, STILLS_FIRST, EDITORIAL]
+      description: |
+        A seed block tree copied into the new project once (ADR-0013). It is
+        not linked afterwards. Seeds carry no media and no copy: their blocks
+        are complete as they stand or created hidden, so the new project is
+        publishable at once.
+
     CreateBlockCommon:
       type: object
       properties:
@@ -2971,6 +2998,17 @@ components:
                   $ref: '#/components/schemas/EmptyContent'
                 config:
                   $ref: '#/components/schemas/GridConfig'
+                children:
+                  type: array
+                  maxItems: 24
+                  description: |
+                    Leaf blocks created inside this GRID, in order, in the same
+                    transaction — how a preset arrives with the children its
+                    contract requires. Only for a top-level GRID; each child is
+                    validated in the GRID's context (one nesting level,
+                    ADR-0006).
+                  items:
+                    $ref: '#/components/schemas/CreateGridChild'
           unevaluatedProperties: false
         - allOf:
             - $ref: '#/components/schemas/CreateBlockCommon'

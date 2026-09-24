@@ -118,6 +118,7 @@ export function createCompositionService(db: Database) {
         parentBlockId?: string | null;
         position?: number;
         isHidden?: boolean;
+        children?: { type: BlockType; content?: Record<string, unknown>; config?: Record<string, unknown>; isHidden?: boolean }[];
       },
     ): Promise<BlockDto> {
       return transaction(db, async (tx) => {
@@ -135,6 +136,17 @@ export function createCompositionService(db: Database) {
           { type: input.type, content: input.content ?? {}, config: input.config ?? {} },
           { owner: owner.kind, parentType },
         );
+        // Children are validated in their container before anything is
+        // written; one level only (ADR-0006).
+        const children = (input.children ?? []).map((child, i) => {
+          if (data.type !== "GRID" || parentType !== null) {
+            throw validationError([{ path: `children.${i}`, message: "only a top-level GRID is created with children" }]);
+          }
+          return {
+            data: parseBlock({ type: child.type, content: child.content ?? {}, config: child.config ?? {} }, { owner: owner.kind, parentType: "GRID" }),
+            isHidden: child.isHidden ?? false,
+          };
+        });
         const container: Container = { owner, parentBlockId: input.parentBlockId ?? null };
         const n = await repo.countContainer(container);
         const position = input.position ?? n;
@@ -148,6 +160,16 @@ export function createCompositionService(db: Database) {
           config: data.config,
           isHidden: input.isHidden ?? false,
         });
+        for (const [position, child] of children.entries()) {
+          await repo.insertBlock({
+            parentBlockId: row.id,
+            type: child.data.type,
+            position,
+            content: child.data.content,
+            config: child.data.config,
+            isHidden: child.isHidden,
+          });
+        }
         return singleBlockDto(repo, row.id);
       });
     },

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
+import { TEMPLATES, type ProjectTemplate } from "@/features/project-builder/templates";
 import type { ProjectSummaryDto } from "@/features/projects/project.mapper";
 import { api } from "../../_components/api";
 import { slugify } from "../../_components/slug";
@@ -24,12 +25,13 @@ export function ProjectsBoard({ projects }: { projects: ProjectSummaryDto[] }) {
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [slugEdited, setSlugEdited] = useState(false);
+  const [template, setTemplate] = useState<ProjectTemplate | "">("FILM_FIRST");
 
   async function create(event: FormEvent) {
     event.preventDefault();
     await run(
       async () => {
-        const project = await api<{ id: string }>("POST", "/projects", { title, slug });
+        const project = await api<{ id: string }>("POST", "/projects", { title, slug, ...(template ? { template } : {}) });
         router.push(`/admin/projects/${project.id}`);
       },
       { refresh: false },
@@ -88,6 +90,24 @@ export function ProjectsBoard({ projects }: { projects: ProjectSummaryDto[] }) {
               />
             </label>
           </div>
+          <fieldset className={styles.templates}>
+            <legend>Start from</legend>
+            {(Object.entries(TEMPLATES) as [ProjectTemplate, (typeof TEMPLATES)[ProjectTemplate]][]).map(([key, { label, description }]) => (
+              <label key={key} className={styles.check}>
+                <input type="radio" name="template" checked={template === key} onChange={() => setTemplate(key)} />
+                <span>
+                  <strong>{label}</strong> — {description}
+                </span>
+              </label>
+            ))}
+            <label className={styles.check}>
+              <input type="radio" name="template" checked={template === ""} onChange={() => setTemplate("")} />
+              <span>
+                <strong>Empty</strong> — no blocks: the page shows the title over the cover, and the facts.
+              </span>
+            </label>
+            <p className={styles.hint}>A template is copied once. Changing templates later never changes this project.</p>
+          </fieldset>
           <div className={styles.actions}>
             <button className={`${styles.button} ${styles.primary}`} type="submit" disabled={pending || !title || !slug}>
               Create draft

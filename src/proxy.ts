@@ -1,4 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { getDatabase } from "@db/client";
+import { ADMIN_SESSION_COOKIE, createAuthService } from "@/features/authentication/auth.service";
 import { accessCookieName } from "@/features/project-access/access-cookie";
 import { createProjectRouter } from "@/features/site-content/project-router";
 import { getContentGateway } from "@/features/site-content/site-content.gateway";
@@ -37,12 +39,32 @@ export async function proxy(request: NextRequest) {
   }
   if (route === "public") return NextResponse.next();
   if (route === "private") {
+    // An admin's preview renders the working copy at the page itself.
+    if (request.cookies.has(DRAFT_MODE_COOKIE) && (await isAdmin(request))) return NextResponse.next();
     return request.cookies.has(accessCookieName(slug))
       ? NextResponse.rewrite(new URL(`/works/${slug}/live`, request.url))
       : NextResponse.next();
   }
+  // An admin previewing a project that has never been published: the page
+  // renders its working copy (draft mode is dynamic, so nothing is cached).
+  // Both cookies are checked here, the session against the database, so a
+  // forged cookie cannot make an arbitrary address render.
+  if (request.cookies.has(DRAFT_MODE_COOKIE) && (await isAdmin(request))) return NextResponse.next();
   // No route answers this path, so Next.js serves its 404 page.
   return NextResponse.rewrite(new URL(`/works/${encodeURIComponent(slug || "_")}/not-found`, request.url));
+}
+
+// Next.js's draft-mode cookie.
+const DRAFT_MODE_COOKIE = "__prerender_bypass";
+
+async function isAdmin(request: NextRequest): Promise<boolean> {
+  const token = request.cookies.get(ADMIN_SESSION_COOKIE)?.value ?? null;
+  if (!token) return false;
+  try {
+    return (await createAuthService(getDatabase()).authenticate(token)) !== null;
+  } catch {
+    return false;
+  }
 }
 
 export const config = { matcher: "/works/:slug" };

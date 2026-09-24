@@ -11,9 +11,20 @@ import { Thumb } from "../../../_components/Thumb";
 import { useAction } from "../../../_components/useAction";
 import styles from "../../../studio.module.css";
 import { StatusBadge } from "../ProjectsBoard";
-import { ProjectComposition } from "./ProjectComposition";
+import { labelOf } from "./composer/blockInfo";
+import { ProjectComposer } from "./composer/ProjectComposer";
 
 type Project = ProjectDetailDto;
+
+// "02 Stills row", "05 Columns › 2 Image": how Publish's reasons name blocks.
+function blockLabels(blocks: Project["blocks"], prefix = ""): Record<string, string> {
+  return Object.fromEntries(
+    blocks.flatMap((block, i) => {
+      const name = `${prefix}${String(i + 1).padStart(prefix ? 1 : 2, "0")} ${labelOf(block)}`;
+      return [[block.id, name], ...Object.entries(blockLabels(block.children, "#"))];
+    }),
+  );
+}
 
 function Panel({ title, children, aside }: { title: string; children: ReactNode; aside?: ReactNode }) {
   return (
@@ -324,11 +335,12 @@ export function ProjectEditor({ project }: { project: Project }) {
         previewHref={`/api/v1/projects/${project.id}/preview`}
         canUnpublish
         live={project.visibility === "PRIVATE" ? `/works/${project.slug} (password)` : `/works/${project.slug}`}
+        blockLabels={blockLabels(project.blocks)}
       />
       <DetailsPanel key={`details-${project.updatedAt}`} project={project} />
       <MediaPanel project={project} />
       <Panel title="Page composition">
-        <ProjectComposition projectId={project.id} blocks={project.blocks} />
+        <ProjectComposer projectId={project.id} blocks={project.blocks} previewHref={`/api/v1/projects/${project.id}/preview`} />
       </Panel>
       <CreditsPanel key={`credits-${project.updatedAt}`} project={project} />
       <AccessPanel project={project} />

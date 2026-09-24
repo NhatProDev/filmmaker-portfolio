@@ -128,7 +128,7 @@ describe("security headers (CLAUDE.md §16)", () => {
     assert.ok(!csp.includes("unsafe-eval"));
     assert.match(csp, /frame-ancestors 'self'/);
     assert.match(csp, /object-src 'none'/);
-    assert.match(csp, /frame-src https:\/\/www\.youtube-nocookie\.com https:\/\/www\.youtube\.com https:\/\/player\.vimeo\.com/);
+    assert.match(csp, /frame-src 'self' https:\/\/www\.youtube-nocookie\.com https:\/\/www\.youtube\.com https:\/\/player\.vimeo\.com;/);
     assert.match(csp, /media-src 'self' blob: https:\/\/media\.example\.com/);
     assert.match(csp, /img-src 'self' data: blob: https:\/\/media\.example\.com/);
     assert.match(csp, /connect-src 'self' https:\/\/media\.example\.com/);
@@ -448,5 +448,17 @@ describe("robots and sitemap", () => {
     const rules = robots();
     assert.deepEqual(rules.rules, [{ userAgent: "*", allow: "/", disallow: ["/admin", "/api/"] }]);
     assert.equal(rules.sitemap, "http://localhost:3000/sitemap.xml");
+  });
+});
+
+describe("revalidation targets", () => {
+  test("every dynamic route revalidated after a publish names a real route file, route group included", async () => {
+    const { readFileSync, existsSync } = await import("node:fs");
+    const source = readFileSync("src/lib/cache/revalidate.ts", "utf8");
+    const patterns = [...source.matchAll(/revalidatePath\("([^"]+)", "page"\)/g)].map((m) => m[1]);
+    assert.ok(patterns.length > 0);
+    for (const pattern of patterns) assert.ok(existsSync(`src/app${pattern}/page.tsx`), pattern);
+    // Never the whole tree: that would also invalidate the prerendered 404.
+    assert.ok(!/revalidatePath\("\/", "layout"\)/.test(source));
   });
 });

@@ -7,6 +7,15 @@ import { BLOCK_TYPES } from "./block.schema";
 
 const jsonObject = z.record(z.string(), z.unknown());
 
+// A GRID's children created with it, in order, in the same transaction — how
+// a preset arrives with the children its contract requires.
+const childBlockSchema = z.strictObject({
+  type: z.enum(BLOCK_TYPES),
+  content: jsonObject.optional(),
+  config: jsonObject.optional(),
+  isHidden: z.boolean().optional(),
+});
+
 export const createBlockSchema = z.strictObject({
   type: z.enum(BLOCK_TYPES),
   content: jsonObject.optional(),
@@ -16,6 +25,7 @@ export const createBlockSchema = z.strictObject({
   // transaction (CLAUDE.md §14).
   position: z.int().min(0).optional(),
   isHidden: z.boolean().optional(),
+  children: z.array(childBlockSchema).max(24).optional(),
 });
 
 export const updateBlockSchema = z

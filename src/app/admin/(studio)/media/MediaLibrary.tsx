@@ -456,7 +456,8 @@ function ActivePictureControl({ media, disabled, onChange }: { media: MediaDto; 
       </label>
       <p className={styles.hint}>
         Best: upload a clean export at the film&apos;s own ratio, without black bars. Choose an area only when bars are baked into a file you cannot
-        re-export; pages then frame the picture and leave the bars out. {media.type === "VIDEO" ? "Give its poster the same area if it has the same bars. " : ""}
+        re-export; project blocks, galleries and albums then frame the picture and leave the bars out. A project&apos;s opening and
+        presets, and Home, still show the file as it is encoded. {media.type === "VIDEO" ? "Give its poster the same area if it has the same bars. " : ""}
         Published pages change when you publish them again.
       </p>
       {media.type === "VIDEO" && media.activePicture !== "FULL" && file && (

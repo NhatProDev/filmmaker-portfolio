@@ -143,3 +143,27 @@ unreferenced), usages and posters, and reports missing files, duplicates,
 target collisions and recorded metadata that disagrees with the file. It exits
 non-zero on missing files or collisions. Run it before and after any media
 move.
+
+## 10. Storage-provider realignment (ADR-0020)
+
+Rows imported before production storage existed record the `local`
+provider, although their files now live in R2. The Studio then shows no
+thumbnail for them. Take a backup (§4), then:
+
+```text
+npm run media:realign-provider -- --confirm-remote=<host>/<database>           dry run
+npm run media:realign-provider -- --apply --confirm-remote=<host>/<database>
+npm run media:realign-provider -- --confirm-remote=<host>/<database>           must find nothing
+```
+
+- It runs with production's storage variables, so it can confirm each object
+  with a HEAD request.
+- It changes a row only once its object is confirmed, and it rewrites the
+  snapshots' copies of that record in the same transaction.
+- Afterwards no page reports unpublished changes, and `db:health` passes.
+- A row whose object is missing is reported, left unchanged, and makes the
+  script exit with code 2.
+
+It was rehearsed on 2026-09-24 against a restored production dump, with the
+production bucket used read-only: 22 rows and 10 snapshots were realigned,
+with 0 drift, and a second run was a no-op.

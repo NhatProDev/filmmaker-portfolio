@@ -9,6 +9,7 @@ import { ContentProjectionError, createMediaIndex, worksProject, type MediaIndex
 import type { ContentGateway, HomeContent, Preview, ProjectPage } from "./site-content.types";
 import {
   parsePageSnapshot,
+  privateProjectMediaUrl,
   parseProjectSnapshot,
   projectRecord,
   renderHome,
@@ -26,12 +27,6 @@ import { staticGateway } from "./static-gateway";
 // §19); they are site chrome and content files, not database rows.
 
 type Listed = PublishedProject & { parsed: ProjectSnapshot };
-
-// PRIVATE media never resolve to an unrestricted public URL (ADR-0014 §4).
-const privateMediaUrl =
-  (slug: string): MediaIndex["url"] =>
-  (asset) =>
-    `/api/v1/public/projects/${slug}/media/${asset.id}`;
 
 export function createDbGateway(db: Database): ContentGateway {
   const publications = createPublicationRepository(db);
@@ -137,7 +132,7 @@ export function createDbGateway(db: Database): ContentGateway {
       if (!row || row.project.visibility !== "PRIVATE" || row.project.id !== projectId) return null;
       const snapshot = parseProjectSnapshot(row.snapshot, `project ${slug}`);
       const next = await firstListed({ slug, title: snapshot.project.title });
-      return page(slug, snapshot, 0, next, privateMediaUrl(slug));
+      return page(slug, snapshot, 0, next, privateProjectMediaUrl(slug));
     },
 
     async previewProjectPage(slug) {

@@ -7,13 +7,15 @@ import { mediaUrl } from "@/lib/storage/media-url";
 
 export type { MediaRow };
 
-// A private object has no public URL (media-storage.ts); the Studio shows it
-// without a preview until it has an access-checked route of its own.
+// A private object has no public URL (media-storage.ts); the Studio previews
+// it through the admin-only signed route instead (ADR-0020).
 export function deliveryUrl(row: Pick<MediaRow, "type" | "status" | "storageProvider" | "storageKey">): string | null {
   if (row.type === "EXTERNAL_VIDEO" || row.status !== "READY" || !row.storageKey) return null;
   if (row.storageProvider !== getMediaStorage().provider || isPrivateKey(row.storageKey)) return null;
   return mediaUrl(row.storageKey);
 }
+
+const isPrivateRow = (row: Pick<MediaRow, "storageKey">) => Boolean(row.storageKey && isPrivateKey(row.storageKey));
 
 export function toMediaRef(row: MediaRow) {
   return {
@@ -21,6 +23,7 @@ export function toMediaRef(row: MediaRow) {
     type: row.type,
     status: row.status,
     deliveryUrl: deliveryUrl(row),
+    isPrivate: isPrivateRow(row),
     width: row.width,
     height: row.height,
     altText: row.altText,
@@ -39,6 +42,7 @@ export function toMediaDto(row: MediaRow, poster: MediaRow | null) {
     storageProvider: row.storageProvider,
     storageKey: row.storageKey,
     deliveryUrl: deliveryUrl(row),
+    isPrivate: isPrivateRow(row),
     thumbnailUrl: row.thumbnailUrl,
     externalProvider: row.externalProvider as "vimeo" | "youtube" | null,
     externalUrl: row.externalUrl,

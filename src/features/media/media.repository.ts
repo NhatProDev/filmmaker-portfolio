@@ -119,10 +119,15 @@ export function createMediaRepository(db: Database) {
       type?: MediaRow["type"];
       status?: MediaRow["status"];
       search?: string;
+      audience?: "PUBLIC" | "PRIVATE";
       page: number;
       pageSize: number;
     }): Promise<{ rows: MediaRow[]; total: number }> {
       const conditions: SQL[] = [live];
+      // The key prefix decides the audience (ADR-0014 §4, ADR-0020).
+      const privateKey = sql`${media.storageKey} like 'private/%'`;
+      if (filter.audience === "PRIVATE") conditions.push(privateKey);
+      if (filter.audience === "PUBLIC") conditions.push(sql`not coalesce(${privateKey}, false)`);
       if (filter.type) conditions.push(eq(media.type, filter.type));
       if (filter.status) conditions.push(eq(media.status, filter.status));
       if (filter.search) {
@@ -176,13 +181,22 @@ export function createMediaRepository(db: Database) {
     // provider adapter reports later.
     async markUploaded(
       id: string,
-      stored: { fileSizeBytes: number; checksumSha256: string | null; mimeType: string | null },
+      stored: {
+        fileSizeBytes: number;
+        checksumSha256: string | null;
+        mimeType: string | null;
+        width: number | null;
+        height: number | null;
+        durationMs: number | null;
+      },
     ): Promise<MediaRow> {
+      // An image is usable at once; a video once its frame size is known.
+      const measured = stored.width !== null && stored.height !== null;
       const [row] = await db
         .update(media)
         .set({
           ...stored,
-          status: sql`case when ${media.type} = 'IMAGE' then 'READY'::media_status else 'PROCESSING'::media_status end`,
+          status: sql`case when ${media.type} = 'IMAGE' or ${measured} then 'READY'::media_status else 'PROCESSING'::media_status end`,
           updatedAt: sql`now()`,
         })
         .where(eq(media.id, id))

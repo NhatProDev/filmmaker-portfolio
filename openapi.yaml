@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Filmmaker Portfolio API
-  version: 1.3.0
+  version: 1.4.0
   description: |
     REST API contract for the V1 filmmaker portfolio modular monolith.
 
@@ -305,6 +305,10 @@ paths:
 
         Setting `visibility` to PRIVATE on a project without a password
         returns `409 PROJECT_PASSWORD_REQUIRED`. Set the password first.
+
+        Setting `visibility` to PUBLIC while the published version uses
+        private media returns `409 PROJECT_NOT_PUBLIC_READY`, with the
+        reasons in `details.issues` (ADR-0020).
       security:
         - adminSession: []
       requestBody:
@@ -1054,6 +1058,11 @@ paths:
           schema:
             type: string
             maxLength: 200
+        - name: audience
+          in: query
+          description: PRIVATE lists originals under `private/`; PUBLIC the rest (ADR-0020).
+          schema:
+            $ref: '#/components/schemas/MediaAudience'
       responses:
         '200':
           description: Paginated media list
@@ -1075,6 +1084,9 @@ paths:
         The browser uploads directly to object storage with the returned
         authorization (CLAUDE.md §12). The file never passes through the
         application server.
+
+        `audience: PRIVATE` stores the original under `private/` in the
+        private bucket; it never has a public URL (ADR-0020).
 
         While no storage provider that can sign uploads is configured, this
         returns `503 STORAGE_UNAVAILABLE` and creates nothing. Uploads are
@@ -1117,11 +1129,22 @@ paths:
       operationId: completeMediaUpload
       summary: Verify/finalize an uploaded media object
       description: |
-        Verifies the stored object's size, type and checksum. If the checksum
-        matches a live asset, the response is `409 MEDIA_DUPLICATE`, with the
-        existing asset's id in `details.mediaId` (ADR-0014).
+        Verifies the stored object's size against the authorised size, and its
+        type and checksum. The optional body declares what the browser
+        measured (ADR-0020): the server decodes nothing, so an image's size and
+        a video's frame and duration come from here, and a video is `READY`
+        only once its frame is declared. The checksum is the provider's when
+        it keeps one, otherwise the declared one. If it matches a live asset,
+        the upload is discarded and the response is `409 MEDIA_DUPLICATE`,
+        with the existing asset's id in `details.mediaId` (ADR-0014).
       security:
         - adminSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompleteMediaUploadRequest'
       responses:
         '200':
           description: Media finalized or processing started
@@ -1136,11 +1159,13 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
-          description: '`INVALID_STATE` (object missing or not finalizable) or `MEDIA_DUPLICATE`.'
+          description: '`INVALID_STATE` (object missing or not finalizable), `UPLOAD_MISMATCH` (stored size differs from the authorised size) or `MEDIA_DUPLICATE`.'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          $ref: '#/components/responses/ValidationError'
         '503':
           $ref: '#/components/responses/StorageUnavailable'
 
@@ -1789,7 +1814,7 @@ components:
       type: object
       additionalProperties: false
       description: A depth-1 media reference. A poster's own poster is never serialised (ADR-0009).
-      required: [id, type, status, deliveryUrl, width, height, altText]
+      required: [id, type, status, deliveryUrl, isPrivate, width, height, altText]
       properties:
         id:
           type: string
@@ -1801,6 +1826,9 @@ components:
         deliveryUrl:
           type: [string, 'null']
           description: Derived at read time from provider + key. Null when not deliverable.
+        isPrivate:
+          type: boolean
+          description: The original is under `private/` and has no public URL (ADR-0020).
         width:
           type: [integer, 'null']
         height:
@@ -1818,6 +1846,7 @@ components:
         - storageProvider
         - storageKey
         - deliveryUrl
+        - isPrivate
         - checksumSha256
         - posterMediaId
         - activePicture
@@ -1841,6 +1870,9 @@ components:
         deliveryUrl:
           type: [string, 'null']
           description: Derived at read time, never stored or accepted as input.
+        isPrivate:
+          type: boolean
+          description: The original is under `private/` and has no public URL (ADR-0020).
         thumbnailUrl:
           type: [string, 'null']
           description: Generated/provider poster fallback (ADR-0009).
@@ -1974,6 +2006,34 @@ components:
         altText:
           type: [string, 'null']
           maxLength: 1000
+        audience:
+          $ref: '#/components/schemas/MediaAudience'
+
+    MediaAudience:
+      type: string
+      enum: [PUBLIC, PRIVATE]
+      description: Who may receive the original (ADR-0020). Defaults to PUBLIC.
+
+    CompleteMediaUploadRequest:
+      type: object
+      additionalProperties: false
+      description: What the browser measured of the uploaded file (ADR-0020). Width and height come together.
+      properties:
+        checksumSha256:
+          type: string
+          pattern: '^[0-9a-f]{64}$'
+        width:
+          type: integer
+          minimum: 1
+          maximum: 20000
+        height:
+          type: integer
+          minimum: 1
+          maximum: 20000
+        durationMs:
+          type: integer
+          minimum: 0
+          maximum: 86400000
 
     MediaUploadAuthorization:
       type: object

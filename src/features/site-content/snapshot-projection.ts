@@ -87,6 +87,14 @@ export function projectRecord(snapshot: ProjectSnapshot, slug: string): PublicPr
 
 export type RenderedProject = { works: WorksProject; page: ProjectPageContent };
 
+// A PRIVATE project's media, public or private, are delivered only through
+// its access-checked route; nothing it references resolves to an
+// unrestricted public URL (ADR-0014 §4, ADR-0020).
+export const privateProjectMediaUrl =
+  (slug: string): MediaIndex["url"] =>
+  (asset) =>
+    `/api/v1/public/projects/${slug}/media/${asset.id}`;
+
 export function renderProject(snapshot: ProjectSnapshot, slug: string, url?: MediaIndex["url"]): RenderedProject {
   const record = projectRecord(snapshot, slug);
   const index = createMediaIndex(snapshot.media, url);

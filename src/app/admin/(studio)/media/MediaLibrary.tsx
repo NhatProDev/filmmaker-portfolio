@@ -9,6 +9,7 @@ import { ChooseMediaButton, ErrorLine } from "../../_components/composition";
 import { mediaLabel, Thumb, thumbnailUrl } from "../../_components/Thumb";
 import { useAction } from "../../_components/useAction";
 import styles from "../../studio.module.css";
+import { UploadPanel } from "./UploadPanel";
 
 const USAGE_LABEL: Record<MediaUsage["kind"], string> = {
   PROJECT_COVER: "Cover of",
@@ -28,85 +29,6 @@ function usageText(usage: MediaUsage) {
 
 const sizeText = (bytes: number | null) =>
   bytes === null ? "—" : bytes > 1e6 ? `${(bytes / 1e6).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1e3))} KB`;
-
-// Hashing in the browser lets the server spot a duplicate before the upload;
-// it is skipped for very large files, which the server verifies afterwards.
-async function sha256(file: File): Promise<string | undefined> {
-  if (file.size > 200 * 1024 * 1024 || !crypto.subtle) return undefined;
-  const digest = await crypto.subtle.digest("SHA-256", await file.arrayBuffer());
-  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
-}
-
-type UploadAuthorisation = { mediaId: string; uploadUrl: string; uploadMethod: string; headers: Record<string, string> };
-
-function UploadPanel({ onDone }: { onDone: () => void }) {
-  const [status, setStatus] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-
-  async function upload(file: File) {
-    setBusy(true);
-    setError(null);
-    try {
-      setStatus(`Preparing ${file.name}…`);
-      const authorisation = await api<UploadAuthorisation>("POST", "/media/uploads", {
-        filename: file.name,
-        mimeType: file.type,
-        fileSizeBytes: file.size,
-        checksumSha256: await sha256(file),
-      });
-      setStatus(`Uploading ${file.name} directly to storage…`);
-      const response = await fetch(authorisation.uploadUrl, {
-        method: authorisation.uploadMethod,
-        headers: authorisation.headers,
-        body: file,
-      });
-      if (!response.ok) throw new Error(`The storage provider refused the upload (${response.status}).`);
-      await api("POST", `/media/${authorisation.mediaId}/complete`);
-      setStatus(`${file.name} is in the library.`);
-      onDone();
-    } catch (caught) {
-      setStatus(null);
-      setError(describeError(caught));
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <section className={styles.panel}>
-      <div className={styles.panelHead}>
-        <h2>Upload</h2>
-      </div>
-      <div className={styles.panelBody}>
-        <p className={styles.hint}>
-          Files go straight from this browser to object storage, never through the site&apos;s server. Uploading needs a
-          storage provider and none is configured yet, so an upload is refused with an explanation. Media already in the
-          library can be used and edited.
-        </p>
-        <div className={styles.row} style={{ marginTop: 10 }}>
-          <input
-            type="file"
-            aria-label="Choose a file to upload"
-            accept="image/jpeg,image/png,image/webp,image/avif,video/mp4,video/webm,video/quicktime"
-            disabled={busy}
-            onChange={(event) => {
-              const file = event.target.files?.[0];
-              if (file) void upload(file);
-              event.target.value = "";
-            }}
-          />
-        </div>
-        {status && (
-          <p className={styles.hint} style={{ marginTop: 8 }}>
-            {status}
-          </p>
-        )}
-        {error && <p className={styles.notice}>{error}</p>}
-      </div>
-    </section>
-  );
-}
 
 function ExternalPanel({ onDone }: { onDone: () => void }) {
   const { run, pending, error } = useAction();
@@ -213,6 +135,14 @@ function Details({ media, onChanged, onDeleted }: { media: MediaDto; onChanged: 
           <dt>Type</dt>
           <dd style={{ margin: 0 }}>
             {media.type} · {media.status}
+          </dd>
+          <dt>Audience</dt>
+          <dd style={{ margin: 0 }}>
+            {media.type === "EXTERNAL_VIDEO"
+              ? "Hosted by the provider"
+              : media.isPrivate
+                ? "Private — never a public link; private projects deliver it through signed, short-lived links"
+                : "Public"}
           </dd>
           <dt>Size</dt>
           <dd style={{ margin: 0 }}>
@@ -329,13 +259,19 @@ export function MediaLibrary({ initial, total: initialTotal }: { initial: MediaD
   const [items, setItems] = useState(initial);
   const [total, setTotal] = useState(initialTotal);
   const [type, setType] = useState("");
+  const [audience, setAudience] = useState("");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<string | null>(initial[0]?.id ?? null);
   const [error, setError] = useState<string | null>(null);
 
   const reload = useCallback(async () => {
     try {
-      const query = new URLSearchParams({ pageSize: "100", ...(type ? { type } : {}), ...(search ? { search } : {}) });
+      const query = new URLSearchParams({
+        pageSize: "100",
+        ...(type ? { type } : {}),
+        ...(audience ? { audience } : {}),
+        ...(search ? { search } : {}),
+      });
       const response = await fetch(`/api/v1/media?${query}`, { cache: "no-store" });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error?.message ?? "The library could not be loaded.");
@@ -345,7 +281,19 @@ export function MediaLibrary({ initial, total: initialTotal }: { initial: MediaD
     } catch (caught) {
       setError(describeError(caught));
     }
-  }, [type, search]);
+  }, [type, audience, search]);
+
+  // A duplicate found during upload: show the asset already in the library,
+  // even when the current filters hide it.
+  const show = useCallback(async (mediaId: string) => {
+    try {
+      const asset = await api<MediaDto>("GET", `/media/${mediaId}`);
+      setItems((current) => (current.some((item) => item.id === asset.id) ? current : [asset, ...current]));
+      setSelected(asset.id);
+    } catch (caught) {
+      setError(describeError(caught));
+    }
+  }, []);
 
   // Filters apply shortly after typing stops; the first render already has
   // the server's data.
@@ -381,6 +329,17 @@ export function MediaLibrary({ initial, total: initialTotal }: { initial: MediaD
             <option value="VIDEO">Videos</option>
             <option value="EXTERNAL_VIDEO">External video</option>
           </select>
+          <select
+            className={styles.select}
+            style={{ width: 150 }}
+            value={audience}
+            onChange={(event) => setAudience(event.target.value)}
+            aria-label="Audience"
+          >
+            <option value="">Public and private</option>
+            <option value="PUBLIC">Public</option>
+            <option value="PRIVATE">Private</option>
+          </select>
           <input
             className={styles.input}
             style={{ width: 240 }}
@@ -393,7 +352,7 @@ export function MediaLibrary({ initial, total: initialTotal }: { initial: MediaD
         </div>
       </div>
       <div className={styles.grid2}>
-        <UploadPanel onDone={() => void reload()} />
+        <UploadPanel onDone={() => void reload()} onShow={(id) => void show(id)} />
         <ExternalPanel onDone={() => void reload()} />
       </div>
       {error && <p className={styles.error}>{error}</p>}
@@ -418,7 +377,9 @@ export function MediaLibrary({ initial, total: initialTotal }: { initial: MediaD
                 <span className={styles.hint}>
                   {media.type === "IMAGE" ? "Image" : media.type === "VIDEO" ? "Video" : "External"}
                   {media.width && media.height ? ` · ${media.width}×${media.height}` : ""}
+                  {media.status !== "READY" ? ` · ${media.status.toLowerCase()}` : ""}
                 </span>
+                {media.isPrivate && <span className={`${styles.badge} ${styles.badgeWarn} ${styles.tileBadge}`}>Private</span>}
               </button>
             );
           })}

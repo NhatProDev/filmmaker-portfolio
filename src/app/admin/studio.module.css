@@ -524,6 +524,41 @@
   white-space: nowrap;
 }
 
+.tileBadge {
+  align-self: flex-start;
+}
+
+/* Upload queue: one row per file, its progress and outcome (ADR-0020). */
+.uploadList {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.uploadList li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  font-size: 13px;
+}
+
+.uploadList li[data-state="failed"] .uploadName {
+  color: var(--s-danger, #b42318);
+}
+
+.uploadList progress {
+  width: 140px;
+}
+
+.uploadName {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
 .split {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 340px;

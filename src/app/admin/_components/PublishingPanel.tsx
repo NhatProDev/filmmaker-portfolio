@@ -1,10 +1,13 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 import type { PublicationDto } from "@/features/projects/project.mapper";
 import { api } from "./api";
 import { ErrorLine } from "./composition";
 import { useAction } from "./useAction";
 import styles from "../studio.module.css";
+
+const subscribeNever = () => () => {};
 
 // Publication state and actions (ADR-0012): the Studio edits the working copy;
 // Publish writes the one live snapshot; nothing else reaches visitors.
@@ -27,7 +30,14 @@ export function PublishingPanel({
 }) {
   const { run, pending, error } = useAction();
   const { isPublished, publishedAt, hasUnpublishedChanges, issues } = publication;
-  const when = publishedAt ? new Date(publishedAt).toLocaleString() : null;
+  // The server (UTC in production) and the browser format dates differently,
+  // so the server and hydration render UTC, then the browser its local time.
+  const hydrated = useSyncExternalStore(subscribeNever, () => true, () => false);
+  const when = publishedAt
+    ? hydrated
+      ? new Date(publishedAt).toLocaleString()
+      : `${publishedAt.slice(0, 16).replace("T", " ")} UTC`
+    : null;
 
   let status: { text: string; className: string };
   if (!isPublished) status = { text: "Draft — not on the site", className: styles.badgeWarn };

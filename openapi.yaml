@@ -1423,9 +1423,12 @@ paths:
       description: |
         Whether this deployment can serve: database reachability, schema
         compatibility with the migrations this build ships, and storage
-        configuration. States only — never versions, hosts or errors.
-        `status` is `unavailable` (503) when a required check fails, and
-        `degraded` (200) when an optional one does.
+        configuration and reachability (a signed request to the provider,
+        its answer reused for 30 seconds). States only — never versions,
+        hosts or errors. `status` is `unavailable` (503) when a required
+        check fails, `degraded` (200) when any other configured dependency
+        is misconfigured or unreachable, and `ok` only when every configured
+        dependency answers.
       security: []
       responses:
         '200':

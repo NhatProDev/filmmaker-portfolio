@@ -142,3 +142,29 @@ Leave unset: `TRUSTED_PROXY_HOPS` (the header replaces it), `APP_ORIGINS`
 
 The build runs `next build` only. It never migrates: migrations run from
 `.env.prod-ops` with `--confirm-remote` (`runbook.md` §1).
+
+## 7. Release verification (2026-09-24)
+
+- **Storage.** `storage-check` passed against production, including CORS for
+  `GET`, `HEAD` and `PUT` with `content-type`, the exposed `ETag` on both
+  buckets, byte ranges, a refused foreign origin, and probe removal. A real
+  film answers `206` to a range request.
+- **Smoke tests.** Every public route passed at desktop, tablet and mobile.
+  So did the Studio at three widths, publish, preview isolation, the private
+  gate, unlock, revocation, rate limit, spoofed forwarding headers and
+  logout. `/admin/home` loads without a hydration error in a UTC+7 browser.
+- **Restore drill.** Passed (`runbook.md` §7).
+- **Neon.** On the Free plan, point-in-time restore covers 6 hours.
+  `pg_dump` is the recovery path.
+- **Domains.** Pending an owner decision (`domains.md`).
+
+**Smoke-test artifacts.** Three throwaway PRIVATE projects remain archived:
+`smoke-test-private`, `smoke-test-private-2` and `smoke-test-private-3`.
+They were created by the production smoke tests, and each was unpublished,
+had its borrowed cover cleared, and was archived (soft deleted). Archived
+projects appear in no public route, listing, sitemap or snapshot. They
+reference no media. They are also the only record that the smoke tests ran.
+They are left in place deliberately, because the application has no
+supported hard-delete path and ad-hoc `DELETE` SQL against production is not
+worth the risk. A later smoke run needs a new slug; archived slugs stay
+reserved.

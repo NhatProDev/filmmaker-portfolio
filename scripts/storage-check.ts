@@ -7,7 +7,10 @@
 //   private probe   refused anonymously, on the S3 endpoint and at the public base
 //                   delivered by a presigned GET
 //                   refused with a tampered or an expired signature
-//   CORS            a browser at SITE_URL may PUT to both buckets and GET the private one
+//   ranges          the public base URL answers a byte range (video seeking)
+//   missing key     a signed HEAD for an absent key is 404 (the health probe)
+//   CORS            a browser at SITE_URL may GET, HEAD and PUT with a
+//                   content-type on both buckets, and can read the ETag
 //
 // It writes only under _probe/ and private/_probe/, and deletes its probes
 // afterwards. It touches no other object.
@@ -69,6 +72,11 @@ async function main() {
     const viaPublic = await status(`${env.MEDIA_PUBLIC_BASE_URL}/${probes.private.key}`);
     check("private probe, anonymous, public base URL", viaPublic.status === 404 || viaPublic.status === 403, `GET ${viaPublic.status}`);
 
+    const range = await status(publicUrl, { headers: { range: "bytes=0-6" } });
+    check("public probe, byte range", range.status === 206 && range.text === body.slice(0, 7), `GET ${range.status} ${range.headers.get("content-range") ?? ""}`);
+    const missing = await status(sign("HEAD", { bucket: probes.public.bucket, key: "health/probe" }), { method: "HEAD" });
+    check("signed HEAD of an absent key", missing.status === 404, `HEAD ${missing.status}`);
+
     const signed = await status(sign("GET", probes.private));
     check("private probe, presigned GET", signed.status === 200 && signed.text === body, `GET ${signed.status}`);
     const tampered = sign("GET", probes.private).replace(/X-Amz-Signature=([0-9a-f])/, (_, c: string) => `X-Amz-Signature=${c === "0" ? "1" : "0"}`);
@@ -79,8 +87,11 @@ async function main() {
 
     for (const [probe, method] of [
       [probes.public, "PUT"],
+      [probes.public, "GET"],
+      [probes.public, "HEAD"],
       [probes.private, "PUT"],
       [probes.private, "GET"],
+      [probes.private, "HEAD"],
     ] as const) {
       const preflight = await status(sign(method, probe), {
         method: "OPTIONS",
@@ -91,6 +102,15 @@ async function main() {
         `CORS ${method} ${probe.bucket} from the site`,
         preflight.status < 300 && (allowed === env.SITE_URL || allowed === "*"),
         `OPTIONS ${preflight.status} allow-origin=${allowed ?? "none"}`,
+      );
+    }
+    for (const probe of [probes.public, probes.private]) {
+      const read = await status(sign("GET", probe), { headers: { origin: env.SITE_URL } });
+      const exposed = (read.headers.get("access-control-expose-headers") ?? "").toLowerCase();
+      check(
+        `CORS exposes ETag on ${probe.bucket}`,
+        read.status === 200 && Boolean(read.headers.get("etag")) && (exposed.includes("etag") || exposed === "*"),
+        `expose=${exposed || "none"}`,
       );
     }
     const foreign = await status(sign("PUT", probes.private), {

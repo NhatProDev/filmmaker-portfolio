@@ -421,6 +421,26 @@ describe("health and database targets (docs/operations/runbook.md)", () => {
     assert.equal((await checkHealth({ db: null, databaseRequired: false, storageConfigured: false })).status, "degraded");
   });
 
+  test("a dependency that is configured but unreachable is never reported ok", async () => {
+    const down = { execute: async () => { throw new Error("connection refused"); } } as unknown as Parameters<typeof checkHealth>[0]["db"];
+    const required = await checkHealth({ db: down, databaseRequired: true, storageConfigured: true });
+    assert.deepEqual(required, { status: "unavailable", checks: { database: "unreachable", schema: "unknown", storage: "ok" } });
+    // Static pages still serve, but the Studio cannot: degraded, not ok.
+    assert.equal((await checkHealth({ db: down, databaseRequired: false, storageConfigured: true })).status, "degraded");
+
+    const storageDown = await checkHealth({
+      db: null,
+      databaseRequired: false,
+      storageConfigured: true,
+      probeStorage: async () => { throw new Error("storage answered 403"); },
+    });
+    assert.deepEqual(storageDown, { status: "degraded", checks: { database: "not-configured", schema: "unknown", storage: "unreachable" } });
+    const storageUp = await checkHealth({ db: null, databaseRequired: false, storageConfigured: true, probeStorage: async () => {} });
+    assert.equal(storageUp.status, "ok");
+    // The response carries states only: never the provider's error text.
+    assert.doesNotMatch(JSON.stringify(storageDown), /403|refused/);
+  });
+
   test("a remote database needs the exact target confirmed on the command line", () => {
     assert.equal(assertDatabaseTarget("postgres://u@localhost:5432/dev", []).remote, false);
     assert.equal(assertDatabaseTarget("postgres://u@127.0.0.1/dev", []).remote, false);

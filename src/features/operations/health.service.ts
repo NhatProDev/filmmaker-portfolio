@@ -3,7 +3,8 @@ import type { Database } from "@db/client";
 import journal from "../../../db/migrations/meta/_journal.json";
 
 // Lightweight readiness (docs/operations/runbook.md): is the database
-// reachable, is its schema the one this build expects, is storage configured.
+// reachable, is its schema the one this build expects, is storage configured
+// and reachable.
 // It reports states, never versions, hosts or errors, because the endpoint is
 // public.
 
@@ -34,6 +35,9 @@ export async function checkHealth(input: {
   // Whether this deployment needs the database to serve its pages.
   databaseRequired: boolean;
   storageConfigured: boolean;
+  // Resolves when the storage provider answers; rejects when it cannot be
+  // reached. Omitted when the adapter has nothing remote to reach.
+  probeStorage?: () => Promise<void>;
 }): Promise<Health> {
   let database: CheckState = "not-configured";
   let schema: CheckState = "unknown";
@@ -46,9 +50,20 @@ export async function checkHealth(input: {
       database = "unreachable";
     }
   }
-  const storage: CheckState = input.storageConfigured ? "ok" : "misconfigured";
+  let storage: CheckState = input.storageConfigured ? "ok" : "misconfigured";
+  if (storage === "ok" && input.probeStorage) {
+    storage = await input.probeStorage().then(
+      () => "ok" as const,
+      () => "unreachable" as const,
+    );
+  }
 
+  // A required database that fails, or a schema this build does not match,
+  // means the site cannot serve. Anything else short of every check passing
+  // is degraded, never ok: a configured database that is down still takes
+  // the Studio with it, and storage delivers every image and film.
   const failed = (input.databaseRequired && database !== "ok") || (database === "ok" && schema !== "ok");
-  const status = failed ? "unavailable" : storage !== "ok" ? "degraded" : "ok";
+  const allOk = storage === "ok" && (database === "ok" || database === "not-configured");
+  const status = failed ? "unavailable" : allOk ? "ok" : "degraded";
   return { status, checks: { database, schema, storage } };
 }

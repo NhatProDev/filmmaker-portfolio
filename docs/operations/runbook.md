@@ -54,6 +54,15 @@ pg_dump --format=custom --no-owner --no-privileges \
 ```
 
 - Use the provider's **direct** (non-pooled) connection string for `pg_dump`.
+- Without a local PostgreSQL 17 client, run it from the `postgres:17` image.
+  The image has no CA bundle. Mount one so that `sslmode=verify-full` still
+  checks Neon's certificate; never drop to `require`. Keep backups outside
+  the repository:
+  ```text
+  docker run --rm -e PGURL -v "<ca-bundle.crt>:/ca.crt:ro" -v "<backups dir>:/backups" postgres:17     pg_dump --format=custom --no-owner --no-privileges --file=/backups/portfolio-<UTC>.dump "$PGURL"
+  ```
+  Here `PGURL` is the direct URL with `sslmode=verify-full&sslrootcert=/ca.crt`.
+  Git for Windows ships a bundle at `/mingw64/etc/ssl/certs/ca-bundle.crt`.
 - Neon also keeps a point-in-time restore window (length by plan — verify at
   2G-B); a branch at a timestamp is the quickest restore rehearsal.
 - Media: storage is the source of truth for files. Enable R2/S3 bucket
@@ -96,6 +105,20 @@ pg_dump --format=custom --no-owner --no-privileges \
 4. Point `DATABASE_URL` at the restored database and redeploy (the pages
    prerender from it).
 5. Keep the old database until the site is verified.
+
+**Restore drill** (disposable container, never the live database):
+
+```text
+docker run -d --name portfolio-restore-drill -e POSTGRES_PASSWORD=drill   -p 127.0.0.1:55432:5432 -v "<backups dir>:/backups:ro" postgres:17
+docker exec portfolio-restore-drill sh -c "createdb -U postgres restored &&   pg_restore --no-owner --no-privileges -U postgres --dbname=restored /backups/<file>.dump"
+DATABASE_URL=postgres://postgres:drill@127.0.0.1:55432/restored SITE_CONTENT_ADAPTER=db npm run db:health
+DATABASE_URL=postgres://postgres:drill@127.0.0.1:55432/restored SITE_CONTENT_ADAPTER=db npm run db:verify
+docker rm -f portfolio-restore-drill
+```
+
+Last drill: 2026-09-24. The dump `portfolio-20260924-1224Z.dump` restored
+completely. `db:health` was healthy (9 project snapshots, 1 page, 26 media,
+0 missing). `db:verify` found 14 of 14 routes identical.
 
 Media are not part of a database restore. Restored rows reference keys; if a
 key's object is gone, `db:health` names it. Bucket versioning restores it.

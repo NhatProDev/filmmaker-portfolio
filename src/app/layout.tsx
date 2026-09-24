@@ -6,17 +6,20 @@ import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
 
 // Faces are self-hosted (design-system.md §1.1): next/font downloads them at
-// build time and serves them from this origin. Newsreader carries the
-// Vietnamese subset because names and credits may be Vietnamese.
+// build time and serves them from this origin. Every subset stays declared —
+// Newsreader keeps latin-ext and Vietnamese because names and credits may be
+// Vietnamese — but `subsets` names only what is preloaded. The browser fetches
+// the others by unicode-range when a page uses them, instead of every visit
+// preloading all eight files (3D-9).
 const marcellus = Marcellus({
   weight: "400",
-  subsets: ["latin", "latin-ext"],
+  subsets: ["latin"],
   variable: "--font-marcellus",
   display: "swap",
 });
 
 const newsreader = Newsreader({
-  subsets: ["latin", "latin-ext", "vietnamese"],
+  subsets: ["latin"],
   style: ["normal", "italic"],
   axes: ["opsz"],
   variable: "--font-newsreader",

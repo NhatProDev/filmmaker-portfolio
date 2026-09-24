@@ -1,13 +1,13 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, type CSSProperties } from "react";
 import styles from "./blocks.module.css";
 
 // CLICK_TO_PLAY for a video block other than the opening film (ADR-0008): the
 // poster (drawn beneath by the parent) until the visitor asks, then the film
 // with its controls and sound. Nothing loads before the act; the act pauses
 // the page's silent loops, so only one thing plays with sound.
-export function ClickToPlay({ src, label }: { src: string; label: string }) {
+export function ClickToPlay({ src, label, layer }: { src: string; label: string; layer?: { className: string; style: CSSProperties } }) {
   const ref = useRef<HTMLVideoElement>(null);
   const [started, setStarted] = useState(false);
 
@@ -31,7 +31,8 @@ export function ClickToPlay({ src, label }: { src: string; label: string }) {
     <>
       <video
         ref={ref}
-        className={`${styles.fill} ${styles.clickVideo}`}
+        className={`${styles.fill} ${styles.clickVideo}${layer ? ` ${layer.className}` : ""}`}
+        style={layer?.style}
         data-started={started ? "" : undefined}
         preload="none"
         playsInline

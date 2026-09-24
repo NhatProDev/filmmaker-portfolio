@@ -102,7 +102,20 @@ export function image(index: MediaIndex, id: string, alt: string, where: string)
   const asset = liveMedia(index, id, where);
   if (asset.type !== "IMAGE") fail(where, `media ${id} is ${asset.type}, not IMAGE`);
   if (!asset.width || !asset.height) fail(where, `image ${id} has no dimensions`);
-  return { src: index.url(asset), width: asset.width, height: asset.height, alt };
+  return { src: index.url(asset), width: asset.width, height: asset.height, alt, ...activeAspectOf(asset, where) };
+}
+
+// ADR-0016: an asset's declared active picture, as an aspect ratio the
+// renderer frames. Only a picture narrower in height than its file is a
+// letterbox; anything else is refused rather than guessed at.
+export function activeAspectOf(asset: MediaRecord, where: string): { activeAspect?: number } {
+  if (!asset.activePicture) return {};
+  if (!asset.width || !asset.height) fail(where, `media ${asset.id} declares an active picture but has no dimensions`);
+  const active = Number(asset.activePicture);
+  if (!(active > asset.width / asset.height)) {
+    fail(where, `media ${asset.id} declares a ${asset.activePicture}:1 picture, which is not letterboxed inside its ${asset.width}×${asset.height} frame`);
+  }
+  return { activeAspect: active };
 }
 
 export function videoSrc(index: MediaIndex, id: string, where: string): string {

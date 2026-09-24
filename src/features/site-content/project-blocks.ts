@@ -1,9 +1,11 @@
+import { embedUrl, parseExternalVideo } from "@/features/media/external-video";
 import type { BlockMediaRecord } from "@/features/project-builder/block.repository";
 import type { BlockData, Playback } from "@/features/project-builder/block.schema";
 import { presetFor } from "@/features/project-builder/presets";
 import type { PublicProjectRecord } from "@/features/projects/project.repository";
 import { projectCreditsSchema } from "@/features/projects/project.schema";
 import {
+  activeAspectOf,
   altFor,
   fail,
   image,
@@ -45,7 +47,8 @@ const at = (where: string, block: ParsedBlock) => `${where}, block ${block.id}`;
 // The poster chain (ADR-0015) as far as a snapshot can follow it: the
 // placement's override, then the asset's default, then an empty frame.
 function optionalPoster(index: MediaIndex, item: BlockMediaRecord, where: string): ProjectImage | null {
-  const video = liveMedia(index, item.mediaId, where);
+  // A hosted video must be live with its file; an external one has no file.
+  const video = index.get(item.mediaId)?.type === "EXTERNAL_VIDEO" ? index.get(item.mediaId)! : liveMedia(index, item.mediaId, where);
   const posterId = item.posterMediaId ?? video.posterMediaId;
   return posterId ? image(index, posterId, altFor(index, item), where) : null;
 }
@@ -58,16 +61,30 @@ function playbackOf(item: BlockMediaRecord, blockDefault: Playback | undefined, 
 }
 
 function mediaOf(index: MediaIndex, item: BlockMediaRecord, playback: Playback["mode"], where: string): ProjectMedia {
-  const asset = liveMedia(index, item.mediaId, where);
-  if (asset.type === "IMAGE") return { kind: "image", image: image(index, asset.id, altFor(index, item), where) };
+  const asset = index.get(item.mediaId);
+  if (asset?.type === "EXTERNAL_VIDEO") return { kind: "external", external: externalOf(index, item, playback, where) };
+  if (asset?.type === "IMAGE") return { kind: "image", image: image(index, asset.id, altFor(index, item), where) };
+  const hosted = liveMedia(index, item.mediaId, where);
   const video: ProjectVideo = {
-    src: videoSrc(index, asset.id, where),
-    width: asset.width,
-    height: asset.height,
+    src: videoSrc(index, hosted.id, where),
+    width: hosted.width,
+    height: hosted.height,
+    ...activeAspectOf(hosted, where),
     poster: optionalPoster(index, item, where),
     playback,
   };
   return { kind: "video", video };
+}
+
+// YouTube and Vimeo play in the provider's player, on the visitor's act only
+// (ADR-0008). Publish refuses an address the player cannot show.
+function externalOf(index: MediaIndex, item: BlockMediaRecord, playback: Playback["mode"], where: string) {
+  const asset = index.get(item.mediaId);
+  if (!asset || asset.status !== "READY") fail(where, `media ${item.mediaId} is missing, deleted or not ready`);
+  if (playback !== "CLICK_TO_PLAY") fail(where, "YouTube and Vimeo videos play only on request (CLICK_TO_PLAY)");
+  const ref = parseExternalVideo(asset.externalProvider ?? "", asset.externalUrl ?? "");
+  if (!ref) fail(where, `media ${asset.id} is not a YouTube or Vimeo video address the player can show`);
+  return { provider: ref.provider, embedUrl: embedUrl(ref), title: altFor(index, item), poster: optionalPoster(index, item, where) };
 }
 
 function requireMedia(block: ParsedBlock, where: string): BlockMediaRecord {
@@ -103,6 +120,7 @@ function leaf(index: MediaIndex, block: ParsedBlock, where: string, nested: bool
     case "VIDEO": {
       const item = requireMedia(block, where);
       const media = mediaOf(index, item, playbackOf(item, data.config.playback, "CLICK_TO_PLAY"), where);
+      if (media.kind === "external") return { type: "externalVideo", id, external: media.external, fit: data.config.fit ?? "COVER" };
       if (media.kind !== "video") fail(where, "a VIDEO block plays a video, not an image");
       return { type: "video", id, video: media.video, fit: data.config.fit ?? "COVER" };
     }
@@ -141,6 +159,9 @@ function openingOf(index: MediaIndex, block: ParsedBlock, cover: WorksCover, whe
   }
   if (block.media.length === 0) return { type: "opening", id: block.id, image: { ...cover, alt: "" } };
   const item = onlyMedia(block, where);
+  if (index.get(item.mediaId)?.type === "EXTERNAL_VIDEO") {
+    fail(where, "the opening plays a hosted film; place a YouTube or Vimeo video in a Video block below it");
+  }
   const asset = liveMedia(index, item.mediaId, where);
   if (asset.type === "IMAGE") return { type: "opening", id: block.id, image: image(index, asset.id, altFor(index, item), where) };
   if (playback?.mode !== "CLICK_TO_PLAY") fail(where, "the opening film is CLICK_TO_PLAY");
@@ -234,6 +255,7 @@ function rootBlock(index: MediaIndex, block: ParsedBlock, where: string): Projec
       config.mode === "VIDEO_GRID" ? { mode: "VIDEO_GRID", columns: config.columns, fit: config.fit ?? "COVER" } : { mode: config.mode };
     const blockDefault = config.mode === "VIDEO_GRID" ? config.playback : undefined;
     const items = block.media.map((item) => mediaOf(index, item, playbackOf(item, blockDefault, "AUTOPLAY_VISIBLE"), where));
+    if (items.some((item) => item.kind === "external")) fail(where, "a GALLERY flows hosted media; YouTube and Vimeo play in a Video block");
     if (layout.mode === "JUSTIFIED_ROWS" && items.some((item) => item.kind === "video")) {
       fail(where, "JUSTIFIED_ROWS lays out stills; for video choose VIDEO_GRID, HORIZONTAL_STRIP or SLIDESHOW");
     }

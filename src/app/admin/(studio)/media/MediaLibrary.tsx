@@ -195,14 +195,17 @@ function Details({ media, onChanged, onDeleted }: { media: MediaDto; onChanged: 
       </div>
       <div className={styles.panelBody} style={{ display: "grid", gap: 12 }}>
         {src ? (
-          <Image
-            src={src}
-            alt=""
-            width={media.width ?? 320}
-            height={media.height ?? 200}
-            unoptimized
-            style={{ width: "100%", height: "auto", borderRadius: 4 }}
-          />
+          <div style={{ position: "relative" }}>
+            <Image
+              src={src}
+              alt=""
+              width={media.width ?? 320}
+              height={media.height ?? 200}
+              unoptimized
+              style={{ width: "100%", height: "auto", borderRadius: 4, display: "block" }}
+            />
+            {media.type === "IMAGE" && <LetterboxBands media={media} />}
+          </div>
         ) : (
           <Thumb src={null} large label={media.type} />
         )}
@@ -252,6 +255,8 @@ function Details({ media, onChanged, onDeleted }: { media: MediaDto; onChanged: 
             Save alt text
           </button>
         </div>
+
+        <ActivePictureControl media={media} disabled={pending} onChange={(activePicture) => patch({ activePicture })} />
 
         {media.type !== "IMAGE" && (
           <div className={styles.field}>
@@ -432,5 +437,64 @@ export function MediaLibrary({ initial, total: initialTotal }: { initial: MediaD
         )}
       </div>
     </>
+  );
+}
+
+// ---- ADR-0016: baked-in letterbox ----
+
+const PICTURE_CHOICES: [string, string][] = [
+  ["FULL", "Full frame — the file as it is"],
+  ["2.39", "2.39 : 1 inside the frame"],
+  ["2.00", "2.00 : 1 inside the frame"],
+  ["1.85", "1.85 : 1 inside the frame"],
+];
+
+const fileAspect = (media: MediaDto) => (media.width && media.height ? media.width / media.height : null);
+
+// The black bands the chosen picture leaves above and below, drawn over the
+// preview so a wrong choice is visible before anything is published.
+function LetterboxBands({ media }: { media: MediaDto }) {
+  const file = fileAspect(media);
+  const active = Number(media.activePicture);
+  if (!file || !(active > file)) return null;
+  const band = `${((1 - file / active) / 2) * 100}%`;
+  const shade = { position: "absolute", left: 0, right: 0, height: band, background: "rgba(180, 35, 24, 0.35)", borderColor: "#b42318", borderStyle: "dashed", borderWidth: 0 } as const;
+  return (
+    <div aria-hidden="true" style={{ position: "absolute", inset: 0, pointerEvents: "none", borderRadius: 4, overflow: "hidden" }}>
+      <div style={{ ...shade, top: 0, borderBottomWidth: 1 }} />
+      <div style={{ ...shade, bottom: 0, borderTopWidth: 1 }} />
+    </div>
+  );
+}
+
+function ActivePictureControl({ media, disabled, onChange }: { media: MediaDto; disabled: boolean; onChange: (value: string) => void }) {
+  if (media.type === "EXTERNAL_VIDEO" || media.status !== "READY") return null;
+  const file = fileAspect(media);
+  // Only a picture wider than its file can be a letterbox inside it.
+  const choices = PICTURE_CHOICES.filter(([value]) => value === "FULL" || (file !== null && Number(value) > file + 0.01));
+  if (choices.length === 1 && media.activePicture === "FULL") return null;
+  return (
+    <div className={styles.field}>
+      <label className={styles.field}>
+        <span>Picture area</span>
+        <select className={styles.select} value={media.activePicture} disabled={disabled} onChange={(event) => onChange(event.target.value)}>
+          {choices.map(([value, text]) => (
+            <option key={value} value={value}>
+              {text}
+            </option>
+          ))}
+        </select>
+      </label>
+      <p className={styles.hint}>
+        Best: upload a clean export at the film&apos;s own ratio, without black bars. Choose an area only when bars are baked into a file you cannot
+        re-export; pages then frame the picture and leave the bars out. {media.type === "VIDEO" ? "Give its poster the same area if it has the same bars. " : ""}
+        Published pages change when you publish them again.
+      </p>
+      {media.type === "VIDEO" && media.activePicture !== "FULL" && file && (
+        <div aria-hidden="true" style={{ position: "relative", width: 160, aspectRatio: String(file), background: "#1c1917", borderRadius: 3 }}>
+          <LetterboxBands media={media} />
+        </div>
+      )}
+    </div>
   );
 }

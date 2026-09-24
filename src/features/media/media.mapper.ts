@@ -52,6 +52,8 @@ export function toMediaDto(row: MediaRow, poster: MediaRow | null) {
     checksumSha256: row.checksumSha256,
     altText: row.altText,
     posterMediaId: row.posterMediaId,
+    // ADR-0016: where the picture sits in a letterboxed file; FULL when unset.
+    activePicture: row.activePicture ?? "FULL",
     poster: poster ? toMediaRef(poster) : null,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),

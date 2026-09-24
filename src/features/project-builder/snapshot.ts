@@ -45,6 +45,11 @@ export const snapshotMediaSchema = z.strictObject({
   durationMs: z.int().min(0).nullable(),
   altText: z.string().nullable(),
   posterMediaId: uuid.nullable(),
+  // Present only on EXTERNAL_VIDEO (Phase 3B); older snapshots lack them.
+  externalProvider: z.string().max(100).optional(),
+  externalUrl: z.string().max(2000).optional(),
+  // ADR-0016; absent means FULL.
+  activePicture: z.enum(["2.39", "2.00", "1.85"]).optional(),
 });
 
 // Validated at runtime to exactly one level of nesting; typed as the block

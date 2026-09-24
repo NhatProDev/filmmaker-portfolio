@@ -49,6 +49,11 @@ export const mediaTypeEnum = pgEnum("media_type", [
   "EXTERNAL_VIDEO",
 ]);
 
+// ADR-0016: where a letterboxed file's picture is — its aspect ratio inside
+// the frame, centred vertically. NULL on media means FULL: the file as encoded.
+export const ACTIVE_PICTURES = ["2.39", "2.00", "1.85"] as const;
+export const mediaActivePictureEnum = pgEnum("media_active_picture", ACTIVE_PICTURES);
+
 export const mediaStatusEnum = pgEnum("media_status", [
   "UPLOADING",
   "PROCESSING",
@@ -112,6 +117,10 @@ export const media = pgTable(
     // An administrator-selected poster: an IMAGE asset (ADR-0009).
     posterMediaId: uuid("poster_media_id"),
 
+    // Baked-in letterbox (ADR-0016): the active picture's aspect ratio, for a
+    // file that cannot be re-exported clean. NULL renders the file as encoded.
+    activePicture: mediaActivePictureEnum("active_picture"),
+
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
       .defaultNow()
       .notNull(),
@@ -136,6 +145,10 @@ export const media = pgTable(
     uniqueIndex("media_checksum_active_uidx")
       .on(table.checksumSha256)
       .where(sql`${table.checksumSha256} IS NOT NULL AND ${table.deletedAt} IS NULL`),
+    check(
+      "media_active_picture_stored_check",
+      sql`${table.activePicture} IS NULL OR ${table.type} <> 'EXTERNAL_VIDEO'`,
+    ),
     check(
       "media_dimensions_positive_check",
       sql`(${table.width} IS NULL OR ${table.width} > 0) AND (${table.height} IS NULL OR ${table.height} > 0)`,

@@ -212,6 +212,38 @@
 
 /* ---- CLICK_TO_PLAY outside the opening ---- */
 
+/* ADR-0016: a letterboxed file framed on its active picture. The frame is a
+   size container; each layer is sized from its own asset so that the active
+   rectangle covers (or, under CONTAIN, fits) the frame and the bars fall
+   outside it. --active is the picture's aspect, --file the file's. The
+   element keeps the file's own proportions, so nothing is distorted. */
+.activeFrame {
+  container-type: size;
+}
+
+.activeLayer {
+  --span: max(100cqw, 100cqh * var(--active));
+  position: absolute;
+  inset: auto;
+  left: 50%;
+  top: 50%;
+  width: var(--span);
+  height: calc(var(--span) / var(--file));
+  max-width: none;
+  object-fit: fill;
+  transform: translate(-50%, -50%);
+}
+
+.activeLayer.activeContain {
+  --span: min(100cqw, 100cqh * var(--active));
+}
+
+/* A provider player, loaded on the visitor's act. */
+.embed {
+  border: 0;
+  background: #000;
+}
+
 .clickVideo {
   background: #000;
   opacity: 0;

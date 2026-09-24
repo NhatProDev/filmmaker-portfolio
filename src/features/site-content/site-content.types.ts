@@ -56,6 +56,9 @@ export type ProjectImage = {
   width: number;
   height: number;
   alt: string;
+  // ADR-0016: the picture's aspect ratio inside a letterboxed file. Present
+  // only when the asset declares one; the renderer frames that picture.
+  activeAspect?: number;
 };
 
 // A CLICK_TO_PLAY film. Its poster is a property of the video asset
@@ -120,12 +123,28 @@ export type ProjectVideo = {
   src: string;
   width: number | null;
   height: number | null;
+  // ADR-0016, as on ProjectImage.
+  activeAspect?: number;
   // Placement poster → asset poster; null draws the empty frame.
   poster: ProjectImage | null;
   playback: PlaybackMode;
 };
 
-export type ProjectMedia = { kind: "image"; image: ProjectImage } | { kind: "video"; video: ProjectVideo };
+// A YouTube or Vimeo video (Phase 3B): always CLICK_TO_PLAY. `embedUrl` is
+// built from the provider's video id, never copied from stored input; nothing
+// loads from the provider before the visitor asks.
+export type ProjectExternalVideo = {
+  provider: "youtube" | "vimeo";
+  embedUrl: string;
+  title: string;
+  // Placement poster → asset poster; null draws the empty frame.
+  poster: ProjectImage | null;
+};
+
+export type ProjectMedia =
+  | { kind: "image"; image: ProjectImage }
+  | { kind: "video"; video: ProjectVideo }
+  | { kind: "external"; external: ProjectExternalVideo };
 
 // Year always; runtime, client and role when the project has them.
 export type ProjectFacts = { year: number; runtime?: string; client?: string; role?: string };
@@ -142,6 +161,7 @@ export type ProjectLeafBlock =
   | { type: "text"; id: string; role: TextRole | null; text: ProjectText }
   | { type: "image"; id: string; image: ProjectImage; fit: MediaFit; caption: string | null }
   | { type: "video"; id: string; video: ProjectVideo; fit: MediaFit }
+  | { type: "externalVideo"; id: string; external: ProjectExternalVideo; fit: MediaFit }
   | { type: "spacer"; id: string; size: "S" | "M" | "L" };
 
 export type GalleryLayout =

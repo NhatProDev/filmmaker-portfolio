@@ -34,8 +34,9 @@ const POSTER = media(3, "IMAGE");
 const OTHER_POSTER = media(4, "IMAGE");
 const FILM = media(5, "VIDEO", { posterMediaId: POSTER.id });
 const BARE = media(6, "VIDEO");
-const EXTERNAL = media(7, "EXTERNAL_VIDEO", { storageKey: null });
-const index = createMediaIndex([COVER, STILL, POSTER, OTHER_POSTER, FILM, BARE, EXTERNAL]);
+const EXTERNAL = media(7, "EXTERNAL_VIDEO", { storageKey: null, externalProvider: "vimeo", externalUrl: "https://vimeo.com/76979871" });
+const UNPLAYABLE = media(8, "EXTERNAL_VIDEO", { storageKey: null, externalProvider: "youtube", externalUrl: "https://www.youtube.com/playlist?list=PL1" });
+const index = createMediaIndex([COVER, STILL, POSTER, OTHER_POSTER, FILM, BARE, EXTERNAL, UNPLAYABLE]);
 
 let next = 100;
 const place = (mediaId: string, extra: Partial<BlockMediaRecord> = {}): BlockMediaRecord => ({
@@ -216,8 +217,12 @@ describe("the generic Project Detail projection", () => {
     refuses([block("GALLERY", {}, { mode: "SLIDESHOW" })], /no media yet/);
   });
 
-  test("external video has no public player in V1 and is refused with the reason", () => {
-    refuses([block("VIDEO", {}, { playback: { mode: "CLICK_TO_PLAY" } }, { media: [place(EXTERNAL.id)] })], /EXTERNAL_VIDEO|storage key/);
+  test("external video plays in the provider's player; an address it cannot show is refused (Phase 3B)", () => {
+    const [, video] = render([block("VIDEO", {}, { playback: { mode: "CLICK_TO_PLAY" } }, { media: [place(EXTERNAL.id)] })]).blocks;
+    assert.ok(video.type === "externalVideo");
+    assert.equal(video.external.embedUrl, "https://player.vimeo.com/video/76979871?autoplay=1&dnt=1");
+    refuses([block("VIDEO", {}, { playback: { mode: "CLICK_TO_PLAY" } }, { media: [place(UNPLAYABLE.id)] })], /not a YouTube or Vimeo/);
+    refuses([block("VIDEO", {}, { playback: { mode: "AUTOPLAY_VISIBLE" } }, { media: [place(EXTERNAL.id)] })], /CLICK_TO_PLAY/);
   });
 
   test("malformed stored blocks are refused, never repaired", () => {

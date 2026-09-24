@@ -24,6 +24,13 @@ export type MediaRecord = {
   durationMs: number | null;
   altText: string | null;
   posterMediaId: string | null;
+  // EXTERNAL_VIDEO only (Phase 3B). Absent, not null, on every other asset,
+  // so a published snapshot written before these fields existed still equals
+  // the working copy it was taken from.
+  externalProvider?: string;
+  externalUrl?: string;
+  // ADR-0016; absent means FULL, the file as encoded.
+  activePicture?: "2.39" | "2.00" | "1.85";
 };
 
 // Every relational reference that keeps an asset in use (CLAUDE.md §12):
@@ -56,7 +63,26 @@ const columns = {
   durationMs: media.durationMs,
   altText: media.altText,
   posterMediaId: media.posterMediaId,
+  externalProvider: media.externalProvider,
+  externalUrl: media.externalUrl,
+  activePicture: media.activePicture,
 };
+
+type SelectedRecord = Omit<MediaRecord, "externalProvider" | "externalUrl" | "activePicture"> & {
+  externalProvider: string | null;
+  externalUrl: string | null;
+  activePicture: MediaRecord["activePicture"] | null;
+};
+
+// Drops the optional fields an asset does not have (see MediaRecord).
+function compact({ externalProvider, externalUrl, activePicture, ...record }: SelectedRecord): MediaRecord {
+  return {
+    ...record,
+    ...(externalProvider ? { externalProvider } : {}),
+    ...(externalUrl ? { externalUrl } : {}),
+    ...(activePicture ? { activePicture } : {}),
+  };
+}
 
 const live = isNull(media.deletedAt);
 
@@ -65,10 +91,11 @@ export function createMediaRepository(db: Database) {
     // Assets that are not soft-deleted, by id.
     async findLiveByIds(ids: readonly string[]): Promise<MediaRecord[]> {
       if (!ids.length) return [];
-      return db
+      const rows = await db
         .select(columns)
         .from(media)
         .where(and(inArray(media.id, [...ids]), live));
+      return rows.map(compact);
     },
 
     async findRowsByIds(ids: readonly string[]): Promise<MediaRow[]> {
@@ -128,7 +155,7 @@ export function createMediaRepository(db: Database) {
       return row;
     },
 
-    async update(id: string, patch: Partial<Pick<MediaRow, "altText" | "posterMediaId">>): Promise<MediaRow> {
+    async update(id: string, patch: Partial<Pick<MediaRow, "altText" | "posterMediaId" | "activePicture">>): Promise<MediaRow> {
       const [row] = await db
         .update(media)
         .set({ ...patch, updatedAt: sql`now()` })

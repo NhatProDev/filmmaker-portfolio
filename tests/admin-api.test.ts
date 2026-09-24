@@ -405,7 +405,7 @@ describe("media library (CLAUDE.md §12, §17.7, §17.27, §17.28)", () => {
   });
 
   test("an unused asset can be soft-deleted, once", async () => {
-    const external = await ctx.as("POST", "/media/external", { provider: "youtube", url: "https://youtu.be/abc123" });
+    const external = await ctx.as("POST", "/media/external", { provider: "youtube", url: "https://youtu.be/dQw4w9WgXcQ" });
     const id = external.body.data.id;
     assert.deepEqual((await ctx.as("GET", `/media/${id}/usages`)).body.data, []);
     assert.equal((await ctx.as("DELETE", `/media/${id}`)).status, 204);

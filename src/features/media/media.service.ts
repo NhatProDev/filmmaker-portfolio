@@ -4,7 +4,7 @@ import { conflict, DomainError, invalid, notFound } from "@/lib/errors/domain-er
 import { getMediaStorage, mediaKeys, MediaStorageUnsupportedError } from "@/lib/storage/media-storage";
 import { toMediaDto, type MediaRow } from "./media.mapper";
 import { createMediaRepository, type MediaUsage } from "./media.repository";
-import { MAX_IMAGE_BYTES, MAX_VIDEO_BYTES } from "./media.schema";
+import { MAX_IMAGE_BYTES, MAX_VIDEO_BYTES, type ActivePictureChoice } from "./media.schema";
 
 // The Media Library (CLAUDE.md §12, ADR-0009, ADR-0014, ADR-0015).
 
@@ -58,12 +58,21 @@ export function createMediaService(db: Database) {
       return dto;
     },
 
-    async update(id: string, input: { altText?: string | null; posterMediaId?: string | null }) {
+    async update(id: string, input: { altText?: string | null; posterMediaId?: string | null; activePicture?: ActivePictureChoice }) {
       return transaction(db, async (tx) => {
         const row = await createMediaRepository(tx).findById(id, "update");
         if (!row) throw notFound("MEDIA_NOT_FOUND", "Media not found.");
         if (input.posterMediaId) await assertPosterTarget(tx, input.posterMediaId, row);
-        const updated = await createMediaRepository(tx).update(id, input);
+        // ADR-0016: an active picture belongs to a stored image or film; a
+        // provider's player frames its own picture.
+        if (input.activePicture && input.activePicture !== "FULL" && row.type === "EXTERNAL_VIDEO") {
+          throw invalid("INVALID_ACTIVE_PICTURE", "An external video's player frames its own picture.");
+        }
+        const { activePicture, ...rest } = input;
+        const updated = await createMediaRepository(tx).update(id, {
+          ...rest,
+          ...(activePicture === undefined ? {} : { activePicture: activePicture === "FULL" ? null : activePicture }),
+        });
         const [dto] = await createMediaService(tx).withPostersFor([updated]);
         return dto;
       });

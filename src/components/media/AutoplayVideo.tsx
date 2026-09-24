@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import styles from "./AutoplayVideo.module.css";
 
 // The two autoplay modes of the playback contract (ADR-0008). Both derive the
@@ -17,6 +17,8 @@ type AutoplayVideoProps = {
   src: string;
   mode: AutoplayMode;
   className?: string;
+  // Layout of the element itself, such as ADR-0016's active-picture framing.
+  style?: CSSProperties;
 };
 
 // A muted loop layered over a poster that the parent renders beneath it. The
@@ -29,7 +31,7 @@ type AutoplayVideoProps = {
 // prefers-reduced-motion nothing is loaded. Playback is re-driven when the
 // source becomes ready rather than only on a visibility change
 // (design-system.md §9.3).
-export function AutoplayVideo({ src, mode, className }: AutoplayVideoProps) {
+export function AutoplayVideo({ src, mode, className, style }: AutoplayVideoProps) {
   const ref = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -122,6 +124,7 @@ export function AutoplayVideo({ src, mode, className }: AutoplayVideoProps) {
     <video
       ref={ref}
       className={className ? `${styles.video} ${className}` : styles.video}
+      style={style}
       data-play={mode === "AUTOPLAY_AMBIENT" ? "ambient" : "visible"}
       muted
       loop

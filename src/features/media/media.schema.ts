@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { ACTIVE_PICTURES } from "@db/schema";
+import { parseExternalVideo } from "./external-video";
 
 // Request schemas for the Media Library (openapi.yaml, CLAUDE.md §14).
 
@@ -21,27 +23,28 @@ export const createUploadSchema = z.strictObject({
   altText: altText.optional(),
 });
 
-// Provider URLs are accepted only on the provider's own https hosts.
-const EXTERNAL_HOSTS = {
-  vimeo: ["vimeo.com", "www.vimeo.com", "player.vimeo.com"],
-  youtube: ["youtube.com", "www.youtube.com", "m.youtube.com", "youtu.be", "www.youtube-nocookie.com"],
-} as const;
-
 export const createExternalSchema = z
   .strictObject({
     provider: z.enum(["vimeo", "youtube"]),
     url: z.url({ protocol: /^https$/ }).max(2000),
     altText: altText.optional(),
   })
-  .refine(
-    ({ provider, url }) => (EXTERNAL_HOSTS[provider] as readonly string[]).includes(new URL(url).hostname),
-    { path: ["url"], message: "must be an https URL on the provider's own host" },
-  );
+  // Provider URLs are accepted only on the provider's own https hosts, and
+  // only when they name a video its player can show (external-video.ts).
+  .refine(({ provider, url }) => parseExternalVideo(provider, url) !== null, {
+    path: ["url"],
+    message: "must be a video address on the provider's own https host, such as youtube.com/watch?v=… or vimeo.com/123456",
+  });
+
+// ADR-0016: FULL (the file as encoded) or where a letterboxed picture sits.
+export const ACTIVE_PICTURE_CHOICES = ["FULL", ...ACTIVE_PICTURES] as const;
+export type ActivePictureChoice = (typeof ACTIVE_PICTURE_CHOICES)[number];
 
 export const updateMediaSchema = z
   .strictObject({
     altText: altText.optional(),
     posterMediaId: z.uuid().nullable().optional(),
+    activePicture: z.enum(ACTIVE_PICTURE_CHOICES).optional(),
   })
   .refine((value) => Object.keys(value).length > 0, "at least one field is required");
 

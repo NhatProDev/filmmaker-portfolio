@@ -1820,6 +1820,7 @@ components:
         - deliveryUrl
         - checksumSha256
         - posterMediaId
+        - activePicture
         - poster
         - createdAt
         - updatedAt
@@ -1877,6 +1878,8 @@ components:
           type: [string, 'null']
           format: uuid
           description: The asset's default poster (ADR-0009). VIDEO and EXTERNAL_VIDEO only.
+        activePicture:
+          $ref: '#/components/schemas/ActivePicture'
         poster:
           oneOf:
             - $ref: '#/components/schemas/MediaRef'
@@ -2030,6 +2033,18 @@ components:
         posterMediaId:
           type: [string, 'null']
           format: uuid
+        activePicture:
+          $ref: '#/components/schemas/ActivePicture'
+
+    ActivePicture:
+      type: string
+      enum: [FULL, '2.39', '2.00', '1.85']
+      description: |
+        ADR-0016: where a letterboxed file's picture sits — its aspect ratio
+        inside the frame, centred vertically — or FULL for the file as
+        encoded (the default, and the right choice for a clean master).
+        IMAGE and VIDEO only; an EXTERNAL_VIDEO is 422. Published pages
+        change at the next Publish.
 
     # ---------------------------------------------------------- Projects
     ProjectCredit:

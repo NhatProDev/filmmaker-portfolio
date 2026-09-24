@@ -4,6 +4,8 @@ import { Fragment, type CSSProperties, type ReactNode } from "react";
 import { AutoplayVideo } from "@/components/media/AutoplayVideo";
 import { JustifiedRows } from "@/components/media/JustifiedRows";
 import type {
+  ProjectExternalVideo,
+  ProjectImage,
   GridPlacement,
   ProjectBlock,
   ProjectFacts,
@@ -14,6 +16,7 @@ import type {
   TextParagraph,
 } from "@/features/site-content/site-content.types";
 import { ClickToPlay } from "./ClickToPlay";
+import { ExternalPlayer } from "./ExternalPlayer";
 import { ProjectOpening } from "./ProjectOpening";
 import { titleBootstrap } from "./titlePlacement";
 import blockStyles from "./blocks.module.css";
@@ -89,33 +92,80 @@ function Credits({ credits, className }: { credits: PageData["credits"]; classNa
 
 // ---- Media ----
 
-const aspectOf = (video: ProjectVideo) => (video.width && video.height ? video.width / video.height : 16 / 9);
+// A frame follows its asset's shape: the active picture's when the file is
+// letterboxed (ADR-0016), otherwise the file's.
+const aspectOf = (video: ProjectVideo) => video.activeAspect ?? (video.width && video.height ? video.width / video.height : 16 / 9);
+
+// ADR-0016: each layer framed on its own asset's active picture, from data —
+// never a per-page or per-asset CSS value.
+type Layer = { className: string; style: CSSProperties };
+function layerOf(asset: { width: number | null; height: number | null; activeAspect?: number }, fit: "COVER" | "CONTAIN"): Layer | undefined {
+  if (!asset.activeAspect || !asset.width || !asset.height) return undefined;
+  return {
+    className: fit === "CONTAIN" ? `${blockStyles.activeLayer} ${blockStyles.activeContain}` : blockStyles.activeLayer,
+    style: { "--active": asset.activeAspect, "--file": asset.width / asset.height } as CSSProperties,
+  };
+}
+
+const hasActiveArea = (media: ProjectMedia) =>
+  media.kind === "image"
+    ? Boolean(media.image.activeAspect)
+    : media.kind === "video"
+      ? Boolean(media.video.activeAspect || media.video.poster?.activeAspect)
+      : Boolean(media.external.poster?.activeAspect);
+
+// The frame becomes a size container only when a layer needs one.
+const framed = (base: string, media: ProjectMedia) => (hasActiveArea(media) ? `${base} ${blockStyles.activeFrame}` : base);
+
+// A still filling its frame, or framed on its active picture.
+function FillImage({ image, fit }: { image: ProjectImage; fit: "COVER" | "CONTAIN" }) {
+  const layer = layerOf(image, fit);
+  if (layer) return <Image className={layer.className} style={layer.style} src={image.src} alt={image.alt} width={image.width} height={image.height} unoptimized />;
+  const fill = fit === "CONTAIN" ? `${blockStyles.fill} ${blockStyles.contain}` : blockStyles.fill;
+  return <Image className={fill} src={image.src} alt={image.alt} fill unoptimized />;
+}
 
 // A video frame: its poster beneath (or the empty frame), and the playback its
 // mode derives (ADR-0008). Autoplay is always muted; sound needs the visitor's
 // act.
 function VideoFrame({ video, fit, label }: { video: ProjectVideo; fit: "COVER" | "CONTAIN"; label: string }) {
   const fill = fit === "CONTAIN" ? `${blockStyles.fill} ${blockStyles.contain}` : blockStyles.fill;
+  const layer = layerOf(video, fit);
   return (
     <>
-      {video.poster && <Image className={fill} src={video.poster.src} alt={video.poster.alt} fill unoptimized />}
+      {video.poster && <FillImage image={video.poster} fit={fit} />}
       {video.playback === "CLICK_TO_PLAY" ? (
-        <ClickToPlay src={video.src} label={label} />
+        <ClickToPlay src={video.src} label={label} layer={layer} />
       ) : (
-        <AutoplayVideo className={fill} src={video.src} mode={video.playback} />
+        <AutoplayVideo className={layer ? `${fill} ${layer.className}` : fill} style={layer?.style} src={video.src} mode={video.playback} />
       )}
+    </>
+  );
+}
+
+// YouTube or Vimeo: the poster (or the empty frame) until the visitor asks.
+function ExternalFrame({ external, fit, label }: { external: ProjectExternalVideo; fit: "COVER" | "CONTAIN"; label: string }) {
+  return (
+    <>
+      {external.poster && <FillImage image={external.poster} fit={fit} />}
+      <ExternalPlayer external={external} label={label} />
     </>
   );
 }
 
 function MediaFrame({ media, fit, label }: { media: ProjectMedia; fit: "COVER" | "CONTAIN"; label: string }) {
   if (media.kind === "video") return <VideoFrame video={media.video} fit={fit} label={label} />;
-  const fill = fit === "CONTAIN" ? `${blockStyles.fill} ${blockStyles.contain}` : blockStyles.fill;
-  return <Image className={fill} src={media.image.src} alt={media.image.alt} fill unoptimized />;
+  if (media.kind === "external") return <ExternalFrame external={media.external} fit={fit} label={label} />;
+  return <FillImage image={media.image} fit={fit} />;
 }
 
+// Provider players are 16:9 frames.
 const mediaAspect = (media: ProjectMedia) =>
-  media.kind === "image" ? media.image.width / media.image.height : aspectOf(media.video);
+  media.kind === "image"
+    ? (media.image.activeAspect ?? media.image.width / media.image.height)
+    : media.kind === "video"
+      ? aspectOf(media.video)
+      : 16 / 9;
 
 // ---- Leaf blocks ----
 
@@ -145,20 +195,33 @@ function LeafContent({ block, page }: { block: ProjectLeafBlock; page: PageData 
     case "image":
       return (
         <figure className={blockStyles.figure}>
-          <Image className={blockStyles.native} src={block.image.src} width={block.image.width} height={block.image.height} alt={block.image.alt} unoptimized />
+          {block.image.activeAspect ? (
+            // ADR-0016: the still at its active picture's own shape.
+            <div className={`${blockStyles.frame} ${blockStyles.activeFrame}`} style={{ "--aspect": block.image.activeAspect } as CSSProperties}>
+              <FillImage image={block.image} fit="COVER" />
+            </div>
+          ) : (
+            <Image className={blockStyles.native} src={block.image.src} width={block.image.width} height={block.image.height} alt={block.image.alt} unoptimized />
+          )}
           {block.caption && <figcaption className={blockStyles.caption}>{block.caption}</figcaption>}
         </figure>
       );
     case "video":
       return (
-        <div className={blockStyles.frame} style={{ "--aspect": aspectOf(block.video) } as CSSProperties}>
+        <div className={framed(blockStyles.frame, { kind: "video", video: block.video })} style={{ "--aspect": aspectOf(block.video) } as CSSProperties}>
           <VideoFrame video={block.video} fit={block.fit} label="Play video" />
+        </div>
+      );
+    case "externalVideo":
+      return (
+        <div className={blockStyles.frame} style={{ "--aspect": 16 / 9 } as CSSProperties}>
+          <ExternalFrame external={block.external} fit={block.fit} label="Play video" />
         </div>
       );
     case "hero":
       return (
         <figure className={blockStyles.figure}>
-          <div className={blockStyles.frame} style={{ "--aspect": mediaAspect(block.media) } as CSSProperties}>
+          <div className={framed(blockStyles.frame, block.media)} style={{ "--aspect": mediaAspect(block.media) } as CSSProperties}>
             <MediaFrame media={block.media} fit={block.fit} label="Play film" />
           </div>
           {block.caption && <figcaption className={blockStyles.caption}>{block.caption}</figcaption>}
@@ -252,7 +315,7 @@ function Block({ block, page }: { block: ProjectBlock; page: PageData }) {
     case "hero":
       return (
         <figure className={blockStyles.hero}>
-          <div className={blockStyles.heroFrame} style={{ "--aspect": mediaAspect(block.media) } as CSSProperties}>
+          <div className={framed(blockStyles.heroFrame, block.media)} style={{ "--aspect": mediaAspect(block.media) } as CSSProperties}>
             <MediaFrame media={block.media} fit={block.fit} label="Play film" />
           </div>
           {block.caption && <figcaption className={`${blockStyles.caption} ${blockStyles.heroCaption}`}>{block.caption}</figcaption>}
@@ -270,6 +333,7 @@ function Block({ block, page }: { block: ProjectBlock; page: PageData }) {
 
     case "image":
     case "video":
+    case "externalVideo":
       return (
         <section className={blockStyles.section}>
           <LeafContent block={block} page={page} />
@@ -319,7 +383,7 @@ function Gallery({ block }: { block: Extract<ProjectBlock, { type: "gallery" }> 
           style={{ "--cols-d": columns.desktop, "--cols-t": columns.tablet, "--cols-m": columns.mobile } as CSSProperties}
         >
           {items.map((item, i) => (
-            <div key={i} className={blockStyles.tile}>
+            <div key={i} className={framed(blockStyles.tile, item)}>
               <MediaFrame media={item} fit={fit} label="Play video" />
             </div>
           ))}
@@ -337,7 +401,7 @@ function Gallery({ block }: { block: Extract<ProjectBlock, { type: "gallery" }> 
       {heading}
       <div className={strip ? blockStyles.strip : blockStyles.slides} role="region" aria-label={label ?? "Gallery"} tabIndex={0}>
         {items.map((item, i) => (
-          <div key={i} className={blockStyles.slide} style={{ "--aspect": mediaAspect(item) } as CSSProperties}>
+          <div key={i} className={framed(blockStyles.slide, item)} style={{ "--aspect": mediaAspect(item) } as CSSProperties}>
             <MediaFrame media={item} fit="COVER" label="Play video" />
           </div>
         ))}

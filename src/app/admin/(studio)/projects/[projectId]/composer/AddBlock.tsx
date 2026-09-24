@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { BlockDto } from "@/features/project-builder/composition.mapper";
+import { PATTERNS } from "@/features/project-builder/patterns";
 import { PRESETS } from "@/features/project-builder/presets";
 import { markupToParagraphs } from "@/features/project-builder/inline-markup";
 import { openingSeed } from "@/features/project-builder/templates";
@@ -153,6 +154,15 @@ const HOME_CHOICES: Choice[] = [
     body: (_text, [label = ""] = []) => ({ type: "GALLERY", content: { label: label.trim() }, config: { mode: "JUSTIFIED_ROWS" } }),
   },
 ];
+
+// Reusable patterns (3C-9): ordinary blocks, inserted once, never linked.
+const PATTERN_CHOICES: Choice[] = PATTERNS.map((pattern) => ({
+  key: `pattern-${pattern.key}`,
+  label: pattern.label,
+  hint: pattern.description,
+  ...(pattern.fields.length ? { fields: pattern.fields } : {}),
+  body: (_text, values = []) => pattern.build(values),
+}));
 
 const ROOT_CHOICES: Choice[] = [
   { key: "text", label: "Text", hint: "Paragraphs in the page's text column.", needsText: "text", body: (text = "") => ({ type: "TEXT", content: { kind: "richText", paragraphs: paragraphs(text) }, config: { role: "body" } }) },
@@ -332,6 +342,8 @@ export function AddBlock({
                     )}
                     {PRESET_CHOICES.map(choiceButton)}
                   </div>
+                  <p className={styles.groupLabel}>Patterns</p>
+                  <div className={styles.choices}>{PATTERN_CHOICES.map(choiceButton)}</div>
                   <p className={styles.groupLabel}>Blocks</p>
                 </>
               )}

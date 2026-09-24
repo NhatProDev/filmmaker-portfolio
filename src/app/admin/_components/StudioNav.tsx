@@ -27,7 +27,9 @@ export function StudioNav({ email }: { email: string }) {
 
   return (
     <header className={styles.bar}>
-      <span className={styles.brand}>Studio</span>
+      <Link href="/admin" className={styles.brand} aria-current={pathname === "/admin" ? "page" : undefined}>
+        Studio
+      </Link>
       <nav className={styles.nav} aria-label="Studio">
         {LINKS.map((link) => (
           <Link key={link.href} href={link.href} aria-current={pathname.startsWith(link.href) ? "page" : undefined}>

@@ -135,6 +135,8 @@ Additive only: two migrations (`0007`, `0008`), three endpoints
   yet; setting one on an asset they use is a design review (ADR-0016 §4).
   The same holds for JUSTIFIED_ROWS.
 - Video in JUSTIFIED_ROWS.
-- Home as a free composer.
+- Home as a free composer. Phase 3C composes Home from its closed sections
+  (ADR-0018); generic blocks on Home await a design review.
 - Bold text, which would be a contract change.
-- Studio upload of private media: uploads are still public originals.
+- Studio upload of private media: done in Phase 3C (ADR-0020,
+  `content-system.md` §5).

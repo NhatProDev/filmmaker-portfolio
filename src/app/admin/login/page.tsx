@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: "Sign in" };
 
 export default async function LoginPage() {
   const { admin, databaseUnavailable } = await getCurrentAdmin();
-  if (admin) redirect("/admin/projects");
+  if (admin) redirect("/admin");
   return (
     <main className={styles.signIn}>
       <div className={styles.signInCard}>

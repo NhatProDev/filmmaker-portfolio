@@ -89,6 +89,7 @@ export function MediaPicker({
                     {media.type}
                     {media.width && media.height ? ` · ${media.width}×${media.height}` : ""}
                   </span>
+                  {media.isPrivate && <span className={`${styles.badge} ${styles.badgeWarn} ${styles.tileBadge}`}>Private — private projects only</span>}
                 </button>
               );
             })}

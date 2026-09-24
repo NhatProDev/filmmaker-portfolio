@@ -129,6 +129,7 @@ time only. Values that differ per deployment are in `.env.prod-ops`, never here.
 | `S3_PUBLIC_BUCKET` | `portfolio-media-public` | public | B+R |
 | `S3_PRIVATE_BUCKET` | `portfolio-media-private` | public | B+R |
 | `S3_FORCE_PATH_STYLE` | `true` | public | B+R |
+| `S3_UPLOAD_CHECKSUMS` | unset (`false`) until the owner updates CORS (`media-lifecycle.md` §4) | public | R |
 | `S3_REGION` | `auto` | public | R |
 | `S3_ACCESS_KEY_ID` | R2 token, Object Read & Write on the two buckets | **secret** | R |
 | `S3_SECRET_ACCESS_KEY` | R2 token secret | **secret** | R |
@@ -200,3 +201,54 @@ so a later smoke run needs a new slug.
   (Phase 3C).
 - **Artifacts.** `smoke-3b-2489fd` and `smoke-3b-def795` are archived, like
   the earlier smoke projects. Their external-video media are soft-deleted.
+
+## 9. Phase 3C release (2026-09-24)
+
+- **Baseline.** `phase-3b-authoring-v1` (`9da1af0`). Phase 3C is tagged
+  `phase-3c-content-system-v1` (`c821b8b`).
+- **Backup and rehearsal.** `portfolio-20260924-1853Z-pre3c.dump`. On a
+  restore of it, `0009` and `0010` applied, provider realignment, the import,
+  `db:health` and `db:verify` all passed, and no snapshot drifted.
+- **Production:**
+  - Neon migrated 8 → 10;
+  - `media:realign-provider --apply` (22 rows, 10 snapshots; a rerun found
+    nothing);
+  - the import created the SITE, ABOUT and CONTACT working copies, and 0
+    media;
+  - the owner published SITE, ABOUT and CONTACT in the Studio.
+- **Public regression.** The screenshots stayed identical to V1 after the
+  deploy and after each publish. The markup changed only in About's and
+  Contact's image paths (same bytes).
+- **Albums.** None is published or linked. The smoke album was deleted.
+- **Artifacts.** `smoke-3c-*` projects are archived. The smoke private PNG is
+  soft-deleted; its object stays in the private bucket until `media:gc`
+  (`media-lifecycle.md`).
+
+## 10. Phase 3D release (launch lock)
+
+- **Baseline.** `phase-3c-content-system-v1` (`c821b8b`), with production
+  health ok. The backup `portfolio-20260924-1938Z-pre3d.dump` was restored into
+  `postgres:17`: `db:health` was healthy and `db:verify` found 14 of 14
+  routes identical.
+- **No schema change.** No migration and no import. The environment needs
+  nothing new: `S3_UPLOAD_CHECKSUMS` stays off until CORS allows the header.
+- **Gates:**
+  - the full test suite, typecheck, lint, `drizzle-kit check` and
+    `git diff --check`;
+  - a fresh PostgreSQL 17 database migrated twice (the second run a no-op),
+    and the import applied twice (0 created, 50 unchanged the second time);
+  - a production build over the restored dump.
+- **Regression against the 3C build over the same restored data:**
+  - screenshots at three widths for 19 routes are identical, except the
+    `/albums` 404 and the phone sign-in page, both fixed on purpose
+    (`launch-review.md` §3);
+  - the body markup is identical on every route; the `<head>` gains Open
+    Graph fields.
+- **QA.** Chromium, Firefox and WebKit, from 1440 to 320 wide: 178 public
+  and Studio checks passed, and so did the Studio keyboard and editing-safety
+  checks. WebKit's Studio is checked in production over https.
+- **Deploy.** Merged to `main` and pushed. `GET /api/v1/health` names the
+  deployed commit (`release`). The tag `phase-3d-launch-v1` points at that
+  commit.
+- **Everything else** (design outcomes, accessibility, performance, SEO,
+  security, owner actions): `docs/architecture/launch-review.md`.

@@ -90,8 +90,10 @@ pg_dump --format=custom --no-owner --no-privileges \
 ## 6. Health verification
 
 - `GET /api/v1/health` — public, uncached: `database`, `schema`, `storage`
-  states; 503 when the site cannot serve. Point the platform's health check at
-  it.
+  states, and `release`, the first 12 hex digits of the deployed commit
+  (null off Vercel). It answers 503 when the site cannot serve. Point the
+  platform's health check at it. After a push, `release` must equal
+  `git rev-parse --short=12 HEAD` before the release is tagged.
 - `npm run db:health` — deeper and read-only: migrations match, every
   published snapshot still validates and renders, every needed media file is
   present (local adapter) — for after a deploy, migration, import or restore.
@@ -117,9 +119,15 @@ DATABASE_URL=postgres://postgres:drill@127.0.0.1:55432/restored SITE_CONTENT_ADA
 docker rm -f portfolio-restore-drill
 ```
 
-Last drill: 2026-09-24. The dump `portfolio-20260924-1224Z.dump` restored
-completely. `db:health` was healthy (9 project snapshots, 1 page, 26 media,
-0 missing). `db:verify` found 14 of 14 routes identical.
+Last drill: 2026-09-24 (Phase 3D). The dump
+`portfolio-20260924-1938Z-pre3d.dump` restored completely into
+`postgres:17`. `db:health` was healthy (9 project snapshots, 4 pages,
+0 albums, 26 media files needed, 0 missing). `db:verify` found 14 of 14 routes
+identical. Earlier drills: `…-1224Z` (2G-B) and `…-1853Z-pre3c` (3C).
+
+Backups are kept outside the repository, in `E:ile cua choeportfolio-backups`
+on the operator machine. Copy them somewhere off that machine too: Neon Free
+keeps only 6 hours of point-in-time restore.
 
 Media are not part of a database restore. Restored rows reference keys; if a
 key's object is gone, `db:health` names it. Bucket versioning restores it.
@@ -134,6 +142,20 @@ key's object is gone, `db:health` names it. Bucket versioning restores it.
 - **Content:** there is no revision history (CLAUDE.md §19). To undo a publish,
   edit the working copy back and publish again, or Unpublish.
 - **Database:** §7.
+
+## 8a. Neon point-in-time restore
+
+Neon Free keeps 6 hours of history. Within that window, a Neon **branch at a
+timestamp** is the fastest way to recover from a bad write:
+
+1. create the branch;
+2. run `db:health` against it;
+3. repoint `DATABASE_URL` to it and redeploy.
+
+Past 6 hours, `pg_dump` backups (§4) are the only path. Do not assume object
+versioning in R2. Treat a removed object as recoverable only from the local
+media sources (`imgs & videos/`, `public/media`) or a copy of the bucket. `media:gc` therefore never removes without `--apply` and
+explicit bucket confirmation.
 
 ## 9. Media and database consistency
 
@@ -167,3 +189,16 @@ npm run media:realign-provider -- --confirm-remote=<host>/<database>           m
 It was rehearsed on 2026-09-24 against a restored production dump, with the
 production bucket used read-only: 22 rows and 10 snapshots were realigned,
 with 0 drift, and a second run was a no-op.
+
+## 11. Media lifecycle
+
+`npm run media:gc` lists both buckets and every database reference, and names
+what nothing needs any more:
+
+- probes;
+- abandoned uploads;
+- soft-deleted assets past the grace period;
+- orphans.
+
+It removes nothing without `--apply` and `--confirm-storage`. Procedure,
+rules and the upload-integrity switch: `media-lifecycle.md`.

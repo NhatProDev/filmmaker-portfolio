@@ -4,17 +4,27 @@ A professional filmmaker portfolio: public site (Home, Art Works, About Me,
 Contact), public and password-protected project pages, and an admin CMS with a
 block-based project builder.
 
-**Status: public frontend locked; database, admin API and Studio in place.**
-The public site (Home, Art Works, Project Detail, About Me, Contact) is
-implemented and reads all content through a content gateway. By default it
-serves the committed static content and needs no database; a
-PostgreSQL-backed adapter serves the same pages from the database model.
+**Status: in production. The core system is complete as of Phase 3D
+(`phase-3d-launch-v1`).**
 
-The Studio at `/admin` (projects, the template-shaped project and Home
-editors, the Media Library) works over the REST API in `src/app/api/v1`, with Argon2id
-sign-in, revocable server-side sessions and CSRF-checked mutations. It needs a
-database; the public site does not. Uploads stay unavailable until a storage
-provider is chosen (ADR-0014).
+- **Production:** https://filmmaker-portfolio-beta.vercel.app, on Vercel,
+  with Neon PostgreSQL 17 and Cloudflare R2.
+- **Start here:** `docs/architecture/system-overview.md` describes the whole
+  system on one page.
+
+The public site (Home, Art Works, Project Detail, About Me, Contact, albums)
+reads all content through a content gateway. In production the database
+adapter serves published snapshots. The static adapter serves the committed
+content and needs no database: it is the fallback and the test fixture.
+
+The Studio at `/admin` works over the REST API in `src/app/api/v1`, with
+Argon2id sign-in, revocable server-side sessions and CSRF-checked mutations.
+It covers:
+
+- projects, and the Project and Home composers;
+- About, Contact and Site settings;
+- albums;
+- the Media Library, with direct uploads to R2 for public and private media.
 
 Publishing follows ADR-0012: the Studio edits a working copy, Publish writes
 one validated snapshot, and the public site reads only snapshots. Preview opens
@@ -22,8 +32,7 @@ the working copy on the real public page for a signed-in admin. Private
 projects open at their address behind the password gate; see
 `docs/architecture/publishing-and-private-access.md`.
 
-`db/schema.ts` implements ADR-0001 to ADR-0007, ADR-0009, ADR-0011, ADR-0014
-and ADR-0015. `openapi.yaml` was realigned to that domain model by ADR-0015.
+`db/schema.ts` and `openapi.yaml` implement ADR-0001 to ADR-0020.
 
 ## Repository map
 
@@ -68,8 +77,9 @@ docs/
   architecture/
     decisions/                Approved ADRs. See its README.
 
-scripts/                      Operational scripts: db-migrate.ts and
-                              import-static-content.ts. seed-admin.ts is reserved.
+scripts/                      Operational scripts (migrate, import, seed-admin,
+                              health, verify, media manifest/upload/realign/gc,
+                              storage and env checks). See scripts/README.md.
 src/                          Application code (Next.js). Public content is read
                               through src/features/site-content/.
 tests/                        node:test suites; database tests run on an
@@ -126,6 +136,14 @@ are deliberately not repeated here; a second copy would drift.
 | `npm run db:import` | Dry run of the static-content import; add `-- --apply` to write (local database only). |
 | `npm run db:seed-admin` | Creates the admin from `ADMIN_EMAIL` / `ADMIN_PASSWORD`, or resets its password and sessions (local database only). |
 | `npm run db:verify` | Read-only: every public route served from the database compared with the committed content (local database only). |
+| `npm run db:health` | Read-only: migrations, every published snapshot, and the media files they need. |
+| `npm run env:check` | Validates the environment; `-- --production` also lists what a deployment lacks. |
+| `npm run storage:check` | Probes both buckets: signing, privacy, CORS, byte ranges (writes and removes two probe objects). |
+| `npm run media:manifest` · `media:upload` · `media:realign-provider` | Media migration tooling (`docs/operations/media-migration.md`, runbook §10). |
+| `npm run media:gc` | Media lifecycle audit, dry run by default (`docs/operations/media-lifecycle.md`). |
+
+Every database script refuses a non-local database unless the command line
+names it with `--confirm-remote=<host>/<database>` (`docs/operations/runbook.md`).
 
 To use the Studio locally: set `DATABASE_URL` to a local PostgreSQL, then run
 `db:migrate`, `db:import -- --apply` and `db:seed-admin`, start the site, and
@@ -151,7 +169,9 @@ migrations.
 
 ## Version control
 
-This repository is under Git, on branch `main`, with no remote configured.
+This repository is under Git. Its remote is a private GitHub repository, and a
+push to `main` deploys production on Vercel, so work happens on phase
+branches. Releases are tagged; see `docs/architecture/system-overview.md` §8.
 
 Three paths are deliberately untracked and gitignored. Each has a tracked
 manifest that travels in its place:

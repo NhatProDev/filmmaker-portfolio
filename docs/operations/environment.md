@@ -18,7 +18,7 @@ and changing them needs a rebuild:
 | When read | Variables |
 |---|---|
 | **Build** (and run) | `SITE_CONTENT_ADAPTER`, `DATABASE_URL` (db adapter: pages prerender from the database), `SITE_URL` (canonical, Open Graph, sitemap), `MEDIA_PUBLIC_BASE_URL` (media URLs in prerendered HTML), and for the CSP: `MEDIA_STORAGE_PROVIDER`, `S3_ENDPOINT`, `S3_FORCE_PATH_STYLE`, `S3_PUBLIC_BUCKET`, `S3_PRIVATE_BUCKET` |
-| **Run** only | `PROJECT_ACCESS_SECRET`, `APP_ORIGINS`, `CLIENT_IP_HEADER`, `TRUSTED_PROXY_HOPS`, `MEDIA_PRIVATE_ROOT`, `MEDIA_SIGNED_URL_TTL_SECONDS`, `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `DATABASE_POOL_MAX`, `DATABASE_PREPARE` |
+| **Run** only | `PROJECT_ACCESS_SECRET`, `APP_ORIGINS`, `CLIENT_IP_HEADER`, `TRUSTED_PROXY_HOPS`, `MEDIA_PRIVATE_ROOT`, `MEDIA_SIGNED_URL_TTL_SECONDS`, `S3_UPLOAD_CHECKSUMS`, `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `DATABASE_POOL_MAX`, `DATABASE_PREPARE` |
 | **Scripts** only | `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME` (`db:seed-admin`) |
 
 On a platform with separate build and runtime environments (Vercel), set the
@@ -46,6 +46,7 @@ build-time variables for both.
 | `S3_PUBLIC_BUCKET` / `S3_PRIVATE_BUCKET` | — | required with `s3`, distinct | Public bucket behind the CDN; private bucket never public. |
 | `S3_ACCESS_KEY_ID` / `S3_SECRET_ACCESS_KEY` | — | required with `s3` | A token scoped to the two buckets only. |
 | `S3_FORCE_PATH_STYLE` | `true` | `true` for R2 | Path-style URLs (`endpoint/bucket/key`). |
+| `S3_UPLOAD_CHECKSUMS` | `false` | `true` once both buckets' CORS allow `x-amz-checksum-sha256` | The provider verifies each upload's SHA-256 (`media-lifecycle.md` §4). Switched on before CORS allows the header, browsers cannot upload. |
 | `VIDEO_PROVIDER` | `none` | `none` | Reserved for Mux / Cloudflare Stream; any other value is refused until implemented. |
 
 ## Secrets handling

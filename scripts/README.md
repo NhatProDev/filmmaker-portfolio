@@ -18,6 +18,8 @@ names. Production workflows: `docs/operations/runbook.md`.
 | `npm run media:upload` | `media-upload.ts` | Uploads a manifest's `deploy` entries to the s3 buckets. Dry run by default; `-- --apply` uploads. Create-only: an object with the same size and MD5 is left alone, one with other bytes is a conflict and never overwritten. The SHA-256 must still match the manifest before upload, and size + MD5 are checked after. `-- --verify-delivery` reads every public object back through `MEDIA_PUBLIC_BASE_URL` (SHA-256, Content-Type, video byte ranges). |
 | `npm run storage:check` | `storage-check.ts` | Writes two probe objects, checks public delivery, private denial (anonymous, tampered and expired signatures), presigned access and CORS for `SITE_URL`, then deletes its probes. |
 | `npm run env:check` | `check-env.ts` | Validates the environment and lists what is set (never secret values). `-- --production` also refuses anything a public deployment lacks. |
+| `npm run media:realign-provider` | `media-realign-provider.ts` | Realigns media rows recorded under another provider than the one holding their files, snapshots included (runbook §10). Dry run by default. |
+| `npm run media:gc` | `media-gc.ts` | Media lifecycle audit: lists both buckets and every reference, and names abandoned uploads, deleted assets and orphans past a grace period. Dry run by default; `-- --apply` needs `--confirm-storage=<public>+<private>` and stays under `--max-delete` (`docs/operations/media-lifecycle.md`). |
 
 `lib/` holds what these share: the import plan, file probing (SHA-256,
 dimensions, duration), the database target guard, the media manifest, and the

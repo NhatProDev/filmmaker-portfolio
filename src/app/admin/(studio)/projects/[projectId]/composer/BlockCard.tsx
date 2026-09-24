@@ -8,6 +8,7 @@ import { useAction } from "../../../../_components/useAction";
 import studio from "../../../../studio.module.css";
 import { AddBlock } from "./AddBlock";
 import { labelOf, needsOf, presetOf, summaryOf, thumbsOf, type Block } from "./blockInfo";
+import { moveBlock, moveRefusal, moveTargets } from "./moves";
 import { GalleryEditor, HeroEditor, ImageEditor, PlacementControl, SpacerEditor, TextEditor, VideoEditor } from "./editors";
 import { SortableList, type HandleProps, type ItemState } from "./SortableList";
 import styles from "./composer.module.css";
@@ -21,6 +22,8 @@ export type CardContext = {
   expanded: ReadonlySet<string>;
   toggle: (id: string, open?: boolean) => void;
   hasOpening: boolean;
+  // The top-level blocks, for moves between containers.
+  roots: readonly Block[];
 };
 
 export function BlockCard({
@@ -45,6 +48,7 @@ export function BlockCard({
   const label = labelOf(block);
   const locked = handle === null;
   const inPreset = Boolean(parent && presetOf(parent));
+  const targets = locked ? [] : moveTargets(block, parent, context.roots);
 
   const remove = () => {
     const children = block.children.length ? ` and the ${block.children.length} block(s) inside it` : "";
@@ -94,6 +98,25 @@ export function BlockCard({
           <button type="button" className={`${studio.button} ${studio.small} ${studio.icon}`} aria-label={`Move ${label} down`} disabled={!state.moveDown || pending} onClick={state.moveDown}>
             ↓
           </button>
+          {targets.length > 0 && (
+            <select
+              className={`${studio.select} ${styles.moveTo}`}
+              aria-label={`Move ${label} to another container`}
+              value=""
+              disabled={pending}
+              onChange={(event) => {
+                const target = targets[Number(event.target.value)];
+                if (target) void run(() => moveBlock(block.id, target.parentBlockId, target.position));
+              }}
+            >
+              <option value="">Move to…</option>
+              {targets.map((target, i) => (
+                <option key={target.parentBlockId ?? "root"} value={i}>
+                  {target.label}
+                </option>
+              ))}
+            </select>
+          )}
           {!locked && !inPreset && (
             <button type="button" className={`${studio.button} ${studio.small}`} disabled={pending} onClick={() => run(() => api("POST", `/blocks/${block.id}/duplicate`))}>
               Duplicate
@@ -307,10 +330,20 @@ function ColumnsEditor({ block, context }: { block: Block; context: CardContext 
         <SortableList
           items={block.children}
           label={labelOf}
+          container={block.id}
+          foreign={{
+            refusal: (item, from) => moveRefusal(item as Block, context.roots.find((root) => root.id === from) ?? null, block),
+            onDrop: (id, index) => void run(() => moveBlock(id, block.id, index)),
+          }}
           disabled={pending}
           onCommit={(ids) => run(() => api("PUT", `/projects/${context.projectId}/blocks/order`, { parentBlockId: block.id, blockIds: ids }))}
           renderItem={(child, handle, state) => <BlockCard block={child} handle={handle} state={state} context={context} parent={block} />}
         />
+        {!block.children.length && (
+          <p className={studio.hint}>
+            Nothing in these columns yet. Add a block below, drag one in by its handle, or use Move to… on a block of the page.
+          </p>
+        )}
         <AddBlock
           projectId={context.projectId}
           parentBlockId={block.id}

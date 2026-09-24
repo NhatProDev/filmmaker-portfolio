@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Filmmaker Portfolio API
-  version: 1.2.0
+  version: 1.3.0
   description: |
     REST API contract for the V1 filmmaker portfolio modular monolith.
 
@@ -850,6 +850,48 @@ paths:
           $ref: '#/components/responses/CsrfRejected'
         '404':
           $ref: '#/components/responses/NotFound'
+
+  /blocks/{blockId}/move:
+    parameters:
+      - $ref: '#/components/parameters/BlockId'
+    post:
+      tags: [Blocks]
+      operationId: moveBlock
+      summary: Move a block into another container of the same owner
+      description: |
+        Moves a block between the owner's root (`parentBlockId: null`) and a
+        top-level GRID, or between two GRIDs of the same page, in one
+        transaction. The source closes its gap and the target's siblings at
+        `position` or later shift right. `position` follows the insertion rules
+        (ADR-0005): omitted appends, and a value beyond the end is 422.
+        The block and its placements are validated in the new container: only
+        leaf blocks enter a GRID (one level, ADR-0006), AUTOPLAY_AMBIENT is
+        refused inside one, a preset GRID keeps its own blocks, and the
+        title-overlay HERO stays first at the top level. Leaving a GRID drops
+        the block's grid placement.
+      security:
+        - adminSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MoveBlockRequest'
+      responses:
+        '200':
+          description: The moved block
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
 
   # ---------------------------------------------------------- Block media
   /blocks/{blockId}/media:
@@ -3053,6 +3095,20 @@ components:
           description: Replaces the stored config; validated against the block's type.
         isHidden:
           type: boolean
+
+    MoveBlockRequest:
+      type: object
+      additionalProperties: false
+      required: [parentBlockId]
+      properties:
+        parentBlockId:
+          type: [string, 'null']
+          format: uuid
+          description: The target container, a top-level GRID of the same owner, or null for the root.
+        position:
+          type: integer
+          minimum: 0
+          description: Optional. Omitted appends; 0..N inserts; beyond N is 422.
 
     ReorderBlocksRequest:
       type: object

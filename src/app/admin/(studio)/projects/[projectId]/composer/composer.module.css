@@ -71,6 +71,41 @@
   bottom: -6px;
 }
 
+/* A block dragged from another container: where it would land, or why not. */
+.dropEnd {
+  padding: 10px 12px;
+  border: 1px dashed var(--s-line-strong);
+  border-radius: var(--s-radius);
+  color: var(--s-muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.dropEnd[data-active] {
+  border-color: var(--s-accent);
+  background: var(--s-accent-soft);
+  color: var(--s-accent);
+}
+
+.sortable[data-drop-refused] > .dropEnd {
+  border-color: var(--s-danger);
+  background: var(--s-danger-soft);
+  color: var(--s-danger);
+}
+
+.sortable[data-drop-refused] {
+  outline: 2px dashed var(--s-danger);
+  outline-offset: 4px;
+  border-radius: var(--s-radius);
+}
+
+.moveTo {
+  width: auto;
+  max-width: 14em;
+  padding-block: 2px;
+  font-size: 12px;
+}
+
 /* ---- Block card ---- */
 
 .card {
@@ -429,3 +464,4 @@
   transform-origin: 0 0;
   background: #111;
 }
+

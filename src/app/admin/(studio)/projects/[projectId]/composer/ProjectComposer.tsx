@@ -8,7 +8,9 @@ import { useAction } from "../../../../_components/useAction";
 import studio from "../../../../studio.module.css";
 import { AddBlock } from "./AddBlock";
 import { BlockCard, type CardContext } from "./BlockCard";
-import { isOpening, labelOf } from "./blockInfo";
+import { isOpening, labelOf, type Block } from "./blockInfo";
+import { DragProvider } from "./DragContext";
+import { moveBlock, moveRefusal, ROOT } from "./moves";
 import { PreviewPanel } from "./PreviewPanel";
 import { SortableList } from "./SortableList";
 import styles from "./composer.module.css";
@@ -32,13 +34,17 @@ export function ProjectComposer({ projectId, blocks, previewHref }: { projectId:
     });
   }, []);
 
-  const context: CardContext = { projectId, expanded, toggle, hasOpening };
+  // One request moves a block into another container; the server validates it
+  // in its new place and the page refreshes with the result.
+  const context: CardContext = { projectId, expanded, toggle, hasOpening, roots: blocks };
+  const containerOf = (id: string) => blocks.find((block) => block.id === id) ?? null;
   // Any change to the working copy reloads the preview.
   const version = JSON.stringify(blocks.map(function stamp(b): unknown {
     return [b.id, b.updatedAt, b.position, b.isHidden, b.media.map((m) => [m.id, m.position, m.altText, m.posterMediaId]), b.children.map(stamp)];
   }));
 
   return (
+    <DragProvider>
     <div className={styles.composer}>
       <div className={styles.outline}>
         {!blocks.length && (
@@ -52,6 +58,11 @@ export function ProjectComposer({ projectId, blocks, previewHref }: { projectId:
         <SortableList
           items={blocks}
           label={labelOf}
+          container={ROOT}
+          foreign={{
+            refusal: (item, from) => moveRefusal(item as Block, containerOf(from), null),
+            onDrop: (id, index) => void run(() => moveBlock(id, null, index)),
+          }}
           lockedFirst={hasOpening}
           disabled={pending}
           onCommit={(ids) => run(() => api("PUT", `/projects/${projectId}/blocks/order`, { parentBlockId: null, blockIds: ids }))}
@@ -62,5 +73,6 @@ export function ProjectComposer({ projectId, blocks, previewHref }: { projectId:
       </div>
       <PreviewPanel href={previewHref} version={version} />
     </div>
+    </DragProvider>
   );
 }

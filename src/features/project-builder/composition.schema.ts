@@ -36,6 +36,13 @@ export const updateBlockSchema = z
   })
   .refine((value) => Object.keys(value).length > 0, "at least one field is required");
 
+// A move into another container of the same owner: null is the owner's root.
+// The position bound depends on the target and is checked in the service.
+export const moveBlockSchema = z.strictObject({
+  parentBlockId: z.uuid().nullable(),
+  position: z.int().min(0).optional(),
+});
+
 const idSet = z
   .array(z.uuid())
   .min(1)

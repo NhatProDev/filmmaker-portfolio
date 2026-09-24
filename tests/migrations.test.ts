@@ -80,6 +80,20 @@ describe("migrations on a real PostgreSQL engine (PGlite)", () => {
     await fails(`insert into project_blocks (parent_block_id, type, position) values ('${grid}', 'GALLERY', 1)`, /leaf_child/);
   });
 
+  test("a nested block's parent is a top-level GRID, on insert and on move (ADR-0006)", async () => {
+    const grid = (await q("select id from project_blocks where type = 'GRID' limit 1")).rows[0].id;
+    const child = (await q(`insert into project_blocks (parent_block_id, type, position) values ('${grid}', 'TEXT', 7) returning id`)).rows[0].id;
+    // A leaf cannot become a container, directly or by moving under a child.
+    await fails(`insert into project_blocks (parent_block_id, type, position) values ('${child}', 'TEXT', 0)`, /top-level GRID/);
+    const project = (await q("insert into projects (slug, title) values ('nest-guard', 'Nest guard') returning id")).rows[0].id;
+    const rootText = (await q(`insert into project_blocks (project_id, type, position) values ('${project}', 'TEXT', 0) returning id`)).rows[0].id;
+    await fails(`insert into project_blocks (parent_block_id, type, position) values ('${rootText}', 'IMAGE', 0)`, /top-level GRID/);
+    await fails(`update project_blocks set parent_block_id = '${child}' where id = '${rootText}'`, /top-level GRID|single_owner/);
+    await fails(`update project_blocks set project_id = null, parent_block_id = '${rootText}' where id = '${child}'`, /top-level GRID/);
+    await q(`delete from project_blocks where id = '${child}'`);
+    await q(`delete from projects where id = '${project}'`);
+  });
+
   test("a poster cannot be its asset, and content checksums are unique among live assets (ADR-0009, ADR-0014)", async () => {
     const a = (await q("insert into media (type, checksum_sha256) values ('VIDEO', repeat('a', 64)) returning id")).rows[0].id;
     await fails(`update media set poster_media_id = '${a}' where id = '${a}'`, /poster_not_self/);

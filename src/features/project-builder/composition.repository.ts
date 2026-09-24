@@ -124,6 +124,19 @@ export function createCompositionRepository(db: Database) {
       return row;
     },
 
+    // Re-homes a block: its container, its position and its config together.
+    async placeBlock(
+      id: string,
+      values: Pick<BlockRow, "parentBlockId" | "projectId" | "pageId" | "position" | "config">,
+    ): Promise<BlockRow> {
+      const [row] = await db
+        .update(projectBlocks)
+        .set({ ...values, updatedAt: sql`now()` })
+        .where(eq(projectBlocks.id, id))
+        .returning();
+      return row;
+    },
+
     // Cascades to children and to every placement; never to media assets.
     async deleteBlock(id: string) {
       await db.delete(projectBlocks).where(eq(projectBlocks.id, id));

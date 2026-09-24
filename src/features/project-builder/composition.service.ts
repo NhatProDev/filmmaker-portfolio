@@ -257,6 +257,71 @@ export function createCompositionService(db: Database) {
       });
     },
 
+    // Moves a block into another container of the same owner: the owner's
+    // root or a top-level GRID (ADR-0006, one level). The block is validated
+    // in its new container with its placements, the source closes its gap and
+    // the target shifts right, all in one transaction. Leaving a GRID drops
+    // the block's grid placement, which means nothing at the top level.
+    // Preset containers keep their contracts, so nothing moves into or out of
+    // one, and the title-overlay HERO stays the opening of its page.
+    async move(blockId: string, input: { parentBlockId: string | null; position?: number }): Promise<BlockDto> {
+      return transaction(db, async (tx) => {
+        const { repo, block, parent, owner, container } = await lockedBlock(tx, blockId);
+        const moveIssue = (message: string) => validationError([{ path: "parentBlockId", message }]);
+        const presetOf = (row: BlockRow | null) => (row ? (row.config as { preset?: string }).preset : undefined);
+        let target: BlockRow | null = null;
+        if (input.parentBlockId) {
+          if (input.parentBlockId === block.id) throw moveIssue("a block cannot contain itself");
+          target = await repo.findBlock(input.parentBlockId);
+          if (!target || !isOwnedRoot(target, owner) || target.type !== "GRID") {
+            throw moveIssue("must be a top-level GRID of the same page, or null for the top level");
+          }
+          if (presetOf(target)) throw moveIssue(`a ${presetOf(target)} preset keeps its own blocks`);
+        }
+        if (presetOf(parent)) throw moveIssue(`a ${presetOf(parent)} preset keeps its own blocks`);
+        const current = block.config as Record<string, unknown>;
+        if (block.type === "HERO" && (current.overlay as { enabled?: boolean } | undefined)?.enabled && target) {
+          throw moveIssue("the title-overlay HERO opens its page and stays at the top level");
+        }
+        const config = target ? current : Object.fromEntries(Object.entries(current).filter(([key]) => key !== "placement"));
+        const data = parseBlock(
+          { type: block.type, content: block.content, config },
+          { owner: owner.kind, parentType: target ? "GRID" : null },
+        );
+        const items = await placedMedia(repo, blockId);
+        for (const item of items) {
+          parseBlockMediaConfig(item.config, { blockType: block.type, parentType: target ? "GRID" : null });
+        }
+        assertMediaFits(data, items);
+
+        const destination: Container = { owner, parentBlockId: target?.id ?? null };
+        const sameContainer = destination.parentBlockId === container.parentBlockId;
+        const n = (await repo.countContainer(destination)) - (sameContainer ? 1 : 0);
+        const position = input.position ?? n;
+        if (position > n) throw positionIssue(n);
+        if (!target && position === 0) {
+          const [first] = (await repo.listContainer(destination)).filter((row) => row.id !== block.id);
+          const firstOverlay = (first?.config as { overlay?: { enabled?: boolean } } | undefined)?.overlay?.enabled;
+          if (first?.type === "HERO" && firstOverlay) {
+            throw validationError([{ path: "position", message: "the title-overlay HERO stays first; move below it" }]);
+          }
+        }
+
+        // Leave the source (closing its gap), then enter the target. The
+        // moved row's own position is written last, so the shifts may touch it.
+        await repo.closeGap(container, block.position);
+        await repo.shiftRight(destination, position);
+        await repo.placeBlock(blockId, {
+          parentBlockId: target?.id ?? null,
+          projectId: !target && owner.kind === "project" ? owner.id : null,
+          pageId: !target && owner.kind === "page" ? owner.id : null,
+          position,
+          config: data.config,
+        });
+        return singleBlockDto(repo, blockId);
+      });
+    },
+
     // ---- Placements ----
 
     async addMedia(

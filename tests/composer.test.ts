@@ -7,7 +7,7 @@ import { TEMPLATES } from "@/features/project-builder/templates";
 import { createDbGateway } from "@/features/site-content/db-gateway";
 import type { ProjectBlock, ProjectPage } from "@/features/site-content/site-content.types";
 import { proxy } from "@/proxy";
-import { createApiTestContext } from "./helpers/api";
+import { api, createApiTestContext } from "./helpers/api";
 
 // Phase 3A: the composer's contract end to end — templates, presets inserted
 // whole, generic compositions through Publish to the public view model, draft
@@ -213,5 +213,102 @@ describe("the Project Detail composer (Phase 3A)", () => {
     assert.ok(rewritten(await proxy(request(draft))), "a draft cookie alone is not enough");
     assert.ok(rewritten(await proxy(request(`${ADMIN_SESSION_COOKIE}=forged; ${draft}`))), "nor a forged session");
     assert.ok(rewritten(await proxy(request(session))), "nor a session without preview");
+  });
+});
+
+// Phase 3B: moving blocks between containers (ADR-0006, one level).
+describe("moving blocks between containers (Phase 3B)", () => {
+  let ctx: Context;
+  let still: string;
+  before(async () => {
+    ctx = await createApiTestContext();
+    still = (await ctx.q<{ id: string }>(`select id from media where storage_key like '%/desk-05.jpg'`))[0].id;
+  });
+  after(async () => {
+    await ctx.close();
+  });
+
+  const tree = async (projectId: string) => {
+    const response = await ctx.as("GET", `/projects/${projectId}`);
+    return response.body.data.blocks as Block[];
+  };
+  const positions = async (container: string) =>
+    (await ctx.q<{ position: number }>(`select position from project_blocks where ${container} order by position`)).map((r) => r.position);
+  const setup = async (slug: string) => {
+    const created = await ctx.as("POST", "/projects", { title: slug, slug, year: 2026 });
+    const id = created.body.data.id as string;
+    const add = async (body: Record<string, unknown>) => (await ctx.as("POST", `/projects/${id}/blocks`, body)).body.data as Block;
+    const a = await add({ type: "TEXT", content: { kind: "richText", paragraphs: [["A"]] } });
+    const grid = await add({ type: "GRID" });
+    const b = await add({ type: "TEXT", content: { kind: "richText", paragraphs: [["B"]] } });
+    const c = await add({ type: "TEXT", parentBlockId: grid.id, content: { kind: "richText", paragraphs: [["C"]] }, config: { placement: { desktop: { colStart: 1, colSpan: 6 } } } });
+    const image = await add({ type: "IMAGE" });
+    await ctx.as("POST", `/blocks/${image.id}/media`, { mediaId: still });
+    return { id, a, grid, b, c, image, add };
+  };
+
+  test("top level → GRID → top level keeps both containers contiguous, and leaving drops the grid placement", async () => {
+    const { id, grid, b, c } = await setup("move-basic");
+    const into = await ctx.as("POST", `/blocks/${b.id}/move`, { parentBlockId: grid.id, position: 0 });
+    assert.equal(into.status, 200, JSON.stringify(into.body));
+    let blocks = await tree(id);
+    assert.deepEqual(blocks.find((x) => x.id === grid.id)!.children.map((x) => x.id), [b.id, c.id]);
+    assert.deepEqual(await positions(`project_id = '${id}'`), [0, 1, 2]);
+    assert.deepEqual(await positions(`parent_block_id = '${grid.id}'`), [0, 1]);
+
+    const out = await ctx.as("POST", `/blocks/${c.id}/move`, { parentBlockId: null, position: 1 });
+    assert.equal(out.status, 200, JSON.stringify(out.body));
+    assert.equal(out.body.data.config.placement, undefined, "grid placement is dropped at the top level");
+    blocks = await tree(id);
+    assert.equal(blocks[1].id, c.id);
+    assert.deepEqual(await positions(`project_id = '${id}'`), [0, 1, 2, 3]);
+    assert.deepEqual(await positions(`parent_block_id = '${grid.id}'`), [0]);
+  });
+
+  test("a block with media moves with its placements; omitted position appends", async () => {
+    const { id, grid, image } = await setup("move-media");
+    const moved = await ctx.as("POST", `/blocks/${image.id}/move`, { parentBlockId: grid.id });
+    assert.equal(moved.status, 200, JSON.stringify(moved.body));
+    assert.equal(moved.body.data.media.length, 1);
+    const children = (await tree(id)).find((x) => x.id === grid.id)!.children;
+    assert.equal(children.at(-1)!.id, image.id);
+  });
+
+  test("one level only: a GRID or GALLERY never enters a GRID; a GRID is not a child's parent", async () => {
+    const { grid, c, add } = await setup("move-depth");
+    const other = await add({ type: "GRID" });
+    const gallery = await add({ type: "GALLERY", config: { mode: "SLIDESHOW" } });
+    for (const [block, target] of [[other.id, grid.id], [gallery.id, grid.id], [c.id, c.id], [c.id, "00000000-0000-4000-8000-000000000000"]]) {
+      const response = await ctx.as("POST", `/blocks/${block}/move`, { parentBlockId: target });
+      assert.equal(response.status, 422, `${JSON.stringify(response.body)}`);
+    }
+  });
+
+  test("an invalid move commits nothing: AUTOPLAY_AMBIENT, out-of-range position, preset containers", async () => {
+    const { id, grid, add } = await setup("move-invalid");
+    const ambient = await add({ type: "VIDEO", config: { playback: { mode: "AUTOPLAY_AMBIENT" } } });
+    const before = await positions(`project_id = '${id}'`);
+    const refused = await ctx.as("POST", `/blocks/${ambient.id}/move`, { parentBlockId: grid.id });
+    assert.equal(refused.status, 422);
+    const tooFar = await ctx.as("POST", `/blocks/${ambient.id}/move`, { parentBlockId: grid.id, position: 9 });
+    assert.equal(tooFar.status, 422);
+    assert.deepEqual(await positions(`project_id = '${id}'`), before);
+    assert.deepEqual(await positions(`parent_block_id = '${grid.id}'`), [0]);
+
+    const preset = await add({ type: "GRID", config: { preset: "projectCredits" }, children: [{ type: "TEXT", content: { kind: "projectCredits" } }] });
+    const presetChild = (await tree(id)).find((x) => x.id === preset.id)!.children[0];
+    assert.equal((await ctx.as("POST", `/blocks/${presetChild.id}/move`, { parentBlockId: null })).status, 422);
+    const text = await add({ type: "TEXT", content: { kind: "richText", paragraphs: [["x"]] } });
+    assert.equal((await ctx.as("POST", `/blocks/${text.id}/move`, { parentBlockId: preset.id })).status, 422);
+  });
+
+  test("the move endpoint needs an admin session and refuses another owner's GRID", async () => {
+    const first = await setup("move-owner-a");
+    const second = await setup("move-owner-b");
+    const foreign = await ctx.as("POST", `/blocks/${first.b.id}/move`, { parentBlockId: second.grid.id });
+    assert.equal(foreign.status, 422);
+    const anonymous = await api("POST", `/blocks/${first.b.id}/move`, { body: { parentBlockId: first.grid.id } });
+    assert.equal(anonymous.status, 401);
+    assert.equal((await ctx.as("POST", `/blocks/${first.b.id}/move`, { parentBlockId: null, extra: 1 })).status, 422);
   });
 });

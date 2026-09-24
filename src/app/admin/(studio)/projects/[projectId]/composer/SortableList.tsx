@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState, type DragEvent, type KeyboardEvent, type ReactNode } from "react";
+import { useSharedDrag } from "./DragContext";
 import styles from "./composer.module.css";
 
 // An ordered list the author rearranges, committed as one complete order in
@@ -13,9 +14,16 @@ import styles from "./composer.module.css";
 //
 // `lockedFirst` pins the first item (the page's opening): it cannot move, and
 // nothing can be placed above it.
+//
+// With `foreign`, the list also accepts an item dragged from another list of
+// the same composer (a block into or out of Columns). The list asks
+// `foreign.refusal` first and shows the reason instead of a drop line when the
+// move is not allowed. Lists nest, so each handles its own drag events and
+// stops them there.
 
 export type HandleProps = {
   "aria-label": string;
+  title: string;
   "aria-describedby": string;
   "aria-pressed": boolean;
   onKeyDown: (event: KeyboardEvent<HTMLButtonElement>) => void;
@@ -32,9 +40,17 @@ export type ItemState = {
   moveDown?: () => void;
 };
 
+export type ForeignDrop = {
+  // Why the dragged item cannot land here; null when it can.
+  refusal: (item: unknown, fromContainer: string) => string | null;
+  onDrop: (id: string, index: number) => void;
+};
+
 export function SortableList<T extends { id: string }>({
   items,
   label,
+  container,
+  foreign,
   lockedFirst = false,
   disabled = false,
   onCommit,
@@ -43,6 +59,9 @@ export function SortableList<T extends { id: string }>({
   items: T[];
   // What the list holds, for announcements ("blocks", "stills").
   label: (item: T) => string;
+  // This list's container id, for moves between lists.
+  container?: string;
+  foreign?: ForeignDrop;
   lockedFirst?: boolean;
   disabled?: boolean;
   // Resolves false when the order was not saved; the list then shows the
@@ -61,6 +80,10 @@ export function SortableList<T extends { id: string }>({
   const [dragging, setDragging] = useState<string | null>(null);
   const [dropAt, setDropAt] = useState<number | null>(null);
   const [message, setMessage] = useState("");
+  const [refused, setRefused] = useState<string | null>(null);
+  const shared = useSharedDrag();
+  // An item from another list is over this one.
+  const incoming = shared.dragged && container && shared.dragged.container !== container ? shared.dragged : null;
   const helpId = useId();
   const order = local && local.base === key ? local.order : ids;
   const setOrder = (next: string[]) => setLocal({ base: key, order: next });
@@ -127,21 +150,68 @@ export function SortableList<T extends { id: string }>({
       event.preventDefault();
       return;
     }
+    event.stopPropagation();
     setDragging(item.id);
+    // Other lists show their drop zones from the next task: a layout change
+    // inside dragstart makes Chrome abandon the drag.
+    if (container) setTimeout(() => shared.setDragged({ id: item.id, container, item }), 0);
     event.dataTransfer.effectAllowed = "move";
     event.dataTransfer.setData("text/plain", item.id);
   };
 
+  // Whether this list takes the current drag; records a refusal to show.
+  const takes = (event: DragEvent<HTMLDivElement>) => {
+    if (dragging) return true;
+    if (!incoming) return false;
+    event.stopPropagation();
+    const reason = foreign ? foreign.refusal(incoming.item, incoming.container) : "Blocks cannot be moved here.";
+    if (reason !== refused) {
+      setRefused(reason);
+      if (reason) setMessage(reason);
+    }
+    if (reason) {
+      event.dataTransfer.dropEffect = "none";
+      setDropAt(null);
+      return false;
+    }
+    return true;
+  };
+
   const onDragOver = (index: number, event: DragEvent<HTMLDivElement>) => {
-    if (!dragging) return;
+    if (!takes(event)) return;
     event.preventDefault();
+    event.stopPropagation();
     const box = event.currentTarget.getBoundingClientRect();
     const after = event.clientY > box.top + box.height / 2;
     setDropAt(Math.max(min, index + (after ? 1 : 0)));
   };
 
+  const onDragOverEnd = (event: DragEvent<HTMLDivElement>) => {
+    if (!takes(event)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    setDropAt(current.length);
+  };
+
+  const onDragLeave = (event: DragEvent<HTMLDivElement>) => {
+    if (event.currentTarget.contains(event.relatedTarget as Node | null)) return;
+    if (incoming) {
+      setDropAt(null);
+      setRefused(null);
+    }
+  };
+
   const onDrop = (event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
+    event.stopPropagation();
+    if (incoming && foreign && dropAt !== null && !refused) {
+      const position = dropAt;
+      const { id, item } = incoming;
+      finishDrag();
+      setMessage(`${label(item as T)} moved here, position ${position + 1}.`);
+      foreign.onDrop(id, position);
+      return;
+    }
     if (!dragging || dropAt === null) return finishDrag();
     const from = order.indexOf(dragging);
     const to = dropAt > from ? dropAt - 1 : dropAt;
@@ -156,10 +226,18 @@ export function SortableList<T extends { id: string }>({
     setDragging(null);
     setDropAt(null);
     setArmed(null);
+    setRefused(null);
+    shared.setDragged(null);
   };
 
   return (
-    <div className={styles.sortable} onDragEnd={finishDrag} onPointerUp={() => !dragging && setArmed(null)}>
+    <div
+      className={styles.sortable}
+      data-drop-refused={incoming && refused ? "" : undefined}
+      onDragEnd={finishDrag}
+      onDragLeave={onDragLeave}
+      onPointerUp={() => !dragging && setArmed(null)}
+    >
       <p id={helpId} className={styles.visuallyHidden}>
         Press Space or Enter to pick up, the arrow keys to move, Space or Enter to drop, Escape to cancel.
       </p>
@@ -169,6 +247,7 @@ export function SortableList<T extends { id: string }>({
           ? null
           : {
               "aria-label": `Reorder ${label(item)}`,
+              title: container ? "Drag to reorder, or into or out of Columns. Space picks it up for the arrow keys." : "Drag to reorder. Space picks it up for the arrow keys.",
               "aria-describedby": helpId,
               "aria-pressed": grabbed === item.id,
               onKeyDown: (event) => onKeyDown(item, event),
@@ -180,7 +259,11 @@ export function SortableList<T extends { id: string }>({
             key={item.id}
             className={styles.sortItem}
             draggable={!locked && !disabled && armed === item.id}
-            onDragStart={(event) => onDragStart(item, event)}
+            onDragStart={(event) => {
+              // A drag that starts in a nested list belongs to that list.
+              if (event.target !== event.currentTarget && !(armed === item.id)) return;
+              onDragStart(item, event);
+            }}
             onDragOver={(event) => onDragOver(index, event)}
             onDrop={onDrop}
             data-drop-before={dropAt === index ? "" : undefined}
@@ -197,6 +280,16 @@ export function SortableList<T extends { id: string }>({
           </div>
         );
       })}
+      {incoming && (
+        <div
+          className={styles.dropEnd}
+          data-active={!refused && dropAt === current.length ? "" : undefined}
+          onDragOver={onDragOverEnd}
+          onDrop={onDrop}
+        >
+          {refused ?? (current.length ? "Drop here to place it last" : "Drop here")}
+        </div>
+      )}
       <p className={styles.visuallyHidden} aria-live="assertive">
         {message}
       </p>

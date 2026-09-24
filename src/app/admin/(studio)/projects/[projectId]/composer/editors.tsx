@@ -6,8 +6,11 @@ import { api } from "../../../../_components/api";
 import { ChooseMediaButton, ErrorLine, PlacementEditor, PlacementList } from "../../../../_components/composition";
 import { useAction } from "../../../../_components/useAction";
 import studio from "../../../../studio.module.css";
+import type { Paragraph } from "@/features/project-builder/block.schema";
+import { markupToParagraphs, paragraphsToMarkup } from "@/features/project-builder/inline-markup";
 import { configOf, GALLERY_MODES, isOpening, TEXT_ROLE_LABELS, type Block } from "./blockInfo";
 import styles from "./composer.module.css";
+import { RichTextField } from "./RichTextField";
 
 // The editing controls of each block type. Every change is one PATCH of the
 // block's whole `content` or `config`, validated on the server by the block
@@ -153,22 +156,15 @@ export function PlaybackControl({ block, standalone }: { block: Block; standalon
 
 // ---- Text ----
 
-type Run = string | { em: string } | { link: { href: string; text: string } };
-
-const isPlain = (paragraphs: Run[][]) => paragraphs.every((p) => p.every((run) => typeof run === "string"));
-
-// Paragraphs are separated by a blank line. Formatting (emphasis, links) that
-// cannot be shown as plain text is kept until the text is edited.
+// Words with emphasis and links (Phase 3B). Saving replaces the content whole
+// with the parsed runs; what cannot parse is shown and not saved.
 export function TextEditor({ block, roles }: { block: Block; roles: boolean }) {
-  const content = block.content as { kind: string; paragraphs?: Run[][] };
-  const initial = (content.paragraphs ?? []).map((p) => p.map((run) => (typeof run === "string" ? run : "em" in run ? run.em : run.link.text)).join("")).join("\n\n");
+  const content = block.content as { kind: string; paragraphs?: Paragraph[] };
+  const initial = paragraphsToMarkup(content.paragraphs ?? []);
   const [text, setText] = useState(initial);
   const { run, pending, error } = useAction();
   const config = configOf(block);
-  const paragraphs = text
-    .split(/\n\s*\n/)
-    .map((p) => p.trim())
-    .filter(Boolean);
+  const parsed = markupToParagraphs(text);
 
   if (content.kind !== "richText") {
     return <p className={studio.hint}>Derived from the project&apos;s Details — edit it there.</p>;
@@ -184,23 +180,17 @@ export function TextEditor({ block, roles }: { block: Block; roles: boolean }) {
           onChange={(role) => run(() => patchConfig(block, { ...(block.config as object), role }))}
         />
       )}
-      {!isPlain(content.paragraphs ?? []) && (
-        <p className={studio.notice}>This text has emphasis or links. Saving here keeps the words and removes the formatting.</p>
-      )}
-      <label className={studio.field}>
-        <span>Text — leave a blank line between paragraphs</span>
-        <textarea className={studio.textarea} value={text} maxLength={20000} rows={5} onChange={(event) => setText(event.target.value)} />
-      </label>
+      <RichTextField label="Text" value={text} onChange={setText} disabled={pending} />
       <div className={studio.row}>
         <button
           type="button"
           className={`${studio.button} ${studio.small} ${studio.primary}`}
-          disabled={pending || !paragraphs.length || text === initial || paragraphs.length > 50}
-          onClick={() => run(() => api("PATCH", `/blocks/${block.id}`, { content: { kind: "richText", paragraphs: paragraphs.map((p) => [p]) } }))}
+          disabled={pending || !parsed.ok || text === initial}
+          onClick={() => parsed.ok && run(() => api("PATCH", `/blocks/${block.id}`, { content: { kind: "richText", paragraphs: parsed.paragraphs } }))}
         >
           Save text
         </button>
-        {!paragraphs.length && <span className={studio.hint}>Text cannot be empty.</span>}
+        {text !== initial && <span className={studio.hint}>Unsaved changes</span>}
       </div>
       <ErrorLine error={error} />
     </div>

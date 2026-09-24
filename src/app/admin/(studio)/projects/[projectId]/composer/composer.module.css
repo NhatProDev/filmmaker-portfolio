@@ -465,3 +465,42 @@
   background: #111;
 }
 
+/* ---- Rich text (Phase 3B) ---- */
+
+.richText {
+  display: grid;
+  gap: 8px;
+}
+
+.richToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.linkSample {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.linkForm {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--s-line);
+  border-radius: var(--s-radius);
+  background: var(--s-bg);
+}
+
+.richPreview {
+  padding: 8px 12px;
+  border-left: 3px solid var(--s-line);
+  color: var(--s-muted);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.richPreview p {
+  margin: 0 0 6px;
+}

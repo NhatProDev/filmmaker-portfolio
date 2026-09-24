@@ -3,12 +3,14 @@
 import { useState } from "react";
 import type { BlockDto } from "@/features/project-builder/composition.mapper";
 import { PRESETS } from "@/features/project-builder/presets";
+import { markupToParagraphs } from "@/features/project-builder/inline-markup";
 import { openingSeed } from "@/features/project-builder/templates";
 import { api } from "../../../../_components/api";
 import { ErrorLine } from "../../../../_components/composition";
 import { useAction } from "../../../../_components/useAction";
 import studio from "../../../../studio.module.css";
 import styles from "./composer.module.css";
+import { RichTextField } from "./RichTextField";
 
 // Inserting a block (ADR-0005: at a position, siblings shift in one
 // transaction). Every choice creates a block the contract accepts as it
@@ -26,12 +28,12 @@ type Choice = {
 };
 
 const col = (colStart: number, colSpan: number) => ({ placement: { desktop: { colStart, colSpan } } });
-const paragraphs = (text: string) =>
-  text
-    .split(/\n\s*\n/)
-    .map((p) => p.trim())
-    .filter(Boolean)
-    .map((p) => [p]);
+// Text is written with emphasis and links (inline-markup.ts); the form cannot
+// submit text that does not parse.
+const paragraphs = (text: string) => {
+  const parsed = markupToParagraphs(text);
+  return parsed.ok ? parsed.paragraphs : [[text.trim()]];
+};
 
 const PRESET_CHOICES: Choice[] = [
   {
@@ -174,12 +176,16 @@ export function AddBlock({
             void create(asking, text);
           }}
         >
-          <label className={studio.field}>
-            <span>{asking.needsText === "caption" ? "Caption" : "Text — leave a blank line between paragraphs"}</span>
-            <textarea className={studio.textarea} rows={4} value={text} maxLength={5000} autoFocus onChange={(event) => setText(event.target.value)} />
-          </label>
+          {asking.needsText === "caption" ? (
+            <label className={studio.field}>
+              <span>Caption</span>
+              <textarea className={studio.textarea} rows={4} value={text} maxLength={5000} autoFocus onChange={(event) => setText(event.target.value)} />
+            </label>
+          ) : (
+            <RichTextField label="Text" value={text} onChange={setText} disabled={pending} />
+          )}
           <div className={studio.row}>
-            <button type="submit" className={`${studio.button} ${studio.small} ${studio.primary}`} disabled={pending || !text.trim()}>
+            <button type="submit" className={`${studio.button} ${studio.small} ${studio.primary}`} disabled={pending || !text.trim() || (asking.needsText === "text" && !markupToParagraphs(text).ok)}>
               Add {asking.label.toLowerCase()}
             </button>
             <button type="button" className={`${studio.button} ${studio.small}`} onClick={() => setAsking(null)}>

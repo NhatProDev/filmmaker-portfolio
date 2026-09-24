@@ -161,7 +161,7 @@ export function PlacementEditor({
 
   return (
     <div className={styles.mediaRow}>
-      <Thumb src={isVideo ? (poster?.deliveryUrl ?? null) : thumbnailUrl(media)} large label={media.type} />
+      <Thumb src={isVideo ? thumbnailUrl(poster) : thumbnailUrl(media)} large label={media.type} />
       <div className={styles.mediaMeta}>
         <div className={styles.row}>
           <strong>{mediaLabel(media)}</strong>

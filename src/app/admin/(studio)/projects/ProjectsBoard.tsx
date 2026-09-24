@@ -7,7 +7,7 @@ import { TEMPLATES, type ProjectTemplate } from "@/features/project-builder/temp
 import type { ProjectSummaryDto } from "@/features/projects/project.mapper";
 import { api } from "../../_components/api";
 import { slugify } from "../../_components/slug";
-import { Thumb } from "../../_components/Thumb";
+import { Thumb, thumbnailUrl } from "../../_components/Thumb";
 import { useAction } from "../../_components/useAction";
 import styles from "../../studio.module.css";
 
@@ -160,7 +160,7 @@ export function ProjectsBoard({ projects }: { projects: ProjectSummaryDto[] }) {
                   </div>
                 </td>
                 <td>
-                  <Thumb src={project.cover?.deliveryUrl ?? null} label="No cover" />
+                  <Thumb src={thumbnailUrl(project.cover)} label="No cover" />
                 </td>
                 <td>
                   <Link href={`/admin/projects/${project.id}`}>

@@ -257,7 +257,7 @@ function Details({ media, onChanged, onDeleted }: { media: MediaDto; onChanged: 
           <div className={styles.field}>
             <span>Default poster</span>
             <div className={styles.row}>
-              <Thumb src={media.poster?.deliveryUrl ?? null} label="None" />
+              <Thumb src={thumbnailUrl(media.poster)} label="None" />
               <ChooseMediaButton
                 label={media.poster ? "Change" : "Choose"}
                 title="Choose the default poster"

@@ -116,7 +116,7 @@ export function playbackLabel(mode: string | undefined): string {
 }
 
 const placementThumb = (item: BlockMediaDto) =>
-  item.media.type === "IMAGE" ? thumbnailUrl(item.media) : (item.poster?.deliveryUrl ?? thumbnailUrl(item.media));
+  item.media.type === "IMAGE" ? thumbnailUrl(item.media) : (thumbnailUrl(item.poster) ?? thumbnailUrl(item.media));
 
 // Up to four thumbnails: the block's own media, then its children's.
 export function thumbsOf(block: Block): string[] {

@@ -1252,6 +1252,40 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
 
+  /media/{mediaId}/content:
+    parameters:
+      - $ref: '#/components/parameters/MediaId'
+    get:
+      tags: [Media]
+      operationId: getMediaContent
+      summary: The Studio's view of a stored asset without a public URL
+      description: |
+        For a signed-in admin only, such as a preview of a private original.
+        Re-checked on every request. Answers with a redirect to a short-lived
+        signed URL (`MEDIA_SIGNED_URL_TTL_SECONDS`) or, for local storage,
+        the file itself with byte ranges. Never cached. Only READY stored
+        assets; an external video, an asset still uploading, a deleted asset
+        or an unknown id is 404. The asset stays private: its DTO still has
+        no `deliveryUrl`.
+      security:
+        - adminSession: []
+      responses:
+        '200':
+          description: The file (local storage only)
+        '206':
+          description: A byte range (local storage only)
+        '302':
+          description: Redirect to a short-lived signed URL
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
   /media/{mediaId}/usages:
     parameters:
       - $ref: '#/components/parameters/MediaId'

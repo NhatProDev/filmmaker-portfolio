@@ -7,7 +7,7 @@ import type { ProjectDetailDto } from "@/features/projects/project.mapper";
 import { api } from "../../../_components/api";
 import { ChooseMediaButton, ErrorLine } from "../../../_components/composition";
 import { PublishingPanel } from "../../../_components/PublishingPanel";
-import { Thumb } from "../../../_components/Thumb";
+import { Thumb, thumbnailUrl } from "../../../_components/Thumb";
 import { useAction } from "../../../_components/useAction";
 import styles from "../../../studio.module.css";
 import { StatusBadge } from "../ProjectsBoard";
@@ -129,7 +129,7 @@ function MediaPanel({ project }: { project: Project }) {
       <div className={styles.grid2}>
         <div className={styles.field}>
           <span>Cover — Art Works card and fallback opening</span>
-          <Thumb src={project.cover?.deliveryUrl ?? null} large label="No cover" />
+          <Thumb src={thumbnailUrl(project.cover)} large label="No cover" />
           <div className={styles.row}>
             <ChooseMediaButton
               label={project.cover ? "Change cover" : "Choose cover"}

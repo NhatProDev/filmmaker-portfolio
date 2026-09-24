@@ -106,3 +106,39 @@ The exact provisioning sequence is §5 of `runbook.md`.
 | Neon plan | Free | 6-hour point-in-time restore window; the `pg_dump` backups in `runbook.md` §4 are the real recovery path. |
 | Regions | Vercel `sin1` (`vercel.json`), Neon `aws-ap-southeast-1`, R2 location hint `apac` | App and database colocated in Singapore; visitors are served by the global CDNs. Neon's region is permanent. |
 | Domain | None yet | `SITE_URL` is the `*.vercel.app` origin and public media use the bucket's rate-limited `r2.dev` URL until a domain on Cloudflare DNS exists. Both are build-time: changing them needs a rebuild. |
+
+## 6. Production environment manifest (Vercel)
+
+Set every variable for the **Production** environment only. A Preview
+deployment given these values would publish and log in against the
+production database. Secrets use Vercel's **Sensitive** type. Vercel exposes
+Production variables to both the build and the functions. **B+R** means
+read at build and at run time, so a change needs a redeploy. **R** means run
+time only. Values that differ per deployment are in `.env.prod-ops`, never here.
+
+| Variable | Value | Kind | When |
+|---|---|---|---|
+| `SITE_CONTENT_ADAPTER` | `db` | public | B+R |
+| `SITE_URL` | the production origin, e.g. `https://<project>.vercel.app` | public | B+R |
+| `DATABASE_URL` | Neon **pooled** host (`…-pooler…`), `?sslmode=verify-full`, no `channel_binding` | **secret** | B+R |
+| `DATABASE_PREPARE` | `false` | public | B+R |
+| `DATABASE_POOL_MAX` | `3` | public | B+R |
+| `MEDIA_STORAGE_PROVIDER` | `s3` | public | B+R |
+| `MEDIA_PUBLIC_BASE_URL` | the public bucket's `https://pub-….r2.dev` (later the media domain), no trailing slash | public | B+R |
+| `S3_ENDPOINT` | `https://<account id>.r2.cloudflarestorage.com` | public | B+R |
+| `S3_PUBLIC_BUCKET` | `portfolio-media-public` | public | B+R |
+| `S3_PRIVATE_BUCKET` | `portfolio-media-private` | public | B+R |
+| `S3_FORCE_PATH_STYLE` | `true` | public | B+R |
+| `S3_REGION` | `auto` | public | R |
+| `S3_ACCESS_KEY_ID` | R2 token, Object Read & Write on the two buckets | **secret** | R |
+| `S3_SECRET_ACCESS_KEY` | R2 token secret | **secret** | R |
+| `PROJECT_ACCESS_SECRET` | 48 random bytes, base64; generated for production only | **secret** | R |
+| `CLIENT_IP_HEADER` | `x-real-ip` (Vercel overwrites it) | public | R |
+
+Leave unset: `TRUSTED_PROXY_HOPS` (the header replaces it), `APP_ORIGINS`
+(until a second host name exists), `MEDIA_PRIVATE_ROOT`,
+`MEDIA_SIGNED_URL_TTL_SECONDS` (defaults to 300), `VIDEO_PROVIDER`, and every
+`ADMIN_*` variable. Vercel sets `NODE_ENV=production` itself.
+
+The build runs `next build` only. It never migrates: migrations run from
+`.env.prod-ops` with `--confirm-remote` (`runbook.md` §1).

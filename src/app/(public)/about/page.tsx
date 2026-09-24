@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
+import { draftMode } from "next/headers";
 import Image from "next/image";
 import { Fragment } from "react";
+import { PreviewBanner, PreviewIssue } from "@/components/preview/PreviewBanner";
+import { getCurrentAdmin } from "@/features/authentication/current-admin";
 import { getContentGateway } from "@/features/site-content/site-content.gateway";
-import type { Inline } from "@/features/site-content/site-content.types";
+import type { AboutContent, Inline } from "@/features/site-content/site-content.types";
 import { Portrait } from "./Portrait";
 import styles from "./about.module.css";
 
@@ -17,12 +20,27 @@ function InlineText({ parts }: { parts: Inline[] }) {
   ));
 }
 
+// About is static. Only in preview mode, for a signed-in admin, does it read
+// cookies and render the working copy instead (ADR-0012, ADR-0017).
+export default async function AboutPage() {
+  const gateway = getContentGateway();
+  if ((await draftMode()).isEnabled && (await getCurrentAdmin()).admin) {
+    const { value, issue } = await gateway.previewAbout();
+    return (
+      <>
+        {value ? <AboutView about={value} /> : <PreviewIssue issue={issue!} />}
+        <PreviewBanner path="/about" />
+      </>
+    );
+  }
+  return <AboutView about={await gateway.getAbout()} />;
+}
+
 // Implements docs/design/prototypes/about/About Me 3B v2 Responsive.dc.html.
 // Source order is the narrow reading order at every width — statement, portrait,
 // biography, evidence — and the desktop grid places the same elements exactly
 // as the locked desktop candidate does.
-export default async function AboutPage() {
-  const about = await getContentGateway().getAbout();
+function AboutView({ about }: { about: AboutContent }) {
   const { portrait, evidence, process, placeholder, experience, contact } = about;
 
   return (

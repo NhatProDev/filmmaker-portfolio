@@ -95,6 +95,7 @@ function usageOf(usage: MediaUsage, projectsById: Map<string, ProjectInfo>): Man
       return { kind: usage.kind, owner: `project:${info.slug}`, audience: info.visibility === "PRIVATE" ? "private" : "public" };
     }
     case "PUBLISHED_PAGE":
+    case "PAGE_MEDIA":
       return { kind: usage.kind, owner: `page:${usage.pageKey}`, audience: "public" };
     case "ASSET_POSTER":
       // Resolved from the video's audience below.

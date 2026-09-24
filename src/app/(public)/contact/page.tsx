@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
+import { draftMode } from "next/headers";
 import Image from "next/image";
+import { PreviewBanner, PreviewIssue } from "@/components/preview/PreviewBanner";
+import { getCurrentAdmin } from "@/features/authentication/current-admin";
 import { getContentGateway } from "@/features/site-content/site-content.gateway";
+import type { ContactContent } from "@/features/site-content/site-content.types";
 import { ContactRows } from "./ContactRows";
 import styles from "./contact.module.css";
 
@@ -9,13 +13,29 @@ export const metadata: Metadata = {
   alternates: { canonical: "/contact" },
 };
 
-// Implements docs/design/prototypes/contact/Contact 4B v2 Responsive.dc.html.
-// Static: no form, no API, no table (CLAUDE.md §19). Source order is visual and
-// reading order at every width — heading, statement, email, rows, closing note,
-// identity still — so nothing is reordered between tiers. The footer is this
-// page's own chrome, as on Home, and sits outside <main>.
+// Contact is static. Only in preview mode, for a signed-in admin, does it read
+// cookies and render the working copy instead (ADR-0012, ADR-0017).
 export default async function ContactPage() {
-  const contact = await getContentGateway().getContact();
+  const gateway = getContentGateway();
+  if ((await draftMode()).isEnabled && (await getCurrentAdmin()).admin) {
+    const { value, issue } = await gateway.previewContact();
+    return (
+      <>
+        {value ? <ContactView contact={value} /> : <PreviewIssue issue={issue!} />}
+        <PreviewBanner path="/contact" />
+      </>
+    );
+  }
+  return <ContactView contact={await gateway.getContact()} />;
+}
+
+// Implements docs/design/prototypes/contact/Contact 4B v2 Responsive.dc.html.
+// No form, no message API, no message table (CLAUDE.md §19); its content is a
+// structured page (ADR-0017). Source order is visual and reading order at every
+// width — heading, statement, email, rows, closing note, identity still — so
+// nothing is reordered between tiers. The footer is this page's own chrome, as
+// on Home, and sits outside <main>.
+function ContactView({ contact }: { contact: ContactContent }) {
   const { email, identity, footer } = contact;
 
   return (

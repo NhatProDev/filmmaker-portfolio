@@ -71,6 +71,14 @@ export const staticGateway: ContentGateway = {
   async previewHome() {
     return { value: home, issue: null };
   },
+
+  async previewAbout() {
+    return { value: about, issue: null };
+  },
+
+  async previewContact() {
+    return { value: contact, issue: null };
+  },
 };
 
 // The committed Project Detail content in its authored shape, for the import

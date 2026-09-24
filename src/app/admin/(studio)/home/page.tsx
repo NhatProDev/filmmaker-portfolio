@@ -6,6 +6,6 @@ import { HomeEditor } from "./HomeEditor";
 export const metadata: Metadata = { title: "Home page" };
 
 export default async function HomeEditorPage() {
-  const page = await services(getDatabase()).pages.get("HOME");
+  const page = await services(getDatabase()).pages.getComposed("HOME");
   return <HomeEditor blocks={page.blocks} publication={page.publication} />;
 }

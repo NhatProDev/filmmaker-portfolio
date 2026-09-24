@@ -48,7 +48,8 @@ export async function realignStorageProvider(
   const confirmed: RealignmentReport["confirmed"] = [];
   const missing: RealignmentReport["missing"] = [];
   for (const row of candidates) {
-    (await storage.verifyUpload(row.key)) ? confirmed.push(row) : missing.push(row);
+    if (await storage.verifyUpload(row.key)) confirmed.push(row);
+    else missing.push(row);
   }
   const ids = new Set(confirmed.map((row) => row.id));
   const report: RealignmentReport = { provider, candidates: candidates.length, confirmed, missing, snapshots: [], applied: false };

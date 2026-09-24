@@ -352,7 +352,8 @@ describe("composition (CLAUDE.md §7, §13, §14; §17.9, §17.12–17, §17.21�
     assert.equal(page.body.data.blocks[2].config.preset, "homeWall");
     const facts = await ctx.as("POST", "/pages/HOME/blocks", { type: "TEXT", content: { kind: "projectFacts" } });
     assert.equal(facts.status, 422);
-    assert.equal((await ctx.as("GET", "/pages/ABOUT")).status, 404);
+    // The keyed pages are a closed set (ADR-0007, ADR-0017).
+    assert.equal((await ctx.as("GET", "/pages/WORKS")).status, 404);
   });
 });
 

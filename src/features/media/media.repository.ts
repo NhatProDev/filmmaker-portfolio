@@ -4,6 +4,7 @@ import type { Database } from "@db/client";
 import {
   blockMedia,
   media,
+  pageMedia,
   pages,
   projectBlocks,
   projects,
@@ -48,6 +49,7 @@ export type MediaUsage =
       pageKey: string | null;
     }
   | { kind: "ASSET_POSTER"; mediaId: string }
+  | { kind: "PAGE_MEDIA"; pageKey: string; slot: string }
   | { kind: "PUBLISHED_PROJECT"; projectId: string; projectTitle: string }
   | { kind: "PUBLISHED_PAGE"; pageKey: string };
 
@@ -218,7 +220,7 @@ export function createMediaRepository(db: Database) {
       const ownerProjectId = sql`coalesce(${projectBlocks.projectId}, ${parent.projectId})`;
       const ownerPageId = sql`coalesce(${projectBlocks.pageId}, ${parent.pageId})`;
 
-      const [covers, previews, placements, posters, snapshots] = await Promise.all([
+      const [covers, previews, placements, posters, snapshots, pageSlots] = await Promise.all([
         db
           .select({ projectId: projects.id, projectTitle: projects.title })
           .from(projects)
@@ -257,6 +259,12 @@ export function createMediaRepository(db: Database) {
           .leftJoin(projects, eq(projects.id, publicationMedia.projectId))
           .leftJoin(pages, eq(pages.id, publicationMedia.pageId))
           .where(eq(publicationMedia.mediaId, mediaId)),
+        // A structured page's image slots (ADR-0017).
+        db
+          .select({ pageKey: pages.key, slot: pageMedia.slot })
+          .from(pageMedia)
+          .innerJoin(pages, eq(pages.id, pageMedia.pageId))
+          .where(eq(pageMedia.mediaId, mediaId)),
       ]);
 
       return [
@@ -267,6 +275,7 @@ export function createMediaRepository(db: Database) {
           ...(posterMediaId === mediaId ? [{ kind: "PLACEMENT_POSTER" as const, ...owner }] : []),
         ]),
         ...posters.map((row) => ({ kind: "ASSET_POSTER" as const, ...row })),
+        ...pageSlots.map((row) => ({ kind: "PAGE_MEDIA" as const, ...row })),
         ...snapshots.map((row) =>
           row.projectId
             ? { kind: "PUBLISHED_PROJECT" as const, projectId: row.projectId, projectTitle: row.projectTitle! }

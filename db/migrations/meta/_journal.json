@@ -57,6 +57,13 @@
       "when": 1790253964310,
       "tag": "0008_media_active_picture",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1790268329760,
+      "tag": "0009_page_content_and_media",
+      "breakpoints": true
     }
   ]
 }

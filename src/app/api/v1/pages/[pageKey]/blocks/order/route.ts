@@ -1,5 +1,5 @@
 import { reorderBlocksSchema } from "@/features/project-builder/composition.schema";
-import { pageParams } from "../../../../_lib/params";
+import { composedPageParams } from "../../../../_lib/params";
 import { adminRoute, noContent, readJson } from "../../../../_lib/route";
 import { services } from "../../../../_lib/services";
 
@@ -10,5 +10,5 @@ export const PUT = adminRoute(
     await composition.reorder(await pages.owner(params.pageKey), parentBlockId, blockIds);
     return noContent();
   },
-  { params: pageParams },
+  { params: composedPageParams },
 );

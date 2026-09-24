@@ -262,6 +262,15 @@ export type ContactContent = {
 // template cannot show it yet.
 export type Preview<T> = { value: T | null; issue: string | null };
 
+// The site settings (ADR-0017 §4): what more than one page shows.
+export type SiteSettings = {
+  name: string;
+  role: string;
+  email: string;
+  footerNote: string;
+  copyright: string;
+};
+
 export interface ContentGateway {
   getHome(): Promise<HomeContent>;
   getWorksIndex(): Promise<WorksIndex>;
@@ -290,4 +299,6 @@ export interface ContentGateway {
   // The working copy, for an authenticated admin's preview (ADR-0012).
   previewProjectPage(slug: string): Promise<Preview<ProjectPage>>;
   previewHome(): Promise<Preview<HomeContent>>;
+  previewAbout(): Promise<Preview<AboutContent>>;
+  previewContact(): Promise<Preview<ContactContent>>;
 }

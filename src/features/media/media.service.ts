@@ -81,6 +81,12 @@ export function createMediaService(db: Database) {
 
     withPostersFor: withPosters,
 
+    // DTOs of the live assets among `ids`, by id.
+    async dtosByIds(ids: readonly string[]) {
+      const dtos = await withPosters(await repository.findRowsByIds([...new Set(ids)]));
+      return new Map(dtos.map((dto) => [dto.id, dto]));
+    },
+
     async usages(id: string): Promise<MediaUsage[]> {
       await requireLive(id);
       return repository.findUsages(id);

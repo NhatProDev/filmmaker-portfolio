@@ -655,3 +655,95 @@
   padding: 0 4px;
   font-weight: 600;
 }
+
+/* ---- Structured page editors (ADR-0017) ---- */
+
+.editorColumns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .editorColumns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.stack {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.fieldGroup {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 14px;
+  border: 1px solid var(--s-line);
+  border-radius: var(--s-radius);
+  background: #fff;
+  min-width: 0;
+}
+
+.fieldGroup > legend {
+  padding: 0 4px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.fieldError {
+  color: var(--s-danger);
+  font-size: 12px;
+}
+
+.listEditor {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+}
+
+.listItem {
+  width: 100%;
+  display: grid;
+  gap: 6px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed var(--s-line);
+}
+
+.listItemBody {
+  min-width: 0;
+}
+
+.inlineFields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px;
+}
+
+.saveBar {
+  position: sticky;
+  bottom: 0;
+  padding: 10px 0;
+  background: var(--s-bg, #f5f5f4);
+}
+
+.slot {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--s-line);
+}
+
+.slot:last-child {
+  border-bottom: 0;
+}
+
+.slotBody {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}

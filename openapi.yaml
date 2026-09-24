@@ -551,7 +551,13 @@ paths:
     get:
       tags: [Pages]
       operationId: getPage
-      summary: Get a page's working copy (Home), including hidden blocks
+      summary: Get a page's working copy
+      description: |
+        HOME answers with its block composition, hidden blocks included
+        (ADR-0007). ABOUT, CONTACT and SITE answer with their structured
+        content and image slots (ADR-0017). `content` is `{}` until it is
+        first saved; until the page is first published the site shows its
+        committed content.
       security:
         - adminSession: []
       responses:
@@ -565,6 +571,101 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [Pages]
+      operationId: updatePageContent
+      summary: Replace a structured page's content (ABOUT, CONTACT, SITE)
+      description: |
+        The content is validated whole against the page's strict schema
+        (ADR-0017): unknown keys, colours, typefaces, layout values and media
+        ids are refused. Text is stored exactly as written. HOME has no
+        structured content and answers 404. Visitors see the change only after
+        publish.
+      security:
+        - adminSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePageContentRequest'
+      responses:
+        '200':
+          description: Updated page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StructuredPageEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /pages/{pageKey}/media/{slot}:
+    parameters:
+      - $ref: '#/components/parameters/PageKey'
+      - name: slot
+        in: path
+        required: true
+        description: A slot of the page's closed set — ABOUT `portrait`, `evidence`, `process`; CONTACT `identity` (ADR-0017).
+        schema:
+          type: string
+          pattern: '^[a-z][a-zA-Z0-9]{0,49}$'
+    put:
+      tags: [Pages]
+      operationId: setPageSlot
+      summary: Place a Media Library image in a structured page's slot
+      description: |
+        The image must be a live, READY IMAGE. It is a relational reference
+        and participates in `MEDIA_IN_USE` (`PAGE_MEDIA`). `altText` is
+        contextual: null inherits the asset's default, '' is decorative.
+      security:
+        - adminSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetPageSlotRequest'
+      responses:
+        '200':
+          description: Updated page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StructuredPageEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    delete:
+      tags: [Pages]
+      operationId: clearPageSlot
+      summary: Empty a structured page's slot
+      description: Removes only the reference; the Media Library asset stays.
+      security:
+        - adminSession: []
+      responses:
+        '200':
+          description: Updated page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StructuredPageEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
+        '404':
+          $ref: '#/components/responses/NotFound'
 
   /pages/{pageKey}/publish:
     parameters:
@@ -574,12 +675,13 @@ paths:
       operationId: publishPage
       summary: Validate the page's working copy and write its published snapshot
       description: |
-        Works like project publish (ADR-0012). The composition must match the
-        locked Home template's slots, in order: hero, identity, wall, About
-        teaser, coda (ADR-0007, ADR-0013). If it does not, the response is
-        `422 PAGE_NOT_PUBLISHABLE` with `details.issues`, and nothing is
-        written. Home cannot be unpublished. A page with no snapshot yet
-        renders its committed default.
+        Works like project publish (ADR-0012). HOME's composition must
+        render on the locked Home template (ADR-0007, ADR-0013). A structured
+        page's content must validate and every slot it needs must hold an
+        image (ADR-0017). Otherwise the response is `422 PAGE_NOT_PUBLISHABLE`
+        with `details.issues`, and nothing is written. Pages cannot be
+        unpublished. A page with no snapshot yet renders its committed
+        content. Publishing SITE updates every page that shows its values.
       security:
         - adminSession: []
       responses:
@@ -1575,10 +1677,10 @@ components:
       name: pageKey
       in: path
       required: true
-      description: A singleton page key. V1 has only `HOME` (ADR-0007).
+      description: A keyed singleton page (ADR-0007, ADR-0017). Block routes accept only `HOME`.
       schema:
         type: string
-        enum: [HOME]
+        enum: [HOME, ABOUT, CONTACT, SITE]
     BlockId:
       name: blockId
       in: path
@@ -1958,6 +2060,10 @@ components:
             - ASSET_POSTER
             - PUBLISHED_PROJECT
             - PUBLISHED_PAGE
+            - PAGE_MEDIA
+        slot:
+          type: [string, 'null']
+          description: For PAGE_MEDIA, the page's slot (ADR-0017).
         projectId:
           type: [string, 'null']
           format: uuid
@@ -2472,7 +2578,221 @@ components:
       required: [data]
       properties:
         data:
-          $ref: '#/components/schemas/Page'
+          oneOf:
+            - $ref: '#/components/schemas/Page'
+            - $ref: '#/components/schemas/StructuredPage'
+
+    StructuredPageEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/StructuredPage'
+
+    # A structured page (ADR-0017). `content` mirrors
+    # src/features/page-content/page-content.schema.ts, the executable form.
+    StructuredPage:
+      type: object
+      additionalProperties: false
+      required: [id, key, title, content, slots, publication]
+      properties:
+        id:
+          type: string
+          format: uuid
+        key:
+          type: string
+          enum: [ABOUT, CONTACT, SITE]
+        title:
+          type: string
+        seoTitle:
+          type: [string, 'null']
+        seoDescription:
+          type: [string, 'null']
+        content:
+          description: "`{}` until first saved."
+          oneOf:
+            - $ref: '#/components/schemas/AboutPageContent'
+            - $ref: '#/components/schemas/ContactPageContent'
+            - $ref: '#/components/schemas/SitePageContent'
+            - type: object
+              additionalProperties: false
+        slots:
+          type: array
+          items:
+            $ref: '#/components/schemas/PageSlot'
+        publication:
+          $ref: '#/components/schemas/Publication'
+
+    PageSlot:
+      type: object
+      additionalProperties: false
+      required: [slot, altText, media]
+      properties:
+        slot:
+          type: string
+        altText:
+          type: [string, 'null']
+        media:
+          oneOf:
+            - $ref: '#/components/schemas/Media'
+            - type: 'null'
+
+    UpdatePageContentRequest:
+      type: object
+      additionalProperties: false
+      required: [content]
+      properties:
+        content:
+          oneOf:
+            - $ref: '#/components/schemas/AboutPageContent'
+            - $ref: '#/components/schemas/ContactPageContent'
+            - $ref: '#/components/schemas/SitePageContent'
+
+    SetPageSlotRequest:
+      type: object
+      additionalProperties: false
+      required: [mediaId]
+      properties:
+        mediaId:
+          type: string
+          format: uuid
+        altText:
+          type: [string, 'null']
+          maxLength: 1000
+
+    EmphasisRun:
+      oneOf:
+        - type: string
+          minLength: 1
+          maxLength: 500
+        - type: object
+          additionalProperties: false
+          required: [em]
+          properties:
+            em:
+              type: string
+              minLength: 1
+              maxLength: 500
+
+    AboutPageContent:
+      type: object
+      additionalProperties: false
+      required: [marker, lead, portrait, biography, evidence, process, placeholder, experience, availability]
+      properties:
+        marker: { type: string, minLength: 1, maxLength: 100 }
+        lead: { type: string, minLength: 1, maxLength: 1000 }
+        portrait:
+          type: object
+          additionalProperties: false
+          required: [caption]
+          properties:
+            caption: { type: string, minLength: 1, maxLength: 200 }
+        biography:
+          type: array
+          minItems: 1
+          maxItems: 6
+          items: { type: string, minLength: 1, maxLength: 3000 }
+        evidence:
+          type: object
+          additionalProperties: false
+          required: [caption, answer]
+          properties:
+            caption: { type: string, minLength: 1, maxLength: 200 }
+            answer: { type: string, minLength: 1, maxLength: 2000 }
+        process:
+          type: object
+          additionalProperties: false
+          required: [line, caption]
+          properties:
+            line: { type: string, minLength: 1, maxLength: 1000 }
+            caption: { type: string, minLength: 1, maxLength: 200 }
+        placeholder:
+          type: object
+          additionalProperties: false
+          required: [label, caption, line]
+          properties:
+            label: { type: string, minLength: 1, maxLength: 200 }
+            caption: { type: string, minLength: 1, maxLength: 200 }
+            line: { type: string, minLength: 1, maxLength: 1000 }
+        experience:
+          type: object
+          additionalProperties: false
+          required: [heading, rows]
+          properties:
+            heading: { type: string, minLength: 1, maxLength: 200 }
+            rows:
+              type: array
+              minItems: 1
+              maxItems: 30
+              description: Each year appears once.
+              items:
+                type: object
+                additionalProperties: false
+                required: [year, text]
+                properties:
+                  year: { type: string, minLength: 1, maxLength: 20 }
+                  text:
+                    type: array
+                    minItems: 1
+                    maxItems: 20
+                    items:
+                      $ref: '#/components/schemas/EmphasisRun'
+        availability: { type: string, minLength: 1, maxLength: 1000 }
+
+    ContactPageContent:
+      type: object
+      additionalProperties: false
+      required: [heading, statement, email, rows, note, identity]
+      properties:
+        heading: { type: string, minLength: 1, maxLength: 100 }
+        statement: { type: string, minLength: 1, maxLength: 1000 }
+        email:
+          type: object
+          additionalProperties: false
+          required: [label, reply]
+          description: The address itself is the site settings' email.
+          properties:
+            label: { type: string, minLength: 1, maxLength: 50 }
+            reply: { type: string, minLength: 1, maxLength: 300 }
+        rows:
+          type: array
+          minItems: 1
+          maxItems: 8
+          description: Each label appears once.
+          items:
+            type: object
+            additionalProperties: false
+            required: [label, value]
+            properties:
+              label: { type: string, minLength: 1, maxLength: 50 }
+              value: { type: string, minLength: 1, maxLength: 200 }
+              href:
+                type: string
+                maxLength: 2000
+                description: A site path, an https URL, a mailto address, or a fragment such as '#'.
+        note: { type: string, minLength: 1, maxLength: 1000 }
+        identity:
+          description: With it, the `identity` slot must hold an image before publish.
+          oneOf:
+            - type: object
+              additionalProperties: false
+              required: [caption]
+              properties:
+                caption: { type: string, minLength: 1, maxLength: 300 }
+            - type: 'null'
+
+    SitePageContent:
+      type: object
+      additionalProperties: false
+      required: [name, role, email, footerNote, copyright]
+      description: What more than one page shows (ADR-0017 §4).
+      properties:
+        name: { type: string, minLength: 1, maxLength: 120 }
+        role: { type: string, minLength: 1, maxLength: 200 }
+        email: { type: string, format: email, maxLength: 320 }
+        footerNote: { type: string, minLength: 1, maxLength: 300 }
+        copyright: { type: string, minLength: 1, maxLength: 100 }
 
     # ---------------------------------------------- Block content & config
     # These mirror src/features/project-builder/block.schema.ts, which is the

@@ -17,11 +17,15 @@ const USAGE_LABEL: Record<MediaUsage["kind"], string> = {
   BLOCK_MEDIA: "Placed in",
   PLACEMENT_POSTER: "Poster for a placement in",
   ASSET_POSTER: "Default poster of a video",
+  PAGE_MEDIA: "Image on",
   PUBLISHED_PROJECT: "Live on the site in",
   PUBLISHED_PAGE: "Live on the site on",
 };
 
+const PAGE_NAMES: Record<string, string> = { HOME: "Home", ABOUT: "About", CONTACT: "Contact", SITE: "site settings" };
+
 function usageText(usage: MediaUsage) {
+  if (usage.kind === "PAGE_MEDIA") return `${USAGE_LABEL.PAGE_MEDIA} the ${PAGE_NAMES[usage.pageKey] ?? usage.pageKey} page (${usage.slot})`;
   if ("projectTitle" in usage && usage.projectTitle) return `${USAGE_LABEL[usage.kind]} ${usage.projectTitle}`;
   if ("pageKey" in usage && usage.pageKey) return `${USAGE_LABEL[usage.kind]} the ${usage.pageKey.toLowerCase()} page`;
   return USAGE_LABEL[usage.kind];

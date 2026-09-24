@@ -265,8 +265,10 @@ export const projects = pgTable(
   ],
 );
 
-// Singleton editorial pages that own a block composition, keyed rather than
-// slugged (ADR-0007). HOME is the only one in V1; it is seeded by migration.
+// Singleton editorial pages, keyed rather than slugged, seeded by migration.
+// HOME owns a block composition (ADR-0007); ABOUT, CONTACT and SITE hold
+// structured `content`, validated by a strict schema per key, and place media
+// through `page_media` (ADR-0017).
 export const pages = pgTable(
   "pages",
   {
@@ -275,6 +277,7 @@ export const pages = pgTable(
     title: varchar("title", { length: 200 }).notNull(),
     seoTitle: varchar("seo_title", { length: 200 }),
     seoDescription: varchar("seo_description", { length: 500 }),
+    content: jsonb("content").$type<unknown>().default({}).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
       .defaultNow()
       .notNull(),
@@ -285,6 +288,38 @@ export const pages = pgTable(
   (table) => [
     uniqueIndex("pages_key_uidx").on(table.key),
     check("pages_key_format_check", sql`${table.key} ~ '^[A-Z][A-Z0-9_]*$'`),
+  ],
+);
+
+// One Media Library asset in a named slot of a structured page (ADR-0017):
+// the slot set is closed per page key. `alt_text` overrides the asset's
+// default for this use: NULL inherits, '' marks it decorative (ADR-0011).
+export const pageMedia = pgTable(
+  "page_media",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    pageId: uuid("page_id").notNull(),
+    slot: varchar("slot", { length: 50 }).notNull(),
+    mediaId: uuid("media_id").notNull(),
+    altText: text("alt_text"),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    foreignKey({
+      name: "page_media_page_id_fkey",
+      columns: [table.pageId],
+      foreignColumns: [pages.id],
+    }).onDelete("cascade"),
+    foreignKey({
+      name: "page_media_media_id_fkey",
+      columns: [table.mediaId],
+      foreignColumns: [media.id],
+    }).onDelete("restrict"),
+    uniqueIndex("page_media_page_slot_uidx").on(table.pageId, table.slot),
+    index("page_media_media_id_idx").on(table.mediaId),
+    check("page_media_slot_format_check", sql`${table.slot} ~ '^[a-z][a-zA-Z0-9]*$'`),
   ],
 );
 
@@ -551,6 +586,12 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
 
 export const pagesRelations = relations(pages, ({ many }) => ({
   blocks: many(projectBlocks),
+  media: many(pageMedia),
+}));
+
+export const pageMediaRelations = relations(pageMedia, ({ one }) => ({
+  page: one(pages, { fields: [pageMedia.pageId], references: [pages.id] }),
+  media: one(media, { fields: [pageMedia.mediaId], references: [media.id] }),
 }));
 
 export const projectBlocksRelations = relations(
@@ -609,4 +650,5 @@ export type NewPage = typeof pages.$inferInsert;
 export type ProjectBlock = typeof projectBlocks.$inferSelect;
 export type NewProjectBlock = typeof projectBlocks.$inferInsert;
 export type BlockMedia = typeof blockMedia.$inferSelect;
+export type PageMedia = typeof pageMedia.$inferSelect;
 export type NewBlockMedia = typeof blockMedia.$inferInsert;

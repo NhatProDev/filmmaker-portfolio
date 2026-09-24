@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { openGraph } from "@/lib/site-metadata";
 import { draftMode } from "next/headers";
 import Image from "next/image";
 import { PreviewBanner, PreviewIssue } from "@/components/preview/PreviewBanner";
@@ -11,6 +12,7 @@ import styles from "./contact.module.css";
 export const metadata: Metadata = {
   title: "Contact",
   alternates: { canonical: "/contact" },
+  openGraph: openGraph("/contact"),
 };
 
 // Contact is static. Only in preview mode, for a signed-in admin, does it read

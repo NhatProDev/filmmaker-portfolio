@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { openGraph } from "@/lib/site-metadata";
 import Image from "next/image";
 import Link from "next/link";
 import { Fragment, type CSSProperties } from "react";
@@ -11,6 +12,7 @@ import styles from "./works.module.css";
 export const metadata: Metadata = {
   title: "Works",
   alternates: { canonical: "/works" },
+  openGraph: openGraph("/works"),
 };
 
 // The Project Detail route. No page route is documented yet; this one follows

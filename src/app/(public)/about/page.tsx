@@ -6,13 +6,19 @@ import { PreviewBanner, PreviewIssue } from "@/components/preview/PreviewBanner"
 import { getCurrentAdmin } from "@/features/authentication/current-admin";
 import { getContentGateway } from "@/features/site-content/site-content.gateway";
 import type { AboutContent, Inline } from "@/features/site-content/site-content.types";
+import { openGraph } from "@/lib/site-metadata";
 import { Portrait } from "./Portrait";
 import styles from "./about.module.css";
 
-export const metadata: Metadata = {
-  title: "About me",
-  alternates: { canonical: "/about" },
-};
+// The share image is the published portrait (3D-10).
+export async function generateMetadata(): Promise<Metadata> {
+  const { portrait } = await getContentGateway().getAbout();
+  return {
+    title: "About me",
+    alternates: { canonical: "/about" },
+    openGraph: openGraph("/about", { image: portrait.image }),
+  };
+}
 
 function InlineText({ parts }: { parts: Inline[] }) {
   return parts.map((part, index) => (

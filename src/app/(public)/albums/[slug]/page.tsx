@@ -8,6 +8,7 @@ import { PreviewBanner, PreviewIssue } from "@/components/preview/PreviewBanner"
 import { getCurrentAdmin } from "@/features/authentication/current-admin";
 import { getContentGateway } from "@/features/site-content/site-content.gateway";
 import type { AlbumPage } from "@/features/site-content/site-content.types";
+import { openGraph } from "@/lib/site-metadata";
 import styles from "../albums.module.css";
 
 type AlbumProps = { params: Promise<{ slug: string }> };
@@ -43,13 +44,7 @@ export async function generateMetadata({ params }: AlbumProps): Promise<Metadata
     title: seo.title ?? title,
     ...(seo.description ? { description: seo.description } : {}),
     alternates: { canonical: `/albums/${slug}` },
-    openGraph: {
-      type: "website",
-      siteName: "Nguyen Khanh Nhat",
-      title: seo.title ?? title,
-      url: `/albums/${slug}`,
-      images: [{ url: cover.src, width: cover.width, height: cover.height }],
-    },
+    openGraph: openGraph(`/albums/${slug}`, { title: seo.title ?? title, image: cover }),
   };
 }
 
@@ -94,7 +89,7 @@ function AlbumView({ album }: { album: AlbumPage }) {
           )}
         </div>
       )}
-      <JustifiedRows id="album" items={album.items.map((item) => item.image)} />
+      <JustifiedRows id="album" items={album.items.map((item) => item.image)} framing="active" />
       {captions.length > 0 && (
         <ol className={styles.captions} aria-label="Captions">
           {captions.map((item) => (

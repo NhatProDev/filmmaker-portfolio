@@ -8,9 +8,21 @@ import { PreviewBanner, PreviewIssue } from "@/components/preview/PreviewBanner"
 import { getCurrentAdmin } from "@/features/authentication/current-admin";
 import { getContentGateway } from "@/features/site-content/site-content.gateway";
 import type { HomeContent, HomeSection } from "@/features/site-content/site-content.types";
+import { homeStructuredData, openGraph } from "@/lib/site-metadata";
 import styles from "./home.module.css";
 
-export const metadata: Metadata = { alternates: { canonical: "/" } };
+// The description is the published identity lead, the page's own words; the
+// share image is the hero's poster (3D-10).
+export async function generateMetadata(): Promise<Metadata> {
+  const { sections } = await getContentGateway().getHome();
+  const identity = sections.find((section) => section.kind === "identity");
+  const hero = sections.find((section) => section.kind === "hero");
+  return {
+    ...(identity ? { description: identity.lead } : {}),
+    alternates: { canonical: "/" },
+    openGraph: openGraph("/", { image: hero?.poster }),
+  };
+}
 
 // Home is static. Only in preview mode, for a signed-in admin, does it read
 // cookies and render the working copy instead (ADR-0012).
@@ -25,7 +37,12 @@ export default async function HomePage() {
       </>
     );
   }
-  return <HomeView content={await gateway.getHome()} />;
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: homeStructuredData() }} />
+      <HomeView content={await gateway.getHome()} />
+    </>
+  );
 }
 
 // Implements docs/design/prototypes/home/Home Baseline v2 Responsive.dc.html.

@@ -158,13 +158,16 @@ The build runs `next build` only. It never migrates: migrations run from
   `pg_dump` is the recovery path.
 - **Domains.** Pending an owner decision (`domains.md`).
 
-**Smoke-test artifacts.** Three throwaway PRIVATE projects remain archived:
+**Smoke-test artifacts.** Three throwaway PRIVATE projects remain:
 `smoke-test-private`, `smoke-test-private-2` and `smoke-test-private-3`.
-They were created by the production smoke tests, and each was unpublished,
-had its borrowed cover cleared, and was archived (soft deleted). Archived
-projects appear in no public route, listing, sitemap or snapshot. They
-reference no media. They are also the only record that the smoke tests ran.
-They are left in place deliberately, because the application has no
-supported hard-delete path and ad-hoc `DELETE` SQL against production is not
-worth the risk. A later smoke run needs a new slug; archived slugs stay
-reserved.
+The production smoke tests created them, then unpublished each one,
+cleared its borrowed cover and archived it (`status = ARCHIVED`). They
+are not soft-deleted. Archived projects appear in no public route,
+listing, sitemap or snapshot, and they reference no media, so they are
+harmless. They do show in the Studio's project list.
+
+The supported way to clear them is the Studio's **Delete project**
+(`DELETE /api/v1/projects/{id}`), which is the soft delete: it sets
+`deleted_at` and removes them from the Studio. It needs no SQL, and it
+is left for the owner to decide. Their slugs stay reserved either way,
+so a later smoke run needs a new slug.

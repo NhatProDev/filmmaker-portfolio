@@ -76,9 +76,65 @@ is publishable once it has its cover and year.
   page and the sitemap instead of the whole tree, which also invalidated the
   prerendered 404 (see `publishing-and-private-access.md` §2).
 
-## 5. Not in this phase
+## 5. Phase 3B — authoring (implementation record)
 
-Moving a block into or out of a GRID (delete and re-create instead); inline
-emphasis/link editing (kept when present, plain text when edited); a public
-player for EXTERNAL_VIDEO; video in JUSTIFIED_ROWS; the letterbox active area
-(ADR-0016); Home as a free composer.
+Additive only: two migrations (`0007`, `0008`), three endpoints
+(`openapi.yaml` 1.3.0), no change to any existing contract or public page.
+
+- **Moving between containers.** `POST /blocks/{blockId}/move` moves a block
+  between the owner's root and a top-level GRID, or between GRIDs, in one
+  locked transaction. The source closes its gap and the target shifts right
+  (ADR-0005 bounds). The block and its placements are revalidated in their
+  new container. Leaving a GRID drops the grid `placement`. Preset GRIDs keep
+  their own blocks, and the title-overlay HERO stays first. Migration `0007`
+  adds a trigger so that a nested block's parent is always a top-level GRID,
+  on insert and on move.
+- **Studio moves.** Drag a block by its handle into or out of Columns. A drop
+  zone appears at the end of the target, and a refused drop shows its reason
+  in place. The equivalent for keyboard and touch is **Move to…** on the card.
+  The rules live in `moves.ts` and mirror the service's. Chrome abandons a
+  drag whose `dragstart` changes layout, so the other lists show their drop
+  zones from the next task.
+- **Rich text.** The TEXT editor has Emphasis (Ctrl+I) and Link (Ctrl+K)
+  buttons and a live preview of what the page will show.
+  `inline-markup.ts` converts between the block contract's inline runs and
+  the editing notation (`*em*`, `[words](href)`, backslash escapes). Stored
+  content is always runs, never notation. Text that does not parse cannot be
+  saved. Links go to a site path, https or mailto only. There is no bold: the
+  inline contract has only emphasis and links.
+- **External video.** YouTube and Vimeo play in VIDEO blocks, a non-opening
+  HERO, and GRID cells, always as CLICK_TO_PLAY.
+  - `external-video.ts` reduces an address to the provider's id and builds
+    the player address from that id alone: `youtube-nocookie.com/embed/…` or
+    `player.vimeo.com/video/…?dnt=1`. These are the CSP's `frame-src`.
+  - Nothing is requested from the provider before the visitor's click.
+  - The Media Library refuses an address no player can show, and Publish
+    refuses a stored one.
+  - The opening plays hosted film only, and galleries refuse external video.
+- **Private previews in the Studio.** `GET /media/{mediaId}/content` is for
+  admins only and re-checked on every request. It answers with a short-lived
+  signed redirect, or the streamed file for local storage, and is never
+  cached. The Media DTO still has no `deliveryUrl` for a private asset.
+- **ADR-0016 active picture.** `media.active_picture` (migration `0008`) holds
+  2.39, 2.00, 1.85, or NULL for FULL, and is set in the Media Library. The
+  Studio shades the bars on the preview and advises a clean re-export first.
+  - The generic renderer frames each layer on its own asset's picture. The
+    frame is a size container. The element keeps its file's proportions,
+    sized so that the active rectangle covers the frame (or fits it, under
+    CONTAIN), and the bars fall outside the frame.
+  - Frames that follow their asset take the active picture's shape.
+  - A choice that is not a letterbox of its file is refused at Publish.
+- **Snapshot stability.** The new media fields are absent, not null, when
+  unused. Every snapshot published before 3B therefore still equals its
+  working copy: no project reports unpublished changes after the migration.
+  This was checked on a restored production dump.
+
+## 6. Not yet
+
+- The locked opening, the presets and Home do not apply the active picture
+  yet; setting one on an asset they use is a design review (ADR-0016 §4).
+  The same holds for JUSTIFIED_ROWS.
+- Video in JUSTIFIED_ROWS.
+- Home as a free composer.
+- Bold text, which would be a contract change.
+- Studio upload of private media: uploads are still public originals.

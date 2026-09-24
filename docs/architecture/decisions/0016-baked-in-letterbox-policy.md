@@ -11,6 +11,11 @@
 - **Affects:** CLAUDE.md §12 · `db/schema.ts` (later, additive) · the Studio's
   media library (later)
 - **Change class:** Resolves an open requirement; no contract change now
+- **Implementation:** Phase 3B. Migration `0008`, `activePicture` on the
+  Media DTO, the Studio's Picture area control, and the generic Project Detail
+  renderer. See `docs/architecture/project-composer.md` §5. The locked
+  opening, the presets and Home are not yet covered (constraint 4 and
+  Decision 4).
 
 ## Problem
 

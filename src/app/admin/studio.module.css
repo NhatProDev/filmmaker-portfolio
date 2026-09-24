@@ -63,10 +63,20 @@
   letter-spacing: 0.02em;
 }
 
+/* More sections than a phone is wide: the links scroll inside the bar
+   rather than widening the page. */
 .nav {
   display: flex;
   gap: 4px;
   flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.nav a {
+  flex: none;
+  white-space: nowrap;
 }
 
 .studio .nav a {

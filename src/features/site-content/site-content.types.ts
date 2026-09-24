@@ -19,13 +19,31 @@ export type WallItem = {
   video?: string;
 };
 
-export type HomeContent = {
+export type HomeFooter = { email: string; note: string; links: { href: string; label: string }[] };
+
+// The committed Home (src/content/home.ts): its five sections by name, in the
+// approved prototype's order. The import stores it as blocks.
+export type HomeTemplate = {
   hero: { poster: HomeImage; video: string; caption: string };
   identity: { display: string; lead: string; aside: string };
   wall: { label: string; items: WallItem[] };
   about: { text: string; more: { href: string; label: string }; portrait: HomeImage };
   coda: { label: string; items: HomeImage[] };
-  footer: { email: string; note: string; links: { href: string; label: string }[] };
+  footer: HomeFooter;
+};
+
+// Home as the page renders it (ADR-0018): an ordered composition of Home's
+// closed sections, each drawn by the locked Home CSS, and the footer.
+export type HomeSection =
+  | ({ kind: "hero" } & HomeTemplate["hero"])
+  | ({ kind: "identity" } & HomeTemplate["identity"])
+  | ({ kind: "wall" } & HomeTemplate["wall"])
+  | ({ kind: "about" } & HomeTemplate["about"])
+  | ({ kind: "frames" } & HomeTemplate["coda"]);
+
+export type HomeContent = {
+  sections: HomeSection[];
+  footer: HomeFooter;
 };
 
 // ---- Art Works ----

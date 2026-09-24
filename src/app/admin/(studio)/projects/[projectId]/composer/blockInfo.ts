@@ -49,7 +49,16 @@ export const TEXT_ROLE_LABELS: Record<string, string> = {
   more: "Small caps line",
 };
 
-export function labelOf(block: Block): string {
+// Home's sections by name (ADR-0018); on a project, the block's own name.
+export function labelOf(block: Block, owner: "project" | "page" = "project"): string {
+  if (owner === "page") {
+    if (block.type === "HERO") return "Hero";
+    if (block.type === "GALLERY" && configOf(block).mode === "JUSTIFIED_ROWS") return "Frames";
+    const preset = presetOf(block);
+    if (preset === "homeIdentity") return "Identity";
+    if (preset === "homeWall") return "Wall";
+    if (preset === "homeAbout") return "About teaser";
+  }
   if (isOpening(block)) return "Opening";
   const preset = presetOf(block);
   if (preset) return presetFor(preset)?.label ?? preset;
@@ -76,6 +85,9 @@ export function summaryOf(block: Block): string {
   const media = block.media.length;
   switch (block.type) {
     case "HERO":
+      if (configOf(block).playback?.mode === "AUTOPLAY_AMBIENT" && !block.children.length && (block.content as { caption?: string }).caption) {
+        return clip((block.content as { caption: string }).caption);
+      }
       if (isOpening(block)) {
         const item = block.media[0];
         return item ? `${item.media.type === "IMAGE" ? "Image" : "Film"} under the title` : "The project's cover under the title";
@@ -100,10 +112,14 @@ export function summaryOf(block: Block): string {
       if (preset === "projectStills") return `${block.children.length} still(s)`;
       if (preset === "projectLoop") return block.children[1] ? clip(plainText(block.children[1])) : "Loop without caption";
       if (preset === "projectCredits") return "The credit list, from Details";
+      if (preset === "homeIdentity") return block.children[0] ? clip(plainText(block.children[0])) : "";
+      if (preset === "homeAbout") return block.children[0] ? clip(plainText(block.children[0])) : "";
       return `${block.children.length} block(s) on 12 columns`;
     }
-    case "GALLERY":
-      return `${media} item(s)`;
+    case "GALLERY": {
+      const label = (block.content as { label?: string }).label;
+      return label ? `${clip(label, 60)} — ${media} item(s)` : `${media} item(s)`;
+    }
     case "SPACER":
       return { S: "Small", M: "Medium", L: "Large" }[configOf(block).size ?? "M"] ?? "";
   }
@@ -136,7 +152,8 @@ export function needsOf(block: Block): string | null {
     if (!caption) return "Write the loop's caption";
     return null;
   }
-  if (preset === "projectMeta" || preset === "projectCredits") return null;
+  if (preset === "projectMeta" || preset === "projectCredits" || preset === "homeIdentity") return null;
+  if (preset === "homeAbout") return block.children[2]?.media.length ? null : "Choose the portrait";
   switch (block.type) {
     case "IMAGE":
       return block.media.length ? null : "Choose an image";

@@ -6,8 +6,8 @@ import { parseBlock, type BlockType } from "@/features/project-builder/block.sch
 import { createPagePublicationService } from "@/features/project-builder/page-publication.service";
 import { createPublicationRepository } from "@/features/project-builder/publication.repository";
 import { createProjectPublicationService } from "@/features/projects/publication.service";
-import type { ContentGateway, HomeContent, ProjectDetail, WorksProject } from "@/features/site-content/site-content.types";
-import { staticProjectDetail } from "@/features/site-content/static-gateway";
+import type { ContentGateway, HomeTemplate, ProjectDetail, WorksProject } from "@/features/site-content/site-content.types";
+import { staticHomeTemplate, staticProjectDetail } from "@/features/site-content/static-gateway";
 import { mediaKeyFromUrl } from "@/lib/storage/media-url";
 import { probeMediaFile, type ProbedMedia } from "./media-probe";
 
@@ -131,7 +131,8 @@ async function collectPlacements(gateway: ContentGateway, issues: string[]) {
     if (detail.coda) add(detail.coda.src, "IMAGE", `${at}: coda`, size(detail.coda));
   }
 
-  const home = await gateway.getHome();
+  // Home in its authored shape: its five sections by name (ADR-0018).
+  const home = staticHomeTemplate();
   add(home.hero.poster.src, "IMAGE", "home: hero poster", size(home.hero.poster));
   add(home.hero.video, "VIDEO", "home: hero video", null);
   home.wall.items.forEach((item, i) => {
@@ -416,7 +417,7 @@ function projectBlocksFrom(detail: ProjectDetail, ref: Ref) {
 
 // Home's default composition (ADR-0007), as the locked Home page renders it.
 // The footer is site chrome, not a block, and stays static.
-function homeBlocksFrom(home: HomeContent, ref: Ref) {
+function homeBlocksFrom(home: HomeTemplate, ref: Ref) {
   return [
     {
       type: "HERO",

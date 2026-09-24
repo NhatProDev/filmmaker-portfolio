@@ -404,12 +404,15 @@ describe("health and database targets (docs/operations/runbook.md)", () => {
     try {
       const ok = await checkHealth({ db: database.db, databaseRequired: true, storageConfigured: true });
       assert.deepEqual(ok, { status: "ok", checks: { database: "ok", schema: "ok", storage: "ok" } });
-      await database.client.query("delete from drizzle.__drizzle_migrations where id = (select max(id) from drizzle.__drizzle_migrations)");
+      // Older code on a newer, additively migrated schema still serves.
+      await database.client.query("insert into drizzle.__drizzle_migrations (hash, created_at) values ('x', 1)");
+      const ahead = await checkHealth({ db: database.db, databaseRequired: true, storageConfigured: true });
+      assert.deepEqual(ahead, { status: "degraded", checks: { database: "ok", schema: "ahead", storage: "ok" } });
+      // A missing migration cannot, even with an unknown one also applied.
+      await database.client.query("delete from drizzle.__drizzle_migrations where created_at = (select max(created_at) from drizzle.__drizzle_migrations)");
       const behind = await checkHealth({ db: database.db, databaseRequired: true, storageConfigured: true });
       assert.equal(behind.status, "unavailable");
       assert.equal(behind.checks.schema, "behind");
-      await database.client.query("insert into drizzle.__drizzle_migrations (hash, created_at) values ('x', 1)");
-      assert.equal((await checkHealth({ db: database.db, databaseRequired: true, storageConfigured: true })).checks.schema, "ahead");
     } finally {
       await database.close();
     }

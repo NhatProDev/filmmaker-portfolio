@@ -24,8 +24,10 @@ const rowsOf = <T,>(result: unknown): T[] =>
 async function schemaState(db: Database): Promise<CheckState> {
   const result = await db.execute(sql`select created_at from drizzle.__drizzle_migrations`);
   const applied = new Set(rowsOf<{ created_at: string | number }>(result).map((row) => String(row.created_at)));
-  if ([...applied].some((when) => !shipped.has(when))) return "ahead";
+  // Behind first: a migration this build needs and the database lacks breaks
+  // pages whatever else was applied.
   if ([...shipped].some((when) => !applied.has(when))) return "behind";
+  if ([...applied].some((when) => !shipped.has(when))) return "ahead";
   return "ok";
 }
 
@@ -58,12 +60,16 @@ export async function checkHealth(input: {
     );
   }
 
-  // A required database that fails, or a schema this build does not match,
-  // means the site cannot serve. Anything else short of every check passing
-  // is degraded, never ok: a configured database that is down still takes
-  // the Studio with it, and storage delivers every image and film.
-  const failed = (input.databaseRequired && database !== "ok") || (database === "ok" && schema !== "ok");
-  const allOk = storage === "ok" && (database === "ok" || database === "not-configured");
+  // A required database that fails, or a schema missing a migration this
+  // build needs, means the site cannot serve. A schema ahead of the build is
+  // the expected state between an additive migration and its deploy, and
+  // after a code rollback (runbook §1, §8): degraded, not down. Anything else
+  // short of every check passing is degraded, never ok: a configured
+  // database that is down still takes the Studio with it, and storage
+  // delivers every image and film.
+  const failed =
+    (input.databaseRequired && database !== "ok") || (database === "ok" && schema !== "ok" && schema !== "ahead");
+  const allOk = storage === "ok" && ((database === "ok" && schema === "ok") || database === "not-configured");
   const status = failed ? "unavailable" : allOk ? "ok" : "degraded";
   return { status, checks: { database, schema, storage } };
 }

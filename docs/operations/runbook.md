@@ -20,8 +20,9 @@ npm run db:migrate -- --confirm-remote=<host>/<database>
 Applies pending migrations from `db/migrations` in one transaction; a second
 run applies nothing. Migrations are additive (CLAUDE.md §6); a destructive one
 needs its own reviewed plan. Run it **before** deploying code that needs the
-new schema. `/api/v1/health` reports `schema: behind` until it has run and
-`ahead` if older code runs against a newer schema.
+new schema. `/api/v1/health` reports `schema: behind` (503, unavailable)
+until it has run and `ahead` (200, degraded) while older code runs against
+the newer schema.
 
 ## 2. Content import (first deployment only)
 

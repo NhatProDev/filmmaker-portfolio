@@ -6,6 +6,7 @@ import styles from "./contact.module.css";
 
 export const metadata: Metadata = {
   title: "Contact",
+  alternates: { canonical: "/contact" },
 };
 
 // Implements docs/design/prototypes/contact/Contact 4B v2 Responsive.dc.html.

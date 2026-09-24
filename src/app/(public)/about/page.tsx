@@ -8,6 +8,7 @@ import styles from "./about.module.css";
 
 export const metadata: Metadata = {
   title: "About me",
+  alternates: { canonical: "/about" },
 };
 
 function InlineText({ parts }: { parts: Inline[] }) {

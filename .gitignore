@@ -90,6 +90,10 @@ imgs & videos/
 # src/content/projects.ts.
 /public/media/
 
+# Private media for the local storage adapter (MEDIA_PRIVATE_ROOT): outside
+# public/, so Next.js never serves it, and never committed.
+/storage/
+
 # Local preview tooling: this machine's launch configurations for the dev,
 # production and prototype servers. Never committed.
 /.claude/launch.json

@@ -1,0 +1,120 @@
+# Operations runbook
+
+Every database script refuses a non-local database unless the command line
+names the exact target: `--confirm-remote=<host>/<database>`
+(`scripts/lib/database-target.ts`). Finding a `DATABASE_URL` is never
+permission. Nothing reads the confirmation from the environment, so it cannot
+be left switched on. **Take a backup (§4) before any remote write.**
+
+The commands below are written for the production target
+`<host>/<database>`; substitute the real values. In Phase 2G-A none of them was
+run against a remote database.
+
+## 1. Migrate
+
+```text
+npm run db:migrate -- --confirm-remote=<host>/<database>
+```
+
+Applies pending migrations from `db/migrations` in one transaction; a second
+run applies nothing. Migrations are additive (CLAUDE.md §6); a destructive one
+needs its own reviewed plan. Run it **before** deploying code that needs the
+new schema. `/api/v1/health` reports `schema: behind` until it has run and
+`ahead` if older code runs against a newer schema.
+
+## 2. Content import (first deployment only)
+
+```text
+npm run db:import -- --confirm-remote=<host>/<database>             review the plan
+npm run db:import -- --apply --confirm-remote=<host>/<database>
+```
+
+Create-only and idempotent: it never overwrites or deletes, and reports drift
+instead. It reads media files from `public/media`, so run it from a checkout
+that has them. It records storage keys; the files themselves are uploaded with
+the media migration (`media-migration.md`).
+
+## 3. Seed the admin
+
+```text
+ADMIN_EMAIL=… ADMIN_PASSWORD=… npm run db:seed-admin -- --confirm-remote=<host>/<database>
+```
+
+Creates the admin, or replaces the password and revokes that admin's sessions.
+Clear `ADMIN_PASSWORD` from the shell afterwards.
+
+## 4. Backup
+
+Before every migration, import or restore, and on a schedule:
+
+```text
+pg_dump --format=custom --no-owner --no-privileges \
+  --file=portfolio-$(date +%Y%m%d-%H%M).dump "$DATABASE_URL_DIRECT"
+```
+
+- Use the provider's **direct** (non-pooled) connection string for `pg_dump`.
+- Neon also keeps a point-in-time restore window (length by plan — verify at
+  2G-B); a branch at a timestamp is the quickest restore rehearsal.
+- Media: storage is the source of truth for files. Enable R2/S3 bucket
+  versioning or a periodic copy of both buckets; the database holds only keys
+  and checksums.
+
+## 5. Provisioning sequence (2G-B, after approval)
+
+1. Create the database (Neon), the two buckets (R2) with the public bucket on
+   the media domain, and a storage token scoped to both buckets.
+2. CORS on the **public** and **private** buckets: allow `PUT` and `GET` from
+   `SITE_URL` (uploads come from the Studio; private delivery is a redirect,
+   so the browser fetches the private bucket directly).
+3. Set the environment (`environment.md`); `npm run env:check -- --production`
+   must pass.
+4. §1 migrate, §2 import, §3 seed admin — each with `--confirm-remote`.
+5. Upload media per `media-migration.md`, then run
+   `npm run db:health -- --confirm-remote=<host>/<database>`.
+6. Deploy the application; check `GET /api/v1/health` is `ok`.
+7. Smoke test: every public route, a private project's gate and unlock,
+   Studio sign-in, a draft preview, one Publish, and that the published page
+   answers at once.
+
+## 6. Health verification
+
+- `GET /api/v1/health` — public, uncached: `database`, `schema`, `storage`
+  states; 503 when the site cannot serve. Point the platform's health check at
+  it.
+- `npm run db:health` — deeper and read-only: migrations match, every
+  published snapshot still validates and renders, every needed media file is
+  present (local adapter) — for after a deploy, migration, import or restore.
+- `npm run media:manifest` — the media-to-database consistency report (§8).
+
+## 7. Restore
+
+1. Put the Studio out of use (no publishing during the restore).
+2. Restore into a **new** database (or Neon branch), never over the live one:
+   `pg_restore --no-owner --no-privileges --dbname="$NEW_DATABASE_URL" portfolio-….dump`
+3. `npm run db:health -- --confirm-remote=<new-host>/<database>` must pass.
+4. Point `DATABASE_URL` at the restored database and redeploy (the pages
+   prerender from it).
+5. Keep the old database until the site is verified.
+
+Media are not part of a database restore. Restored rows reference keys; if a
+key's object is gone, `db:health` names it. Bucket versioning restores it.
+
+## 8. Rollback
+
+- **Code:** redeploy the previous build or tag (`git tag` lists the phase tags:
+  `public-frontend-v1`, `phase-2f-cms-v1`, …). A rollback across a migration is
+  safe only while migrations are additive: older code ignores new columns. The
+  health endpoint reports `schema: ahead`; that is expected and harmless for an
+  additive migration.
+- **Content:** there is no revision history (CLAUDE.md §19). To undo a publish,
+  edit the working copy back and publish again, or Unpublish.
+- **Database:** §7.
+
+## 9. Media and database consistency
+
+`npm run media:manifest -- --out=manifest.json` lists every asset with its
+checksum, current source, future key, audience (public / private /
+unreferenced), usages and posters, and reports missing files, duplicates,
+target collisions and recorded metadata that disagrees with the file. It exits
+non-zero on missing files or collisions. Run it before and after any media
+move.

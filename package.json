@@ -8,13 +8,16 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "node --import tsx --test tests/*.test.ts",
+    "test": "node --import tsx --import ./tests/helpers/env.ts --test tests/*.test.ts",
     "db:generate": "drizzle-kit generate",
     "db:check": "drizzle-kit check",
     "db:migrate": "tsx --env-file-if-exists=.env.local scripts/db-migrate.ts",
     "db:import": "tsx --env-file-if-exists=.env.local scripts/import-static-content.ts",
     "db:seed-admin": "tsx --env-file-if-exists=.env.local scripts/seed-admin.ts",
-    "db:verify": "tsx --env-file-if-exists=.env.local scripts/verify-content.ts"
+    "db:verify": "tsx --env-file-if-exists=.env.local scripts/verify-content.ts",
+    "db:health": "tsx --env-file-if-exists=.env.local scripts/db-health.ts",
+    "media:manifest": "tsx --env-file-if-exists=.env.local scripts/media-manifest.ts",
+    "env:check": "tsx --env-file-if-exists=.env.local scripts/check-env.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.3",

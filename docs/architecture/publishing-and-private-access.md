@@ -51,7 +51,10 @@ Next.js 16 renders a thrown `notFound()` in a dynamic route as an empty
 addresses grow the page cache.
 
 So the proxy (Node runtime) routes by a short-lived (10 s) index of published
-slugs:
+slugs (`src/features/site-content/project-router.ts`). A slug the index does
+not know is looked up fresh, one slug, before it is called unknown, so a
+project is routable the moment Publish returns, on every instance (Phase
+2G-A):
 
 | Slug | Goes to |
 |---|---|
@@ -78,7 +81,12 @@ cacheable page.
 - A PRIVATE project's media resolve to
   `/api/v1/public/projects/{slug}/media/{mediaId}`. That route streams the file
   only with valid access, and only if the published snapshot references it,
-  with byte ranges and `Cache-Control: private, no-store`.
+  with byte ranges and `Cache-Control: private, no-store`. With the `s3`
+  storage adapter it answers `302` to a short-lived presigned URL instead, so
+  storage serves the bytes (Phase 2G-A, `docs/operations/media-migration.md`).
+- The unlocked page (`./live`) takes the project's own title, still
+  `noindex, nofollow`; the gate and every failure keep the generic
+  "Private project".
 
 ## 5. Preview
 
@@ -92,19 +100,22 @@ output: without both conditions the page is the static published one.
 ## 6. Limitations and choices open for review
 
 1. **Private media with the local adapter.** The access check applies to the
-   URLs the site emits. The files themselves also sit in `public/media` and
-   are reachable by exact key. Production needs a private bucket and signed,
-   short-lived URLs behind the adapter (ADR-0014 §4). *Blocked on the storage
-   provider.*
+   URLs the site emits. Legacy keys still sit in `public/media` and are
+   reachable by exact key. *Prepared in 2G-A:* keys under `private/` are never
+   publicly addressable (local root outside `public/`; a private bucket with
+   presigned GET for `s3`). A private project's media are protected at the file
+   level once moved under `private/` (`docs/operations/media-migration.md`).
 2. **Gate vs 404.** A private slug shows the gate and an unknown slug shows
    404, so the gate confirms that a private project exists at that address.
    This is the behaviour the gate design record left to engineering
    (`private-gate-5b-v2.md` §9.1). Unguessable slugs for private projects
    mitigate it. *Open for review.*
-3. **Index staleness.** For up to 10 seconds after a publish or an unpublish,
-   the proxy's index may route the old way. A newly published project may
-   answer 404 briefly.
+3. **Index staleness.** *Resolved for publishing in 2G-A:* a newly published
+   project answers at once. Only a withdrawal can lag: for up to 10 seconds an
+   instance may still route an unpublished or deleted slug to its page, which
+   has already been revalidated and renders no project content.
 4. **Unexpected gate errors** (the secret is unset, the network fails) show a
    third generic message in the design's message slot: "This work cannot be
    opened right now." *Open for review.*
-5. **Tab title of an unlocked private project** stays "Private project".
+5. **Tab title of an unlocked private project.** *Resolved in 2G-A:* the real
+   title after verified access, generic before; always noindex.

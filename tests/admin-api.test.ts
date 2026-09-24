@@ -429,6 +429,8 @@ describe("media library (CLAUDE.md §12, §17.7, §17.27, §17.28)", () => {
     const fake: MediaStorage = {
       provider: "fake",
       publicUrl: (key) => `https://cdn.test/${key}`,
+      signedDeliveryUrl: (key) => `https://private.test/${key}?signed`,
+      localPath: () => null,
       createUpload: async ({ key }) => ({ url: `https://upload.test/${key}`, method: "PUT", headers: {}, expiresAt: new Date(Date.now() + 60000) }),
       verifyUpload: async (key) => (objects.has(key) ? { key, ...objects.get(key)! } : null),
       deleteObject: async () => {},

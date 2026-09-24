@@ -49,7 +49,22 @@ export function createDbGateway(db: Database): ContentGateway {
     url?: MediaIndex["url"],
   ): ProjectPage {
     const { works, detail } = renderProject(snapshot, slug, url);
-    return { slug, title: works.title, year: works.year, cover: works.cover, displayPosition, detail, next };
+    const { seoTitle, seoDescription, shortDescription } = snapshot.project;
+    const description = seoDescription ?? shortDescription;
+    const seo = {
+      ...(seoTitle ? { title: seoTitle } : {}),
+      ...(description ? { description } : {}),
+    };
+    return {
+      slug,
+      title: works.title,
+      year: works.year,
+      cover: works.cover,
+      displayPosition,
+      ...(Object.keys(seo).length ? { seo } : {}),
+      detail,
+      next,
+    };
   }
 
   // A project outside the listing links on to the first listed project.
@@ -104,6 +119,12 @@ export function createDbGateway(db: Database): ContentGateway {
         public: rows.filter((row) => row.visibility === "PUBLIC").map((row) => row.slug),
         private: rows.filter((row) => row.visibility === "PRIVATE").map((row) => row.slug),
       };
+    },
+
+    async findProjectRoute(slug) {
+      const row = await publications.findPublishedBySlug(slug);
+      if (!row) return null;
+      return row.project.visibility === "PRIVATE" ? "private" : "public";
     },
 
     async findPrivateProject(slug) {

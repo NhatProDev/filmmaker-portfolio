@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { accessCookieName } from "@/features/project-access/access-cookie";
+import { createProjectRouter } from "@/features/site-content/project-router";
 import { getContentGateway } from "@/features/site-content/site-content.gateway";
 
 // Routes /works/<slug> before anything renders (ADR-0003, ADR-0012):
@@ -13,37 +14,35 @@ import { getContentGateway } from "@/features/site-content/site-content.gateway"
 //
 // The static pages therefore never read cookies, and private content is never
 // rendered into a cacheable page. The cookie's signature, expiry and password
-// binding are verified by ./live itself.
+// binding are verified by ./live itself. A project published a moment ago is
+// routed at once (project-router.ts).
 
-const TTL_MS = 10_000;
-let routes: { at: number; public: Set<string>; private: Set<string> } | null = null;
-
-async function projectRoutes() {
-  if (!routes || Date.now() - routes.at > TTL_MS) {
-    const index = await getContentGateway().listProjectRoutes();
-    routes = { at: Date.now(), public: new Set(index.public), private: new Set(index.private) };
-  }
-  return routes;
-}
+let router: ReturnType<typeof createProjectRouter> | undefined;
 
 export async function proxy(request: NextRequest) {
-  const slug = decodeURIComponent(request.nextUrl.pathname.split("/")[2] ?? "");
-  let known: Awaited<ReturnType<typeof projectRoutes>>;
+  let slug: string;
   try {
-    known = await projectRoutes();
+    slug = decodeURIComponent(request.nextUrl.pathname.split("/")[2] ?? "");
+  } catch {
+    slug = "";
+  }
+  router ??= createProjectRouter(getContentGateway());
+  let route: Awaited<ReturnType<typeof router.route>>;
+  try {
+    route = await router.route(slug);
   } catch (error) {
     // Without the index, the pages decide as they would without a proxy.
     console.error("[proxy] project routes unavailable", error);
     return NextResponse.next();
   }
-  if (known.public.has(slug)) return NextResponse.next();
-  if (known.private.has(slug)) {
+  if (route === "public") return NextResponse.next();
+  if (route === "private") {
     return request.cookies.has(accessCookieName(slug))
       ? NextResponse.rewrite(new URL(`/works/${slug}/live`, request.url))
       : NextResponse.next();
   }
   // No route answers this path, so Next.js serves its 404 page.
-  return NextResponse.rewrite(new URL(`/works/${encodeURIComponent(slug)}/not-found`, request.url));
+  return NextResponse.rewrite(new URL(`/works/${encodeURIComponent(slug || "_")}/not-found`, request.url));
 }
 
 export const config = { matcher: "/works/:slug" };

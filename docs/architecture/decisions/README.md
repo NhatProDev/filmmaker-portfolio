@@ -29,9 +29,11 @@ write a new one that supersedes it, and mark the old one `Superseded by NNNN`.
 | [0013](0013-templates-typed-blocks-and-presentation-presets.md) | Hybrid: typed blocks persist, templates seed and are not live-linked, closed code-defined presentation presets own responsive derivations; strict exactly-one-owner | Approved |
 | [0014](0014-media-architecture.md) | Media identity is provider + key with checksum, URLs derived at read time, originals separate from future variants, providers behind adapters, private media not publicly delivered | Approved — §3 amended by 0015 |
 | [0015](0015-placement-poster-override-and-contract-realignment.md) | Poster = asset default + optional relational placement override, both in `MEDIA_IN_USE`; strict single-owner wording; `0001` baseline provenance; `openapi.yaml` realigned to the domain | Approved |
+| [0016](0016-baked-in-letterbox-policy.md) | Baked-in letterbox: clean masters first; a stored, closed-enum active area per asset for files that cannot be re-exported; no automatic detection in V1 | Approved (delegated, Phase 2G-A) — to be confirmed at review |
 
 ADRs 0001–0008 were approved on 2026-09-21; ADR-0009 and ADR-0010 on
-2026-09-22; ADR-0011 to ADR-0015 on 2026-09-24.
+2026-09-22; ADR-0011 to ADR-0015 on 2026-09-24. ADR-0016 was decided on
+2026-09-24 under the owner's Phase 2G-A delegation.
 
 **Schema note.** The deferred schema work of ADR-0006, ADR-0007 and ADR-0009 is
 applied, together with ADR-0011 and ADR-0014's additions, in migration

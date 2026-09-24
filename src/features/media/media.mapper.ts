@@ -1,5 +1,5 @@
 import type { Media as MediaRow } from "@db/schema";
-import { getMediaStorage } from "@/lib/storage/media-storage";
+import { getMediaStorage, isPrivateKey } from "@/lib/storage/media-storage";
 import { mediaUrl } from "@/lib/storage/media-url";
 
 // Media DTOs (openapi.yaml). Delivery URLs are derived here, at read time, from
@@ -7,9 +7,11 @@ import { mediaUrl } from "@/lib/storage/media-url";
 
 export type { MediaRow };
 
+// A private object has no public URL (media-storage.ts); the Studio shows it
+// without a preview until it has an access-checked route of its own.
 export function deliveryUrl(row: Pick<MediaRow, "type" | "status" | "storageProvider" | "storageKey">): string | null {
   if (row.type === "EXTERNAL_VIDEO" || row.status !== "READY" || !row.storageKey) return null;
-  if (row.storageProvider !== getMediaStorage().provider) return null;
+  if (row.storageProvider !== getMediaStorage().provider || isPrivateKey(row.storageKey)) return null;
   return mediaUrl(row.storageKey);
 }
 

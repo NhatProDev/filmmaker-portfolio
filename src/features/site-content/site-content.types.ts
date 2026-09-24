@@ -96,6 +96,9 @@ export type ProjectPage = {
   year: number;
   cover: WorksCover;
   displayPosition: number;
+  // Search and sharing text, from the project's SEO fields or its short
+  // description; absent in the committed content.
+  seo?: { title?: string; description?: string };
   detail: ProjectDetail | null;
   // The next project in the public listing's displayPosition order, wrapping
   // after the last. Only listed projects can be next, so a PRIVATE project is
@@ -183,6 +186,9 @@ export interface ContentGateway {
   // Every published project address, by audience: what the edge proxy needs
   // to route /works/<slug> without rendering (src/proxy.ts).
   listProjectRoutes(): Promise<{ public: string[]; private: string[] }>;
+  // The same for one slug, read fresh: how the proxy routes an address its
+  // index does not know yet, e.g. a project published a moment ago.
+  findProjectRoute(slug: string): Promise<"public" | "private" | null>;
 
   // The working copy, for an authenticated admin's preview (ADR-0012).
   previewProjectPage(slug: string): Promise<Preview<ProjectPage>>;

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { draftMode } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,6 +9,8 @@ import { getCurrentAdmin } from "@/features/authentication/current-admin";
 import { getContentGateway } from "@/features/site-content/site-content.gateway";
 import type { HomeContent } from "@/features/site-content/site-content.types";
 import styles from "./home.module.css";
+
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 // Home is static. Only in preview mode, for a signed-in admin, does it read
 // cookies and render the working copy instead (ADR-0012).

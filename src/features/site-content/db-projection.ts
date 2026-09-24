@@ -10,6 +10,7 @@ import {
 } from "@/features/project-builder/block.schema";
 import type { PublicProjectRecord } from "@/features/projects/project.repository";
 import { projectCreditsSchema } from "@/features/projects/project.schema";
+import { isPrivateKey } from "@/lib/storage/media-storage";
 import { mediaUrl } from "@/lib/storage/media-url";
 import type {
   HomeContent,
@@ -40,10 +41,14 @@ export type MediaIndex = {
   url(asset: MediaRecord & { storageKey: string }): string;
 };
 
-export function createMediaIndex(
-  records: readonly MediaRecord[],
-  url: MediaIndex["url"] = (asset) => mediaUrl(asset.storageKey),
-): MediaIndex {
+// A private object never becomes a public URL: a public page that references
+// one cannot be rendered.
+export const publicMediaUrl: MediaIndex["url"] = (asset) => {
+  if (isPrivateKey(asset.storageKey)) fail(`media ${asset.id}`, "is in private storage and cannot appear on a public page");
+  return mediaUrl(asset.storageKey);
+};
+
+export function createMediaIndex(records: readonly MediaRecord[], url: MediaIndex["url"] = publicMediaUrl): MediaIndex {
   const byId = new Map(records.map((record) => [record.id, record]));
   return { get: (id) => byId.get(id), url };
 }

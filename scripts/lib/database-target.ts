@@ -1,20 +1,40 @@
 import { sql } from "drizzle-orm";
 import type { Database } from "@db/client";
 
-// Phase 2C writes only to a local development database. A DATABASE_URL that
-// merely exists is not permission to change the database it points at.
+// Which database a script may connect to. A DATABASE_URL that merely exists is
+// not permission to use the database it points at:
+//
+// - a local development database (localhost, 127.0.0.1, ::1 or a local
+//   socket) is always allowed;
+// - any other host is refused unless the command line names that exact target,
+//   `--confirm-remote=<host>/<database>`, typed for this run. Nothing reads the
+//   confirmation from the environment, so it cannot be left switched on.
+//
+// docs/operations/runbook.md describes the production workflows that use it.
 const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
 
-export function assertLocalDatabaseUrl(url: string): { host: string; database: string } {
+export type DatabaseTarget = { host: string; database: string; remote: boolean; label: string };
+
+export function parseDatabaseTarget(url: string): DatabaseTarget {
   const parsed = new URL(url);
   const host = parsed.hostname.replace(/^\[|\]$/g, "");
-  if (host && !LOCAL_HOSTS.has(host)) {
+  const database = decodeURIComponent(parsed.pathname.slice(1));
+  const remote = Boolean(host) && !LOCAL_HOSTS.has(host);
+  return { host: host || "(local socket)", database, remote, label: `${host || "(local socket)"}/${database}` };
+}
+
+export function assertDatabaseTarget(url: string, argv: readonly string[] = process.argv): DatabaseTarget {
+  const target = parseDatabaseTarget(url);
+  if (!target.remote) return target;
+  const confirmation = argv.find((arg) => arg.startsWith("--confirm-remote="))?.slice("--confirm-remote=".length);
+  if (confirmation !== target.label) {
     throw new Error(
-      `Refusing to write to the database at "${host}": only a local development database ` +
-        "(localhost, 127.0.0.1, ::1 or a local socket) may be written in this phase.",
+      `Refusing to use the non-local database "${target.label}". ` +
+        `If this is intended, re-run with --confirm-remote=${target.label} ` +
+        "after checking the runbook (docs/operations/runbook.md) and taking a backup.",
     );
   }
-  return { host: host || "(local socket)", database: decodeURIComponent(parsed.pathname.slice(1)) };
+  return target;
 }
 
 export async function describeDatabase(db: Database): Promise<string> {

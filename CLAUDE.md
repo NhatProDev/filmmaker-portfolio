@@ -511,9 +511,11 @@ composed frame.
 **The production ingestion/media pipeline must solve this structurally.**
 One-off CSS scaling is not an acceptable production solution and must not ship.
 
-**The method is unresolved and requires analysis** — detect-and-strip at
-ingestion, or store an active-area crop per asset. Do not choose without it; the
-choice changes what the CMS must show the administrator.
+**The method is decided by ADR-0016:** clean masters first (upload the active
+picture, without bars); for a file that cannot be re-exported, a stored,
+closed-enum active area on the asset, applied by the renderer to each layer from
+its own asset; no automatic detection in V1. Implementation is additive and
+pending; until then assets render as encoded.
 
 Whichever method is chosen must apply **identically to a poster and its video**,
 or the poster-to-video swap produces a visible scale jump (ADR-0009 §5).

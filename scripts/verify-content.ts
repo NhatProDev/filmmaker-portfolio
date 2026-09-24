@@ -14,13 +14,14 @@ import { createDbGateway } from "@/features/site-content/db-gateway";
 import { staticGateway } from "@/features/site-content/static-gateway";
 import { serverEnv } from "@/lib/env/server-env";
 import { compareGateways } from "./lib/content-parity";
-import { assertLocalDatabaseUrl, describeDatabase } from "./lib/database-target";
+import { assertDatabaseTarget, describeDatabase } from "./lib/database-target";
 import { buildImportPlan } from "./lib/static-import";
 
 async function main() {
   const { DATABASE_URL, DATABASE_PREPARE } = serverEnv();
   if (!DATABASE_URL) throw new Error("DATABASE_URL is not set.");
-  const target = assertLocalDatabaseUrl(DATABASE_URL);
+  const target = assertDatabaseTarget(DATABASE_URL);
+  if (target.remote) console.log(`REMOTE  ${target.label} (confirmed on the command line)`);
   const plan = await buildImportPlan(staticGateway, resolve("public/media"));
   const handle = createDatabase(DATABASE_URL, { max: 1, prepare: DATABASE_PREPARE === "true" });
   try {

@@ -11,7 +11,7 @@ import { resolve } from "node:path";
 import { createDatabase } from "@db/client";
 import { staticGateway } from "@/features/site-content/static-gateway";
 import { serverEnv } from "@/lib/env/server-env";
-import { assertLocalDatabaseUrl, describeDatabase } from "./lib/database-target";
+import { assertDatabaseTarget, describeDatabase } from "./lib/database-target";
 import { applyImportPlan, buildImportPlan, type ImportPlan } from "./lib/static-import";
 
 const args = new Set(process.argv.slice(2));
@@ -66,7 +66,8 @@ async function main() {
     return;
   }
 
-  const target = assertLocalDatabaseUrl(DATABASE_URL);
+  const target = assertDatabaseTarget(DATABASE_URL);
+  if (target.remote) console.log(`REMOTE  ${target.label} (confirmed on the command line)`);
   const handle = createDatabase(DATABASE_URL, { max: 1 });
   try {
     console.log(`\nTARGET  ${target.host}/${target.database}  ${await describeDatabase(handle.db)}`);

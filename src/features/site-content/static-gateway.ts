@@ -49,6 +49,10 @@ export const staticGateway: ContentGateway = {
     return { public: works.projects.map((project) => project.slug), private: [] };
   },
 
+  async findProjectRoute(slug) {
+    return works.projects.some((project) => project.slug === slug) ? "public" : null;
+  },
+
   // The committed content has no private projects and no drafts.
   async findPrivateProject() {
     return null;

@@ -42,7 +42,22 @@ const NOINDEX: Metadata["robots"] = { index: false, follow: false };
 export async function generateMetadata({ params }: ProjectDetailProps): Promise<Metadata> {
   const found = await resolve((await params).slug);
   if (!found) return {};
-  if (found.kind === "public") return { title: found.page.title };
+  if (found.kind === "public") {
+    const { slug, title, seo, cover } = found.page;
+    return {
+      title: seo?.title ?? title,
+      ...(seo?.description ? { description: seo.description } : {}),
+      alternates: { canonical: `/works/${slug}` },
+      // Replaces the layout's openGraph object whole, so it restates it.
+      openGraph: {
+        type: "website",
+        siteName: "Nguyen Khanh Nhat",
+        title: seo?.title ?? title,
+        url: `/works/${slug}`,
+        images: [{ url: cover.src, width: cover.width, height: cover.height }],
+      },
+    };
+  }
   if (found.kind === "gate") return { title: "Private project", robots: NOINDEX };
   return { title: found.preview.value ? `Preview: ${found.preview.value.title}` : "Preview", robots: NOINDEX };
 }

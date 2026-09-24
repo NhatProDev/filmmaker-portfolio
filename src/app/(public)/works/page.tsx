@@ -10,6 +10,7 @@ import styles from "./works.module.css";
 
 export const metadata: Metadata = {
   title: "Works",
+  alternates: { canonical: "/works" },
 };
 
 // The Project Detail route. No page route is documented yet; this one follows

@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Filmmaker Portfolio API
-  version: 1.1.0
+  version: 1.2.0
   description: |
     REST API contract for the V1 filmmaker portfolio modular monolith.
 
@@ -53,6 +53,7 @@ tags:
   - name: Block Media
   - name: Media
   - name: Public Projects
+  - name: Operations
 
 paths:
   # ---------------------------------------------------------------- Auth
@@ -1390,20 +1391,55 @@ paths:
         Otherwise the response is 404, so an asset's existence is not
         revealed. Byte ranges are supported for video.
 
-        With the `local` storage adapter, the file is streamed from the media
-        root. A provider adapter redirects to a short-lived signed URL
-        instead. That path is blocked until a provider is chosen (ADR-0014
-        §4).
+        With the `local` storage adapter, the file is streamed: a private key
+        (`private/…`) from the private root outside `public/`, a legacy public
+        key from the public media root. The `s3` adapter answers `302` to a
+        short-lived signed URL (`MEDIA_SIGNED_URL_TTL_SECONDS`), so the bytes
+        come directly from storage (ADR-0014 §4).
       security: []
       responses:
         '200':
           description: The asset's bytes
         '206':
           description: A byte range of the asset
+        '302':
+          description: Redirect to a short-lived signed storage URL
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
         '404':
           $ref: '#/components/responses/NotFound'
         '416':
           description: Range not satisfiable
+
+  # ---------------------------------------------------------- Operations
+  /health:
+    get:
+      tags: [Operations]
+      operationId: getHealth
+      summary: Readiness of the deployment
+      description: |
+        Whether this deployment can serve: database reachability, schema
+        compatibility with the migrations this build ships, and storage
+        configuration. States only — never versions, hosts or errors.
+        `status` is `unavailable` (503) when a required check fails, and
+        `degraded` (200) when an optional one does.
+      security: []
+      responses:
+        '200':
+          description: Serving
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthEnvelope'
+        '503':
+          description: Not able to serve
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthEnvelope'
 
 components:
   securitySchemes:
@@ -1529,6 +1565,36 @@ components:
             $ref: '#/components/schemas/ErrorEnvelope'
 
   schemas:
+    # ------------------------------------------------------- Operations
+    HealthCheckState:
+      type: string
+      enum: [ok, not-configured, unreachable, behind, ahead, unknown, misconfigured]
+
+    HealthEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          type: object
+          additionalProperties: false
+          required: [status, checks]
+          properties:
+            status:
+              type: string
+              enum: [ok, degraded, unavailable]
+            checks:
+              type: object
+              additionalProperties: false
+              required: [database, schema, storage]
+              properties:
+                database:
+                  $ref: '#/components/schemas/HealthCheckState'
+                schema:
+                  $ref: '#/components/schemas/HealthCheckState'
+                storage:
+                  $ref: '#/components/schemas/HealthCheckState'
+
     # ------------------------------------------------------------ Enums
     ProjectStatus:
       type: string

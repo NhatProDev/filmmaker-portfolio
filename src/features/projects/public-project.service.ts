@@ -3,6 +3,7 @@ import type { MediaRecord } from "@/features/media/media.repository";
 import type { BlockRecord } from "@/features/project-builder/block.repository";
 import { createPublicationRepository, type PublishedProject } from "@/features/project-builder/publication.repository";
 import { parseProjectSnapshot, type ProjectSnapshot } from "@/features/site-content/snapshot-projection";
+import { isPrivateKey } from "@/lib/storage/media-storage";
 import { mediaUrl } from "@/lib/storage/media-url";
 
 // The public project resources of /api/v1 (openapi.yaml `PublicProject*`),
@@ -12,7 +13,10 @@ import { mediaUrl } from "@/lib/storage/media-url";
 
 type UrlFor = (asset: MediaRecord) => string;
 
-const publicUrl: UrlFor = (asset) => (asset.storageKey ? mediaUrl(asset.storageKey) : "");
+// A private object never has a public URL; publishing refuses such a public
+// page, so this empty value is only a guard.
+const publicUrl: UrlFor = (asset) =>
+  asset.storageKey && !isPrivateKey(asset.storageKey) ? mediaUrl(asset.storageKey) : "";
 const privateUrl =
   (slug: string): UrlFor =>
   (asset) =>

@@ -37,6 +37,8 @@ export function presignS3(input: {
   expiresInSeconds: number;
   // Extra headers bound into the signature, by lower-case name.
   headers?: Record<string, string>;
+  // Extra query parameters, e.g. for a bucket listing (list-type=2).
+  query?: Record<string, string>;
   now?: Date;
 }): string {
   const { method, location, credentials, expiresInSeconds } = input;
@@ -45,9 +47,9 @@ export function presignS3(input: {
   }
   const endpoint = new URL(location.endpoint);
   const host = location.pathStyle ? endpoint.host : `${location.bucket}.${endpoint.host}`;
-  const path = (location.pathStyle ? [location.bucket, ...location.key.split("/")] : location.key.split("/"))
-    .map(encode)
-    .join("/");
+  // An empty key addresses the bucket itself (a listing).
+  const segments = location.key ? location.key.split("/") : [];
+  const path = (location.pathStyle ? [location.bucket, ...segments] : segments).map(encode).join("/");
   const canonicalUri = `/${path}`;
 
   const timestamp = amzDate(input.now ?? new Date());
@@ -66,6 +68,7 @@ export function presignS3(input: {
     ["X-Amz-Date", timestamp],
     ["X-Amz-Expires", String(expiresInSeconds)],
     ["X-Amz-SignedHeaders", signedHeaders],
+    ...Object.entries(input.query ?? {}),
   ];
   const canonicalQuery = query
     .map(([k, v]) => [encode(k), encode(v)])

@@ -48,7 +48,7 @@ describe("presigned uploads can bind a checksum header", () => {
   });
 
   test("header names must be lower case and never host", () => {
-    for (const headers of [{ "X-Amz-Checksum-Sha256": "x" }, { host: "evil.example" }]) {
+    for (const headers of [{ "X-Amz-Checksum-Sha256": "x" }, { host: "evil.example" }] as Record<string, string>[]) {
       assert.throws(() => presignS3({ method: "PUT", location, credentials, expiresInSeconds: 60, now, headers }));
     }
   });

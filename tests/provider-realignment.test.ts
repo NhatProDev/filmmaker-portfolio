@@ -22,6 +22,7 @@ describe("storage-provider realignment (ADR-0020)", () => {
     },
     verifyUpload: async (key) => (key === missingKey ? null : { key, byteSize: 1 }),
     deleteObject: async () => {},
+    listObjects: async function* () {},
   };
 
   before(async () => {

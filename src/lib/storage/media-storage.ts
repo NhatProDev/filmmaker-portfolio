@@ -1,4 +1,5 @@
-import { join, resolve, sep } from "node:path";
+import { readdir, stat } from "node:fs/promises";
+import { join, relative, resolve, sep } from "node:path";
 import { serverEnv, type ServerEnv } from "@/lib/env/server-env";
 import { assertMediaKey } from "./media-url";
 import { presignS3, type S3Location } from "./s3-presign";
@@ -38,6 +39,14 @@ export type StoredObject = {
   checksumSha256?: string;
 };
 
+// One object as a bucket listing reports it (docs/operations/media-lifecycle.md).
+export type ListedObject = {
+  audience: "public" | "private";
+  key: string;
+  byteSize: number;
+  lastModified: Date;
+};
+
 export const PRIVATE_KEY_PREFIX = "private/";
 
 export const isPrivateKey = (key: string) => key.startsWith(PRIVATE_KEY_PREFIX);
@@ -69,6 +78,9 @@ export interface MediaStorage {
   // Removes an object. Media deletion is soft in the database; objects are
   // removed later, only once nothing references the asset.
   deleteObject(key: string): Promise<void>;
+  // Every object in one audience's store, for the lifecycle audit
+  // (media:gc). Operations only; the site never lists storage.
+  listObjects(audience: "public" | "private"): AsyncIterable<ListedObject>;
 }
 
 export class MediaStorageUnsupportedError extends Error {}
@@ -122,7 +134,42 @@ export function createLocalMediaStorage(
     createUpload: unsupported,
     verifyUpload: unsupported,
     deleteObject: unsupported,
+    async *listObjects(audience) {
+      const root = resolve(audience === "public" ? roots.public : roots.private);
+      for (const path of await walk(root)) {
+        const info = await stat(path);
+        const key = relative(root, path).split(sep).join("/");
+        yield { audience, key: audience === "private" ? `${PRIVATE_KEY_PREFIX}${key}` : key, byteSize: info.size, lastModified: info.mtime };
+      }
+    },
   };
+}
+
+async function walk(directory: string): Promise<string[]> {
+  let entries;
+  try {
+    entries = await readdir(directory, { withFileTypes: true });
+  } catch {
+    return [];
+  }
+  const nested = await Promise.all(
+    entries.map((entry) => (entry.isDirectory() ? walk(join(directory, entry.name)) : Promise.resolve(entry.isFile() ? [join(directory, entry.name)] : []))),
+  );
+  return nested.flat().sort();
+}
+
+const xmlText = (value: string) =>
+  value.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, "&");
+
+// The <Contents> of one ListObjectsV2 page, and the token for the next.
+export function parseListObjectsV2(xml: string): { objects: { key: string; byteSize: number; lastModified: Date }[]; next: string | null } {
+  const objects = [...xml.matchAll(/<Contents>([\s\S]*?)<\/Contents>/g)].map(([, body]) => {
+    const field = (name: string) => body.match(new RegExp(`<${name}>([\\s\\S]*?)</${name}>`))?.[1] ?? "";
+    return { key: xmlText(field("Key")), byteSize: Number(field("Size")), lastModified: new Date(field("LastModified")) };
+  });
+  const truncated = /<IsTruncated>true<\/IsTruncated>/.test(xml);
+  const next = xml.match(/<NextContinuationToken>([\s\S]*?)<\/NextContinuationToken>/)?.[1];
+  return { objects, next: truncated && next ? xmlText(next) : null };
 }
 
 export type S3Config = {
@@ -195,6 +242,25 @@ export function createS3MediaStorage(config: S3Config, fetcher: typeof fetch = f
     async deleteObject(key) {
       const response = await fetcher(sign("DELETE", key, 60), { method: "DELETE" });
       if (!response.ok && response.status !== 404) throw new Error(`Storage answered ${response.status} for DELETE ${key}`);
+    },
+    async *listObjects(audience) {
+      const bucket = audience === "public" ? config.publicBucket : config.privateBucket;
+      let token: string | null = null;
+      do {
+        const query: Record<string, string> = { "list-type": "2", "max-keys": "1000", ...(token ? { "continuation-token": token } : {}) };
+        const url = presignS3({
+          method: "GET",
+          location: { endpoint: config.endpoint, bucket, key: "", region: config.region, pathStyle: config.pathStyle },
+          credentials,
+          expiresInSeconds: 60,
+          query,
+        });
+        const response = await fetcher(url);
+        if (!response.ok) throw new Error(`Storage answered ${response.status} listing ${audience} objects`);
+        const page = parseListObjectsV2(await response.text());
+        for (const object of page.objects) yield { audience, ...object };
+        token = page.next;
+      } while (token);
     },
   };
 }

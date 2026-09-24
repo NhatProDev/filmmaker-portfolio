@@ -22,6 +22,7 @@
     "media:manifest": "tsx --env-file-if-exists=.env.local scripts/media-manifest.ts",
     "media:upload": "tsx --env-file-if-exists=.env.local scripts/media-upload.ts",
     "media:realign-provider": "tsx --env-file-if-exists=.env.local scripts/media-realign-provider.ts",
+    "media:gc": "tsx --env-file-if-exists=.env.local scripts/media-gc.ts",
     "storage:check": "tsx --env-file-if-exists=.env.local scripts/storage-check.ts",
     "env:check": "tsx --env-file-if-exists=.env.local scripts/check-env.ts"
   },

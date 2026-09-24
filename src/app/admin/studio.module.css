@@ -609,7 +609,9 @@
 }
 
 .signInCard {
-  width: min(380px, 100%);
+  /* Content-box: the padding and border sit outside this width, so a phone
+     subtracts them rather than overflowing (3D-6). Desktop is unchanged. */
+  width: min(380px, calc(100% - 58px));
   padding: 28px;
   background: var(--s-panel);
   border: 1px solid var(--s-line);

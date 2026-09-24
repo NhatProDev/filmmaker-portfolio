@@ -16,6 +16,12 @@ sign-in, revocable server-side sessions and CSRF-checked mutations. It needs a
 database; the public site does not. Uploads stay unavailable until a storage
 provider is chosen (ADR-0014).
 
+Publishing follows ADR-0012: the Studio edits a working copy, Publish writes
+one validated snapshot, and the public site reads only snapshots. Preview opens
+the working copy on the real public page for a signed-in admin. Private
+projects open at their address behind the password gate; see
+`docs/architecture/publishing-and-private-access.md`.
+
 `db/schema.ts` implements ADR-0001 to ADR-0007, ADR-0009, ADR-0011, ADR-0014
 and ADR-0015. `openapi.yaml` was realigned to that domain model by ADR-0015.
 

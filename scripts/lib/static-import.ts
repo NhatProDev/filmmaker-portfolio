@@ -3,6 +3,9 @@ import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 import type { Database } from "@db/client";
 import { blockMedia, media, pages, projectBlocks, projects } from "@db/schema";
 import { parseBlock, type BlockType } from "@/features/project-builder/block.schema";
+import { createPagePublicationService } from "@/features/project-builder/page-publication.service";
+import { createPublicationRepository } from "@/features/project-builder/publication.repository";
+import { createProjectPublicationService } from "@/features/projects/publication.service";
 import type { ContentGateway, HomeContent, ProjectDetail, WorksProject } from "@/features/site-content/site-content.types";
 import { mediaKeyFromUrl } from "@/lib/storage/media-url";
 import { probeMediaFile, type ProbedMedia } from "./media-probe";
@@ -720,6 +723,30 @@ export async function applyImportPlan(db: Database, plan: ImportPlan, write: boo
     const [homePage] = await tx.select({ id: pages.id }).from(pages).where(eq(pages.key, "HOME"));
     if (!homePage) throw new Error("The HOME page row is missing; apply the database migrations first.");
     await syncTree("page HOME", { pageId: homePage.id }, plan.home);
+
+    // Publications (ADR-0012): the committed content is the live site, so each
+    // published project and HOME gets its snapshot, once, through the same
+    // validation as a publish from the Studio. An existing snapshot, or a
+    // project someone has since unpublished, is left alone.
+    const publications = createPublicationRepository(tx);
+    for (const project of plan.projects) {
+      const [row] = await tx
+        .select({ id: projects.id, status: projects.status })
+        .from(projects)
+        .where(eq(projects.slug, project.slug));
+      if (row && (await publications.findProject(row.id))) {
+        same();
+        continue;
+      }
+      if (row && row.status !== "PUBLISHED") continue;
+      create(`publication of project ${project.slug}`);
+      if (write && row) await createProjectPublicationService(tx).publish(row.id, null);
+    }
+    if (await publications.findPage(homePage.id)) same();
+    else {
+      create("publication of page HOME");
+      if (write) await createPagePublicationService(tx).publish("HOME", null);
+    }
 
     return report;
 

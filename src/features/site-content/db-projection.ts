@@ -32,7 +32,21 @@ function fail(where: string, message: string): never {
   throw new ContentProjectionError(`${where}: ${message}`);
 }
 
-export type MediaIndex = ReadonlyMap<string, MediaRecord>;
+// The assets a composition may reference, and how each becomes a delivery URL:
+// the public media path by default, an access-checked route for a PRIVATE
+// project (ADR-0014 §4).
+export type MediaIndex = {
+  get(id: string): MediaRecord | undefined;
+  url(asset: MediaRecord & { storageKey: string }): string;
+};
+
+export function createMediaIndex(
+  records: readonly MediaRecord[],
+  url: MediaIndex["url"] = (asset) => mediaUrl(asset.storageKey),
+): MediaIndex {
+  const byId = new Map(records.map((record) => [record.id, record]));
+  return { get: (id) => byId.get(id), url };
+}
 
 type ParsedBlock = {
   id: string;
@@ -68,12 +82,7 @@ export function parseTree(blocks: BlockRecord[], owner: "project" | "page", wher
   }));
 }
 
-export function treeMediaIds(blocks: BlockRecord[]): string[] {
-  return blocks.flatMap((block) => [
-    ...block.media.flatMap((item) => (item.posterMediaId ? [item.mediaId, item.posterMediaId] : [item.mediaId])),
-    ...treeMediaIds(block.children),
-  ]);
-}
+export { treeMediaIds } from "@/features/project-builder/snapshot";
 
 // ---- Media ----
 
@@ -89,14 +98,14 @@ function image(index: MediaIndex, id: string, alt: string, where: string): HomeI
   const asset = liveMedia(index, id, where);
   if (asset.type !== "IMAGE") fail(where, `media ${id} is ${asset.type}, not IMAGE`);
   if (!asset.width || !asset.height) fail(where, `image ${id} has no dimensions`);
-  return { src: mediaUrl(asset.storageKey), width: asset.width, height: asset.height, alt };
+  return { src: index.url(asset), width: asset.width, height: asset.height, alt };
 }
 
 function videoSrc(index: MediaIndex, id: string, where: string): string {
   const asset = liveMedia(index, id, where);
   // The locked pages play hosted video only; EXTERNAL_VIDEO has no renderer yet.
   if (asset.type !== "VIDEO") fail(where, `media ${id} is ${asset.type}, not a hosted VIDEO`);
-  return mediaUrl(asset.storageKey);
+  return index.url(asset);
 }
 
 // Poster resolution (ADR-0015): the placement's override, then the video

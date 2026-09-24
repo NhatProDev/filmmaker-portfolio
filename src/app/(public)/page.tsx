@@ -1,16 +1,36 @@
+import { draftMode } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
 import { AutoplayVideo } from "@/components/media/AutoplayVideo";
 import { JustifiedRows } from "@/components/media/JustifiedRows";
+import { PreviewBanner, PreviewIssue } from "@/components/preview/PreviewBanner";
+import { getCurrentAdmin } from "@/features/authentication/current-admin";
 import { getContentGateway } from "@/features/site-content/site-content.gateway";
+import type { HomeContent } from "@/features/site-content/site-content.types";
 import styles from "./home.module.css";
+
+// Home is static. Only in preview mode, for a signed-in admin, does it read
+// cookies and render the working copy instead (ADR-0012).
+export default async function HomePage() {
+  const gateway = getContentGateway();
+  if ((await draftMode()).isEnabled && (await getCurrentAdmin()).admin) {
+    const { value, issue } = await gateway.previewHome();
+    return (
+      <>
+        {value ? <HomeView content={value} /> : <PreviewIssue issue={issue!} />}
+        <PreviewBanner path="/" />
+      </>
+    );
+  }
+  return <HomeView content={await gateway.getHome()} />;
+}
 
 // Implements docs/design/prototypes/home/Home Baseline v2 Responsive.dc.html.
 // Source order is visual order at every width: nothing is reordered, hidden or
 // moved between breakpoints. The footer is site chrome rather than a block, so
 // it sits outside <main>; only Home's prototype carries one so far.
-export default async function HomePage() {
-  const { hero, identity, wall, about, coda, footer } = await getContentGateway().getHome();
+function HomeView({ content }: { content: HomeContent }) {
+  const { hero, identity, wall, about, coda, footer } = content;
   const [mailbox, domain] = footer.email.split("@");
 
   return (

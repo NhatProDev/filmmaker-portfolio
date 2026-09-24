@@ -16,6 +16,8 @@ const USAGE_LABEL: Record<MediaUsage["kind"], string> = {
   BLOCK_MEDIA: "Placed in",
   PLACEMENT_POSTER: "Poster for a placement in",
   ASSET_POSTER: "Default poster of a video",
+  PUBLISHED_PROJECT: "Live on the site in",
+  PUBLISHED_PAGE: "Live on the site on",
 };
 
 function usageText(usage: MediaUsage) {

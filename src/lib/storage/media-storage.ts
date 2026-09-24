@@ -1,4 +1,6 @@
+import { join } from "node:path";
 import { serverEnv } from "@/lib/env/server-env";
+import { assertMediaKey } from "./media-url";
 
 // The storage boundary (ADR-0014). Domain code works with storage keys; only an
 // adapter knows how a key becomes a delivery URL, how a browser uploads to it
@@ -72,4 +74,13 @@ export function setMediaStorageForTesting(adapter: MediaStorage | undefined) {
 export function getMediaStorage(): MediaStorage {
   storage ??= createLocalMediaStorage(serverEnv().MEDIA_PUBLIC_BASE_URL);
   return storage;
+}
+
+// Where the local adapter keeps a key's bytes: public/media, the folder it
+// serves from. Used to stream PRIVATE media behind the access check; a
+// provider adapter would issue a short-lived signed URL instead (ADR-0014 §4).
+export function localMediaPath(key: string): string {
+  assertMediaKey(key);
+  if (/[\\:\0]/.test(key)) throw new Error(`Not a portable media key: ${key}`);
+  return join(process.cwd(), "public", "media", ...key.split("/"));
 }

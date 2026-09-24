@@ -1,80 +1,156 @@
+import { and, eq, isNull } from "drizzle-orm";
 import type { Database } from "@db/client";
-import { createMediaRepository, type MediaRecord } from "@/features/media/media.repository";
-import { createBlockRepository } from "@/features/project-builder/block.repository";
-import { createProjectRepository } from "@/features/projects/project.repository";
+import { projects } from "@db/schema";
+import { buildPageSnapshot } from "@/features/project-builder/page-publication.service";
+import { findPage } from "@/features/project-builder/page.service";
+import { createPublicationRepository, type PublishedProject } from "@/features/project-builder/publication.repository";
+import { buildProjectSnapshot } from "@/features/projects/publication.service";
+import { ContentProjectionError, createMediaIndex, worksProject, type MediaIndex } from "./db-projection";
+import type { ContentGateway, HomeContent, Preview, ProjectPage } from "./site-content.types";
 import {
-  ContentProjectionError,
-  homeContent,
-  parseTree,
-  projectDetail,
-  treeMediaIds,
-  worksCover,
-  worksProject,
-  type MediaIndex,
-} from "./db-projection";
-import type { ContentGateway } from "./site-content.types";
+  parsePageSnapshot,
+  parseProjectSnapshot,
+  projectRecord,
+  renderHome,
+  renderProject,
+  type ProjectSnapshot,
+} from "./snapshot-projection";
 import { staticGateway } from "./static-gateway";
 
 // Serves public content from PostgreSQL, in the same view models as the static
-// adapter. Errors propagate: a failing database or a composition the locked
-// pages cannot render fails the request or the build rather than serving
-// something different. About, Contact and Home's footer stay static in V1
-// (CLAUDE.md §19); they are site chrome and content files, not database rows.
-export function createDbGateway(db: Database): ContentGateway {
-  const projects = createProjectRepository(db);
-  const blocks = createBlockRepository(db);
-  const media = createMediaRepository(db);
+// adapter. The public site reads only published snapshots (ADR-0012); the live
+// project row contributes routing and access (slug, visibility, order).
+// Errors propagate: a failing database or a snapshot the locked pages cannot
+// render fails the request or the build rather than serving something
+// different. About, Contact and Home's footer stay static in V1 (CLAUDE.md
+// §19); they are site chrome and content files, not database rows.
 
-  // Live assets by id, plus the posters those assets name.
-  async function mediaIndex(ids: readonly (string | null)[]): Promise<MediaIndex> {
-    const wanted = [...new Set(ids.filter((id): id is string => id !== null))];
-    const assets = await media.findLiveByIds(wanted);
-    const posterIds = assets.map((asset) => asset.posterMediaId).filter((id): id is string => id !== null);
-    const posters = await media.findLiveByIds(posterIds.filter((id) => !wanted.includes(id)));
-    return new Map<string, MediaRecord>([...assets, ...posters].map((asset) => [asset.id, asset]));
+type Listed = PublishedProject & { parsed: ProjectSnapshot };
+
+// PRIVATE media never resolve to an unrestricted public URL (ADR-0014 §4).
+const privateMediaUrl =
+  (slug: string): MediaIndex["url"] =>
+  (asset) =>
+    `/api/v1/public/projects/${slug}/media/${asset.id}`;
+
+export function createDbGateway(db: Database): ContentGateway {
+  const publications = createPublicationRepository(db);
+
+  async function publicList(): Promise<Listed[]> {
+    const rows = await publications.listPublicPublished();
+    return rows.map((row) => ({ ...row, parsed: parseProjectSnapshot(row.snapshot, `project ${row.project.slug}`) }));
   }
+
+  function page(
+    slug: string,
+    snapshot: ProjectSnapshot,
+    displayPosition: number,
+    next: { slug: string; title: string },
+    url?: MediaIndex["url"],
+  ): ProjectPage {
+    const { works, detail } = renderProject(snapshot, slug, url);
+    return { slug, title: works.title, year: works.year, cover: works.cover, displayPosition, detail, next };
+  }
+
+  // A project outside the listing links on to the first listed project.
+  async function firstListed(fallback: { slug: string; title: string }) {
+    const [first] = await publications.listPublicPublished();
+    if (!first) return fallback;
+    return { slug: first.project.slug, title: parseProjectSnapshot(first.snapshot, `project ${first.project.slug}`).project.title };
+  }
+
+  async function home(snapshot: unknown): Promise<HomeContent> {
+    const { footer } = await staticGateway.getHome();
+    return renderHome(parsePageSnapshot(snapshot, "page HOME"), footer);
+  }
+
+  const preview = async <T,>(render: () => Promise<T | null>): Promise<Preview<T>> => {
+    try {
+      return { value: await render(), issue: null };
+    } catch (error) {
+      if (error instanceof ContentProjectionError) return { value: null, issue: error.message };
+      throw error;
+    }
+  };
 
   return {
     async getWorksIndex() {
-      const rows = await projects.listPublic();
-      const index = await mediaIndex(rows.flatMap((row) => [row.coverMediaId, row.previewMediaId]));
-      return { projects: rows.map((row) => worksProject(row, index)) };
-    },
-
-    async listPublicProjectSlugs() {
-      return (await projects.listPublic()).map((row) => row.slug);
-    },
-
-    async getProjectPage(slug) {
-      const rows = await projects.listPublic();
-      const position = rows.findIndex((row) => row.slug === slug);
-      if (position < 0) return null;
-      const project = rows[position];
-      const next = rows[(position + 1) % rows.length];
-      const records = await blocks.listVisibleTreeForProject(project.id);
-      const tree = parseTree(records, "project", `project ${slug}`);
-      const index = await mediaIndex([project.coverMediaId, ...treeMediaIds(records)]);
-      if (project.year === null) throw new ContentProjectionError(`project ${slug}: a public project needs a year`);
+      const listed = await publicList();
       return {
-        slug,
-        title: project.title,
-        year: project.year,
-        cover: worksCover(project, index),
-        // The position in the public listing, as Art Works numbers it.
-        displayPosition: position,
-        detail: projectDetail(project, tree, index),
-        next: { slug: next.slug, title: next.title },
+        projects: listed.map(({ project, parsed }) =>
+          worksProject(projectRecord(parsed, project.slug), createMediaIndex(parsed.media)),
+        ),
       };
     },
 
+    async listPublicProjectSlugs() {
+      return (await publications.listPublicPublished()).map((row) => row.project.slug);
+    },
+
+    async getProjectPage(slug) {
+      const listed = await publicList();
+      const position = listed.findIndex((row) => row.project.slug === slug);
+      if (position < 0) return null;
+      const next = listed[(position + 1) % listed.length];
+      return page(slug, listed[position].parsed, position, {
+        slug: next.project.slug,
+        title: next.parsed.project.title,
+      });
+    },
+
+    async listProjectRoutes() {
+      const rows = await publications.publishedSlugs();
+      return {
+        public: rows.filter((row) => row.visibility === "PUBLIC").map((row) => row.slug),
+        private: rows.filter((row) => row.visibility === "PRIVATE").map((row) => row.slug),
+      };
+    },
+
+    async findPrivateProject(slug) {
+      const row = await publications.findPublishedBySlug(slug);
+      return row && row.project.visibility === "PRIVATE" ? { projectId: row.project.id } : null;
+    },
+
+    async getPrivateProjectPage(slug, projectId) {
+      const row = await publications.findPublishedBySlug(slug);
+      if (!row || row.project.visibility !== "PRIVATE" || row.project.id !== projectId) return null;
+      const snapshot = parseProjectSnapshot(row.snapshot, `project ${slug}`);
+      const next = await firstListed({ slug, title: snapshot.project.title });
+      return page(slug, snapshot, 0, next, privateMediaUrl(slug));
+    },
+
+    async previewProjectPage(slug) {
+      return preview(async () => {
+        const [row] = await db
+          .select()
+          .from(projects)
+          .where(and(eq(projects.slug, slug), isNull(projects.deletedAt)));
+        if (!row) return null;
+        const snapshot = await buildProjectSnapshot(db, row);
+        const listed = await publicList();
+        const position = listed.findIndex((item) => item.project.id === row.id);
+        const next =
+          position >= 0 && listed.length > 1
+            ? listed[(position + 1) % listed.length]
+            : listed.find((item) => item.project.id !== row.id);
+        return page(
+          slug,
+          snapshot,
+          Math.max(position, 0),
+          next ? { slug: next.project.slug, title: next.parsed.project.title } : { slug, title: row.title },
+        );
+      });
+    },
+
+    // Until HOME is first published, the site shows its committed default.
     async getHome() {
-      const page = await blocks.findPageByKey("HOME");
-      if (!page) throw new ContentProjectionError("page HOME: the row is missing; apply the database migrations");
-      const records = await blocks.listVisibleTreeForPage(page.id);
-      const tree = parseTree(records, "page", "page HOME");
-      const index = await mediaIndex(treeMediaIds(records));
-      const { footer } = await staticGateway.getHome();
-      return homeContent(tree, index, footer);
+      const homePage = await findPage(db, "HOME");
+      const stored = await publications.findPage(homePage.id);
+      return stored ? home(stored.snapshot) : staticGateway.getHome();
+    },
+
+    async previewHome() {
+      return preview(async () => home(await buildPageSnapshot(db, await findPage(db, "HOME"))));
     },
 
     getAbout: () => staticGateway.getAbout(),

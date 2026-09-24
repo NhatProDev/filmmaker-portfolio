@@ -393,6 +393,90 @@ export const blockMedia = pgTable(
   ],
 );
 
+// The single current published snapshot of a project or page (ADR-0012): a
+// validated copy of what the public site renders. Publishing replaces it;
+// unpublishing deletes it. Never more than one per owner, never history.
+export const projectPublications = pgTable(
+  "project_publications",
+  {
+    projectId: uuid("project_id").primaryKey(),
+    snapshot: jsonb("snapshot").$type<unknown>().notNull(),
+    publishedAt: timestamp("published_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    publishedBy: uuid("published_by"),
+  },
+  (table) => [
+    foreignKey({
+      name: "project_publications_project_id_fkey",
+      columns: [table.projectId],
+      foreignColumns: [projects.id],
+    }).onDelete("cascade"),
+    foreignKey({
+      name: "project_publications_published_by_fkey",
+      columns: [table.publishedBy],
+      foreignColumns: [adminUsers.id],
+    }).onDelete("set null"),
+  ],
+);
+
+export const pagePublications = pgTable(
+  "page_publications",
+  {
+    pageId: uuid("page_id").primaryKey(),
+    snapshot: jsonb("snapshot").$type<unknown>().notNull(),
+    publishedAt: timestamp("published_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    publishedBy: uuid("published_by"),
+  },
+  (table) => [
+    foreignKey({
+      name: "page_publications_page_id_fkey",
+      columns: [table.pageId],
+      foreignColumns: [pages.id],
+    }).onDelete("cascade"),
+    foreignKey({
+      name: "page_publications_published_by_fkey",
+      columns: [table.publishedBy],
+      foreignColumns: [adminUsers.id],
+    }).onDelete("set null"),
+  ],
+);
+
+// Every media asset a current snapshot references, relationally, so that
+// MEDIA_IN_USE protects what is live even after the working copy stops using
+// it (ADR-0012, CLAUDE.md §12). Exactly one owner per row.
+export const publicationMedia = pgTable(
+  "publication_media",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    projectId: uuid("project_id"),
+    pageId: uuid("page_id"),
+    mediaId: uuid("media_id").notNull(),
+  },
+  (table) => [
+    foreignKey({
+      name: "publication_media_project_id_fkey",
+      columns: [table.projectId],
+      foreignColumns: [projectPublications.projectId],
+    }).onDelete("cascade"),
+    foreignKey({
+      name: "publication_media_page_id_fkey",
+      columns: [table.pageId],
+      foreignColumns: [pagePublications.pageId],
+    }).onDelete("cascade"),
+    foreignKey({
+      name: "publication_media_media_id_fkey",
+      columns: [table.mediaId],
+      foreignColumns: [media.id],
+    }).onDelete("restrict"),
+    uniqueIndex("publication_media_project_media_uidx").on(table.projectId, table.mediaId),
+    uniqueIndex("publication_media_page_media_uidx").on(table.pageId, table.mediaId),
+    index("publication_media_media_id_idx").on(table.mediaId),
+    check(
+      "publication_media_single_owner_check",
+      sql`(${table.projectId} IS NOT NULL AND ${table.pageId} IS NULL) OR (${table.projectId} IS NULL AND ${table.pageId} IS NOT NULL)`,
+    ),
+  ],
+);
+
 // A revocable admin session (CLAUDE.md §11, §16). The cookie carries a random
 // token; only its SHA-256 is stored, so reading this table cannot replay a
 // session. Logout sets revoked_at; expiry is absolute.

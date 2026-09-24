@@ -1,141 +1,66 @@
 import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
+import { draftMode } from "next/headers";
 import { notFound } from "next/navigation";
-import type { CSSProperties } from "react";
-import { AutoplayVideo } from "@/components/media/AutoplayVideo";
+import { cache } from "react";
+import { PreviewBanner, PreviewIssue } from "@/components/preview/PreviewBanner";
+import { getCurrentAdmin } from "@/features/authentication/current-admin";
 import { getContentGateway } from "@/features/site-content/site-content.gateway";
-import { ProjectOpening } from "./ProjectOpening";
-import { titleBootstrap } from "./titlePlacement";
-import styles from "./project.module.css";
+import { PrivateGate } from "./PrivateGate";
+import { ProjectDetailView } from "./ProjectDetailView";
 
 type ProjectDetailProps = {
   params: Promise<{ slug: string }>;
 };
 
-// One page per Works project; any other slug is not found.
-export const dynamicParams = false;
+// Listed projects are prerendered; a project published later renders on its
+// first request. Unknown slugs never reach this page: the proxy sends them to
+// the site's 404 (src/proxy.ts). Publishing revalidates.
+export const dynamicParams = true;
 
 export async function generateStaticParams() {
   const slugs = await getContentGateway().listPublicProjectSlugs();
   return slugs.map((slug) => ({ slug }));
 }
 
+// What this address shows. It never reads cookies unless preview mode is on,
+// so the page stays static; a visitor holding a private project's access
+// cookie is routed to ./live by the proxy instead (src/proxy.ts).
+const resolve = cache(async (slug: string) => {
+  const gateway = getContentGateway();
+  if ((await draftMode()).isEnabled && (await getCurrentAdmin()).admin) {
+    return { kind: "preview", preview: await gateway.previewProjectPage(slug) } as const;
+  }
+  const page = await gateway.getProjectPage(slug);
+  if (page) return { kind: "public", page } as const;
+  // A private project's gate reveals nothing of the project (ADR-0003).
+  if (await gateway.findPrivateProject(slug)) return { kind: "gate" } as const;
+  return null;
+});
+
+const NOINDEX: Metadata["robots"] = { index: false, follow: false };
+
 export async function generateMetadata({ params }: ProjectDetailProps): Promise<Metadata> {
-  const project = await getContentGateway().getProjectPage((await params).slug);
-  return project ? { title: project.title } : {};
+  const found = await resolve((await params).slug);
+  if (!found) return {};
+  if (found.kind === "public") return { title: found.page.title };
+  if (found.kind === "gate") return { title: "Private project", robots: NOINDEX };
+  return { title: found.preview.value ? `Preview: ${found.preview.value.title}` : "Preview", robots: NOINDEX };
 }
 
-function Fact({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className={styles.fact}>
-      <dt>{label}</dt>
-      <dd>{value}</dd>
-    </div>
-  );
-}
-
-// Implements docs/design/prototypes/project-detail/Project Detail 1B v2
-// Responsive.dc.html. The project opens directly into the film; everything
-// that has to be read sits below it. Blocks render in the prototype's authored
-// order and a project without a block's content omits that block. Source order
-// is visual order at every width. This route sits outside the (public) layout
-// because the page carries no site header.
+// This route sits outside the (public) layout because the page carries no
+// site header.
 export default async function ProjectDetailPage({ params }: ProjectDetailProps) {
-  const project = await getContentGateway().getProjectPage((await params).slug);
-  if (!project) notFound();
-  const { title, year, cover, detail, next } = project;
-  const film = detail?.film;
-
+  const { slug } = await params;
+  const found = await resolve(slug);
+  if (!found) notFound();
+  if (found.kind === "public") return <ProjectDetailView project={found.page} />;
+  if (found.kind === "gate") return <PrivateGate slug={slug} />;
+  const { value, issue } = found.preview;
+  if (!value && !issue) notFound();
   return (
-    <div className={styles.environment}>
-      <div className={styles.page}>
-        <main>
-          <ProjectOpening title={title} image={film ? film.poster : { ...cover, alt: "" }} film={film?.src} />
-          <div hidden dangerouslySetInnerHTML={{ __html: titleBootstrap() }} />
-
-          <section className={styles.metaSec}>
-            <dl className={styles.meta}>
-              <Fact label="Year" value={year} />
-              {detail?.runtime && <Fact label="Runtime" value={detail.runtime} />}
-              {detail?.client && <Fact label="Client" value={detail.client} />}
-              {detail?.role && <Fact label="Role" value={detail.role} />}
-            </dl>
-            {detail?.statement && (
-              <div className={styles.statement}>
-                <p className={styles.lead}>{detail.statement.lead}</p>
-                <p className={styles.body}>{detail.statement.body}</p>
-              </div>
-            )}
-          </section>
-
-          {detail && detail.stills.length > 0 && (
-            <section className={styles.stills}>
-              {detail.stills.map((still) => (
-                <Image
-                  key={still.src}
-                  className={styles.still}
-                  src={still.src}
-                  width={still.width}
-                  height={still.height}
-                  alt={still.alt}
-                  unoptimized
-                />
-              ))}
-            </section>
-          )}
-
-          {detail?.loop && (
-            <figure className={styles.support}>
-              <div className={styles.loop}>
-                <Image className={styles.fill} src={detail.loop.poster.src} alt={detail.loop.poster.alt} fill unoptimized />
-                <AutoplayVideo className={styles.fill} src={detail.loop.src} mode="AUTOPLAY_VISIBLE" />
-              </div>
-              <figcaption className={styles.caption}>{detail.loop.caption}</figcaption>
-            </figure>
-          )}
-
-          {detail && detail.credits.length > 0 && (
-            <section className={styles.creditsSec}>
-              <dl className={styles.credits}>
-                {detail.credits.map(({ role, name }) => (
-                  <div key={`${role}-${name}`} className={styles.credit}>
-                    <dt>{role}</dt>
-                    <dd>{name}</dd>
-                  </div>
-                ))}
-              </dl>
-            </section>
-          )}
-
-          {detail?.coda && (
-            <section
-              className={styles.coda}
-              style={{ "--coda-aspect": detail.coda.width / detail.coda.height } as CSSProperties}
-            >
-              <Image
-                className={`${styles.fill} ${styles.codaImage}`}
-                src={detail.coda.src}
-                alt={detail.coda.alt}
-                fill
-                unoptimized
-              />
-            </section>
-          )}
-        </main>
-
-        <footer className={styles.footer}>
-          <span className={styles.nextLabel}>Next project</span>
-          <div className={styles.nextBox}>
-            <Link href={`/works/${next.slug}`} className={styles.next}>
-              {next.title}
-            </Link>
-          </div>
-          <Link href="/works" className={`${styles.line} ${styles.all}`}>
-            All works
-          </Link>
-        </footer>
-      </div>
-    </div>
+    <>
+      {value ? <ProjectDetailView project={value} /> : <PreviewIssue issue={issue!} />}
+      <PreviewBanner path={`/works/${slug}`} />
+    </>
   );
 }

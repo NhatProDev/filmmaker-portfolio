@@ -1,0 +1,435 @@
+/* Implements docs/design/prototypes/private-gate/Private Gate 5B v2.dc.html
+   (desktop) and Private Gate 5B Responsive.dc.html (768 and below, and
+   constrained heights). The gate shows nothing of the project: no title, no
+   image, no project-derived colour. Every derivation follows the viewport's
+   own width and height, as the responsive record specifies. */
+
+.gate {
+  --edge: 56px;
+  --gut: 20px;
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-body);
+}
+
+.veil {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  background: var(--surface-dark);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 260ms linear;
+}
+
+.handoff .veil {
+  opacity: 1;
+}
+
+/* ---- Header ---- */
+
+.header {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gut);
+  align-items: baseline;
+  padding: 30px var(--edge) 0;
+}
+
+.wordmark {
+  grid-column: 1 / 6;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.nav {
+  grid-column: 7 / 13;
+  display: flex;
+  justify-content: flex-end;
+  gap: 34px;
+  font-size: 16px;
+}
+
+/* ---- Content ---- */
+
+.content {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gut);
+  align-content: center;
+  flex: 1;
+  padding: 0 var(--edge);
+  transition: opacity 260ms linear;
+}
+
+.handoff .content {
+  opacity: 0;
+}
+
+.datum {
+  grid-column: 1 / 13;
+  height: 1px;
+  background: var(--rule);
+  margin-bottom: 34px;
+}
+
+.spine {
+  grid-column: 1 / 7;
+  container-type: inline-size;
+}
+
+.eyebrow,
+.label {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.heading {
+  margin: 22px 0 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 46px;
+  line-height: 1.08;
+  letter-spacing: var(--display-track);
+}
+
+.lede {
+  margin: 20px 0 0;
+  max-width: 44ch;
+  font-size: 17px;
+  line-height: 1.74;
+  color: var(--muted);
+}
+
+.form {
+  margin-top: 46px;
+}
+
+.field {
+  width: 22ch;
+  min-width: 270px;
+}
+
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 12px;
+  padding: 10px 0;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--ink);
+  border-radius: 0;
+  font: inherit;
+  font-size: 20px;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  outline-offset: 6px;
+}
+
+.input[aria-invalid="true"],
+.failed .input {
+  border-bottom-color: var(--accent);
+}
+
+.revealRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.reveal {
+  padding: 0;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  font: inherit;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+  outline-offset: 4px;
+}
+
+.error {
+  margin: 18px 0 0;
+  padding-top: 10px;
+  max-width: 40ch;
+  border-top: 1px solid var(--accent);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--accent);
+}
+
+.actions {
+  display: flex;
+  align-items: baseline;
+  gap: 28px;
+  margin-top: 28px;
+}
+
+.submit {
+  padding: 0 0 3px;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--ink);
+  font: inherit;
+  font-size: 17px;
+  color: var(--ink);
+  cursor: pointer;
+  outline-offset: 6px;
+}
+
+.submit:disabled {
+  opacity: 0.62;
+  cursor: default;
+}
+
+.escape {
+  font-size: 16px;
+  color: var(--muted);
+  outline-offset: 4px;
+}
+
+.gate :focus-visible {
+  outline: 2px solid var(--ink);
+}
+
+.tail {
+  display: none;
+}
+
+.footer {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gut);
+  padding: 0 var(--edge) 40px;
+}
+
+.foot {
+  grid-column: 1 / 8;
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* ---- Responsive tier (the 5B Responsive record) ---- */
+
+@media (max-width: 768px) {
+  .gate {
+    --edge: 32px;
+  }
+
+  .header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px var(--edge) 0;
+  }
+
+  .wordmark {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+  }
+
+  .nav {
+    gap: 20px;
+    font-size: 15px;
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 0;
+  }
+
+  .datum {
+    margin-bottom: 20px;
+  }
+
+  .eyebrow,
+  .label {
+    font-size: 11px;
+  }
+
+  .heading {
+    margin-top: 14px;
+    line-height: 1.1;
+    font-size: clamp(26px, 8.2cqw, 46px);
+  }
+
+  .lede {
+    margin-top: 14px;
+    font-size: 16px;
+    line-height: 1.7;
+  }
+
+  .form {
+    margin-top: 28px;
+  }
+
+  .field {
+    width: min(max(240px, 22ch), 100%);
+    min-width: 0;
+  }
+
+  .input {
+    margin-top: 10px;
+    padding: 9px 0;
+    font-size: 18px;
+  }
+
+  .revealRow {
+    margin-top: 7px;
+  }
+
+  .error {
+    margin-top: 14px;
+    padding-top: 9px;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .actions {
+    gap: 24px;
+    margin-top: 22px;
+  }
+
+  .submit {
+    font-size: 16px;
+    outline-offset: 5px;
+  }
+
+  .escape {
+    font-size: 15px;
+  }
+
+  .tail {
+    display: block;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* The footnote sits in the content flow, under the form. */
+  .footer {
+    display: block;
+    padding: 0 var(--edge);
+  }
+
+  .foot {
+    margin: 20px 0 18px;
+    font-size: 12px;
+  }
+}
+
+/* The gate has one job; below 430 the public nav competes with the only
+   control on the page. The escape route stays in the form. */
+@media (max-width: 430px) {
+  .gate {
+    --edge: 24px;
+  }
+
+  .nav {
+    display: none;
+  }
+
+  .lede {
+    font-size: 15px;
+  }
+}
+
+/* Constrained height (a keyboard is open, or the window is short): the form
+   starts at the top so the field, the message and Enter stay reachable. */
+@media (max-height: 619px) {
+  .content {
+    align-content: start;
+    justify-content: flex-start;
+    padding-top: 14px;
+  }
+
+  .footer {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) and (max-height: 619px) {
+  .header {
+    padding-top: 12px;
+  }
+
+  .datum {
+    margin-bottom: 14px;
+  }
+
+  .heading {
+    font-size: max(24px, calc(clamp(26px, 8.2cqw, 46px) - 4px));
+  }
+
+  .lede {
+    margin-top: 10px;
+  }
+
+  .form {
+    margin-top: 18px;
+  }
+
+  .actions {
+    margin-top: 16px;
+  }
+
+  .tail {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) and (max-height: 429px) {
+  .header {
+    padding-top: 10px;
+  }
+
+  .content {
+    padding-top: 10px;
+  }
+
+  .datum {
+    margin-bottom: 10px;
+  }
+
+  .heading {
+    font-size: 21px;
+  }
+
+  .form {
+    margin-top: 12px;
+  }
+
+  .actions {
+    margin-top: 12px;
+  }
+}
+
+@media (max-width: 768px) and (max-height: 379px) {
+  .lede {
+    display: none;
+  }
+}
+
+/* Motion is never load-bearing: the handoff is instantaneous. */
+@media (prefers-reduced-motion: reduce) {
+  .veil,
+  .content {
+    transition: none;
+  }
+}

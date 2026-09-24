@@ -1,7 +1,16 @@
 import { and, count, desc, eq, ilike, inArray, isNull, or, sql, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import type { Database } from "@db/client";
-import { blockMedia, media, pages, projectBlocks, projects, type Media as MediaRow, type NewMedia } from "@db/schema";
+import {
+  blockMedia,
+  media,
+  pages,
+  projectBlocks,
+  projects,
+  publicationMedia,
+  type Media as MediaRow,
+  type NewMedia,
+} from "@db/schema";
 
 export type MediaRecord = {
   id: string;
@@ -19,8 +28,9 @@ export type MediaRecord = {
 
 // Every relational reference that keeps an asset in use (CLAUDE.md §12):
 // project covers and previews (ADR-0011), block placements, placement posters
-// (ADR-0015) and asset default posters (ADR-0009). References held by a
-// soft-deleted project or asset no longer count: V1 has no restore.
+// (ADR-0015), asset default posters (ADR-0009) and current published snapshots
+// (ADR-0012). References held by a soft-deleted project or asset no longer
+// count: V1 has no restore.
 export type MediaUsage =
   | { kind: "PROJECT_COVER" | "PROJECT_PREVIEW"; projectId: string; projectTitle: string }
   | {
@@ -30,7 +40,9 @@ export type MediaUsage =
       projectTitle: string | null;
       pageKey: string | null;
     }
-  | { kind: "ASSET_POSTER"; mediaId: string };
+  | { kind: "ASSET_POSTER"; mediaId: string }
+  | { kind: "PUBLISHED_PROJECT"; projectId: string; projectTitle: string }
+  | { kind: "PUBLISHED_PAGE"; pageKey: string };
 
 const columns = {
   id: media.id,
@@ -165,7 +177,7 @@ export function createMediaRepository(db: Database) {
       const ownerProjectId = sql`coalesce(${projectBlocks.projectId}, ${parent.projectId})`;
       const ownerPageId = sql`coalesce(${projectBlocks.pageId}, ${parent.pageId})`;
 
-      const [covers, previews, placements, posters] = await Promise.all([
+      const [covers, previews, placements, posters, snapshots] = await Promise.all([
         db
           .select({ projectId: projects.id, projectTitle: projects.title })
           .from(projects)
@@ -198,6 +210,12 @@ export function createMediaRepository(db: Database) {
           .select({ mediaId: media.id })
           .from(media)
           .where(and(eq(media.posterMediaId, mediaId), live)),
+        db
+          .select({ projectId: projects.id, projectTitle: projects.title, pageKey: pages.key })
+          .from(publicationMedia)
+          .leftJoin(projects, eq(projects.id, publicationMedia.projectId))
+          .leftJoin(pages, eq(pages.id, publicationMedia.pageId))
+          .where(eq(publicationMedia.mediaId, mediaId)),
       ]);
 
       return [
@@ -208,6 +226,11 @@ export function createMediaRepository(db: Database) {
           ...(posterMediaId === mediaId ? [{ kind: "PLACEMENT_POSTER" as const, ...owner }] : []),
         ]),
         ...posters.map((row) => ({ kind: "ASSET_POSTER" as const, ...row })),
+        ...snapshots.map((row) =>
+          row.projectId
+            ? { kind: "PUBLISHED_PROJECT" as const, projectId: row.projectId, projectTitle: row.projectTitle! }
+            : { kind: "PUBLISHED_PAGE" as const, pageKey: row.pageKey! },
+        ),
       ];
     },
   };

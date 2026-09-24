@@ -1,3 +1,4 @@
+import { unstable_rethrow } from "next/navigation";
 import { z, type ZodType } from "zod";
 import { DatabaseUnavailableError, getDatabase, type Database } from "@db/client";
 import { ADMIN_SESSION_COOKIE, createAuthService, type AdminPrincipal } from "@/features/authentication/auth.service";
@@ -117,6 +118,8 @@ async function run(work: () => Promise<Response>): Promise<Response> {
   try {
     return await work();
   } catch (error) {
+    // Next.js's own control flow (redirects, dynamic rendering) passes through.
+    unstable_rethrow(error);
     return errorResponse(error);
   }
 }

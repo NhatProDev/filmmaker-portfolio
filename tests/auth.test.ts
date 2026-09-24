@@ -155,28 +155,10 @@ describe("CSRF and authorisation on every admin operation (CLAUDE.md §16, §17.
       paths: Record<string, Record<string, { security?: unknown[] }>>;
     };
     const uuid = "00000000-0000-4000-8000-000000000000";
-    // Operations that arrive with publishing and private access (Phase 2E).
-    const pending = new Set([
-      "POST /projects/{projectId}/publish",
-      "POST /projects/{projectId}/unpublish",
-      "POST /projects/{projectId}/archive",
-      "GET /projects/{projectId}/preview",
-      "GET /preview/exit",
-      "POST /pages/{pageKey}/publish",
-      "GET /pages/{pageKey}/preview",
-      "GET /public/projects",
-      "GET /public/projects/{slug}",
-      "POST /public/projects/{slug}/access",
-      "GET /public/projects/{slug}/media/{mediaId}",
-    ]);
     let checked = 0;
     for (const [template, item] of Object.entries(contract.paths)) {
       for (const [method, operation] of Object.entries(item)) {
         if (method === "parameters") continue;
-        if (pending.has(`${method.toUpperCase()} ${template}`)) {
-          assert.equal(resolveRoute(template.replace(/\{\w+\}/g, uuid)), null, `${template} is implemented; unlist it`);
-          continue;
-        }
         const path = template.replace(/\{pageKey\}/g, "HOME").replace(/\{slug\}/g, "some-slug").replace(/\{\w+\}/g, uuid);
         const route = resolveRoute(path);
         assert.ok(route, `no route module for ${method.toUpperCase()} ${template}`);

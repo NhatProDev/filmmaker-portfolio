@@ -29,16 +29,30 @@ export type ProjectMetadataInput = {
   seoDescription?: string | null;
 };
 
-// How a project's publication is summarised; replaced by the snapshot-aware
-// summary of the publishing module (ADR-0012).
-export type PublicationSummarizer = (db: Database, project: ProjectRow) => Promise<PublicationDto>;
+// How publication state is read and withdrawn: the snapshot publishing of
+// ADR-0012 (publication.service.ts). Without it, status alone is reported.
+export type PublicationProvider = {
+  summary(db: Database, project: ProjectRow): Promise<PublicationDto>;
+  publishedAt(db: Database, ids: readonly string[]): Promise<Map<string, Date>>;
+  withdraw(db: Database, projectId: string): Promise<void>;
+};
 
-const statusSummary: PublicationSummarizer = async (_db, project) => ({
-  isPublished: project.status === "PUBLISHED",
-  publishedAt: project.publishedAt?.toISOString() ?? null,
-  hasUnpublishedChanges: false,
-  issues: [],
-});
+const statusOnly: PublicationProvider = {
+  summary: async (_db, project) => ({
+    isPublished: project.status === "PUBLISHED",
+    publishedAt: project.publishedAt?.toISOString() ?? null,
+    hasUnpublishedChanges: false,
+    issues: [],
+  }),
+  publishedAt: async () => new Map(),
+  withdraw: async () => {},
+};
+
+export type ProjectServiceOptions = {
+  publication?: PublicationProvider;
+  // Called after a change visitors can see: order, slug, visibility, deletion.
+  onPublicChange?: () => void;
+};
 
 const projectNotFound = () => notFound("PROJECT_NOT_FOUND", "Project not found.");
 
@@ -51,13 +65,16 @@ async function assertMediaFor(db: Database, id: string, type: "IMAGE" | "VIDEO",
   }
 }
 
-export function createProjectService(db: Database, summarize: PublicationSummarizer = statusSummary) {
+export function createProjectService(db: Database, options: ProjectServiceOptions = {}) {
+  const publication = options.publication ?? statusOnly;
+  const publicChange = () => options.onPublicChange?.();
+
   async function detail(tx: Database, row: ProjectRow) {
     const media = createMediaRepository(tx);
-    const [assets, blocks, publication] = await Promise.all([
+    const [assets, blocks, summary] = await Promise.all([
       media.findRowsByIds([row.coverMediaId, row.previewMediaId].filter((id): id is string => Boolean(id))),
       createCompositionService(tx).tree({ kind: "project", id: row.id }),
-      summarize(tx, row),
+      publication.summary(tx, row),
     ]);
     const byId = new Map(assets.map((asset) => [asset.id, asset]));
     return toProjectDetailDto(
@@ -67,7 +84,7 @@ export function createProjectService(db: Database, summarize: PublicationSummari
         preview: row.previewMediaId ? byId.get(row.previewMediaId) ?? null : null,
       },
       blocks,
-      publication,
+      summary,
     );
   }
 
@@ -93,13 +110,13 @@ export function createProjectService(db: Database, summarize: PublicationSummari
         rows.flatMap((row) => (row.coverMediaId ? [row.coverMediaId] : [])),
       );
       const byId = new Map(covers.map((cover) => [cover.id, cover]));
-      const summaries = await Promise.all(rows.map((row) => summarize(db, row)));
+      const publishedAt = await publication.publishedAt(db, rows.map((row) => row.id));
       return {
-        data: rows.map((row, i) =>
+        data: rows.map((row) =>
           toProjectSummaryDto(
             row,
             row.coverMediaId ? byId.get(row.coverMediaId) ?? null : null,
-            summaries[i].publishedAt ? new Date(summaries[i].publishedAt!) : null,
+            publishedAt.get(row.id) ?? null,
           ),
         ),
         meta: { page: query.page, pageSize: query.pageSize, total },
@@ -134,7 +151,8 @@ export function createProjectService(db: Database, summarize: PublicationSummari
     },
 
     async update(id: string, input: ProjectMetadataInput) {
-      return transaction(db, async (tx) => {
+      let visible = false;
+      const result = await transaction(db, async (tx) => {
         const projects = createProjectRepository(tx);
         await projects.lockOrdering();
         const row = await projects.findById(id, "update");
@@ -152,12 +170,20 @@ export function createProjectService(db: Database, summarize: PublicationSummari
               : { isFeatured: false, featuredPosition: null };
         const updated = await projects.update(id, { ...fields, ...featuring });
         if (isFeatured === false && row.isFeatured) await projects.compactOrders();
+        // Slug and visibility are live: a published project changes address or
+        // audience at once, without a publish (ADR-0012).
+        visible =
+          row.status === "PUBLISHED" &&
+          ((input.slug !== undefined && input.slug !== row.slug) ||
+            (input.visibility !== undefined && input.visibility !== row.visibility));
         return detail(tx, updated);
       });
+      if (visible) publicChange();
+      return result;
     },
 
     // Soft delete: archived, out of both orders, and (ADR-0012) unpublished.
-    async softDelete(id: string, onDeleted?: (tx: Database, project: ProjectRow) => Promise<void>) {
+    async softDelete(id: string) {
       await transaction(db, async (tx) => {
         const projects = createProjectRepository(tx);
         await projects.lockOrdering();
@@ -170,8 +196,9 @@ export function createProjectService(db: Database, summarize: PublicationSummari
           featuredPosition: null,
         });
         await projects.compactOrders();
-        await onDeleted?.(tx, row);
+        await publication.withdraw(tx, row.id);
       });
+      publicChange();
     },
 
     async reorder(projectIds: string[]) {
@@ -182,6 +209,7 @@ export function createProjectService(db: Database, summarize: PublicationSummari
         assertCompleteSet(current, projectIds, "every non-deleted project");
         await projects.setDisplayPositions(projectIds);
       });
+      publicChange();
     },
 
     async reorderFeatured(projectIds: string[]) {

@@ -2,6 +2,7 @@ import { existsSync, readdirSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { setDatabaseForTesting } from "@db/client";
+import { setPublicChangeHandlerForTesting } from "@/app/api/v1/_lib/services";
 import { createAuthService } from "@/features/authentication/auth.service";
 import { staticGateway } from "@/features/site-content/static-gateway";
 import { applyImportPlan, buildImportPlan } from "../../scripts/lib/static-import";
@@ -43,7 +44,14 @@ export type ApiResponse = { status: number; headers: Headers; body: any }; // es
 export async function api(
   method: string,
   path: string,
-  options: { body?: unknown; cookie?: string; origin?: string | null; headers?: Record<string, string> } = {},
+  options: {
+    body?: unknown;
+    cookie?: string;
+    origin?: string | null;
+    headers?: Record<string, string>;
+    // Binary responses: the body is returned as its byte length.
+    raw?: boolean;
+  } = {},
 ): Promise<ApiResponse> {
   const route = resolveRoute(path);
   if (!route) throw new Error(`No route for ${path}`);
@@ -61,6 +69,7 @@ export async function api(
   const response: Response = await handler(new Request(`${ORIGIN}/api/v1${path}`, { method, headers, body }), {
     params: Promise.resolve(route.params),
   });
+  if (options.raw) return { status: response.status, headers: response.headers, body: (await response.arrayBuffer()).byteLength };
   const text = await response.text();
   return { status: response.status, headers: response.headers, body: text ? JSON.parse(text) : null };
 }
@@ -78,6 +87,8 @@ export async function createApiTestContext(options: { importContent?: boolean } 
   }
   await createAuthService(database.db).provisionAdmin({ ...ADMIN, name: "Test Admin" });
   setDatabaseForTesting(database.db);
+  // No page cache outside Next.js; tests that count revalidations replace this.
+  setPublicChangeHandlerForTesting(() => {});
   const login = await api("POST", "/auth/login", { body: ADMIN, headers: { "x-forwarded-for": "10.0.0.1" } });
   if (login.status !== 200) throw new Error(`login failed: ${JSON.stringify(login.body)}`);
   const cookie = cookieFrom(login);
@@ -89,6 +100,7 @@ export async function createApiTestContext(options: { importContent?: boolean } 
     as: (method: string, path: string, body?: unknown) => api(method, path, { body, cookie }),
     close: async () => {
       setDatabaseForTesting(null);
+      setPublicChangeHandlerForTesting(null);
       await database.close();
     },
   };

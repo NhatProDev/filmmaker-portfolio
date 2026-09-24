@@ -11,7 +11,9 @@ import { useAction } from "../../_components/useAction";
 import styles from "../../studio.module.css";
 
 export function StatusBadge({ project }: { project: Pick<ProjectSummaryDto, "status" | "publishedAt"> }) {
-  if (project.status === "PUBLISHED") return <span className={`${styles.badge} ${styles.badgeOk}`}>Published</span>;
+  if (project.status === "PUBLISHED" && project.publishedAt) {
+    return <span className={`${styles.badge} ${styles.badgeOk}`}>Published</span>;
+  }
   if (project.status === "ARCHIVED") return <span className={styles.badge}>Archived</span>;
   return <span className={`${styles.badge} ${styles.badgeWarn}`}>Draft</span>;
 }

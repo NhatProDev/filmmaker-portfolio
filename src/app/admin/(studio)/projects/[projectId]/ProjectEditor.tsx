@@ -6,6 +6,7 @@ import { useState, type FormEvent, type ReactNode } from "react";
 import type { ProjectDetailDto } from "@/features/projects/project.mapper";
 import { api } from "../../../_components/api";
 import { ChooseMediaButton, ErrorLine } from "../../../_components/composition";
+import { PublishingPanel } from "../../../_components/PublishingPanel";
 import { Thumb } from "../../../_components/Thumb";
 import { useAction } from "../../../_components/useAction";
 import styles from "../../../studio.module.css";
@@ -280,7 +281,7 @@ function AccessPanel({ project }: { project: Project }) {
   );
 }
 
-export function ProjectEditor({ project, publishing }: { project: Project; publishing?: ReactNode }) {
+export function ProjectEditor({ project }: { project: Project }) {
   const router = useRouter();
   const { run, pending, error } = useAction();
 
@@ -317,7 +318,13 @@ export function ProjectEditor({ project, publishing }: { project: Project; publi
         </button>
       </div>
       <ErrorLine error={error} />
-      {publishing}
+      <PublishingPanel
+        publication={project.publication}
+        basePath={`/projects/${project.id}`}
+        previewHref={`/api/v1/projects/${project.id}/preview`}
+        canUnpublish
+        live={project.visibility === "PRIVATE" ? `/works/${project.slug} (password)` : `/works/${project.slug}`}
+      />
       <DetailsPanel key={`details-${project.updatedAt}`} project={project} />
       <MediaPanel project={project} />
       <Panel title="Page composition">

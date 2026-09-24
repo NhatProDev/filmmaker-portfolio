@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { resolve } from "node:path";
 import { after, before, describe, test } from "node:test";
 import { createMediaRepository } from "@/features/media/media.repository";
+import { createProjectPublicationService } from "@/features/projects/publication.service";
 import { createDbGateway } from "@/features/site-content/db-gateway";
 import { ContentProjectionError } from "@/features/site-content/db-projection";
 import type { ContentGateway } from "@/features/site-content/site-content.types";
@@ -71,8 +72,11 @@ describe("static content → database: import and adapter parity", () => {
   test("apply creates every asset, poster, project and composition once", async () => {
     const report = await applyImportPlan(database.db, plan, true);
     assert.deepEqual(report.drift, []);
-    // 22 assets + 7 posters + 9 projects + 1 project composition + HOME.
-    assert.equal(report.created, 40);
+    // 22 assets + 7 posters + 9 projects + 1 project composition + HOME,
+    // then a published snapshot for each project and for HOME.
+    assert.equal(report.created, 50);
+    assert.equal(await count("project_publications"), 9);
+    assert.equal(await count("page_publications"), 1);
     assert.equal(await count("media"), 22);
     assert.equal(await count("projects"), 9);
     assert.equal(await count("project_blocks"), 26);
@@ -118,13 +122,20 @@ describe("static content → database: import and adapter parity", () => {
     const n3 = await idOf("home/n3.mp4");
     const [defaultPoster] = (await q(`select poster_media_id as id from media where id = '${n3}'`)).rows;
     const override = (await q("select poster_media_id as id, block_id from block_media where poster_media_id is not null")).rows[0];
+    // It is also live in both published snapshots (ADR-0012).
     assert.deepEqual(
       (await repository.findUsages(defaultPoster.id as string)).map((u) => u.kind).sort(),
-      ["ASSET_POSTER", "BLOCK_MEDIA"],
+      ["ASSET_POSTER", "BLOCK_MEDIA", "PUBLISHED_PAGE", "PUBLISHED_PROJECT"],
     );
     const overrideUsages = await repository.findUsages(override.id as string);
     assert.ok(overrideUsages.some((u) => u.kind === "PLACEMENT_POSTER" && u.pageKey === "HOME" && u.blockId === override.block_id));
-    assert.deepEqual(await kinds("home/n3.mp4"), ["BLOCK_MEDIA", "BLOCK_MEDIA", "PROJECT_PREVIEW"]);
+    assert.deepEqual(await kinds("home/n3.mp4"), [
+      "BLOCK_MEDIA",
+      "BLOCK_MEDIA",
+      "PROJECT_PREVIEW",
+      "PUBLISHED_PAGE",
+      "PUBLISHED_PROJECT",
+    ]);
 
     // A soft-deleted project's references no longer hold an asset.
     const cover = (await q("select cover_media_id as id from projects where slug = 'court'")).rows[0].id as string;
@@ -162,41 +173,72 @@ describe("static content → database: import and adapter parity", () => {
     }
   });
 
-  test("hidden blocks never appear, at any level (CLAUDE.md §17.18)", async () => {
+  // Public reads come only from published snapshots (ADR-0012): a working-copy
+  // edit is invisible until it is published, and a preview shows it at once.
+  const publisher = () => createProjectPublicationService(database.db);
+  const projectId = async () => (await q("select id from projects where slug = 'made-to-measure'")).rows[0].id as string;
+
+  test("hidden blocks never appear, at any level, once published (CLAUDE.md §17.18)", async () => {
     const coda = `(select id from project_blocks where type = 'IMAGE' and config->>'preset' = 'projectCoda')`;
     const still = `(select b.id from project_blocks b join project_blocks g on g.id = b.parent_block_id
                     where g.config->>'preset' = 'projectStills' order by b.position limit 1)`;
     await q(`update project_blocks set is_hidden = true where id in (${coda}, ${still})`);
     try {
-      const detail = (await db.getProjectPage("made-to-measure"))?.detail;
-      assert.equal(detail?.coda, undefined);
-      assert.equal(detail?.stills.length, 3);
+      // Live: unchanged until publish.
+      assert.ok((await db.getProjectPage("made-to-measure"))?.detail?.coda);
+      // Preview: the working copy, without the hidden blocks.
+      const preview = (await db.previewProjectPage("made-to-measure")).value?.detail;
+      assert.equal(preview?.coda, undefined);
+      assert.equal(preview?.stills.length, 3);
+      await publisher().publish(await projectId(), null);
+      const live = (await db.getProjectPage("made-to-measure"))?.detail;
+      assert.equal(live?.coda, undefined);
+      assert.equal(live?.stills.length, 3);
     } finally {
       await q("update project_blocks set is_hidden = false");
+      await publisher().publish(await projectId(), null);
     }
+    assert.ok((await db.getProjectPage("made-to-measure"))?.detail?.coda);
   });
 
-  test("a composition the locked page cannot render is refused, not reshuffled", async () => {
+  test("a composition the locked page cannot render is refused at publish, not reshuffled", async () => {
     const stills = `(select id from project_blocks where config->>'preset' = 'projectStills')`;
     const coda = `(select id from project_blocks where config->>'preset' = 'projectCoda')`;
     await q(`update project_blocks set position = 99 where id = ${coda}`);
     await q(`update project_blocks set position = 100 where id = ${stills}`);
     try {
-      await assert.rejects(db.getProjectPage("made-to-measure"), ContentProjectionError);
+      await assert.rejects(publisher().publish(await projectId(), null), (error: Error & { code?: string }) => {
+        assert.equal(error.code, "PROJECT_NOT_PUBLISHABLE");
+        return true;
+      });
+      const preview = await db.previewProjectPage("made-to-measure");
+      assert.equal(preview.value, null);
+      assert.match(preview.issue!, /out of the template's order/);
+      // What is live is untouched.
+      assert.ok((await db.getProjectPage("made-to-measure"))?.detail?.coda);
     } finally {
       await q(`update project_blocks set position = 2 where id = ${stills}`);
       await q(`update project_blocks set position = 5 where id = ${coda}`);
     }
-    assert.ok((await db.getProjectPage("made-to-measure"))?.detail?.coda);
   });
 
-  test("stored JSON that fails the block contract is refused on read", async () => {
+  test("stored JSON that fails the block contract is refused at publish and on read", async () => {
     const hero = `(select id from project_blocks where type = 'HERO' and project_id is not null)`;
     await q(`update project_blocks set config = config || '{"color": "#c4361c"}' where id = ${hero}`);
     try {
-      await assert.rejects(db.getProjectPage("made-to-measure"), /color/);
+      await assert.rejects(publisher().publish(await projectId(), null), /cannot be published/);
+      assert.match((await db.previewProjectPage("made-to-measure")).issue!, /color/);
     } finally {
       await q(`update project_blocks set config = config - 'color' where id = ${hero}`);
     }
+    // A corrupted snapshot is refused rather than served.
+    const id = await projectId();
+    await q(`update project_publications set snapshot = snapshot || '{"version": 2}' where project_id = '${id}'`);
+    try {
+      await assert.rejects(db.getProjectPage("made-to-measure"), ContentProjectionError);
+    } finally {
+      await publisher().publish(id, null);
+    }
+    assert.ok(await db.getProjectPage("made-to-measure"));
   });
 });

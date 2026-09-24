@@ -158,6 +158,10 @@ export type ContactContent = {
 // application's own REST API, which is the contract for the Studio and external
 // clients. Methods are asynchronous so that a future database adapter, reading
 // through the application services, fits the same interface.
+// A working copy rendered for an admin's preview: the page, or why the locked
+// template cannot show it yet.
+export type Preview<T> = { value: T | null; issue: string | null };
+
 export interface ContentGateway {
   getHome(): Promise<HomeContent>;
   getWorksIndex(): Promise<WorksIndex>;
@@ -166,4 +170,21 @@ export interface ContentGateway {
   listPublicProjectSlugs(): Promise<string[]>;
   getAbout(): Promise<AboutContent>;
   getContact(): Promise<ContactContent>;
+
+  // PRIVATE projects are never listed (ADR-0003). This says only that a slug
+  // is a published private project, so the password gate can be shown; it
+  // returns nothing of the project.
+  findPrivateProject(slug: string): Promise<{ projectId: string } | null>;
+  // The published page of a PRIVATE project, for a visitor whose access to
+  // `projectId` the caller has verified. Its media resolve through the
+  // access-checked route, never an unrestricted public URL.
+  getPrivateProjectPage(slug: string, projectId: string): Promise<ProjectPage | null>;
+
+  // Every published project address, by audience: what the edge proxy needs
+  // to route /works/<slug> without rendering (src/proxy.ts).
+  listProjectRoutes(): Promise<{ public: string[]; private: string[] }>;
+
+  // The working copy, for an authenticated admin's preview (ADR-0012).
+  previewProjectPage(slug: string): Promise<Preview<ProjectPage>>;
+  previewHome(): Promise<Preview<HomeContent>>;
 }

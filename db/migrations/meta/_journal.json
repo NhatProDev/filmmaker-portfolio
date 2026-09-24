@@ -36,6 +36,13 @@
       "when": 1790204295802,
       "tag": "0005_admin_sessions_and_rate_limits",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790206913642,
+      "tag": "0006_publications",
+      "breakpoints": true
     }
   ]
 }

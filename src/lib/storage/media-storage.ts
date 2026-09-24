@@ -96,8 +96,8 @@ function pathUnder(root: string, key: string): string {
 export function createLocalMediaStorage(
   baseUrl: string,
   roots: { public: string; private: string } = {
-    public: join(process.cwd(), "public", "media"),
-    private: join(process.cwd(), "storage", "private"),
+    public: join(/*turbopackIgnore: true*/ process.cwd(), "public", "media"),
+    private: join(/*turbopackIgnore: true*/ process.cwd(), "storage", "private"),
   },
 ): MediaStorage {
   const unsupported = async (): Promise<never> => {
@@ -196,9 +196,13 @@ export function createMediaStorageFromEnv(env: ServerEnv): MediaStorage {
       uploadTtlSeconds: env.MEDIA_SIGNED_URL_TTL_SECONDS,
     });
   }
+  // The local adapter reads files at run time from where they already sit; it
+  // is never used in production (MEDIA_STORAGE_PROVIDER=s3). Without the
+  // ignore comments, Turbopack traces the media, or with the unscoped private
+  // root the whole project, into every server function.
   return createLocalMediaStorage(env.MEDIA_PUBLIC_BASE_URL, {
-    public: join(process.cwd(), "public", "media"),
-    private: resolve(process.cwd(), env.MEDIA_PRIVATE_ROOT),
+    public: join(/*turbopackIgnore: true*/ process.cwd(), "public", "media"),
+    private: resolve(/*turbopackIgnore: true*/ process.cwd(), env.MEDIA_PRIVATE_ROOT),
   });
 }
 

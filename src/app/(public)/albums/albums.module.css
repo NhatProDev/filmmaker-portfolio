@@ -1,0 +1,265 @@
+/* Albums (ADR-0019). There is no approved prototype for these pages: they are
+   assembled from the public system as it stands — Art Works' tiers and
+   masthead, Home's italic gallery label, the body type values, the palette
+   tokens and the shared JustifiedRows component — and nothing here is
+   promoted to the system. Their design needs the owner's review before the
+   pages are linked from anywhere (ADR-0019 §6). Tiers are measured on the
+   `page` container, like every public page. */
+
+div:has(> .albums) {
+  --edge: 56px;
+  --gut: 20px;
+}
+
+.albums {
+  --band: 120px;
+  padding-bottom: 120px;
+}
+
+@container page (width < 1024px) {
+  div:has(> .albums) {
+    --edge: 32px;
+    --gut: 14px;
+  }
+
+  .albums {
+    --band: 96px;
+    padding-bottom: 96px;
+  }
+}
+
+@container page (width < 600px) {
+  div:has(> .albums) {
+    --edge: 24px;
+    --gut: 10px;
+  }
+
+  .albums {
+    --band: 72px;
+    padding-bottom: 72px;
+  }
+}
+
+/* ---- Masthead: Art Works' display line and right-aligned count ---- */
+
+.mast {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gut);
+  align-items: end;
+  padding: 78px var(--edge) 34px;
+}
+
+.mastBox {
+  grid-column: 1 / 9;
+  container-type: inline-size;
+  min-width: 0;
+}
+
+.heading {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(34px, 6.65cqw, 58px);
+  line-height: 1.05;
+  letter-spacing: var(--display-track);
+  text-transform: uppercase;
+  overflow-wrap: break-word;
+}
+
+.count {
+  grid-column: 9 / 13;
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--muted);
+  text-align: right;
+}
+
+@container page (width < 1024px) {
+  .mast {
+    padding-top: 60px;
+    padding-bottom: 26px;
+  }
+}
+
+@container page (width < 600px) {
+  .mast {
+    padding-top: 44px;
+  }
+
+  .mastBox,
+  .count {
+    grid-column: 1 / -1;
+  }
+
+  .count {
+    margin-top: 8px;
+    text-align: left;
+  }
+}
+
+/* ---- The index: collections of album cards ---- */
+
+.collection + .collection {
+  margin-top: var(--band);
+}
+
+/* Home's gallery label. */
+.label {
+  margin: 0 0 22px;
+  padding: 0 var(--edge);
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 16px;
+  font-style: italic;
+  color: var(--muted);
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: calc(var(--gut) * 2) var(--gut);
+  margin: 0;
+  padding: 0 var(--edge);
+  list-style: none;
+}
+
+@container page (width < 1024px) {
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container page (width < 600px) {
+  .cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.card {
+  display: grid;
+  gap: 10px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.cardFrame {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  background: var(--frame);
+}
+
+.cardImage {
+  object-fit: cover;
+}
+
+.cardTitle {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--gut);
+  font-size: 17px;
+  line-height: 1.4;
+}
+
+.cardCount {
+  flex: none;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.card:hover .cardTitle > span:first-child,
+.card:focus-visible .cardTitle > span:first-child {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+/* ---- One album ---- */
+
+.intro {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gut);
+  padding: 0 var(--edge) 56px;
+}
+
+/* Home's lead measure and type. */
+.description {
+  grid-column: 1 / 7;
+  margin: 0;
+  max-width: 46ch;
+  font-size: 17px;
+  line-height: 1.74;
+  white-space: pre-line;
+}
+
+.related {
+  grid-column: 9 / 13;
+  align-self: end;
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--muted);
+  text-align: right;
+}
+
+.related a {
+  color: var(--ink);
+}
+
+@container page (width < 1024px) {
+  .description {
+    grid-column: 1 / 9;
+  }
+
+  .related {
+    grid-column: 9 / 13;
+  }
+}
+
+@container page (width < 600px) {
+  .description,
+  .related {
+    grid-column: 1 / -1;
+  }
+
+  .related {
+    margin-top: 16px;
+    text-align: left;
+  }
+}
+
+/* Captions follow the rows, numbered in reading order. */
+.captions {
+  display: grid;
+  gap: 6px;
+  margin: 40px 0 0;
+  padding: 0 var(--edge);
+  list-style: none;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--muted);
+  max-width: calc(46ch + 2 * var(--edge));
+}
+
+.captions span {
+  display: inline-block;
+  min-width: 2.2em;
+  font-variant-numeric: tabular-nums;
+}
+
+.back {
+  margin: var(--band) 0 0;
+  padding: 0 var(--edge);
+  font-size: 15px;
+}
+
+.back a {
+  color: var(--ink);
+}

@@ -1,16 +1,20 @@
 import { and, eq, isNull } from "drizzle-orm";
 import type { Database } from "@db/client";
-import { projects, type Page as PageRow } from "@db/schema";
+import { albums as albumsTable, projects, type Page as PageRow } from "@db/schema";
 import { site as committedSite } from "@/content/site";
+import { createAlbumRepository } from "@/features/albums/album.repository";
+import { buildAlbumSnapshot } from "@/features/albums/album.snapshot";
 import { buildContentPageSnapshot } from "@/features/page-content/page-content.snapshot";
 import { buildPageSnapshot } from "@/features/project-builder/page-publication.service";
 import { findPage } from "@/features/project-builder/page.service";
 import { createPublicationRepository, type PublishedProject } from "@/features/project-builder/publication.repository";
 import { buildProjectSnapshot } from "@/features/projects/publication.service";
 import { ContentProjectionError, createMediaIndex, worksProject, type MediaIndex } from "./db-projection";
+import { albumsIndex, parseAlbumSnapshot, renderAlbum } from "./album-projection";
 import { parseContentPageSnapshot, renderAbout, renderContact, renderSite } from "./page-content-projection";
 import type {
   AboutContent,
+  AlbumPage,
   ContactContent,
   ContentGateway,
   HomeContent,
@@ -128,6 +132,23 @@ export function createDbGateway(db: Database): ContentGateway {
     };
   }
 
+  // A published PUBLIC project an album belongs with, by the album's live
+  // link; never a private one (ADR-0003, ADR-0019 §3).
+  async function relatedProject(projectId: string | null): Promise<AlbumPage["related"]> {
+    if (!projectId) return null;
+    const row = (await publicList()).find((listed) => listed.project.id === projectId);
+    return row ? { slug: row.project.slug, title: row.parsed.project.title } : null;
+  }
+
+  async function publishedAlbums(): Promise<AlbumPage[]> {
+    const rows = await createAlbumRepository(db).listPublished();
+    return Promise.all(
+      rows.map(async ({ album, snapshot }) =>
+        renderAlbum(parseAlbumSnapshot(snapshot, `album ${album.slug}`), album.slug, await relatedProject(album.projectId)),
+      ),
+    );
+  }
+
   const preview = async <T,>(render: () => Promise<T | null>): Promise<Preview<T>> => {
     try {
       return { value: await render(), issue: null };
@@ -221,6 +242,34 @@ export function createDbGateway(db: Database): ContentGateway {
 
     async previewHome() {
       return preview(async () => home(await buildPageSnapshot(db, await findPage(db, "HOME")), true));
+    },
+
+    async getAlbumsIndex() {
+      return albumsIndex(await publishedAlbums());
+    },
+
+    async getAlbumPage(slug) {
+      return (await publishedAlbums()).find((album) => album.slug === slug) ?? null;
+    },
+
+    async listPublicAlbumSlugs() {
+      return (await createAlbumRepository(db).listPublished()).map((row) => row.album.slug);
+    },
+
+    async findAlbumRoute(slug) {
+      return (await createAlbumRepository(db).listPublished()).some((row) => row.album.slug === slug);
+    },
+
+    // The working copy of any album that is not deleted, for an admin.
+    async previewAlbumPage(slug) {
+      return preview(async () => {
+        const [row] = await db
+          .select()
+          .from(albumsTable)
+          .where(and(eq(albumsTable.slug, slug), isNull(albumsTable.deletedAt)));
+        if (!row) return null;
+        return renderAlbum(await buildAlbumSnapshot(db, row), slug, await relatedProject(row.projectId));
+      });
     },
 
     getAbout: () => about(),

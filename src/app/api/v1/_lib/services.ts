@@ -1,4 +1,5 @@
 import type { Database } from "@db/client";
+import { createAlbumService } from "@/features/albums/album.service";
 import { createMediaService } from "@/features/media/media.service";
 import { createProjectAccessService } from "@/features/project-access/project-access.service";
 import { createCompositionService } from "@/features/project-builder/composition.service";
@@ -43,5 +44,6 @@ export const services = (db: Database) => {
     media: createMediaService(db),
     access: createProjectAccessService(db, serverEnv().PROJECT_ACCESS_SECRET),
     publicProjects: createPublicProjectService(db),
+    albums: createAlbumService(db, { onPublicChange: notify }),
   };
 };

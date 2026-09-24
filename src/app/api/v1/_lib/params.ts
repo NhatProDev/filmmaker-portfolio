@@ -7,6 +7,8 @@ export const projectParams = z.object({ projectId: uuidParam });
 export const blockParams = z.object({ blockId: uuidParam });
 export const blockMediaParams = z.object({ blockId: uuidParam, blockMediaId: uuidParam });
 export const mediaParams = z.object({ mediaId: uuidParam });
+export const albumParams = z.object({ albumId: uuidParam });
+export const albumMediaParams = z.object({ albumId: uuidParam, albumMediaId: uuidParam });
 export const pageParams = z.object({ pageKey: z.enum(PAGE_KEYS) });
 // Block routes: only a page that owns a composition (ADR-0007).
 export const composedPageParams = z.object({ pageKey: z.enum(COMPOSED_PAGE_KEYS) });

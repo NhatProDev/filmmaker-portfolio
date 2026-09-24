@@ -2,6 +2,8 @@ import { and, count, desc, eq, ilike, inArray, isNull, or, sql, type SQL } from 
 import { alias } from "drizzle-orm/pg-core";
 import type { Database } from "@db/client";
 import {
+  albumMedia,
+  albums,
   blockMedia,
   media,
   pageMedia,
@@ -50,6 +52,7 @@ export type MediaUsage =
     }
   | { kind: "ASSET_POSTER"; mediaId: string }
   | { kind: "PAGE_MEDIA"; pageKey: string; slot: string }
+  | { kind: "ALBUM_ITEM" | "ALBUM_COVER" | "PUBLISHED_ALBUM"; albumId: string; albumTitle: string }
   | { kind: "PUBLISHED_PROJECT"; projectId: string; projectTitle: string }
   | { kind: "PUBLISHED_PAGE"; pageKey: string };
 
@@ -220,7 +223,7 @@ export function createMediaRepository(db: Database) {
       const ownerProjectId = sql`coalesce(${projectBlocks.projectId}, ${parent.projectId})`;
       const ownerPageId = sql`coalesce(${projectBlocks.pageId}, ${parent.pageId})`;
 
-      const [covers, previews, placements, posters, snapshots, pageSlots] = await Promise.all([
+      const [covers, previews, placements, posters, snapshots, pageSlots, albumItems, albumCovers] = await Promise.all([
         db
           .select({ projectId: projects.id, projectTitle: projects.title })
           .from(projects)
@@ -254,10 +257,17 @@ export function createMediaRepository(db: Database) {
           .from(media)
           .where(and(eq(media.posterMediaId, mediaId), live)),
         db
-          .select({ projectId: projects.id, projectTitle: projects.title, pageKey: pages.key })
+          .select({
+            projectId: projects.id,
+            projectTitle: projects.title,
+            pageKey: pages.key,
+            albumId: albums.id,
+            albumTitle: albums.title,
+          })
           .from(publicationMedia)
           .leftJoin(projects, eq(projects.id, publicationMedia.projectId))
           .leftJoin(pages, eq(pages.id, publicationMedia.pageId))
+          .leftJoin(albums, eq(albums.id, publicationMedia.albumId))
           .where(eq(publicationMedia.mediaId, mediaId)),
         // A structured page's image slots (ADR-0017).
         db
@@ -265,6 +275,16 @@ export function createMediaRepository(db: Database) {
           .from(pageMedia)
           .innerJoin(pages, eq(pages.id, pageMedia.pageId))
           .where(eq(pageMedia.mediaId, mediaId)),
+        // An album's images and cover (ADR-0019); a deleted album holds none.
+        db
+          .select({ albumId: albums.id, albumTitle: albums.title })
+          .from(albumMedia)
+          .innerJoin(albums, eq(albums.id, albumMedia.albumId))
+          .where(and(eq(albumMedia.mediaId, mediaId), isNull(albums.deletedAt))),
+        db
+          .select({ albumId: albums.id, albumTitle: albums.title })
+          .from(albums)
+          .where(and(eq(albums.coverMediaId, mediaId), isNull(albums.deletedAt))),
       ]);
 
       return [
@@ -279,8 +299,12 @@ export function createMediaRepository(db: Database) {
         ...snapshots.map((row) =>
           row.projectId
             ? { kind: "PUBLISHED_PROJECT" as const, projectId: row.projectId, projectTitle: row.projectTitle! }
-            : { kind: "PUBLISHED_PAGE" as const, pageKey: row.pageKey! },
+            : row.albumId
+              ? { kind: "PUBLISHED_ALBUM" as const, albumId: row.albumId, albumTitle: row.albumTitle! }
+              : { kind: "PUBLISHED_PAGE" as const, pageKey: row.pageKey! },
         ),
+        ...[...new Map(albumItems.map((row) => [row.albumId, row])).values()].map((row) => ({ kind: "ALBUM_ITEM" as const, ...row })),
+        ...albumCovers.map((row) => ({ kind: "ALBUM_COVER" as const, ...row })),
       ];
     },
   };

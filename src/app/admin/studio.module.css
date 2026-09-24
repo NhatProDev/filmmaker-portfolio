@@ -757,3 +757,43 @@
   gap: 6px;
   min-width: 0;
 }
+
+/* ---- Album editor (ADR-0019) ---- */
+
+.albumItems {
+  display: grid;
+  gap: 0;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.albumItem {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--s-line);
+}
+
+.index {
+  padding-top: 2px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--s-muted);
+}
+
+.albumItem:last-child {
+  border-bottom: 0;
+}
+
+@media (max-width: 600px) {
+  .albumItem {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .albumItem > :nth-child(3) {
+    grid-column: 1 / -1;
+  }
+}

@@ -1,6 +1,6 @@
 import { and, eq, inArray, isNotNull, isNull, ne } from "drizzle-orm";
 import { transaction, type Database } from "@db/client";
-import { media, pagePublications, projectPublications } from "@db/schema";
+import { albumPublications, media, pagePublications, projectPublications } from "@db/schema";
 import type { MediaStorage } from "@/lib/storage/media-storage";
 
 // ADR-0020 §2: rows recorded under another storage provider than the one that
@@ -69,6 +69,13 @@ export async function realignStorageProvider(
       if (!changed) continue;
       report.snapshots.push({ owner: `page ${row.pageId}`, records: changed });
       if (options.apply) await tx.update(pagePublications).set({ snapshot }).where(eq(pagePublications.pageId, row.pageId));
+    }
+    const albumRows = await tx.select().from(albumPublications);
+    for (const row of albumRows) {
+      const { snapshot, changed } = realignRecords(row.snapshot, ids, provider);
+      if (!changed) continue;
+      report.snapshots.push({ owner: `album ${row.albumId}`, records: changed });
+      if (options.apply) await tx.update(albumPublications).set({ snapshot }).where(eq(albumPublications.albumId, row.albumId));
     }
     if (options.apply) await tx.update(media).set({ storageProvider: provider }).where(inArray(media.id, [...ids]));
   };

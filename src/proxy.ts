@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getDatabase } from "@db/client";
 import { ADMIN_SESSION_COOKIE, createAuthService } from "@/features/authentication/auth.service";
 import { accessCookieName } from "@/features/project-access/access-cookie";
-import { createProjectRouter } from "@/features/site-content/project-router";
+import { createAlbumRouter, createProjectRouter } from "@/features/site-content/project-router";
 import { getContentGateway } from "@/features/site-content/site-content.gateway";
 
 // Routes /works/<slug> before anything renders (ADR-0003, ADR-0012):
@@ -20,6 +20,7 @@ import { getContentGateway } from "@/features/site-content/site-content.gateway"
 // routed at once (project-router.ts).
 
 let router: ReturnType<typeof createProjectRouter> | undefined;
+let albumRouter: ReturnType<typeof createAlbumRouter> | undefined;
 
 export async function proxy(request: NextRequest) {
   let slug: string;
@@ -28,6 +29,7 @@ export async function proxy(request: NextRequest) {
   } catch {
     slug = "";
   }
+  if (request.nextUrl.pathname.startsWith("/albums/")) return routeAlbum(request, slug);
   router ??= createProjectRouter(getContentGateway());
   let route: Awaited<ReturnType<typeof router.route>>;
   try {
@@ -54,6 +56,23 @@ export async function proxy(request: NextRequest) {
   return NextResponse.rewrite(new URL(`/works/${encodeURIComponent(slug || "_")}/not-found`, request.url));
 }
 
+// /albums/<slug> (ADR-0019): a published album goes to its static page; an
+// admin's preview renders any album's working copy; anything else gets the
+// site's prerendered 404 without rendering the album route.
+async function routeAlbum(request: NextRequest, slug: string) {
+  albumRouter ??= createAlbumRouter(getContentGateway());
+  let route: Awaited<ReturnType<typeof albumRouter.route>>;
+  try {
+    route = await albumRouter.route(slug);
+  } catch (error) {
+    console.error("[proxy] album routes unavailable", error);
+    return NextResponse.next();
+  }
+  if (route === "public") return NextResponse.next();
+  if (request.cookies.has(DRAFT_MODE_COOKIE) && (await isAdmin(request))) return NextResponse.next();
+  return NextResponse.rewrite(new URL(`/albums/${encodeURIComponent(slug || "_")}/not-found`, request.url));
+}
+
 // Next.js's draft-mode cookie.
 const DRAFT_MODE_COOKIE = "__prerender_bypass";
 
@@ -67,4 +86,4 @@ async function isAdmin(request: NextRequest): Promise<boolean> {
   }
 }
 
-export const config = { matcher: "/works/:slug" };
+export const config = { matcher: ["/works/:slug", "/albums/:slug"] };

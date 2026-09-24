@@ -86,6 +86,27 @@ export const staticGateway: ContentGateway = {
     return { value: homeFromTemplate(home), issue: null };
   },
 
+  // The committed content has no albums (ADR-0019).
+  async getAlbumsIndex() {
+    return { collections: [] };
+  },
+
+  async getAlbumPage() {
+    return null;
+  },
+
+  async listPublicAlbumSlugs() {
+    return [];
+  },
+
+  async findAlbumRoute() {
+    return false;
+  },
+
+  async previewAlbumPage() {
+    return { value: null, issue: null };
+  },
+
   async previewAbout() {
     return { value: about, issue: null };
   },

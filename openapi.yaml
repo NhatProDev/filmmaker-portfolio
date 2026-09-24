@@ -52,6 +52,7 @@ tags:
   - name: Blocks
   - name: Block Media
   - name: Media
+  - name: Albums
   - name: Public Projects
   - name: Operations
 
@@ -1135,6 +1136,336 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
+  # --------------------------------------------------------------- Albums
+  /albums:
+    get:
+      tags: [Albums]
+      operationId: listAlbums
+      summary: List albums, in display order (ADR-0019)
+      security:
+        - adminSession: []
+      responses:
+        '200':
+          description: Albums
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlbumListEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags: [Albums]
+      operationId: createAlbum
+      summary: Create a draft album
+      description: Appended to the display order. The slug is unique among all albums, deleted ones included.
+      security:
+        - adminSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAlbumRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlbumEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /albums/order:
+    put:
+      tags: [Albums]
+      operationId: reorderAlbums
+      summary: Replace the album display order
+      description: The complete set of live albums, in one transaction (ADR-0002). Anything else is `409 REORDER_SET_MISMATCH`.
+      security:
+        - adminSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReorderAlbumsRequest'
+      responses:
+        '204':
+          description: Reordered
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /albums/{albumId}:
+    parameters:
+      - $ref: '#/components/parameters/AlbumId'
+    get:
+      tags: [Albums]
+      operationId: getAlbum
+      summary: Get an album's working copy
+      security:
+        - adminSession: []
+      responses:
+        '200':
+          description: Album
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlbumEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [Albums]
+      operationId: updateAlbum
+      summary: Update an album's details, cover or related project
+      description: |
+        The cover must be a ready IMAGE. The slug and the related project are
+        live and take effect at once; everything else reaches the site on
+        publish.
+      security:
+        - adminSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAlbumRequest'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlbumEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    delete:
+      tags: [Albums]
+      operationId: deleteAlbum
+      summary: Soft-delete an album
+      description: Archives and unpublishes it, and closes the order. Its images stay in the Media Library.
+      security:
+        - adminSession: []
+      responses:
+        '204':
+          description: Deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /albums/{albumId}/publish:
+    parameters:
+      - $ref: '#/components/parameters/AlbumId'
+    post:
+      tags: [Publishing]
+      operationId: publishAlbum
+      summary: Validate the album's working copy and write its published snapshot
+      description: |
+        Refused with `422 ALBUM_NOT_PUBLISHABLE` and `details.issues` when it
+        has no image, or an image cannot be shown on a public page (for
+        example a private original). Nothing is written on refusal.
+      security:
+        - adminSession: []
+      responses:
+        '200':
+          description: Published album
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlbumEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /albums/{albumId}/unpublish:
+    parameters:
+      - $ref: '#/components/parameters/AlbumId'
+    post:
+      tags: [Publishing]
+      operationId: unpublishAlbum
+      summary: Remove the album's published snapshot
+      security:
+        - adminSession: []
+      responses:
+        '200':
+          description: Unpublished album
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlbumEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /albums/{albumId}/preview:
+    parameters:
+      - $ref: '#/components/parameters/AlbumId'
+    get:
+      tags: [Publishing]
+      operationId: previewAlbum
+      summary: Open the album's working copy on its public page
+      security:
+        - adminSession: []
+      responses:
+        '307':
+          description: Redirect to /albums/{slug} in preview mode
+          headers:
+            Location:
+              schema:
+                type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /albums/{albumId}/media:
+    parameters:
+      - $ref: '#/components/parameters/AlbumId'
+    post:
+      tags: [Albums]
+      operationId: addAlbumMedia
+      summary: Place a Media Library image in the album
+      description: |
+        A live, READY IMAGE, once per album (`409 ALBUM_MEDIA_DUPLICATE`).
+        `position` follows ADR-0005: omitted appends, `0..N` inserts and
+        shifts right, `> N` is `422`. The asset is referenced, not copied.
+      security:
+        - adminSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddAlbumMediaRequest'
+      responses:
+        '201':
+          description: Placed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlbumItemEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /albums/{albumId}/media/order:
+    parameters:
+      - $ref: '#/components/parameters/AlbumId'
+    put:
+      tags: [Albums]
+      operationId: reorderAlbumMedia
+      summary: Replace the order of the album's images
+      description: The complete set, in one transaction (ADR-0002). Anything else is `409 REORDER_SET_MISMATCH`.
+      security:
+        - adminSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReorderAlbumMediaRequest'
+      responses:
+        '204':
+          description: Reordered
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /albums/{albumId}/media/{albumMediaId}:
+    parameters:
+      - $ref: '#/components/parameters/AlbumId'
+      - $ref: '#/components/parameters/AlbumMediaId'
+    patch:
+      tags: [Albums]
+      operationId: updateAlbumMedia
+      summary: Update an image's caption or contextual description
+      security:
+        - adminSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAlbumMediaRequest'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlbumItemEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    delete:
+      tags: [Albums]
+      operationId: removeAlbumMedia
+      summary: Remove an image from the album
+      description: Only the reference; the asset stays in the Media Library. The order closes its gap.
+      security:
+        - adminSession: []
+      responses:
+        '204':
+          description: Removed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
   # ---------------------------------------------------------------- Media
   /media:
     get:
@@ -1673,6 +2004,20 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/Slug'
+    AlbumId:
+      name: albumId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    AlbumMediaId:
+      name: albumMediaId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
     PageKey:
       name: pageKey
       in: path
@@ -2033,6 +2378,172 @@ components:
         data:
           $ref: '#/components/schemas/Media'
 
+    # ------------------------------------------------------------ Albums
+    # ADR-0019. Mirrors src/features/albums/album.schema.ts.
+    AlbumStatus:
+      type: string
+      enum: [DRAFT, PUBLISHED, ARCHIVED]
+
+    AlbumSummary:
+      type: object
+      additionalProperties: false
+      required: [id, slug, title, collection, status, displayPosition, itemCount, createdAt, updatedAt, cover, publication]
+      properties:
+        id: { type: string, format: uuid }
+        slug: { $ref: '#/components/schemas/Slug' }
+        title: { type: string }
+        collection: { type: [string, 'null'] }
+        status: { $ref: '#/components/schemas/AlbumStatus' }
+        displayPosition: { type: integer, minimum: 0 }
+        itemCount: { type: integer, minimum: 0 }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        cover:
+          description: The chosen cover, else the first image, else null.
+          oneOf:
+            - $ref: '#/components/schemas/Media'
+            - type: 'null'
+        publication: { $ref: '#/components/schemas/Publication' }
+
+    AlbumItem:
+      type: object
+      additionalProperties: false
+      required: [id, position, altText, caption, media]
+      properties:
+        id: { type: string, format: uuid }
+        position: { type: integer, minimum: 0 }
+        altText:
+          type: [string, 'null']
+          description: Null inherits the asset's default; '' is decorative (ADR-0011).
+        caption: { type: [string, 'null'] }
+        media:
+          oneOf:
+            - $ref: '#/components/schemas/Media'
+            - type: 'null'
+
+    Album:
+      type: object
+      additionalProperties: false
+      required: [id, slug, title, collection, status, displayPosition, itemCount, createdAt, updatedAt, description, seoTitle, seoDescription, cover, project, items, publication]
+      properties:
+        id: { type: string, format: uuid }
+        slug: { $ref: '#/components/schemas/Slug' }
+        title: { type: string }
+        collection: { type: [string, 'null'] }
+        status: { $ref: '#/components/schemas/AlbumStatus' }
+        displayPosition: { type: integer, minimum: 0 }
+        itemCount: { type: integer, minimum: 0 }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        description: { type: [string, 'null'] }
+        seoTitle: { type: [string, 'null'] }
+        seoDescription: { type: [string, 'null'] }
+        cover:
+          oneOf:
+            - $ref: '#/components/schemas/Media'
+            - type: 'null'
+        project:
+          description: The related project (live). Shown publicly only while it is published and PUBLIC.
+          oneOf:
+            - type: object
+              additionalProperties: false
+              required: [id, title, slug]
+              properties:
+                id: { type: string, format: uuid }
+                title: { type: string }
+                slug: { type: string }
+            - type: 'null'
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/AlbumItem' }
+        publication: { $ref: '#/components/schemas/Publication' }
+
+    AlbumEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data: { $ref: '#/components/schemas/Album' }
+
+    AlbumListEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/AlbumSummary' }
+
+    AlbumItemEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data: { $ref: '#/components/schemas/AlbumItem' }
+
+    CreateAlbumRequest:
+      type: object
+      additionalProperties: false
+      required: [title, slug]
+      properties:
+        title: { type: string, minLength: 1, maxLength: 200 }
+        slug: { $ref: '#/components/schemas/Slug' }
+        description: { type: [string, 'null'], maxLength: 5000 }
+        collection: { type: [string, 'null'], maxLength: 120 }
+        projectId: { type: [string, 'null'], format: uuid }
+
+    UpdateAlbumRequest:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        title: { type: string, minLength: 1, maxLength: 200 }
+        slug: { $ref: '#/components/schemas/Slug' }
+        description: { type: [string, 'null'], maxLength: 5000 }
+        collection: { type: [string, 'null'], maxLength: 120 }
+        projectId: { type: [string, 'null'], format: uuid }
+        coverMediaId: { type: [string, 'null'], format: uuid }
+        seoTitle: { type: [string, 'null'], maxLength: 200 }
+        seoDescription: { type: [string, 'null'], maxLength: 500 }
+
+    AddAlbumMediaRequest:
+      type: object
+      additionalProperties: false
+      required: [mediaId]
+      properties:
+        mediaId: { type: string, format: uuid }
+        position: { type: integer, minimum: 0 }
+        altText: { type: [string, 'null'], maxLength: 1000 }
+        caption: { type: [string, 'null'], maxLength: 500 }
+
+    UpdateAlbumMediaRequest:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        altText: { type: [string, 'null'], maxLength: 1000 }
+        caption: { type: [string, 'null'], maxLength: 500 }
+
+    ReorderAlbumsRequest:
+      type: object
+      additionalProperties: false
+      required: [albumIds]
+      properties:
+        albumIds:
+          type: array
+          uniqueItems: true
+          items: { type: string, format: uuid }
+
+    ReorderAlbumMediaRequest:
+      type: object
+      additionalProperties: false
+      required: [albumMediaIds]
+      properties:
+        albumMediaIds:
+          type: array
+          uniqueItems: true
+          items: { type: string, format: uuid }
+
     MediaCollectionEnvelope:
       type: object
       additionalProperties: false
@@ -2061,6 +2572,14 @@ components:
             - PUBLISHED_PROJECT
             - PUBLISHED_PAGE
             - PAGE_MEDIA
+            - ALBUM_ITEM
+            - ALBUM_COVER
+            - PUBLISHED_ALBUM
+        albumId:
+          type: [string, 'null']
+          format: uuid
+        albumTitle:
+          type: [string, 'null']
         slot:
           type: [string, 'null']
           description: For PAGE_MEDIA, the page's slot (ADR-0017).

@@ -280,6 +280,23 @@ export type ContactContent = {
 // template cannot show it yet.
 export type Preview<T> = { value: T | null; issue: string | null };
 
+// Albums (ADR-0019): public, ordered image sets grouped by collection.
+export type AlbumPage = {
+  slug: string;
+  title: string;
+  description: string | null;
+  collection: string | null;
+  cover: HomeImage;
+  items: { image: HomeImage; caption: string | null }[];
+  // A published PUBLIC project the album belongs with; never a private one.
+  related: { slug: string; title: string } | null;
+  seo: { title?: string; description?: string };
+};
+
+export type AlbumCard = { slug: string; title: string; cover: HomeImage; count: number };
+
+export type AlbumsIndex = { collections: { name: string | null; albums: AlbumCard[] }[] };
+
 // The site settings (ADR-0017 §4): what more than one page shows.
 export type SiteSettings = {
   name: string;
@@ -318,5 +335,12 @@ export interface ContentGateway {
   previewProjectPage(slug: string): Promise<Preview<ProjectPage>>;
   previewHome(): Promise<Preview<HomeContent>>;
   previewAbout(): Promise<Preview<AboutContent>>;
+
+  getAlbumsIndex(): Promise<AlbumsIndex>;
+  getAlbumPage(slug: string): Promise<AlbumPage | null>;
+  listPublicAlbumSlugs(): Promise<string[]>;
+  // Proxy routing for /albums/<slug>: a published album, or nothing.
+  findAlbumRoute(slug: string): Promise<boolean>;
+  previewAlbumPage(slug: string): Promise<Preview<AlbumPage>>;
   previewContact(): Promise<Preview<ContactContent>>;
 }

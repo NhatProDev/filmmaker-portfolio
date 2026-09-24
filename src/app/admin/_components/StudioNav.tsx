@@ -7,6 +7,7 @@ import styles from "../studio.module.css";
 
 const LINKS = [
   { href: "/admin/projects", label: "Projects" },
+  { href: "/admin/albums", label: "Albums" },
   { href: "/admin/home", label: "Home" },
   { href: "/admin/about", label: "About" },
   { href: "/admin/contact", label: "Contact" },

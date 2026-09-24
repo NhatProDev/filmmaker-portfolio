@@ -298,13 +298,15 @@ V1 uses integer positions:
 0, 1, 2, 3, ...
 ```
 
-Four collections are reorderable:
+Six collections are reorderable:
 
 ```text
 projects (display order)      PUT /api/v1/projects/order
 projects (featured order)     PUT /api/v1/projects/featured/order
 blocks within a container     PUT /api/v1/projects/{projectId}/blocks/order
 media within a block          PUT /api/v1/blocks/{blockId}/media/order
+albums (display order)        PUT /api/v1/albums/order                 (ADR-0019)
+images within an album        PUT /api/v1/albums/{albumId}/media/order (ADR-0019)
 ```
 
 ### Ordering scope under the composer
@@ -346,6 +348,7 @@ These rules govern creation, not reordering. They apply to:
 POST /api/v1/projects/{projectId}/blocks     siblings = blocks of the target container
 POST /api/v1/pages/{pageKey}/blocks          siblings = blocks of the target container
 POST /api/v1/blocks/{blockId}/media          siblings = block_media of that block
+POST /api/v1/albums/{albumId}/media          siblings = album_media of that album
 ```
 
 Let `N` be the number of existing siblings **before** the insert.

@@ -64,6 +64,13 @@
       "when": 1790268329760,
       "tag": "0009_page_content_and_media",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790271335511,
+      "tag": "0010_albums",
+      "breakpoints": true
     }
   ]
 }

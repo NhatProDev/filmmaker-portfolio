@@ -1,4 +1,4 @@
-# Domains — site and media (pending owner approval)
+# Domains: site and media (owner-controlled)
 
 Production today runs on two provider host names (`deployment.md` §5):
 
@@ -6,91 +6,146 @@ Production today runs on two provider host names (`deployment.md` §5):
 - public media: the public bucket's `https://pub-….r2.dev` URL
 
 `r2.dev` is rate-limited and not meant for production traffic. Both moves
-below change DNS, so each waits for the owner to choose the domain and approve
-the change. Nothing in this file has been applied.
+below change DNS, so each waits for the owner:
 
-Why the moves are cheap: the database and every published snapshot store
+- to choose or buy a domain (buying costs money, so the owner does that);
+- to approve the change.
+
+**Nothing in this file has been applied.** It was brought up to date for
+Phase 3D (3D-17 and 3D-18). `<domain>` below stands for the owner's domain,
+e.g. `example.com`.
+
+**Why the moves are cheap.** The database and every published snapshot store
 media **keys**, never URLs. URLs are derived at render time from
-`MEDIA_PUBLIC_BASE_URL`, and the CSP's media origins and HSTS derive from the
-environment (`src/lib/http/security-headers.ts`). Both variables are read at
-build time, so each move is **env change → redeploy**, with no data migration.
+`MEDIA_PUBLIC_BASE_URL`. The CSP's media origins, canonical URLs, Open Graph,
+the sitemap, robots and HSTS all derive from the environment. So each move is
+**env change → redeploy without the build cache**, with **no database
+migration**.
+
+## Topology after both moves
+
+```text
+<domain>, www.<domain>        → Vercel (Next.js site, Studio, /api/v1)
+media.<domain>                → Cloudflare R2 public bucket (custom domain)
+<account>.r2.cloudflarestorage.com
+                              → S3 API: presigned uploads (both buckets) and
+                                presigned private delivery (private bucket)
+private bucket                → never has a public domain
+```
 
 ## Prerequisite
 
-The domain's DNS must be on Cloudflare for an R2 custom domain. It can be
-registered anywhere; the nameservers point at Cloudflare. Adding a zone on the
-Free plan costs nothing. Buying a domain does cost money, so the owner does
-that.
+For an R2 custom domain, the domain's DNS must be on Cloudflare. It can be
+registered anywhere, with its nameservers pointed at Cloudflare. A zone on the
+Free plan costs nothing.
 
-## A. Media: `r2.dev` → `media.<domain>`
+## A. Media: `r2.dev` → `media.<domain>` (3D-18)
 
-Do A before or together with B. A only needs the zone on Cloudflare.
+Do A before or together with B. A needs only the zone on Cloudflare.
 
-1. In the Cloudflare dashboard, go to **R2 → portfolio-media-public →
-   Settings → Custom Domains → Connect Domain** and enter `media.<domain>`.
+1. **Attach.** In Cloudflare, open **R2 → portfolio-media-public → Settings
+   → Custom Domains → Connect Domain** and enter `media.<domain>`.
    Cloudflare creates the DNS record and the certificate. Wait until the
-   status reads **Active**.
-2. Check it before switching. The two URLs must return byte-identical content
-   for the same key:
+   status reads **Active**. Do this for the **public bucket only**: the
+   private bucket keeps no public domain.
+2. **Compare before switching.** For the same key, both hosts must return
+   identical bytes:
    ```text
-   K=home/n1.mp4
-   curl -s https://pub-….r2.dev/$K | sha256sum
-   curl -s https://media.<domain>/$K | sha256sum
-   curl -sI -H "Range: bytes=0-99" https://media.<domain>/$K    # 206
-   curl -s  https://media.<domain>/private/anything              # 404
+   OLD=https://pub-….r2.dev   NEW=https://media.<domain>
+   for K in home/n1.mp4 home/mtm-atelier.jpg; do
+     curl -s $OLD/$K | sha256sum; curl -s $NEW/$K | sha256sum; done
+   curl -sI -H "Range: bytes=0-99" $NEW/home/n1.mp4      # 206 Partial Content
+   curl -sI $NEW/home/mtm-atelier.jpg | grep -i cache-control   # public, max-age=31536000, immutable
+   curl -s -o /dev/null -w "%{http_code}\n" $NEW/private/anything   # 404
    ```
-   The private bucket keeps no public domain. It is only ever reached through
-   presigned URLs on the S3 endpoint.
-3. CORS belongs to the bucket, not the host name, so it carries over. After
-   the site domain exists (B), add `https://<domain>` as an allowed origin on
-   **both** buckets, with the same rule as now: `GET`, `HEAD` and `PUT`, the
-   header `content-type`, and exposing `ETag`.
-4. In Vercel, go to **Settings → Environment Variables (Production)** and set
-   `MEDIA_PUBLIC_BASE_URL=https://media.<domain>`, with no trailing slash.
-5. Redeploy **without the build cache**. The prerendered pages bake in media
-   URLs.
-6. Verify:
-   ```text
-   SITE_URL=<site origin> npx tsx --env-file=.env.prod-ops scripts/storage-check.ts
-   ```
-   Update `MEDIA_PUBLIC_BASE_URL` in `.env.prod-ops` first. Then:
-   - the public smoke test: every page view clean and no broken images;
+3. **Caching (optional, free).** A Cloudflare Cache Rule on
+   `media.<domain>` can give Studio uploads the one-year browser TTL that
+   imported media already carry. Their keys (`originals/<id>/…`) never change.
+4. **CORS.** CORS belongs to the bucket, not the host name, so it carries
+   over. Once the site domain exists (B), add `https://<domain>` (and `www`,
+   if it serves) to **both** buckets' allowed origins. Use the same rule as
+   now:
+   - methods `GET`, `HEAD` and `PUT`;
+   - header `content-type`, plus `x-amz-checksum-sha256` if upload checksums
+     are on (`media-lifecycle.md` §4);
+   - expose `ETag`.
+5. **Environment.** In Vercel **Settings → Environment Variables
+   (Production)**, set `MEDIA_PUBLIC_BASE_URL=https://media.<domain>` (no
+   trailing slash). Update `.env.prod-ops` too.
+6. **Redeploy without the build cache.** The prerendered pages bake in media
+   URLs, and the CSP bakes in media origins.
+7. **Verify.**
+   - `SITE_URL=<site origin> npx tsx --env-file=.env.prod-ops scripts/storage-check.ts`
+     passes;
    - `curl -sI <site>/ | grep -i content-security-policy` names
      `media.<domain>` and no longer names `r2.dev`;
-   - page HTML contains no `r2.dev`.
-7. Once the site is verified, disable the bucket's **r2.dev** public access.
-   Keep it enabled until then: it is the rollback path.
+   - `curl -s <site>/ <site>/works <site>/about | grep -c r2.dev` is 0;
+   - the public smoke test passes: every page loads, no broken images, films
+     play, and the Works previews move;
+   - Studio thumbnails load in the Media Library, and a new upload shows
+     its thumbnail;
+   - a private project's films still play after unlock (the private bucket
+     is unaffected);
+   - `npm run db:health -- --confirm-remote=…` is healthy.
+8. **Keep r2.dev enabled** until the site is verified. It is the rollback.
+   Afterwards, disable the bucket's **r2.dev** public access.
 
-**Rollback:** set `MEDIA_PUBLIC_BASE_URL` back to the r2.dev URL and redeploy.
+**Rollback:** set `MEDIA_PUBLIC_BASE_URL` back to the r2.dev URL (re-enable
+r2.dev access if it was disabled) and redeploy without the cache. No data
+changes in either direction.
 
-## B. Site: `*.vercel.app` → `<domain>`
+## B. Site: `*.vercel.app` → `<domain>` (3D-17)
 
-1. In Vercel, go to **Settings → Domains → Add** and enter `<domain>`, plus
-   `www.<domain>` redirecting to it (or the reverse; choose one canonical
-   host).
-2. In Cloudflare DNS, add the records Vercel shows. Typically these are an
-   `A` record for the apex (`76.76.21.21`) and a `CNAME www → cname.vercel-dns.com`.
-   Set both to **DNS only** (grey cloud). Proxying through Cloudflare in front
-   of Vercel breaks Vercel's certificate issuance and duplicates the CDN.
-3. When Vercel shows the domain as valid, set the Production variables:
-   - `SITE_URL=https://<domain>`
-   - `APP_ORIGINS=https://filmmaker-portfolio-beta.vercel.app`. This is only
-     needed while Studio sessions may still come from the old host; remove it
-     afterwards.
-4. Add `https://<domain>` to both buckets' CORS rules (A.3).
-5. Redeploy without the build cache. Canonical URLs, Open Graph, the sitemap,
-   robots and HSTS all derive from `SITE_URL`.
-6. Verify:
-   - the public and admin smoke scripts with `SITE=https://<domain>`;
-   - `storage-check` with the new `SITE_URL`;
-   - `/sitemap.xml` and `/robots.txt` name the new origin;
-   - Studio upload from the new origin succeeds.
-7. Keep the `*.vercel.app` host serving. Vercel keeps it automatically. It is
-   also where a Preview deployment would live, and Preview has no production
-   environment (`deployment.md` §6).
+1. **Add the domain in Vercel.** In **Settings → Domains → Add**, enter
+   `<domain>` and `www.<domain>`. Choose one canonical host (e.g. the apex)
+   and set the other to **redirect** to it (308).
+2. **Get the DNS records.** Vercel shows the records it needs. Typically:
+   - an `A` record for the apex (`76.76.21.21`);
+   - a `CNAME` from `www` to `cname.vercel-dns.com`.
+   Use the values Vercel shows, not these examples.
+3. **Configure apex and www in Cloudflare DNS.** Add both records as **DNS
+   only** (grey cloud). Proxying through Cloudflare in front of Vercel breaks
+   Vercel's certificate issuance and duplicates the CDN.
+4. **Verify SSL.** Wait until Vercel shows both domains as **Valid
+   Configuration** with a certificate. Then
+   `curl -sI https://<domain>/ | head -1` must answer 200, and
+   `curl -sI https://www.<domain>/` must answer 308 to the canonical host
+   (or the reverse).
+5. **Update `SITE_URL`.** In Vercel Production, set
+   `SITE_URL=https://<domain>` (the bare canonical origin). While Studio
+   sessions may still come from the old host, also set
+   `APP_ORIGINS=https://filmmaker-portfolio-beta.vercel.app`; remove it
+   afterwards.
+6. **Redeploy without the build cache.** `SITE_URL` is read at build time.
+7. **Canonical.** `curl -s https://<domain>/works | grep -o '<link rel="canonical"[^>]*>'`
+   names `https://<domain>/works`, and `og:url` matches.
+8. **Sitemap.** `curl -s https://<domain>/sitemap.xml` lists only
+   `https://<domain>/…` URLs.
+9. **Robots.** `curl -s https://<domain>/robots.txt` names
+   `Sitemap: https://<domain>/sitemap.xml` and disallows `/admin` and `/api/`.
+10. **CSP and HSTS.**
+    - `curl -sI https://<domain>/` shows the CSP (media origins unchanged
+      unless A is done) and
+      `Strict-Transport-Security: max-age=63072000; includeSubDomains`.
+    - HSTS covers subdomains, so `media.<domain>` must serve https, which R2
+      custom domains always do.
+11. **Auth cookies.** The admin session cookie is host-only
+    (`HttpOnly; Secure; SameSite=Strict`). The admin signs in again on the
+    new host. Check sign-in, sign-out, and that a replayed session is refused
+    after sign-out.
+12. **Private project access.** Access cookies are host-only too: visitors
+    unlock again on the new host. Check a PRIVATE project's gate: a wrong
+    password is refused, the right one unlocks, the page is `noindex`, and
+    its films play.
+13. **CORS.** Add `https://<domain>` to both buckets (A.4). Then check a
+    Studio upload (public and private) from the new host, and run
+    `storage-check` with the new `SITE_URL`.
+14. **Old host.** Vercel keeps `*.vercel.app` serving. Optionally set it to
+    redirect to `<domain>` in **Settings → Domains**. Canonical URLs already
+    point to the new host.
 
-The admin session cookie is host-only, so the admin signs in again on the new
-host.
+**Rollback:** set `SITE_URL` back to the `*.vercel.app` origin and redeploy.
+The DNS records can stay; the site simply is not canonical there.
 
 ## Owner inputs needed
 

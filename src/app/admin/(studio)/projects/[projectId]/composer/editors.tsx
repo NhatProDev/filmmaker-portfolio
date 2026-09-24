@@ -207,7 +207,10 @@ const COLUMNS = Array.from({ length: 12 }, (_, i) => i + 1);
 // A logical 12-column span: start and width, never pixels (ADR-0006).
 function SpanPicker({ label, span, onChange, disabled }: { label: string; span: Span; onChange: (span: Span) => void; disabled?: boolean }) {
   return (
-    <div className={styles.spanPicker}>
+    // A named group, so "From column" and "across" say which width they set.
+    // The selects stay enabled while a save runs, so keyboard focus is never
+    // dropped; a change made meanwhile is ignored (3D-8).
+    <div className={styles.spanPicker} role="group" aria-label={label}>
       <span className={styles.spanLabel}>{label}</span>
       <div className={styles.spanBar} aria-hidden="true">
         {COLUMNS.map((c) => (
@@ -219,8 +222,9 @@ function SpanPicker({ label, span, onChange, disabled }: { label: string; span: 
         <select
           className={studio.select}
           value={span.colStart}
-          disabled={disabled}
+          aria-disabled={disabled || undefined}
           onChange={(event) => {
+            if (disabled) return;
             const colStart = Number(event.target.value);
             onChange({ colStart, colSpan: Math.min(span.colSpan, 13 - colStart) });
           }}
@@ -237,8 +241,8 @@ function SpanPicker({ label, span, onChange, disabled }: { label: string; span: 
         <select
           className={studio.select}
           value={span.colSpan}
-          disabled={disabled}
-          onChange={(event) => onChange({ colStart: span.colStart, colSpan: Number(event.target.value) })}
+          aria-disabled={disabled || undefined}
+          onChange={(event) => !disabled && onChange({ colStart: span.colStart, colSpan: Number(event.target.value) })}
         >
           {COLUMNS.filter((c) => span.colStart + c <= 13).map((c) => (
             <option key={c} value={c}>

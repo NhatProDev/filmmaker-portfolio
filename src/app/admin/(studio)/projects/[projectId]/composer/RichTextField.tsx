@@ -122,14 +122,14 @@ export function RichTextField({
           maxLength={20000}
           rows={5}
           disabled={disabled}
-          aria-describedby={helpId}
+          aria-describedby={parsed.ok ? helpId : `${helpId} ${helpId}-error`}
           aria-invalid={!parsed.ok || undefined}
           onKeyDown={onKeyDown}
           onChange={(event) => onChange(event.target.value)}
         />
       </label>
       {parsed.ok ? (
-        <div className={styles.richPreview} aria-label="How the page shows it">
+        <div className={styles.richPreview} role="region" aria-label="How the page shows it">
           {parsed.paragraphs.map((paragraph, i) => (
             <p key={i}>
               <PreviewRuns paragraph={paragraph} />
@@ -137,7 +137,8 @@ export function RichTextField({
           ))}
         </div>
       ) : (
-        <p className={studio.error} role="alert">
+        // Polite: it appears while the text is still being typed (3D-8).
+        <p className={studio.error} id={`${helpId}-error`} aria-live="polite">
           {parsed.error}
         </p>
       )}

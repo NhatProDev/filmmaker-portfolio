@@ -44,6 +44,7 @@ export function BlockCard({
 }) {
   const { run, pending, error } = useAction();
   const [inserting, setInserting] = useState(false);
+  const [moveTo, setMoveTo] = useState("");
   const open = context.expanded.has(block.id);
   const needs = needsOf(block);
   const thumbs = thumbsOf(block);
@@ -104,23 +105,37 @@ export function BlockCard({
             ↓
           </button>
           {targets.length > 0 && (
-            <select
-              className={`${studio.select} ${styles.moveTo}`}
-              aria-label={`Move ${label} to another container`}
-              value=""
-              disabled={pending}
-              onChange={(event) => {
-                const target = targets[Number(event.target.value)];
-                if (target) void run(() => moveBlock(block.id, target.parentBlockId, target.position));
-              }}
-            >
-              <option value="">Move to…</option>
-              {targets.map((target, i) => (
-                <option key={target.parentBlockId ?? "root"} value={i}>
-                  {target.label}
-                </option>
-              ))}
-            </select>
+            // Choosing does not move: arrowing through a closed select fires
+            // a change on Windows, so the move waits for the button (3D-8).
+            <>
+              <select
+                className={`${studio.select} ${styles.moveTo}`}
+                aria-label={`Move ${label} to another container`}
+                value={moveTo}
+                onChange={(event) => setMoveTo(event.target.value)}
+              >
+                <option value="">Move to…</option>
+                {targets.map((target, i) => (
+                  <option key={target.parentBlockId ?? "root"} value={i}>
+                    {target.label}
+                  </option>
+                ))}
+              </select>
+              {moveTo !== "" && (
+                <button
+                  type="button"
+                  className={`${studio.button} ${studio.small}`}
+                  disabled={pending}
+                  onClick={() => {
+                    const target = targets[Number(moveTo)];
+                    setMoveTo("");
+                    if (target) void run(() => moveBlock(block.id, target.parentBlockId, target.position));
+                  }}
+                >
+                  Move
+                </button>
+              )}
+            </>
           )}
           {!locked && !inPreset && !single && (
             <button type="button" className={`${studio.button} ${studio.small}`} disabled={pending} onClick={() => run(() => api("POST", `/blocks/${block.id}/duplicate`))}>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { openGraph } from "@/lib/site-metadata";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -8,6 +9,7 @@ import styles from "./albums.module.css";
 export const metadata: Metadata = {
   title: "Albums",
   alternates: { canonical: "/albums" },
+  openGraph: openGraph("/albums"),
 };
 
 // The published albums (ADR-0019), in display order, grouped by collection in

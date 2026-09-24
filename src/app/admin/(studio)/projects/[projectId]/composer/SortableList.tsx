@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, type DragEvent, type KeyboardEvent, type ReactNode } from "react";
+import { useId, useState, type DragEvent, type FocusEvent, type KeyboardEvent, type ReactNode } from "react";
 import { useSharedDrag } from "./DragContext";
 import styles from "./composer.module.css";
 
@@ -27,6 +27,9 @@ export type HandleProps = {
   "aria-describedby": string;
   "aria-pressed": boolean;
   onKeyDown: (event: KeyboardEvent<HTMLButtonElement>) => void;
+  // Leaving a picked-up handle cancels the move, as Escape does: an order
+  // shown but never saved would mislead (3D-8).
+  onBlur: (event: FocusEvent<HTMLButtonElement>) => void;
   onPointerDown: () => void;
   disabled: boolean;
 };
@@ -251,6 +254,18 @@ export function SortableList<T extends { id: string }>({
               "aria-describedby": helpId,
               "aria-pressed": grabbed === item.id,
               onKeyDown: (event) => onKeyDown(item, event),
+              onBlur: (event) => {
+                if (grabbed !== item.id) return;
+                const handleElement = event.currentTarget;
+                // Reordering can move the focused handle in the DOM, and React
+                // then restores its focus: only a real departure cancels.
+                setTimeout(() => {
+                  if (document.activeElement === handleElement) return;
+                  setLocal(null);
+                  setGrabbed((current) => (current === item.id ? null : current));
+                  setMessage(`Move cancelled. ${label(item)} is back at position ${ids.indexOf(item.id) + 1}.`);
+                }, 0);
+              },
               onPointerDown: () => setArmed(item.id),
               disabled,
             };

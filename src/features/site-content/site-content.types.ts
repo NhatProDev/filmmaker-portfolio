@@ -287,7 +287,7 @@ export type AlbumPage = {
   description: string | null;
   collection: string | null;
   cover: HomeImage;
-  items: { image: HomeImage; caption: string | null }[];
+  items: { image: HomeImage & { activeAspect?: number }; caption: string | null }[];
   // A published PUBLIC project the album belongs with; never a private one.
   related: { slug: string; title: string } | null;
   seo: { title?: string; description?: string };

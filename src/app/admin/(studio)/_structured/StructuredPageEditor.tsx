@@ -15,6 +15,7 @@ import { ChooseMediaButton, ErrorLine } from "../../_components/composition";
 import { PublishingPanel } from "../../_components/PublishingPanel";
 import { Thumb, thumbnailUrl } from "../../_components/Thumb";
 import { useAction } from "../../_components/useAction";
+import { useUnsavedGuard } from "../../_components/useUnsavedGuard";
 import styles from "../../studio.module.css";
 
 // The Studio's editor for a structured page (ADR-0017): About, Contact or the
@@ -338,6 +339,7 @@ export function StructuredPageEditor({
   const { run, pending, error } = useAction();
   const [fieldErrors, setFieldErrors] = useState<string[]>([]);
   const dirty = JSON.stringify(draft) !== saved;
+  useUnsavedGuard(dirty);
 
   const save = () =>
     run(async () => {

@@ -29,3 +29,21 @@
 .image {
   object-fit: cover;
 }
+
+/* ADR-0016: a letterboxed still framed on its active picture. The cell has
+   the picture's aspect (--aspect); the file keeps its own (--file), spans the
+   cell's width and is centred, so its baked bars fall outside the cell and
+   nothing is distorted. */
+.activeCell {
+  container-type: size;
+}
+
+.activeImage {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100cqw;
+  max-width: none;
+  height: calc(100cqw / var(--file));
+  transform: translateY(-50%);
+}

@@ -13,9 +13,11 @@
 - **Change class:** Resolves an open requirement; no contract change now
 - **Implementation:** Phase 3B. Migration `0008`, `activePicture` on the
   Media DTO, the Studio's Picture area control, and the generic Project Detail
-  renderer. See `docs/architecture/project-composer.md` §5. The locked
-  opening, the presets and Home are not yet covered (constraint 4 and
-  Decision 4).
+  renderer. See `docs/architecture/project-composer.md` §5. Phase 3D
+  extended it to `JUSTIFIED_ROWS` in project galleries and albums, where a
+  row tile already takes each asset's own aspect
+  (`docs/architecture/launch-review.md` §2). The locked opening, the presets
+  and Home are not yet covered (constraint 4 and Decision 4).
 
 ## Problem
 

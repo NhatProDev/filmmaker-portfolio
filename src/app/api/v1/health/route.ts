@@ -27,6 +27,10 @@ function probeStorage(storage: MediaStorage): Promise<void> {
   return result;
 }
 
+// The deployed commit, so a person can tie production to a release tag
+// (runbook §6). Vercel provides it; elsewhere it is null.
+const release = () => /^[0-9a-f]{40}$/.test(process.env.VERCEL_GIT_COMMIT_SHA ?? "") ? process.env.VERCEL_GIT_COMMIT_SHA!.slice(0, 12) : null;
+
 export async function GET() {
   let db: Database | null = null;
   try {
@@ -47,5 +51,5 @@ export async function GET() {
     // The local adapter reads this server's own disk: nothing to reach.
     probeStorage: storage && storage.provider !== "local" ? () => probeStorage(storage) : undefined,
   });
-  return json({ data: health }, health.status === "unavailable" ? 503 : 200);
+  return json({ data: { ...health, release: release() } }, health.status === "unavailable" ? 503 : 200);
 }

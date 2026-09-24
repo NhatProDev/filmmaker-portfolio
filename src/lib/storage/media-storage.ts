@@ -1,4 +1,5 @@
-import { join, resolve, sep } from "node:path";
+import { readdir, stat } from "node:fs/promises";
+import { join, relative, resolve, sep } from "node:path";
 import { serverEnv, type ServerEnv } from "@/lib/env/server-env";
 import { assertMediaKey } from "./media-url";
 import { presignS3, type S3Location } from "./s3-presign";
@@ -33,7 +34,17 @@ export type StoredObject = {
   key: string;
   byteSize: number;
   mimeType?: string;
+  // The SHA-256 the provider computed over the stored bytes (hex), when it
+  // keeps one. Never a browser's claim, and never an ETag.
   checksumSha256?: string;
+};
+
+// One object as a bucket listing reports it (docs/operations/media-lifecycle.md).
+export type ListedObject = {
+  audience: "public" | "private";
+  key: string;
+  byteSize: number;
+  lastModified: Date;
 };
 
 export const PRIVATE_KEY_PREFIX = "private/";
@@ -58,13 +69,18 @@ export interface MediaStorage {
   // Where an adapter that keeps objects on this server's disk holds a key's
   // bytes; null for remote storage.
   localPath(key: string): string | null;
-  // Authorises one direct browser-to-storage upload of an original.
-  createUpload(input: { key: string; mimeType: string; byteSize: number }): Promise<SignedUpload>;
+  // Authorises one direct browser-to-storage upload of an original. With a
+  // checksum (hex SHA-256), an adapter that can may bind it into the upload so
+  // that the provider refuses any other bytes.
+  createUpload(input: { key: string; mimeType: string; byteSize: number; checksumSha256?: string }): Promise<SignedUpload>;
   // Confirms that an upload arrived; null when the object does not exist.
   verifyUpload(key: string): Promise<StoredObject | null>;
   // Removes an object. Media deletion is soft in the database; objects are
   // removed later, only once nothing references the asset.
   deleteObject(key: string): Promise<void>;
+  // Every object in one audience's store, for the lifecycle audit
+  // (media:gc). Operations only; the site never lists storage.
+  listObjects(audience: "public" | "private"): AsyncIterable<ListedObject>;
 }
 
 export class MediaStorageUnsupportedError extends Error {}
@@ -118,7 +134,42 @@ export function createLocalMediaStorage(
     createUpload: unsupported,
     verifyUpload: unsupported,
     deleteObject: unsupported,
+    async *listObjects(audience) {
+      const root = resolve(audience === "public" ? roots.public : roots.private);
+      for (const path of await walk(root)) {
+        const info = await stat(path);
+        const key = relative(root, path).split(sep).join("/");
+        yield { audience, key: audience === "private" ? `${PRIVATE_KEY_PREFIX}${key}` : key, byteSize: info.size, lastModified: info.mtime };
+      }
+    },
   };
+}
+
+async function walk(directory: string): Promise<string[]> {
+  let entries;
+  try {
+    entries = await readdir(directory, { withFileTypes: true });
+  } catch {
+    return [];
+  }
+  const nested = await Promise.all(
+    entries.map((entry) => (entry.isDirectory() ? walk(join(directory, entry.name)) : Promise.resolve(entry.isFile() ? [join(directory, entry.name)] : []))),
+  );
+  return nested.flat().sort();
+}
+
+const xmlText = (value: string) =>
+  value.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, "&");
+
+// The <Contents> of one ListObjectsV2 page, and the token for the next.
+export function parseListObjectsV2(xml: string): { objects: { key: string; byteSize: number; lastModified: Date }[]; next: string | null } {
+  const objects = [...xml.matchAll(/<Contents>([\s\S]*?)<\/Contents>/g)].map(([, body]) => {
+    const field = (name: string) => body.match(new RegExp(`<${name}>([\\s\\S]*?)</${name}>`))?.[1] ?? "";
+    return { key: xmlText(field("Key")), byteSize: Number(field("Size")), lastModified: new Date(field("LastModified")) };
+  });
+  const truncated = /<IsTruncated>true<\/IsTruncated>/.test(xml);
+  const next = xml.match(/<NextContinuationToken>([\s\S]*?)<\/NextContinuationToken>/)?.[1];
+  return { objects, next: truncated && next ? xmlText(next) : null };
 }
 
 export type S3Config = {
@@ -131,7 +182,14 @@ export type S3Config = {
   pathStyle: boolean;
   publicBaseUrl: string;
   uploadTtlSeconds: number;
+  // Bind the browser's SHA-256 into the signed PUT (x-amz-checksum-sha256),
+  // so the provider verifies the body. Needs that header in both buckets'
+  // CORS AllowedHeaders, hence opt-in (docs/operations/media-lifecycle.md).
+  uploadChecksums?: boolean;
 };
+
+const hexToBase64 = (hex: string) => Buffer.from(hex, "hex").toString("base64");
+const base64ToHex = (value: string) => Buffer.from(value, "base64").toString("hex");
 
 export function createS3MediaStorage(config: S3Config, fetcher: typeof fetch = fetch): MediaStorage {
   const location = (key: string): S3Location => {
@@ -145,8 +203,8 @@ export function createS3MediaStorage(config: S3Config, fetcher: typeof fetch = f
     };
   };
   const credentials = { accessKeyId: config.accessKeyId, secretAccessKey: config.secretAccessKey };
-  const sign = (method: string, key: string, expiresInSeconds: number) =>
-    presignS3({ method, location: location(key), credentials, expiresInSeconds });
+  const sign = (method: string, key: string, expiresInSeconds: number, headers?: Record<string, string>) =>
+    presignS3({ method, location: location(key), credentials, expiresInSeconds, headers });
 
   return {
     provider: "s3",
@@ -157,27 +215,52 @@ export function createS3MediaStorage(config: S3Config, fetcher: typeof fetch = f
     },
     signedDeliveryUrl: (key, expiresInSeconds) => sign("GET", key, expiresInSeconds),
     localPath: () => null,
-    async createUpload({ key, mimeType }) {
+    async createUpload({ key, mimeType, checksumSha256 }) {
+      const bound = config.uploadChecksums && checksumSha256 ? { "x-amz-checksum-sha256": hexToBase64(checksumSha256) } : undefined;
       return {
-        url: sign("PUT", key, config.uploadTtlSeconds),
+        url: sign("PUT", key, config.uploadTtlSeconds, bound),
         method: "PUT",
-        headers: { "content-type": mimeType },
+        headers: { "content-type": mimeType, ...bound },
         expiresAt: new Date(Date.now() + config.uploadTtlSeconds * 1000),
       };
     },
+    // Checksum mode asks the provider for the SHA-256 it computed when the
+    // upload carried one (R2 and S3 answer x-amz-checksum-sha256, base64).
     async verifyUpload(key) {
-      const response = await fetcher(sign("HEAD", key, 60), { method: "HEAD" });
+      const mode = { "x-amz-checksum-mode": "ENABLED" };
+      const response = await fetcher(sign("HEAD", key, 60, mode), { method: "HEAD", headers: mode });
       if (response.status === 404) return null;
       if (!response.ok) throw new Error(`Storage answered ${response.status} for HEAD ${key}`);
+      const checksum = response.headers.get("x-amz-checksum-sha256");
       return {
         key,
         byteSize: Number(response.headers.get("content-length") ?? 0),
         mimeType: response.headers.get("content-type") ?? undefined,
+        ...(checksum && /^[A-Za-z0-9+/]{43}=$/.test(checksum) ? { checksumSha256: base64ToHex(checksum) } : {}),
       };
     },
     async deleteObject(key) {
       const response = await fetcher(sign("DELETE", key, 60), { method: "DELETE" });
       if (!response.ok && response.status !== 404) throw new Error(`Storage answered ${response.status} for DELETE ${key}`);
+    },
+    async *listObjects(audience) {
+      const bucket = audience === "public" ? config.publicBucket : config.privateBucket;
+      let token: string | null = null;
+      do {
+        const query: Record<string, string> = { "list-type": "2", "max-keys": "1000", ...(token ? { "continuation-token": token } : {}) };
+        const url = presignS3({
+          method: "GET",
+          location: { endpoint: config.endpoint, bucket, key: "", region: config.region, pathStyle: config.pathStyle },
+          credentials,
+          expiresInSeconds: 60,
+          query,
+        });
+        const response = await fetcher(url);
+        if (!response.ok) throw new Error(`Storage answered ${response.status} listing ${audience} objects`);
+        const page = parseListObjectsV2(await response.text());
+        for (const object of page.objects) yield { audience, ...object };
+        token = page.next;
+      } while (token);
     },
   };
 }
@@ -194,6 +277,7 @@ export function createMediaStorageFromEnv(env: ServerEnv): MediaStorage {
       pathStyle: env.S3_FORCE_PATH_STYLE === "true",
       publicBaseUrl: env.MEDIA_PUBLIC_BASE_URL,
       uploadTtlSeconds: env.MEDIA_SIGNED_URL_TTL_SECONDS,
+      uploadChecksums: env.S3_UPLOAD_CHECKSUMS === "true",
     });
   }
   // The local adapter reads files at run time from where they already sit; it

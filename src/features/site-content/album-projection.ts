@@ -22,8 +22,9 @@ export function renderAlbum(snapshot: AlbumSnapshot, slug: string, related: Albu
   const index = createMediaIndex(snapshot.media, url);
   if (!snapshot.items.length) fail(where, "an album needs at least one image");
   const items = snapshot.items.map((item) => {
-    const { src, width, height, alt } = image(index, item.mediaId, altOf(index, item.mediaId, item.altText), `${where}, image ${item.position + 1}`);
-    return { image: { src, width, height, alt }, caption: item.caption };
+    const { src, width, height, alt, activeAspect } = image(index, item.mediaId, altOf(index, item.mediaId, item.altText), `${where}, image ${item.position + 1}`);
+    // ADR-0016: the rows frame a letterboxed still on its active picture.
+    return { image: { src, width, height, alt, ...(activeAspect ? { activeAspect } : {}) }, caption: item.caption };
   });
   const coverId = snapshot.album.coverMediaId;
   const cover = coverId ? image(index, coverId, "", `${where}, cover`) : null;

@@ -185,6 +185,7 @@ export function ProjectsBoard({ projects }: { projects: ProjectSummaryDto[] }) {
                   <label className={styles.check}>
                     <input
                       type="checkbox"
+                      aria-label={`Featured: ${project.title}`}
                       checked={project.isFeatured}
                       disabled={pending}
                       onChange={(event) =>

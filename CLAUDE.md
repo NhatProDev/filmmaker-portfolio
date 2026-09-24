@@ -536,7 +536,8 @@ picture, without bars); for a file that cannot be re-exported, a stored,
 closed-enum active area on the asset, applied by the renderer to each layer from
 its own asset; no automatic detection in V1. It is implemented (Phase 3B,
 migration `0008`: `media.active_picture`) for surfaces drawn by the generic
-block renderer. The locked opening, presets, Home and `JUSTIFIED_ROWS` still
+block renderer, and since Phase 3D for `JUSTIFIED_ROWS` in project galleries
+and albums. The locked opening, presets and Home (including its frames) still
 render assets as encoded; applying it there is a design review (ADR-0016
 Decision 4).
 

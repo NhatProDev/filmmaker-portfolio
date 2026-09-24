@@ -5,6 +5,7 @@ import { cache } from "react";
 import { PreviewBanner, PreviewIssue } from "@/components/preview/PreviewBanner";
 import { getCurrentAdmin } from "@/features/authentication/current-admin";
 import { getContentGateway } from "@/features/site-content/site-content.gateway";
+import { openGraph } from "@/lib/site-metadata";
 import { PrivateGate } from "./PrivateGate";
 import { ProjectDetailView } from "./ProjectDetailView";
 
@@ -48,14 +49,7 @@ export async function generateMetadata({ params }: ProjectDetailProps): Promise<
       title: seo?.title ?? title,
       ...(seo?.description ? { description: seo.description } : {}),
       alternates: { canonical: `/works/${slug}` },
-      // Replaces the layout's openGraph object whole, so it restates it.
-      openGraph: {
-        type: "website",
-        siteName: "Nguyen Khanh Nhat",
-        title: seo?.title ?? title,
-        url: `/works/${slug}`,
-        images: [{ url: cover.src, width: cover.width, height: cover.height }],
-      },
+      openGraph: openGraph(`/works/${slug}`, { title: seo?.title ?? title, image: cover }),
     };
   }
   if (found.kind === "gate") return { title: "Private project", robots: NOINDEX };

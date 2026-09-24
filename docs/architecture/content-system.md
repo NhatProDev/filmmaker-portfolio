@@ -115,6 +115,10 @@ Home is built from its own sections.
 
 ## 7. Letterbox on locked surfaces (3C-7): design-review blocker
 
+> **Phase 3D update:** `JUSTIFIED_ROWS` in project galleries and albums now
+> frames the active picture (`launch-review.md` §2). The opening, the presets
+> and Home remain as below.
+
 **Evaluated, not implemented.** ADR-0016's active picture applies on the
 generic renderer. The locked opening (`ProjectOpening`, cover under the title),
 the Project Detail presets (`projectStills`, `projectLoop`, `projectCoda`),
@@ -141,6 +145,9 @@ references. Until then, the Studio's Picture area control keeps advising a
 clean re-export and says which pages apply it.
 
 ## 8. Video in justified rows (3C-8): deferred
+
+> **Phase 3D:** re-reviewed and still deferred, for the reasons below
+> (`launch-review.md` §1).
 
 **Evaluated, not implemented.** Justified rows stay stills-only, and Publish
 still refuses video there (`project-blocks.ts`). The brief's conditions are
@@ -250,9 +257,12 @@ in §12.
   - video in justified rows (§8).
 - **Private albums:** a change to the access model (ADR-0019 §5).
 - **Uploads:**
-  - the browser-declared checksum is trusted when the provider keeps none (R2
-    could verify `x-amz-checksum-sha256` on the signed PUT; not wired);
-  - uploads that are abandoned stay `UPLOADING` (a cleanup job is not built);
+  - the browser-declared checksum is trusted when the provider keeps none.
+    Phase 3D wired R2's verification behind `S3_UPLOAD_CHECKSUMS`, which
+    waits for a CORS change;
+  - uploads that are abandoned stay `UPLOADING`. Phase 3D added
+    `media:gc`, which soft-deletes them after 48 hours
+    (`docs/operations/media-lifecycle.md`);
   - a video whose frame the browser cannot read stays `PROCESSING`, and the
     Studio says so.
 - **Images:** About's and Contact's images now use the shared asset's key. The

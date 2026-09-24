@@ -368,7 +368,7 @@ function Gallery({ block }: { block: Extract<ProjectBlock, { type: "gallery" }> 
     return (
       <section className={blockStyles.section}>
         {heading}
-        <JustifiedRows id={`g-${block.id}`} items={images} />
+        <JustifiedRows id={`g-${block.id}`} items={images} framing="active" />
       </section>
     );
   }

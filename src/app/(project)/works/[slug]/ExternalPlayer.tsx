@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ProjectExternalVideo } from "@/features/site-content/site-content.types";
 import styles from "./blocks.module.css";
 
@@ -11,6 +11,12 @@ import styles from "./blocks.module.css";
 // the page's silent loops so only one thing plays with sound.
 export function ExternalPlayer({ external, label }: { external: ProjectExternalVideo; label: string }) {
   const [started, setStarted] = useState(false);
+  const frame = useRef<HTMLIFrameElement>(null);
+  // The play button is replaced by the player: focus follows it, so a
+  // keyboard visitor lands in the player rather than at the top (3D-8).
+  useEffect(() => {
+    if (started) frame.current?.focus();
+  }, [started]);
   const provider = external.provider === "youtube" ? "YouTube" : "Vimeo";
 
   const start = () => {
@@ -20,6 +26,7 @@ export function ExternalPlayer({ external, label }: { external: ProjectExternalV
 
   return started ? (
     <iframe
+      ref={frame}
       className={`${styles.fill} ${styles.embed}`}
       src={external.embedUrl}
       title={external.title || `${provider} video`}

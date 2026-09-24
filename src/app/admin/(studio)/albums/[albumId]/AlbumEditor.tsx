@@ -8,6 +8,7 @@ import { ChooseMediaButton, ErrorLine } from "../../../_components/composition";
 import { PublishingPanel } from "../../../_components/PublishingPanel";
 import { Thumb, mediaLabel, thumbnailUrl } from "../../../_components/Thumb";
 import { useAction } from "../../../_components/useAction";
+import { useUnsavedGuard } from "../../../_components/useUnsavedGuard";
 import styles from "../../../studio.module.css";
 
 // One album's working copy (ADR-0019): its details, its cover, the project it
@@ -34,6 +35,7 @@ function Details({ album, projects }: { album: AlbumDetailDto; projects: { id: s
     form.collection !== (album.collection ?? "") ||
     form.projectId !== (album.project?.id ?? "") ||
     form.seoDescription !== (album.seoDescription ?? "");
+  useUnsavedGuard(dirty);
   return (
     <section className={styles.panel}>
       <div className={styles.panelHead}>
@@ -141,7 +143,17 @@ function ItemRow({ albumId, item, index, count, onMove }: { albumId: string; ite
           <button type="button" className={`${styles.button} ${styles.small} ${styles.icon}`} aria-label={`Move image ${index + 1} down`} disabled={pending || index === count - 1} onClick={() => onMove(index, 1)}>
             ↓
           </button>
-          <button type="button" className={`${styles.button} ${styles.small} ${styles.danger}`} disabled={pending} onClick={() => run(() => api("DELETE", `/albums/${albumId}/media/${item.id}`))}>
+          <button
+            type="button"
+            className={`${styles.button} ${styles.small} ${styles.danger}`}
+            aria-label={`Remove image ${index + 1}`}
+            disabled={pending}
+            onClick={() => {
+              if (confirm("Remove this image from the album? Its caption and description here are lost. The file stays in the Media Library.")) {
+                void run(() => api("DELETE", `/albums/${albumId}/media/${item.id}`));
+              }
+            }}
+          >
             Remove
           </button>
         </div>
@@ -170,7 +182,13 @@ export function AlbumEditor({ album, projects }: { album: AlbumDetailDto; projec
       </div>
       <div className={styles.editorColumns}>
         <div className={styles.stack}>
-          <Details key={album.updatedAt} album={album} projects={projects} />
+          {/* Keyed on its own saved values: a cover change or an item edit must
+              not remount it and wipe edits typed here. */}
+          <Details
+            key={JSON.stringify([album.title, album.slug, album.description, album.collection, album.project?.id, album.seoDescription])}
+            album={album}
+            projects={projects}
+          />
           <section className={styles.panel}>
             <div className={styles.panelHead}>
               <h2>Stills</h2>

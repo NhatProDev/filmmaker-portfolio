@@ -2,6 +2,7 @@ import { transaction, type Database } from "@db/client";
 import { createPublicationRepository } from "@/features/project-builder/publication.repository";
 import { readComposition, stableJson } from "@/features/project-builder/snapshot";
 import {
+  privateProjectMediaUrl,
   projectSnapshotSchema,
   renderIssues,
   renderProject,
@@ -44,11 +45,13 @@ export async function buildProjectSnapshot(db: Database, row: ProjectRow): Promi
 }
 
 // Empty when the snapshot matches its schema and the locked Project Detail
-// and Art Works templates render it exactly.
-export function projectSnapshotIssues(snapshot: unknown, slug: string): string[] {
+// and Art Works templates render it exactly, for the project's audience: a
+// PUBLIC project may not show private media; a PRIVATE one serves every asset
+// through its access-checked route (ADR-0020).
+export function projectSnapshotIssues(snapshot: unknown, slug: string, visibility: "PUBLIC" | "PRIVATE" = "PUBLIC"): string[] {
   const parsed = projectSnapshotSchema.safeParse(snapshot);
   if (!parsed.success) return parsed.error.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`);
-  return renderIssues(() => renderProject(parsed.data, slug));
+  return renderIssues(() => renderProject(parsed.data, slug, visibility === "PRIVATE" ? privateProjectMediaUrl(slug) : undefined));
 }
 
 const projectNotFound = () => notFound("PROJECT_NOT_FOUND", "Project not found.");
@@ -68,7 +71,7 @@ export function createProjectPublicationService(db: Database, options: ProjectPu
         isPublished: row.status === "PUBLISHED" && stored !== null,
         publishedAt: stored?.publishedAt.toISOString() ?? null,
         hasUnpublishedChanges: stored !== null && stableJson(candidate) !== stableJson(stored.snapshot),
-        issues: projectSnapshotIssues(candidate, row.slug),
+        issues: projectSnapshotIssues(candidate, row.slug, row.visibility),
       };
     },
 
@@ -82,7 +85,7 @@ export function createProjectPublicationService(db: Database, options: ProjectPu
         const row = await projects.findById(projectId, "update");
         if (!row) throw projectNotFound();
         const snapshot = await buildProjectSnapshot(tx, row);
-        const issues = projectSnapshotIssues(snapshot, row.slug);
+        const issues = projectSnapshotIssues(snapshot, row.slug, row.visibility);
         if (issues.length) {
           throw invalid("PROJECT_NOT_PUBLISHABLE", "The project cannot be published yet.", {
             issues: issues.map((message) => ({ path: "", message })),

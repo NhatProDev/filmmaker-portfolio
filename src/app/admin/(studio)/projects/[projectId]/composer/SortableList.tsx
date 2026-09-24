@@ -247,7 +247,7 @@ export function SortableList<T extends { id: string }>({
           ? null
           : {
               "aria-label": `Reorder ${label(item)}`,
-              title: container ? "Drag to reorder, or into or out of Columns. Space picks it up for the arrow keys." : "Drag to reorder. Space picks it up for the arrow keys.",
+              title: foreign ? "Drag to reorder, or into or out of Columns. Space picks it up for the arrow keys." : "Drag to reorder. Space picks it up for the arrow keys.",
               "aria-describedby": helpId,
               "aria-pressed": grabbed === item.id,
               onKeyDown: (event) => onKeyDown(item, event),

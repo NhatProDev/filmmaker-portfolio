@@ -14,6 +14,7 @@ import { mediaUrl } from "@/lib/storage/media-url";
 import type {
   HomeContent,
   HomeImage,
+  HomeSection,
   ProjectImage,
   WallItem,
   WorksCover,
@@ -186,89 +187,101 @@ export function worksProject(project: PublicProjectRecord, index: MediaIndex): W
 
 // ---- Home ----
 
-const HOME_SLOTS = ["hero", "identity", "wall", "about", "coda"] as const;
+// Home is an ordered composition of its five closed sections (ADR-0018),
+// each drawn by the locked Home CSS. A block is recognised by its type and
+// preset; anything else has no approved Home dress and is refused.
+export function homeSectionKind(block: Pick<ParsedBlock, "data">): HomeSection["kind"] | null {
+  const { data } = block;
+  if (data.type === "HERO") return "hero";
+  if (data.type === "GRID" && data.config.preset === "homeIdentity") return "identity";
+  if (data.type === "GRID" && data.config.preset === "homeAbout") return "about";
+  if (data.type === "GALLERY" && data.config.mode === "VIDEO_GRID" && data.config.preset === "homeWall") return "wall";
+  if (data.type === "GALLERY" && data.config.mode === "JUSTIFIED_ROWS") return "frames";
+  return null;
+}
+
+function homeSection(block: ParsedBlock, index: MediaIndex, where: string): HomeSection {
+  const at = `${where}, block ${block.id}`;
+  switch (homeSectionKind(block)) {
+    case "hero": {
+      // A standalone ambient video over its poster, with a caption.
+      const hero = block.data;
+      if (hero.type !== "HERO" || hero.config.playback?.mode !== "AUTOPLAY_AMBIENT" || hero.config.overlay?.enabled) {
+        fail(at, "the Home hero is an AUTOPLAY_AMBIENT HERO without a title overlay");
+      }
+      if (!hero.content.caption) fail(at, "the Home hero needs its caption");
+      const item = onlyMedia(block, at);
+      return {
+        kind: "hero",
+        poster: poster(index, item, altFor(index, item), at),
+        video: videoSrc(index, item.mediaId, at),
+        caption: hero.content.caption,
+      };
+    }
+    case "identity": {
+      // Display, lead and aside, in that order.
+      if (block.children.length !== 3) fail(at, "homeIdentity holds the display, lead and aside texts");
+      const [display, lead, aside] = block.children.map((child, i) =>
+        plain(richText(child, ["display", "lead", "aside"][i], 1, at)[0], at),
+      );
+      return { kind: "identity", display, lead, aside };
+    }
+    case "wall": {
+      // A VIDEO_GRID of posters, some of them moving.
+      const wall = block.data;
+      if (wall.type !== "GALLERY" || wall.config.mode !== "VIDEO_GRID" || wall.config.playback.mode !== "AUTOPLAY_VISIBLE") {
+        fail(at, "the Home wall is an AUTOPLAY_VISIBLE VIDEO_GRID with the homeWall preset");
+      }
+      if (!wall.content.label) fail(at, "the Home wall needs its label");
+      if (!block.media.length) fail(at, "the Home wall needs at least one tile");
+      const items: WallItem[] = block.media.map((item) => {
+        const asset = liveMedia(index, item.mediaId, at);
+        const alt = altFor(index, item);
+        return asset.type === "VIDEO"
+          ? { poster: poster(index, item, alt, at), video: videoSrc(index, asset.id, at) }
+          : { poster: image(index, asset.id, alt, at) };
+      });
+      return { kind: "wall", label: wall.content.label, items };
+    }
+    case "about": {
+      // The text, the link line and the portrait.
+      const [bodyText, moreText, portraitBlock, ...extra] = block.children;
+      if (!portraitBlock || extra.length) fail(at, "homeAbout holds the body text, the link line and the portrait");
+      const text = plain(richText(bodyText, "body", 1, at)[0], at);
+      const [moreParagraph] = richText(moreText, "more", 1, at);
+      const link = moreParagraph.length === 1 ? moreParagraph[0] : null;
+      if (!link || typeof link === "string" || !("link" in link)) fail(at, "the link line is a single link");
+      if (portraitBlock.data.type !== "IMAGE") fail(at, "homeAbout ends with the portrait IMAGE");
+      const portraitItem = onlyMedia(portraitBlock, at);
+      return {
+        kind: "about",
+        text,
+        more: { href: link.link.href, label: link.link.text },
+        portrait: image(index, portraitItem.mediaId, altFor(index, portraitItem), at),
+      };
+    }
+    case "frames": {
+      // Stills in justified rows.
+      const frames = block.data;
+      if (frames.type !== "GALLERY" || !frames.content.label) fail(at, "Home frames need their label");
+      if (!block.media.length) fail(at, "Home frames need at least one still");
+      return {
+        kind: "frames",
+        label: frames.content.label,
+        items: block.media.map((item) => image(index, item.mediaId, altFor(index, item), at)),
+      };
+    }
+    default:
+      fail(at, `a ${block.data.type} block has no place on Home: Home is built from its hero, identity, wall, about teaser and frames`);
+  }
+}
 
 export function homeContent(tree: ParsedBlock[], index: MediaIndex, footer: HomeContent["footer"]): HomeContent {
   const where = "page HOME";
-  if (tree.length !== HOME_SLOTS.length) {
-    fail(where, `the Home template has ${HOME_SLOTS.length} blocks, found ${tree.length}`);
-  }
-  const [heroBlock, identityBlock, wallBlock, aboutBlock, codaBlock] = tree;
-  const at = (block: ParsedBlock) => `${where}, block ${block.id}`;
-
-  // Hero: a standalone ambient video over its poster, with a caption.
-  const hero = heroBlock.data;
-  if (hero.type !== "HERO" || hero.config.playback?.mode !== "AUTOPLAY_AMBIENT" || hero.config.overlay?.enabled) {
-    fail(at(heroBlock), "the Home hero is an AUTOPLAY_AMBIENT HERO without a title overlay");
-  }
-  if (!hero.content.caption) fail(at(heroBlock), "the Home hero needs its caption");
-  const heroItem = onlyMedia(heroBlock, at(heroBlock));
-
-  // Identity: display, lead and aside, in that order.
-  const identity = identityBlock.data;
-  if (identity.type !== "GRID" || identity.config.preset !== "homeIdentity" || identityBlock.children.length !== 3) {
-    fail(at(identityBlock), "homeIdentity holds the display, lead and aside texts");
-  }
-  const [display, lead, aside] = identityBlock.children.map((child, i) =>
-    plain(richText(child, ["display", "lead", "aside"][i], 1, at(identityBlock))[0], at(identityBlock)),
-  );
-
-  // Wall: a VIDEO_GRID of posters, some of them moving.
-  const wall = wallBlock.data;
-  if (
-    wall.type !== "GALLERY" ||
-    wall.config.mode !== "VIDEO_GRID" ||
-    wall.config.preset !== "homeWall" ||
-    wall.config.playback.mode !== "AUTOPLAY_VISIBLE"
-  ) {
-    fail(at(wallBlock), "the Home wall is an AUTOPLAY_VISIBLE VIDEO_GRID with the homeWall preset");
-  }
-  if (!wall.content.label) fail(at(wallBlock), "the Home wall needs its label");
-  const items: WallItem[] = wallBlock.media.map((item) => {
-    const asset = liveMedia(index, item.mediaId, at(wallBlock));
-    const alt = altFor(index, item);
-    return asset.type === "VIDEO"
-      ? { poster: poster(index, item, alt, at(wallBlock)), video: videoSrc(index, asset.id, at(wallBlock)) }
-      : { poster: image(index, asset.id, alt, at(wallBlock)) };
-  });
-
-  // About: the text, the link line and the portrait.
-  const about = aboutBlock.data;
-  const [bodyText, moreText, portraitBlock, ...extra] = aboutBlock.children;
-  if (about.type !== "GRID" || about.config.preset !== "homeAbout" || !portraitBlock || extra.length) {
-    fail(at(aboutBlock), "homeAbout holds the body text, the link line and the portrait");
-  }
-  const body = plain(richText(bodyText, "body", 1, at(aboutBlock))[0], at(aboutBlock));
-  const [moreParagraph] = richText(moreText, "more", 1, at(aboutBlock));
-  const link = moreParagraph.length === 1 ? moreParagraph[0] : null;
-  if (!link || typeof link === "string" || !("link" in link)) fail(at(aboutBlock), "the link line is a single link");
-  if (portraitBlock.data.type !== "IMAGE") fail(at(aboutBlock), "homeAbout ends with the portrait IMAGE");
-  const portraitItem = onlyMedia(portraitBlock, at(aboutBlock));
-
-  // Coda: justified rows of stills.
-  const coda = codaBlock.data;
-  if (coda.type !== "GALLERY" || coda.config.mode !== "JUSTIFIED_ROWS") {
-    fail(at(codaBlock), "the Home coda is a JUSTIFIED_ROWS gallery");
-  }
-  if (!coda.content.label) fail(at(codaBlock), "the Home coda needs its label");
-
-  return {
-    hero: {
-      poster: poster(index, heroItem, altFor(index, heroItem), at(heroBlock)),
-      video: videoSrc(index, heroItem.mediaId, at(heroBlock)),
-      caption: hero.content.caption,
-    },
-    identity: { display, lead, aside },
-    wall: { label: wall.content.label, items },
-    about: {
-      text: body,
-      more: { href: link.link.href, label: link.link.text },
-      portrait: image(index, portraitItem.mediaId, altFor(index, portraitItem), at(aboutBlock)),
-    },
-    coda: {
-      label: coda.content.label,
-      items: codaBlock.media.map((item) => image(index, item.mediaId, altFor(index, item), at(codaBlock))),
-    },
-    footer,
-  };
+  const kinds = tree.map(homeSectionKind);
+  const heroes = kinds.filter((kind) => kind === "hero").length;
+  if (heroes > 1 || (heroes === 1 && kinds[0] !== "hero")) fail(where, "the hero opens Home, once: it is its one ambient film");
+  const identities = kinds.filter((kind) => kind === "identity").length;
+  if (identities !== 1) fail(where, `Home needs its identity exactly once, found ${identities}: it carries the page's name`);
+  return { sections: tree.map((block) => homeSection(block, index, where)), footer };
 }

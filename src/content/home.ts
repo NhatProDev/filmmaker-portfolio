@@ -14,7 +14,7 @@
 // must restore them by hand. Image dimensions are the files' own, so every
 // aspect ratio below is native.
 
-import type { HomeImage, WallItem } from "@/features/site-content/site-content.types";
+import type { HomeImage, HomeTemplate, WallItem } from "@/features/site-content/site-content.types";
 import { mediaUrl } from "@/lib/storage/media-url";
 
 const image = (file: string, width: number, height: number, alt = ""): HomeImage => ({
@@ -26,7 +26,7 @@ const image = (file: string, width: number, height: number, alt = ""): HomeImage
 
 const clip = (file: string) => mediaUrl(`home/${file}`);
 
-export const home = {
+export const home: HomeTemplate = {
   // Block 1 — HERO / VIDEO, AUTOPLAY_AMBIENT, full bleed.
   hero: {
     poster: image("mtm-atelier.jpg", 1800, 882),

@@ -1,12 +1,14 @@
 import { transaction, type Database } from "@db/client";
 import { createMediaRepository } from "@/features/media/media.repository";
 import { createCompositionService } from "@/features/project-builder/composition.service";
+import { createPublicationRepository } from "@/features/project-builder/publication.repository";
 import { seedProjectTemplate } from "@/features/project-builder/template-seeding";
 import type { ProjectTemplate } from "@/features/project-builder/templates";
 import { hashPassword } from "@/lib/auth/password";
 import { conflict, notFound, validationError } from "@/lib/errors/domain-error";
 import { toProjectDetailDto, toProjectSummaryDto, type PublicationDto } from "./project.mapper";
 import { createProjectRepository, type ProjectRow } from "./project.repository";
+import { projectSnapshotIssues } from "./publication.service";
 
 // Projects in the Studio (CLAUDE.md §6, §7, §11; ADR-0002, ADR-0011). The
 // display and featured orders change only inside transactions that hold the
@@ -164,6 +166,17 @@ export function createProjectService(db: Database, options: ProjectServiceOption
         await checkReferences(tx, input, id);
         if (input.visibility === "PRIVATE" && !row.passwordHash) {
           throw conflict("PROJECT_PASSWORD_REQUIRED", "Set a password before making the project private.");
+        }
+        // Visibility is live: a published snapshot must render publicly
+        // before the project may become PUBLIC (ADR-0020).
+        if (input.visibility === "PUBLIC" && row.visibility === "PRIVATE") {
+          const stored = await createPublicationRepository(tx).findProject(id);
+          const issues = stored ? projectSnapshotIssues(stored.snapshot, input.slug ?? row.slug, "PUBLIC") : [];
+          if (issues.length) {
+            throw conflict("PROJECT_NOT_PUBLIC_READY", "The published version uses private media. Replace them and publish before making the project public.", {
+              issues: issues.map((message) => ({ path: "", message })),
+            });
+          }
         }
         const { isFeatured, ...fields } = input;
         const featuring =

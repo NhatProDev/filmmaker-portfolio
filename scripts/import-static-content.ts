@@ -4,6 +4,10 @@
 //   npm run db:import -- --apply   create what is missing (local database only)
 //   npm run db:import -- --json    also print the plan as JSON
 //
+// It also creates the About, Contact and site-settings working copies
+// (scripts/lib/page-content-import.ts); nothing becomes public until an
+// admin publishes each page.
+//
 // With no DATABASE_URL the dry run plans against an empty database. The
 // import is create-only and idempotent: see scripts/lib/static-import.ts.
 
@@ -12,6 +16,7 @@ import { createDatabase } from "@db/client";
 import { staticGateway } from "@/features/site-content/static-gateway";
 import { serverEnv } from "@/lib/env/server-env";
 import { assertDatabaseTarget, describeDatabase } from "./lib/database-target";
+import { importContentPages } from "./lib/page-content-import";
 import { applyImportPlan, buildImportPlan, type ImportPlan } from "./lib/static-import";
 
 const args = new Set(process.argv.slice(2));
@@ -30,7 +35,7 @@ function printPlan(plan: ImportPlan) {
     list.reduce((n, b) => n + 1 + blocks(b.children as { children: unknown[] }[]), 0);
 
   console.log("MEDIA INVENTORY");
-  console.log(`  placements referenced by the site   ${inventory.placements.length} (${imported.length} imported; About and Contact stay static)`);
+  console.log(`  placements referenced by the site   ${inventory.placements.length} (${imported.length} imported with projects and Home; About and Contact as structured pages)`);
   console.log(`  distinct files                      ${inventory.files.size} (${(bytes / 1e6).toFixed(1)} MB)`);
   console.log(`  missing files                       ${inventory.missing.length}`);
   console.log(`  dimension mismatches                ${inventory.dimensionMismatches.length}`);
@@ -75,6 +80,14 @@ async function main() {
     console.log(`\n${apply ? "APPLIED" : "DRY RUN"}  create ${report.created} · unchanged ${report.unchanged} · drift ${report.drift.length}`);
     report.operations.forEach((op) => console.log(`  ${op}`));
     report.drift.forEach((d) => console.log(`  drift: ${d}`));
+
+    // About, Contact and the site settings as structured pages (ADR-0017):
+    // working copies only; each goes live when an admin publishes it.
+    const pagesReport = await importContentPages(handle.db, staticGateway, resolve("public/media"), apply);
+    console.log(`
+STRUCTURED PAGES (working copies, not published)`);
+    for (const page of pagesReport.pages) console.log(`  ${page.action.padEnd(9)} ${page.key}${page.detail ? ` — ${page.detail}` : ""}`);
+    for (const key of pagesReport.mediaCreated) console.log(`  create    media ${key}`);
     if (!apply) console.log("\nNothing written. Re-run with --apply to create the items above.");
   } finally {
     await handle.close();

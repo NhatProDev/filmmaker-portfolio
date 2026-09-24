@@ -3,14 +3,28 @@ import { contact } from "@/content/contact";
 import { home } from "@/content/home";
 import { projectDetails } from "@/content/projects";
 import { works } from "@/content/works";
-import type { ContentGateway, ProjectDetail } from "./site-content.types";
+import type { ContentGateway, HomeContent, HomeTemplate, ProjectDetail } from "./site-content.types";
 import { staticProjectContent } from "./static-project-blocks";
 
 // Serves the content committed with the code (src/content/*) unchanged. Works
 // order is array order, which stands for displayPosition.
+// The committed Home as sections, in the prototype's order (ADR-0018).
+export function homeFromTemplate(template: HomeTemplate): HomeContent {
+  return {
+    sections: [
+      { kind: "hero", ...template.hero },
+      { kind: "identity", ...template.identity },
+      { kind: "wall", ...template.wall },
+      { kind: "about", ...template.about },
+      { kind: "frames", ...template.coda },
+    ],
+    footer: template.footer,
+  };
+}
+
 export const staticGateway: ContentGateway = {
   async getHome() {
-    return home;
+    return homeFromTemplate(home);
   },
 
   async getWorksIndex() {
@@ -69,9 +83,43 @@ export const staticGateway: ContentGateway = {
   },
 
   async previewHome() {
-    return { value: home, issue: null };
+    return { value: homeFromTemplate(home), issue: null };
+  },
+
+  // The committed content has no albums (ADR-0019).
+  async getAlbumsIndex() {
+    return { collections: [] };
+  },
+
+  async getAlbumPage() {
+    return null;
+  },
+
+  async listPublicAlbumSlugs() {
+    return [];
+  },
+
+  async findAlbumRoute() {
+    return false;
+  },
+
+  async previewAlbumPage() {
+    return { value: null, issue: null };
+  },
+
+  async previewAbout() {
+    return { value: about, issue: null };
+  },
+
+  async previewContact() {
+    return { value: contact, issue: null };
   },
 };
+
+// The committed Home in its authored shape, for the import.
+export function staticHomeTemplate(): HomeTemplate {
+  return home;
+}
 
 // The committed Project Detail content in its authored shape, for the import
 // (scripts/lib/static-import.ts), which stores it as blocks.

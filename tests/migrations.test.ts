@@ -26,9 +26,14 @@ describe("migrations on a real PostgreSQL engine (PGlite)", () => {
     assert.equal((await q("select count(*)::int as n from drizzle.__drizzle_migrations")).rows[0].n, journal.entries.length);
   });
 
-  test("the HOME page is seeded once", async () => {
-    const rows = (await q("select key, title from pages")).rows;
-    assert.deepEqual(rows, [{ key: "HOME", title: "Home" }]);
+  test("the keyed pages are seeded once (ADR-0007, ADR-0017)", async () => {
+    const rows = (await q("select key, title, content from pages order by key")).rows;
+    assert.deepEqual(rows, [
+      { key: "ABOUT", title: "About me", content: {} },
+      { key: "CONTACT", title: "Contact", content: {} },
+      { key: "HOME", title: "Home", content: {} },
+      { key: "SITE", title: "Site settings", content: {} },
+    ]);
   });
 
   test("the new columns exist", async () => {

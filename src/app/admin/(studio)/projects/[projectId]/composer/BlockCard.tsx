@@ -10,6 +10,8 @@ import { AddBlock } from "./AddBlock";
 import { labelOf, needsOf, presetOf, summaryOf, thumbsOf, type Block } from "./blockInfo";
 import { moveBlock, moveRefusal, moveTargets } from "./moves";
 import { GalleryEditor, HeroEditor, ImageEditor, PlacementControl, SpacerEditor, TextEditor, VideoEditor } from "./editors";
+import { HomeSectionEditor } from "./HomeEditors";
+import type { ComposerOwner } from "./owner";
 import { SortableList, type HandleProps, type ItemState } from "./SortableList";
 import styles from "./composer.module.css";
 
@@ -18,7 +20,7 @@ import styles from "./composer.module.css";
 // its own ordered children, one level deep (ADR-0006).
 
 export type CardContext = {
-  projectId: string;
+  owner: ComposerOwner;
   expanded: ReadonlySet<string>;
   toggle: (id: string, open?: boolean) => void;
   hasOpening: boolean;
@@ -45,10 +47,13 @@ export function BlockCard({
   const open = context.expanded.has(block.id);
   const needs = needsOf(block);
   const thumbs = thumbsOf(block);
-  const label = labelOf(block);
+  const label = labelOf(block, context.owner.kind);
   const locked = handle === null;
   const inPreset = Boolean(parent && presetOf(parent));
-  const targets = locked ? [] : moveTargets(block, parent, context.roots);
+  const home = context.owner.kind === "page";
+  const targets = locked || home ? [] : moveTargets(block, parent, context.roots);
+  // Home shows its hero and its identity once (ADR-0018).
+  const single = home && (block.type === "HERO" || presetOf(block) === "homeIdentity");
 
   const remove = () => {
     const children = block.children.length ? ` and the ${block.children.length} block(s) inside it` : "";
@@ -117,7 +122,7 @@ export function BlockCard({
               ))}
             </select>
           )}
-          {!locked && !inPreset && (
+          {!locked && !inPreset && !single && (
             <button type="button" className={`${studio.button} ${studio.small}`} disabled={pending} onClick={() => run(() => api("POST", `/blocks/${block.id}/duplicate`))}>
               Duplicate
             </button>
@@ -151,7 +156,7 @@ export function BlockCard({
         <div className={styles.insertBelow}>
           {inserting ? (
             <AddBlock
-              projectId={context.projectId}
+              owner={context.owner}
               parentBlockId={null}
               position={state.index + 1}
               hasOpening={context.hasOpening}
@@ -176,6 +181,7 @@ export function BlockCard({
 
 function BlockEditor({ block, parent, context }: { block: Block; parent: Block | null; context: CardContext }) {
   const root = parent === null;
+  if (context.owner.kind === "page") return <HomeSectionEditor block={block} />;
   switch (block.type) {
     case "HERO":
       return <HeroEditor block={block} standalone={root} />;
@@ -198,14 +204,14 @@ function BlockEditor({ block, parent, context }: { block: Block; parent: Block |
 
 function GridEditor({ block, context }: { block: Block; context: CardContext }) {
   const preset = presetOf(block);
-  if (preset === "projectMeta") return <MetaEditor block={block} projectId={context.projectId} />;
+  if (preset === "projectMeta") return <MetaEditor block={block} ownerPath={context.owner.path} />;
   if (preset === "projectStills") return <StillsEditor block={block} context={context} />;
   if (preset === "projectLoop") return <LoopEditor block={block} />;
   if (preset === "projectCredits") return <p className={studio.hint}>The credit list from Credits below. Nothing to edit here.</p>;
   return <ColumnsEditor block={block} context={context} />;
 }
 
-function MetaEditor({ block, projectId }: { block: Block; projectId: string }) {
+function MetaEditor({ block, ownerPath }: { block: Block; ownerPath: string }) {
   const { run, pending, error } = useAction();
   const statement = block.children[1];
   return (
@@ -231,7 +237,7 @@ function MetaEditor({ block, projectId }: { block: Block; projectId: string }) {
           multiline={[false, true]}
           submitLabel="Add statement"
           onCreate={([lead, body]) =>
-            api("POST", `/projects/${projectId}/blocks`, {
+            api("POST", `${ownerPath}/blocks`, {
               type: "TEXT",
               parentBlockId: block.id,
               position: 1,
@@ -255,7 +261,7 @@ function StillsEditor({ block, context }: { block: Block; context: CardContext }
         items={block.children}
         label={(child) => child.media[0]?.media.storageKey?.split("/").pop() ?? "still"}
         disabled={pending}
-        onCommit={(ids) => run(() => api("PUT", `/projects/${context.projectId}/blocks/order`, { parentBlockId: block.id, blockIds: ids }))}
+        onCommit={(ids) => run(() => api("PUT", `${context.owner.path}/blocks/order`, { parentBlockId: block.id, blockIds: ids }))}
         renderItem={(still, handle, state) => (
           <div className={styles.stillRow}>
             {handle && (
@@ -290,7 +296,7 @@ function StillsEditor({ block, context }: { block: Block; context: CardContext }
           title="Choose a still"
           types={["IMAGE"]}
           onSelect={async (media) => {
-            const child = await api<Block>("POST", `/projects/${context.projectId}/blocks`, { type: "IMAGE", parentBlockId: block.id, config: { fit: "CONTAIN" } });
+            const child = await api<Block>("POST", `${context.owner.path}/blocks`, { type: "IMAGE", parentBlockId: block.id, config: { fit: "CONTAIN" } });
             await api("POST", `/blocks/${child.id}/media`, { mediaId: media.id });
           }}
         />
@@ -336,7 +342,7 @@ function ColumnsEditor({ block, context }: { block: Block; context: CardContext 
             onDrop: (id, index) => void run(() => moveBlock(id, block.id, index)),
           }}
           disabled={pending}
-          onCommit={(ids) => run(() => api("PUT", `/projects/${context.projectId}/blocks/order`, { parentBlockId: block.id, blockIds: ids }))}
+          onCommit={(ids) => run(() => api("PUT", `${context.owner.path}/blocks/order`, { parentBlockId: block.id, blockIds: ids }))}
           renderItem={(child, handle, state) => <BlockCard block={child} handle={handle} state={state} context={context} parent={block} />}
         />
         {!block.children.length && (
@@ -345,7 +351,7 @@ function ColumnsEditor({ block, context }: { block: Block; context: CardContext 
           </p>
         )}
         <AddBlock
-          projectId={context.projectId}
+          owner={context.owner}
           parentBlockId={block.id}
           hasOpening={context.hasOpening}
           label="Add to the columns"

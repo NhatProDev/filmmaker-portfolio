@@ -171,3 +171,32 @@ The supported way to clear them is the Studio's **Delete project**
 `deleted_at` and removes them from the Studio. It needs no SQL, and it
 is left for the owner to decide. Their slugs stay reserved either way,
 so a later smoke run needs a new slug.
+
+## 8. Phase 3B release (2026-09-24)
+
+- **Baseline.** `portfolio-v1-production` (`38f47f9`) is the V1 rollback
+  point. Phase 3B is tagged `phase-3b-authoring-v1` (`9da1af0`).
+- **Migrations.** `0007` and `0008` were applied to Neon after a `pg_dump`
+  (`portfolio-20260924-1402Z.dump`). They were first rehearsed on a restored
+  copy of that dump: every snapshot still equalled its working copy, and
+  `db:health` and `db:verify` (14 of 14) passed. A second run applied nothing.
+  Until the new build was live, V1 answered health with `schema: ahead`, which
+  is now reported as `degraded` rather than 503 (`runbook.md` §1).
+- **Public regression.** Markup and full-page screenshots of 17 routes at
+  three widths are identical to V1, captured before and after the deploy.
+- **Studio smoke.** 56 authenticated checks passed in production. They
+  covered moves between containers, drag, the one-level refusal, rich text,
+  YouTube and Vimeo, picture-area refusals, the admin media route, publish,
+  the private gate, draft isolation, no false unpublished changes, and the
+  Studio at three widths. They ran with a temporary one-hour admin session
+  minted through the session repository and revoked afterwards. A replay of
+  that session was then refused.
+- **Found and fixed.** Every Studio thumbnail requested the admin media route
+  and got 404 (`9da1af0`).
+- **Known gap.** Production's 22 imported assets are recorded under the
+  `local` provider, although R2 holds their files. The Studio therefore shows
+  them without thumbnails, as it did in V1. The fix changes the provider on
+  the media rows and on the snapshot records in the same transaction
+  (Phase 3C).
+- **Artifacts.** `smoke-3b-2489fd` and `smoke-3b-def795` are archived, like
+  the earlier smoke projects. Their external-video media are soft-deleted.

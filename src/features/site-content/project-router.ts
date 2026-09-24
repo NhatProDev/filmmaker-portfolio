@@ -11,6 +11,7 @@ import type { ContentGateway } from "./site-content.types";
 // then has been revalidated and renders no project content.
 
 export type ProjectRoute = "public" | "private" | "unknown";
+export type AlbumRoute = "public" | "unknown";
 
 type RouteSource = Pick<ContentGateway, "listProjectRoutes" | "findProjectRoute">;
 
@@ -41,6 +42,26 @@ export function createProjectRouter(source: RouteSource, options: { ttlMs?: numb
       if (!fresh) return "unknown";
       known[fresh].add(slug);
       return fresh;
+    },
+  };
+}
+
+// The same routing for /albums/<slug> (ADR-0019): published albums only.
+type AlbumRouteSource = Pick<ContentGateway, "listPublicAlbumSlugs" | "findAlbumRoute">;
+
+export function createAlbumRouter(source: AlbumRouteSource, options: { ttlMs?: number; now?: () => number } = {}) {
+  const ttlMs = options.ttlMs ?? 10_000;
+  const now = options.now ?? Date.now;
+  let index: { at: number; slugs: Set<string> } | null = null;
+
+  return {
+    async route(slug: string): Promise<AlbumRoute> {
+      if (slug.length > 200 || !SLUG.test(slug)) return "unknown";
+      if (!index || now() - index.at > ttlMs) index = { at: now(), slugs: new Set(await source.listPublicAlbumSlugs()) };
+      if (index.slugs.has(slug)) return "public";
+      if (!(await source.findAlbumRoute(slug))) return "unknown";
+      index.slugs.add(slug);
+      return "public";
     },
   };
 }

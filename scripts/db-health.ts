@@ -38,11 +38,11 @@ async function main() {
     if (health.checks.schema !== "ok") failures.push(`schema: ${health.checks.schema} (run npm run db:migrate)`);
 
     const published = await handle.db
-      .select({ slug: projects.slug, snapshot: projectPublications.snapshot })
+      .select({ slug: projects.slug, visibility: projects.visibility, snapshot: projectPublications.snapshot })
       .from(projectPublications)
       .innerJoin(projects, eq(projects.id, projectPublications.projectId));
     for (const row of published) {
-      for (const issue of projectSnapshotIssues(row.snapshot, row.slug)) failures.push(`project ${row.slug}: ${issue}`);
+      for (const issue of projectSnapshotIssues(row.snapshot, row.slug, row.visibility)) failures.push(`project ${row.slug}: ${issue}`);
     }
     const pageRows = await handle.db
       .select({ key: pages.key, snapshot: pagePublications.snapshot })

@@ -4,7 +4,7 @@ import { conflict, DomainError, invalid, notFound } from "@/lib/errors/domain-er
 import { getMediaStorage, mediaKeys, MediaStorageUnsupportedError } from "@/lib/storage/media-storage";
 import { toMediaDto, type MediaRow } from "./media.mapper";
 import { createMediaRepository, type MediaUsage } from "./media.repository";
-import { MAX_IMAGE_BYTES, MAX_VIDEO_BYTES, type ActivePictureChoice } from "./media.schema";
+import { MAX_IMAGE_BYTES, MAX_VIDEO_BYTES, type ActivePictureChoice, type CompleteUpload } from "./media.schema";
 
 // The Media Library (CLAUDE.md §12, ADR-0009, ADR-0014, ADR-0015).
 
@@ -46,6 +46,7 @@ export function createMediaService(db: Database) {
       type?: MediaRow["type"];
       status?: MediaRow["status"];
       search?: string;
+      audience?: "PUBLIC" | "PRIVATE";
       page: number;
       pageSize: number;
     }) {
@@ -79,6 +80,12 @@ export function createMediaService(db: Database) {
     },
 
     withPostersFor: withPosters,
+
+    // DTOs of the live assets among `ids`, by id.
+    async dtosByIds(ids: readonly string[]) {
+      const dtos = await withPosters(await repository.findRowsByIds([...new Set(ids)]));
+      return new Map(dtos.map((dto) => [dto.id, dto]));
+    },
 
     async usages(id: string): Promise<MediaUsage[]> {
       await requireLive(id);
@@ -122,6 +129,7 @@ export function createMediaService(db: Database) {
       fileSizeBytes: number;
       checksumSha256?: string;
       altText?: string | null;
+      audience?: "PUBLIC" | "PRIVATE";
     }) {
       const type = input.mimeType.startsWith("image/") ? "IMAGE" : "VIDEO";
       const limit = type === "IMAGE" ? MAX_IMAGE_BYTES : MAX_VIDEO_BYTES;
@@ -133,7 +141,10 @@ export function createMediaService(db: Database) {
         if (input.checksumSha256) await assertNotDuplicate(media, input.checksumSha256);
         const storage = getMediaStorage();
         const id = randomUUID();
-        const key = mediaKeys.original(id, input.filename);
+        const original = mediaKeys.original(id, input.filename);
+        // A private original goes to the private bucket and never has a
+        // public URL (ADR-0020).
+        const key = input.audience === "PRIVATE" ? mediaKeys.private(original) : original;
         await media.insert({
           id,
           type,
@@ -161,27 +172,57 @@ export function createMediaService(db: Database) {
 
     // Verifies the stored object and makes the asset usable. Identical bytes
     // to a live asset are refused (ADR-0014 §1).
-    async completeUpload(id: string) {
-      return transaction(db, async (tx) => {
-        const media = createMediaRepository(tx);
-        const row = await media.findById(id, "update");
-        if (!row) throw notFound("MEDIA_NOT_FOUND", "Media not found.");
-        if (row.status !== "UPLOADING" || !row.storageKey || row.storageProvider !== getMediaStorage().provider) {
-          throw conflict("INVALID_STATE", "This media is not awaiting an upload.");
+    async completeUpload(id: string, declared: CompleteUpload = {}) {
+      try {
+        return await completeInTransaction(db, id, declared);
+      } catch (error) {
+        // The same bytes are already an asset: this upload is discarded — its
+        // row soft-deleted and its object removed — so no orphan remains.
+        if (error instanceof DomainError && error.code === "MEDIA_DUPLICATE") {
+          const row = await repository.findById(id);
+          if (row && row.status === "UPLOADING" && !row.deletedAt) {
+            await repository.softDelete(id);
+            if (row.storageKey) await getMediaStorage().deleteObject(row.storageKey).catch(() => {});
+          }
         }
-        const stored = await withStorage(() => getMediaStorage().verifyUpload(row.storageKey!));
-        if (!stored) throw conflict("INVALID_STATE", "The uploaded file was not found in storage.");
-        if (stored.checksumSha256) await assertNotDuplicate(media, stored.checksumSha256);
-        const updated = await media.markUploaded(id, {
-          fileSizeBytes: stored.byteSize,
-          checksumSha256: stored.checksumSha256 ?? null,
-          mimeType: stored.mimeType ?? row.mimeType,
-        });
-        const [dto] = await createMediaService(tx).withPostersFor([updated]);
-        return dto;
-      });
+        throw error;
+      }
     },
+
   };
+}
+
+// Verifies the stored object and makes the asset usable, in one transaction.
+async function completeInTransaction(db: Database, id: string, declared: CompleteUpload) {
+  return transaction(db, async (tx) => {
+    const media = createMediaRepository(tx);
+    const row = await media.findById(id, "update");
+    if (!row) throw notFound("MEDIA_NOT_FOUND", "Media not found.");
+    if (row.status !== "UPLOADING" || !row.storageKey || row.storageProvider !== getMediaStorage().provider) {
+      throw conflict("INVALID_STATE", "This media is not awaiting an upload.");
+    }
+    const stored = await withStorage(() => getMediaStorage().verifyUpload(row.storageKey!));
+    if (!stored) throw conflict("INVALID_STATE", "The uploaded file was not found in storage.");
+    if (row.fileSizeBytes !== null && stored.byteSize !== row.fileSizeBytes) {
+      throw conflict("UPLOAD_MISMATCH", "The stored file is not the size that was authorised.", {
+        expected: row.fileSizeBytes,
+        stored: stored.byteSize,
+      });
+    }
+    // The provider's checksum when it keeps one, otherwise the browser's.
+    const checksum = stored.checksumSha256 ?? declared.checksumSha256 ?? null;
+    if (checksum) await assertNotDuplicate(media, checksum);
+    const updated = await media.markUploaded(id, {
+      fileSizeBytes: stored.byteSize,
+      checksumSha256: checksum,
+      mimeType: stored.mimeType ?? row.mimeType,
+      width: declared.width ?? null,
+      height: declared.height ?? null,
+      durationMs: row.type === "VIDEO" ? (declared.durationMs ?? null) : null,
+    });
+    const [dto] = await createMediaService(tx).withPostersFor([updated]);
+    return dto;
+  });
 }
 
 async function assertNotDuplicate(media: ReturnType<typeof createMediaRepository>, checksum: string) {

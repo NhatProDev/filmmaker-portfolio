@@ -3,11 +3,13 @@ import { pageParams } from "../../../_lib/params";
 import { adminRoute } from "../../../_lib/route";
 import { services } from "../../../_lib/services";
 
-const PUBLIC_PATH = { HOME: "/" } as const;
+// Where each page is seen. The site settings show on every page; Home is
+// where their footer appears first.
+const PUBLIC_PATH = { HOME: "/", ABOUT: "/about", CONTACT: "/contact", SITE: "/" } as const;
 
 export const GET = adminRoute(
   async ({ params, db }) => {
-    await services(db).pages.owner(params.pageKey);
+    await services(db).pages.get(params.pageKey);
     (await draftMode()).enable();
     return new Response(null, {
       status: 307,

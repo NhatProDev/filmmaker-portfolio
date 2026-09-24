@@ -159,7 +159,14 @@ describe("CSRF and authorisation on every admin operation (CLAUDE.md §16, §17.
     for (const [template, item] of Object.entries(contract.paths)) {
       for (const [method, operation] of Object.entries(item)) {
         if (method === "parameters") continue;
-        const path = template.replace(/\{pageKey\}/g, "HOME").replace(/\{slug\}/g, "some-slug").replace(/\{\w+\}/g, uuid);
+        // Block routes take only the composed HOME; the rest also take a
+        // structured page (ADR-0017), which content and slot routes require.
+        const pageKey = template.includes("/blocks") ? "HOME" : "ABOUT";
+        const path = template
+          .replace(/\{pageKey\}/g, pageKey)
+          .replace(/\{slot\}/g, "portrait")
+          .replace(/\{slug\}/g, "some-slug")
+          .replace(/\{\w+\}/g, uuid);
         const route = resolveRoute(path);
         assert.ok(route, `no route module for ${method.toUpperCase()} ${template}`);
         const handlers = await import(pathToFileURL(route.file).href);

@@ -265,8 +265,10 @@ export const projects = pgTable(
   ],
 );
 
-// Singleton editorial pages that own a block composition, keyed rather than
-// slugged (ADR-0007). HOME is the only one in V1; it is seeded by migration.
+// Singleton editorial pages, keyed rather than slugged, seeded by migration.
+// HOME owns a block composition (ADR-0007); ABOUT, CONTACT and SITE hold
+// structured `content`, validated by a strict schema per key, and place media
+// through `page_media` (ADR-0017).
 export const pages = pgTable(
   "pages",
   {
@@ -275,6 +277,7 @@ export const pages = pgTable(
     title: varchar("title", { length: 200 }).notNull(),
     seoTitle: varchar("seo_title", { length: 200 }),
     seoDescription: varchar("seo_description", { length: 500 }),
+    content: jsonb("content").$type<unknown>().default({}).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
       .defaultNow()
       .notNull(),
@@ -285,6 +288,115 @@ export const pages = pgTable(
   (table) => [
     uniqueIndex("pages_key_uidx").on(table.key),
     check("pages_key_format_check", sql`${table.key} ~ '^[A-Z][A-Z0-9_]*$'`),
+  ],
+);
+
+// One Media Library asset in a named slot of a structured page (ADR-0017):
+// the slot set is closed per page key. `alt_text` overrides the asset's
+// default for this use: NULL inherits, '' marks it decorative (ADR-0011).
+export const pageMedia = pgTable(
+  "page_media",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    pageId: uuid("page_id").notNull(),
+    slot: varchar("slot", { length: 50 }).notNull(),
+    mediaId: uuid("media_id").notNull(),
+    altText: text("alt_text"),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    foreignKey({
+      name: "page_media_page_id_fkey",
+      columns: [table.pageId],
+      foreignColumns: [pages.id],
+    }).onDelete("cascade"),
+    foreignKey({
+      name: "page_media_media_id_fkey",
+      columns: [table.mediaId],
+      foreignColumns: [media.id],
+    }).onDelete("restrict"),
+    uniqueIndex("page_media_page_slot_uidx").on(table.pageId, table.slot),
+    index("page_media_media_id_idx").on(table.mediaId),
+    check("page_media_slot_format_check", sql`${table.slot} ~ '^[a-z][a-zA-Z0-9]*$'`),
+  ],
+);
+
+// An album (ADR-0019): an ordered set of Media Library images with its own
+// title and description, grouped into collections by a short label. Public
+// only in V1. `project_id` is a live, optional link to a related project,
+// never snapshotted.
+export const albums = pgTable(
+  "albums",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    slug: varchar("slug", { length: 200 }).notNull(),
+    title: varchar("title", { length: 200 }).notNull(),
+    description: text("description"),
+    collection: varchar("collection", { length: 120 }),
+    status: projectStatusEnum("status").default("DRAFT").notNull(),
+    coverMediaId: uuid("cover_media_id"),
+    projectId: uuid("project_id"),
+    displayPosition: integer("display_position").default(0).notNull(),
+    seoTitle: varchar("seo_title", { length: 200 }),
+    seoDescription: varchar("seo_description", { length: 500 }),
+    publishedAt: timestamp("published_at", { withTimezone: true, mode: "date" }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    deletedAt: timestamp("deleted_at", { withTimezone: true, mode: "date" }),
+  },
+  (table) => [
+    foreignKey({
+      name: "albums_cover_media_id_fkey",
+      columns: [table.coverMediaId],
+      foreignColumns: [media.id],
+    }).onDelete("set null"),
+    foreignKey({
+      name: "albums_project_id_fkey",
+      columns: [table.projectId],
+      foreignColumns: [projects.id],
+    }).onDelete("set null"),
+    uniqueIndex("albums_slug_uidx").on(table.slug),
+    index("albums_public_order_idx").on(table.status, table.deletedAt, table.displayPosition),
+    index("albums_cover_media_id_idx").on(table.coverMediaId),
+    check("albums_display_position_nonnegative_check", sql`${table.displayPosition} >= 0`),
+  ],
+);
+
+// One image of an album, in order. `alt_text` is contextual (ADR-0011):
+// NULL inherits the asset's default, '' marks it decorative.
+export const albumMedia = pgTable(
+  "album_media",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    albumId: uuid("album_id").notNull(),
+    mediaId: uuid("media_id").notNull(),
+    position: integer("position").notNull(),
+    altText: text("alt_text"),
+    caption: varchar("caption", { length: 500 }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    foreignKey({
+      name: "album_media_album_id_fkey",
+      columns: [table.albumId],
+      foreignColumns: [albums.id],
+    }).onDelete("cascade"),
+    foreignKey({
+      name: "album_media_media_id_fkey",
+      columns: [table.mediaId],
+      foreignColumns: [media.id],
+    }).onDelete("restrict"),
+    index("album_media_album_position_idx").on(table.albumId, table.position),
+    index("album_media_media_id_idx").on(table.mediaId),
+    check("album_media_position_nonnegative_check", sql`${table.position} >= 0`),
   ],
 );
 
@@ -453,15 +565,39 @@ export const pagePublications = pgTable(
   ],
 );
 
+export const albumPublications = pgTable(
+  "album_publications",
+  {
+    albumId: uuid("album_id").primaryKey(),
+    snapshot: jsonb("snapshot").$type<unknown>().notNull(),
+    publishedAt: timestamp("published_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    publishedBy: uuid("published_by"),
+  },
+  (table) => [
+    foreignKey({
+      name: "album_publications_album_id_fkey",
+      columns: [table.albumId],
+      foreignColumns: [albums.id],
+    }).onDelete("cascade"),
+    foreignKey({
+      name: "album_publications_published_by_fkey",
+      columns: [table.publishedBy],
+      foreignColumns: [adminUsers.id],
+    }).onDelete("set null"),
+  ],
+);
+
 // Every media asset a current snapshot references, relationally, so that
 // MEDIA_IN_USE protects what is live even after the working copy stops using
-// it (ADR-0012, CLAUDE.md §12). Exactly one owner per row.
+// it (ADR-0012, CLAUDE.md §12). Exactly one owner per row: a project, a page
+// or an album (ADR-0019).
 export const publicationMedia = pgTable(
   "publication_media",
   {
     id: uuid("id").defaultRandom().primaryKey(),
     projectId: uuid("project_id"),
     pageId: uuid("page_id"),
+    albumId: uuid("album_id"),
     mediaId: uuid("media_id").notNull(),
   },
   (table) => [
@@ -476,16 +612,22 @@ export const publicationMedia = pgTable(
       foreignColumns: [pagePublications.pageId],
     }).onDelete("cascade"),
     foreignKey({
+      name: "publication_media_album_id_fkey",
+      columns: [table.albumId],
+      foreignColumns: [albumPublications.albumId],
+    }).onDelete("cascade"),
+    foreignKey({
       name: "publication_media_media_id_fkey",
       columns: [table.mediaId],
       foreignColumns: [media.id],
     }).onDelete("restrict"),
     uniqueIndex("publication_media_project_media_uidx").on(table.projectId, table.mediaId),
     uniqueIndex("publication_media_page_media_uidx").on(table.pageId, table.mediaId),
+    uniqueIndex("publication_media_album_media_uidx").on(table.albumId, table.mediaId),
     index("publication_media_media_id_idx").on(table.mediaId),
     check(
       "publication_media_single_owner_check",
-      sql`(${table.projectId} IS NOT NULL AND ${table.pageId} IS NULL) OR (${table.projectId} IS NULL AND ${table.pageId} IS NOT NULL)`,
+      sql`num_nonnulls(${table.projectId}, ${table.pageId}, ${table.albumId}) = 1`,
     ),
   ],
 );
@@ -551,6 +693,12 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
 
 export const pagesRelations = relations(pages, ({ many }) => ({
   blocks: many(projectBlocks),
+  media: many(pageMedia),
+}));
+
+export const pageMediaRelations = relations(pageMedia, ({ one }) => ({
+  page: one(pages, { fields: [pageMedia.pageId], references: [pages.id] }),
+  media: one(media, { fields: [pageMedia.mediaId], references: [media.id] }),
 }));
 
 export const projectBlocksRelations = relations(
@@ -609,4 +757,8 @@ export type NewPage = typeof pages.$inferInsert;
 export type ProjectBlock = typeof projectBlocks.$inferSelect;
 export type NewProjectBlock = typeof projectBlocks.$inferInsert;
 export type BlockMedia = typeof blockMedia.$inferSelect;
+export type PageMedia = typeof pageMedia.$inferSelect;
+export type Album = typeof albums.$inferSelect;
+export type NewAlbum = typeof albums.$inferInsert;
+export type AlbumMedia = typeof albumMedia.$inferSelect;
 export type NewBlockMedia = typeof blockMedia.$inferInsert;

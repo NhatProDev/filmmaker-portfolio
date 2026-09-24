@@ -1,14 +1,30 @@
 import { and, eq, isNull } from "drizzle-orm";
 import type { Database } from "@db/client";
-import { projects } from "@db/schema";
+import { albums as albumsTable, projects, type Page as PageRow } from "@db/schema";
+import { site as committedSite } from "@/content/site";
+import { createAlbumRepository } from "@/features/albums/album.repository";
+import { buildAlbumSnapshot } from "@/features/albums/album.snapshot";
+import { buildContentPageSnapshot } from "@/features/page-content/page-content.snapshot";
 import { buildPageSnapshot } from "@/features/project-builder/page-publication.service";
 import { findPage } from "@/features/project-builder/page.service";
 import { createPublicationRepository, type PublishedProject } from "@/features/project-builder/publication.repository";
 import { buildProjectSnapshot } from "@/features/projects/publication.service";
 import { ContentProjectionError, createMediaIndex, worksProject, type MediaIndex } from "./db-projection";
-import type { ContentGateway, HomeContent, Preview, ProjectPage } from "./site-content.types";
+import { albumsIndex, parseAlbumSnapshot, renderAlbum } from "./album-projection";
+import { parseContentPageSnapshot, renderAbout, renderContact, renderSite } from "./page-content-projection";
+import type {
+  AboutContent,
+  AlbumPage,
+  ContactContent,
+  ContentGateway,
+  HomeContent,
+  Preview,
+  ProjectPage,
+  SiteSettings,
+} from "./site-content.types";
 import {
   parsePageSnapshot,
+  privateProjectMediaUrl,
   parseProjectSnapshot,
   projectRecord,
   renderHome,
@@ -22,16 +38,11 @@ import { staticGateway } from "./static-gateway";
 // project row contributes routing and access (slug, visibility, order).
 // Errors propagate: a failing database or a snapshot the locked pages cannot
 // render fails the request or the build rather than serving something
-// different. About, Contact and Home's footer stay static in V1 (CLAUDE.md
-// §19); they are site chrome and content files, not database rows.
+// different. About, Contact and the site settings are structured pages
+// (ADR-0017): each shows its committed content until its first publish, and
+// the settings fill in what the pages share (Home's footer, the email).
 
 type Listed = PublishedProject & { parsed: ProjectSnapshot };
-
-// PRIVATE media never resolve to an unrestricted public URL (ADR-0014 §4).
-const privateMediaUrl =
-  (slug: string): MediaIndex["url"] =>
-  (asset) =>
-    `/api/v1/public/projects/${slug}/media/${asset.id}`;
 
 export function createDbGateway(db: Database): ContentGateway {
   const publications = createPublicationRepository(db);
@@ -74,9 +85,68 @@ export function createDbGateway(db: Database): ContentGateway {
     return { slug: first.project.slug, title: parseProjectSnapshot(first.snapshot, `project ${first.project.slug}`).project.title };
   }
 
-  async function home(snapshot: unknown): Promise<HomeContent> {
+  // What the public sees of a structured page: its published snapshot, or
+  // null before its first publish. In preview: its working copy, once it has
+  // any content — until then the page previews as it is published.
+  async function structured(key: "ABOUT" | "CONTACT" | "SITE", draft: boolean) {
+    const row: PageRow = await findPage(db, key);
+    if (draft && Object.keys(row.content as object).length) return buildContentPageSnapshot(db, row);
+    const stored = await publications.findPage(row.id);
+    return stored ? parseContentPageSnapshot(stored.snapshot, key) : null;
+  }
+
+  async function site(draft = false): Promise<SiteSettings> {
+    const snapshot = await structured("SITE", draft);
+    if (!snapshot) return committedSite;
+    try {
+      return renderSite(snapshot);
+    } catch (error) {
+      // A draft SITE that does not validate yet must not block previewing
+      // the other pages; SITE's own publish panel names the problem.
+      if (draft && error instanceof ContentProjectionError) return committedSite;
+      throw error;
+    }
+  }
+
+  async function home(snapshot: unknown, draft = false): Promise<HomeContent> {
     const { footer } = await staticGateway.getHome();
-    return renderHome(parsePageSnapshot(snapshot, "page HOME"), footer);
+    const settings = await site(draft);
+    return renderHome(parsePageSnapshot(snapshot, "page HOME"), { ...footer, email: settings.email, note: settings.footerNote });
+  }
+
+  async function about(draft = false): Promise<AboutContent> {
+    const [snapshot, settings] = await Promise.all([structured("ABOUT", draft), site(draft)]);
+    if (snapshot) return renderAbout(snapshot, settings);
+    const committed = await staticGateway.getAbout();
+    return { ...committed, contact: { ...committed.contact, email: settings.email } };
+  }
+
+  async function contact(draft = false): Promise<ContactContent> {
+    const [snapshot, settings] = await Promise.all([structured("CONTACT", draft), site(draft)]);
+    if (snapshot) return renderContact(snapshot, settings);
+    const committed = await staticGateway.getContact();
+    return {
+      ...committed,
+      email: { ...committed.email, address: settings.email },
+      footer: { name: settings.name, role: settings.role, copyright: settings.copyright },
+    };
+  }
+
+  // A published PUBLIC project an album belongs with, by the album's live
+  // link; never a private one (ADR-0003, ADR-0019 §3).
+  async function relatedProject(projectId: string | null): Promise<AlbumPage["related"]> {
+    if (!projectId) return null;
+    const row = (await publicList()).find((listed) => listed.project.id === projectId);
+    return row ? { slug: row.project.slug, title: row.parsed.project.title } : null;
+  }
+
+  async function publishedAlbums(): Promise<AlbumPage[]> {
+    const rows = await createAlbumRepository(db).listPublished();
+    return Promise.all(
+      rows.map(async ({ album, snapshot }) =>
+        renderAlbum(parseAlbumSnapshot(snapshot, `album ${album.slug}`), album.slug, await relatedProject(album.projectId)),
+      ),
+    );
   }
 
   const preview = async <T,>(render: () => Promise<T | null>): Promise<Preview<T>> => {
@@ -137,7 +207,7 @@ export function createDbGateway(db: Database): ContentGateway {
       if (!row || row.project.visibility !== "PRIVATE" || row.project.id !== projectId) return null;
       const snapshot = parseProjectSnapshot(row.snapshot, `project ${slug}`);
       const next = await firstListed({ slug, title: snapshot.project.title });
-      return page(slug, snapshot, 0, next, privateMediaUrl(slug));
+      return page(slug, snapshot, 0, next, privateProjectMediaUrl(slug));
     },
 
     async previewProjectPage(slug) {
@@ -171,10 +241,40 @@ export function createDbGateway(db: Database): ContentGateway {
     },
 
     async previewHome() {
-      return preview(async () => home(await buildPageSnapshot(db, await findPage(db, "HOME"))));
+      return preview(async () => home(await buildPageSnapshot(db, await findPage(db, "HOME")), true));
     },
 
-    getAbout: () => staticGateway.getAbout(),
-    getContact: () => staticGateway.getContact(),
+    async getAlbumsIndex() {
+      return albumsIndex(await publishedAlbums());
+    },
+
+    async getAlbumPage(slug) {
+      return (await publishedAlbums()).find((album) => album.slug === slug) ?? null;
+    },
+
+    async listPublicAlbumSlugs() {
+      return (await createAlbumRepository(db).listPublished()).map((row) => row.album.slug);
+    },
+
+    async findAlbumRoute(slug) {
+      return (await createAlbumRepository(db).listPublished()).some((row) => row.album.slug === slug);
+    },
+
+    // The working copy of any album that is not deleted, for an admin.
+    async previewAlbumPage(slug) {
+      return preview(async () => {
+        const [row] = await db
+          .select()
+          .from(albumsTable)
+          .where(and(eq(albumsTable.slug, slug), isNull(albumsTable.deletedAt)));
+        if (!row) return null;
+        return renderAlbum(await buildAlbumSnapshot(db, row), slug, await relatedProject(row.projectId));
+      });
+    },
+
+    getAbout: () => about(),
+    getContact: () => contact(),
+    previewAbout: () => preview(() => about(true)),
+    previewContact: () => preview(() => contact(true)),
   };
 }

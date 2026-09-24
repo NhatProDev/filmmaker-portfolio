@@ -19,13 +19,31 @@ export type WallItem = {
   video?: string;
 };
 
-export type HomeContent = {
+export type HomeFooter = { email: string; note: string; links: { href: string; label: string }[] };
+
+// The committed Home (src/content/home.ts): its five sections by name, in the
+// approved prototype's order. The import stores it as blocks.
+export type HomeTemplate = {
   hero: { poster: HomeImage; video: string; caption: string };
   identity: { display: string; lead: string; aside: string };
   wall: { label: string; items: WallItem[] };
   about: { text: string; more: { href: string; label: string }; portrait: HomeImage };
   coda: { label: string; items: HomeImage[] };
-  footer: { email: string; note: string; links: { href: string; label: string }[] };
+  footer: HomeFooter;
+};
+
+// Home as the page renders it (ADR-0018): an ordered composition of Home's
+// closed sections, each drawn by the locked Home CSS, and the footer.
+export type HomeSection =
+  | ({ kind: "hero" } & HomeTemplate["hero"])
+  | ({ kind: "identity" } & HomeTemplate["identity"])
+  | ({ kind: "wall" } & HomeTemplate["wall"])
+  | ({ kind: "about" } & HomeTemplate["about"])
+  | ({ kind: "frames" } & HomeTemplate["coda"]);
+
+export type HomeContent = {
+  sections: HomeSection[];
+  footer: HomeFooter;
 };
 
 // ---- Art Works ----
@@ -262,6 +280,32 @@ export type ContactContent = {
 // template cannot show it yet.
 export type Preview<T> = { value: T | null; issue: string | null };
 
+// Albums (ADR-0019): public, ordered image sets grouped by collection.
+export type AlbumPage = {
+  slug: string;
+  title: string;
+  description: string | null;
+  collection: string | null;
+  cover: HomeImage;
+  items: { image: HomeImage; caption: string | null }[];
+  // A published PUBLIC project the album belongs with; never a private one.
+  related: { slug: string; title: string } | null;
+  seo: { title?: string; description?: string };
+};
+
+export type AlbumCard = { slug: string; title: string; cover: HomeImage; count: number };
+
+export type AlbumsIndex = { collections: { name: string | null; albums: AlbumCard[] }[] };
+
+// The site settings (ADR-0017 §4): what more than one page shows.
+export type SiteSettings = {
+  name: string;
+  role: string;
+  email: string;
+  footerNote: string;
+  copyright: string;
+};
+
 export interface ContentGateway {
   getHome(): Promise<HomeContent>;
   getWorksIndex(): Promise<WorksIndex>;
@@ -290,4 +334,13 @@ export interface ContentGateway {
   // The working copy, for an authenticated admin's preview (ADR-0012).
   previewProjectPage(slug: string): Promise<Preview<ProjectPage>>;
   previewHome(): Promise<Preview<HomeContent>>;
+  previewAbout(): Promise<Preview<AboutContent>>;
+
+  getAlbumsIndex(): Promise<AlbumsIndex>;
+  getAlbumPage(slug: string): Promise<AlbumPage | null>;
+  listPublicAlbumSlugs(): Promise<string[]>;
+  // Proxy routing for /albums/<slug>: a published album, or nothing.
+  findAlbumRoute(slug: string): Promise<boolean>;
+  previewAlbumPage(slug: string): Promise<Preview<AlbumPage>>;
+  previewContact(): Promise<Preview<ContactContent>>;
 }

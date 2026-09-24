@@ -17,7 +17,7 @@ export function LoginForm() {
     setError(null);
     try {
       await api("POST", "/auth/login", { email: form.get("email"), password: form.get("password") });
-      router.replace("/admin/projects");
+      router.replace("/admin");
       router.refresh();
     } catch (caught) {
       setError(

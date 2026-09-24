@@ -7,8 +7,12 @@ import styles from "../studio.module.css";
 
 const LINKS = [
   { href: "/admin/projects", label: "Projects" },
-  { href: "/admin/home", label: "Home page" },
+  { href: "/admin/albums", label: "Albums" },
+  { href: "/admin/home", label: "Home" },
+  { href: "/admin/about", label: "About" },
+  { href: "/admin/contact", label: "Contact" },
   { href: "/admin/media", label: "Media" },
+  { href: "/admin/settings", label: "Settings" },
 ];
 
 export function StudioNav({ email }: { email: string }) {
@@ -23,7 +27,9 @@ export function StudioNav({ email }: { email: string }) {
 
   return (
     <header className={styles.bar}>
-      <span className={styles.brand}>Studio</span>
+      <Link href="/admin" className={styles.brand} aria-current={pathname === "/admin" ? "page" : undefined}>
+        Studio
+      </Link>
       <nav className={styles.nav} aria-label="Studio">
         {LINKS.map((link) => (
           <Link key={link.href} href={link.href} aria-current={pathname.startsWith(link.href) ? "page" : undefined}>

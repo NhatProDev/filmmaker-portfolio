@@ -30,6 +30,7 @@ Professional filmmaker portfolio with:
 - Admin CMS
 - Project CRUD
 - Media Library
+- Albums and collections (ADR-0019)
 - Responsive Visual Layout Composer (block-based, grid-composed, drag-and-drop)
 
 The composer is how the administrator builds both project pages and the Home
@@ -220,6 +221,10 @@ Core tables:
 - `project_blocks`
 - `block_media`
 - `media`
+- `page_media` (ADR-0017)
+- `albums`, `album_media` (ADR-0019)
+- publication tables: `project_publications`, `page_publications`,
+  `album_publications`, `publication_media` (ADR-0012)
 
 Relationships:
 
@@ -232,7 +237,14 @@ MEDIA 1:N BLOCK_MEDIA
 PROJECT N:1 MEDIA (optional cover; optional preview — ADR-0011)
 MEDIA N:1 MEDIA (optional default poster — ADR-0009)
 BLOCK_MEDIA N:1 MEDIA (optional placement poster — ADR-0015)
+PAGE 1:N PAGE_MEDIA N:1 MEDIA     (About/Contact slots — ADR-0017)
+ALBUM 1:N ALBUM_MEDIA N:1 MEDIA   (ADR-0019)
+ALBUM N:1 MEDIA (optional cover); ALBUM N:1 PROJECT (optional, live — ADR-0019)
 ```
+
+`PAGES.content` holds a keyed page's structured editorial content (ABOUT,
+CONTACT, SITE), validated by a strict per-key schema; it never holds media ids,
+colour, typeface or layout values (ADR-0017).
 
 `PROJECT_BLOCK.config` and `BLOCK_MEDIA.config` hold presentation configuration only.
 
@@ -286,13 +298,15 @@ V1 uses integer positions:
 0, 1, 2, 3, ...
 ```
 
-Four collections are reorderable:
+Six collections are reorderable:
 
 ```text
 projects (display order)      PUT /api/v1/projects/order
 projects (featured order)     PUT /api/v1/projects/featured/order
 blocks within a container     PUT /api/v1/projects/{projectId}/blocks/order
 media within a block          PUT /api/v1/blocks/{blockId}/media/order
+albums (display order)        PUT /api/v1/albums/order                 (ADR-0019)
+images within an album        PUT /api/v1/albums/{albumId}/media/order (ADR-0019)
 ```
 
 ### Ordering scope under the composer
@@ -334,6 +348,7 @@ These rules govern creation, not reordering. They apply to:
 POST /api/v1/projects/{projectId}/blocks     siblings = blocks of the target container
 POST /api/v1/pages/{pageKey}/blocks          siblings = blocks of the target container
 POST /api/v1/blocks/{blockId}/media          siblings = block_media of that block
+POST /api/v1/albums/{albumId}/media          siblings = album_media of that album
 ```
 
 Let `N` be the number of existing siblings **before** the insert.
@@ -480,7 +495,12 @@ Browser/API
 
 Media deletion must fail with `409 MEDIA_IN_USE` while referenced by a project
 cover or preview, a block placement, a placement poster, an asset's default
-poster, or (ADR-0012) a current published snapshot.
+poster, a page media slot (ADR-0017), an album item or cover (ADR-0019), or
+(ADR-0012) a current published snapshot.
+
+Uploads choose an audience (ADR-0020). A PRIVATE original lives under
+`private/`, has no public URL, and is delivered only through signed,
+short-lived, access-checked routes.
 
 The in-use check inspects **relational** references only. A media id hidden in a
 `config` object is invisible to it, which is one reason §6 forbids putting media
@@ -743,10 +763,12 @@ Safe mobile stacking is the default precisely so this cannot happen by neglect.
   duplicate or reconfigure its blocks without code changes. See ADR-0007.
 - **Art Works** — data-driven and gallery-oriented. It may expose presentation
   options; do not turn it into a free page builder.
-- **About Me** — content-file managed (§19). Do not silently convert it into a
-  CMS page builder. A small presentation configuration is permitted only if the
-  composer architecture genuinely requires it.
-- **Contact** — static (§19).
+- **Home** is composed of Home's five closed sections only; generic blocks on
+  Home await a design review (ADR-0018).
+- **About Me** and **Contact** — CMS-managed **structured** content (ADR-0017),
+  not composer pages. Their locked layouts render typed fields and media slots;
+  do not convert them into block compositions. Contact has no form.
+- **Albums** — data-driven sequences of images (ADR-0019), not compositions.
 
 ### Layout and theme are orthogonal
 
@@ -966,19 +988,19 @@ Do not implement unless explicitly requested:
 - revision/version history
 - microservices
 - Contact form API, persistence table, email provider, or spam system
-- CMS-managed About Me content (no About table, no About API)
+- private albums (ADR-0019 §5)
 - showing PRIVATE projects as locked cards in the public listing
 
 ### Contact page
 
-V1 Contact is static. It may contain an email/`mailto:` link, social links and
-other public contact information. It has no API, no database table and no
-delivery integration.
+Contact content is CMS-managed (ADR-0017): statement, email, rows, note and an
+optional identity still. It has no form, no message API, no message table and
+no delivery integration.
 
 ### About Me page
 
-V1 About Me is not CMS-managed. Treat its content as application/content-file
-content committed with the code.
+About Me content is CMS-managed structured content (ADR-0017). Its committed
+content file remains the fallback until the page is first published.
 
 ---
 

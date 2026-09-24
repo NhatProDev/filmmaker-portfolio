@@ -7,7 +7,7 @@ import { JustifiedRows } from "@/components/media/JustifiedRows";
 import { PreviewBanner, PreviewIssue } from "@/components/preview/PreviewBanner";
 import { getCurrentAdmin } from "@/features/authentication/current-admin";
 import { getContentGateway } from "@/features/site-content/site-content.gateway";
-import type { HomeContent } from "@/features/site-content/site-content.types";
+import type { HomeContent, HomeSection } from "@/features/site-content/site-content.types";
 import styles from "./home.module.css";
 
 export const metadata: Metadata = { alternates: { canonical: "/" } };
@@ -30,70 +30,80 @@ export default async function HomePage() {
 
 // Implements docs/design/prototypes/home/Home Baseline v2 Responsive.dc.html.
 // Source order is visual order at every width: nothing is reordered, hidden or
-// moved between breakpoints. The footer is site chrome rather than a block, so
-// it sits outside <main>; only Home's prototype carries one so far.
+// moved between breakpoints. Home is an ordered composition of its closed
+// sections (ADR-0018), each drawn exactly as the prototype draws it. The
+// footer is site chrome rather than a block, so it sits outside <main>; only
+// Home's prototype carries one so far.
 function HomeView({ content }: { content: HomeContent }) {
-  const { hero, identity, wall, about, coda, footer } = content;
+  const { sections, footer } = content;
   const [mailbox, domain] = footer.email.split("@");
+  // Each frames section needs its own rows token; the first keeps the one the
+  // page has always used.
+  const framesToken = new Map<number, string>();
+  sections.forEach((section, i) => {
+    if (section.kind === "frames") framesToken.set(i, framesToken.size ? `home-coda-${framesToken.size + 1}` : "home-coda");
+  });
 
   return (
     <div className={styles.home}>
       <main>
-        <figure className={styles.hero}>
-          <Image
-            className={styles.media}
-            src={hero.poster.src}
-            alt={hero.poster.alt}
-            fill
-            unoptimized
-            preload
-          />
-          <AutoplayVideo className={styles.media} src={hero.video} mode="AUTOPLAY_AMBIENT" />
-          <figcaption className={styles.heroCaption}>{hero.caption}</figcaption>
-        </figure>
-
-        <section className={styles.identity}>
-          <div className={styles.displayBox}>
-            <h1 className={styles.display}>{identity.display}</h1>
-          </div>
-          <p className={styles.lead}>{identity.lead}</p>
-          <p className={styles.aside}>{identity.aside}</p>
-        </section>
-
-        <section className={styles.gallery}>
-          <h2 className={styles.label}>{wall.label}</h2>
-          <div className={styles.wall}>
-            {wall.items.map(({ poster, video }) => (
-              <div key={poster.src} className={styles.cell}>
-                <Image className={styles.media} src={poster.src} alt={poster.alt} fill unoptimized />
-                {video && <AutoplayVideo className={styles.media} src={video} mode="AUTOPLAY_VISIBLE" />}
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className={styles.about}>
-          <div className={styles.aboutText}>
-            <p className={styles.aboutBody}>{about.text}</p>
-            <p className={styles.aboutMore}>
-              <Link href={about.more.href}>{about.more.label}</Link>
-            </p>
-          </div>
-          <div className={styles.portrait}>
-            <Image
-              src={about.portrait.src}
-              width={about.portrait.width}
-              height={about.portrait.height}
-              alt={about.portrait.alt}
-              unoptimized
-            />
-          </div>
-        </section>
-
-        <section className={styles.gallery}>
-          <h2 className={styles.label}>{coda.label}</h2>
-          <JustifiedRows id="home-coda" items={coda.items} />
-        </section>
+        {sections.map((section, i) => {
+          switch (section.kind) {
+            case "hero":
+              return <Hero key={i} hero={section} />;
+            case "identity":
+              return (
+                <section key={i} className={styles.identity}>
+                  <div className={styles.displayBox}>
+                    <h1 className={styles.display}>{section.display}</h1>
+                  </div>
+                  <p className={styles.lead}>{section.lead}</p>
+                  <p className={styles.aside}>{section.aside}</p>
+                </section>
+              );
+            case "wall":
+              return (
+                <section key={i} className={styles.gallery}>
+                  <h2 className={styles.label}>{section.label}</h2>
+                  <div className={styles.wall}>
+                    {section.items.map(({ poster, video }) => (
+                      <div key={poster.src} className={styles.cell}>
+                        <Image className={styles.media} src={poster.src} alt={poster.alt} fill unoptimized />
+                        {video && <AutoplayVideo className={styles.media} src={video} mode="AUTOPLAY_VISIBLE" />}
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              );
+            case "about":
+              return (
+                <section key={i} className={styles.about}>
+                  <div className={styles.aboutText}>
+                    <p className={styles.aboutBody}>{section.text}</p>
+                    <p className={styles.aboutMore}>
+                      <Link href={section.more.href}>{section.more.label}</Link>
+                    </p>
+                  </div>
+                  <div className={styles.portrait}>
+                    <Image
+                      src={section.portrait.src}
+                      width={section.portrait.width}
+                      height={section.portrait.height}
+                      alt={section.portrait.alt}
+                      unoptimized
+                    />
+                  </div>
+                </section>
+              );
+            case "frames":
+              return (
+                <section key={i} className={styles.gallery}>
+                  <h2 className={styles.label}>{section.label}</h2>
+                  <JustifiedRows id={framesToken.get(i)!} items={section.items} />
+                </section>
+              );
+          }
+        })}
       </main>
 
       <footer className={styles.footer}>
@@ -115,5 +125,15 @@ function HomeView({ content }: { content: HomeContent }) {
         </nav>
       </footer>
     </div>
+  );
+}
+
+function Hero({ hero }: { hero: Extract<HomeSection, { kind: "hero" }> }) {
+  return (
+    <figure className={styles.hero}>
+      <Image className={styles.media} src={hero.poster.src} alt={hero.poster.alt} fill unoptimized preload />
+      <AutoplayVideo className={styles.media} src={hero.video} mode="AUTOPLAY_AMBIENT" />
+      <figcaption className={styles.heroCaption}>{hero.caption}</figcaption>
+    </figure>
   );
 }

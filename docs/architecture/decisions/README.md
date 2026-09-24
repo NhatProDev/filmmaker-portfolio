@@ -30,10 +30,15 @@ write a new one that supersedes it, and mark the old one `Superseded by NNNN`.
 | [0014](0014-media-architecture.md) | Media identity is provider + key with checksum, URLs derived at read time, originals separate from future variants, providers behind adapters, private media not publicly delivered | Approved — §3 amended by 0015 |
 | [0015](0015-placement-poster-override-and-contract-realignment.md) | Poster = asset default + optional relational placement override, both in `MEDIA_IN_USE`; strict single-owner wording; `0001` baseline provenance; `openapi.yaml` realigned to the domain | Approved |
 | [0016](0016-baked-in-letterbox-policy.md) | Baked-in letterbox: clean masters first; a stored, closed-enum active area per asset for files that cannot be re-exported; no automatic detection in V1 | Approved (delegated, Phase 2G-A) — to be confirmed at review |
+| [0017](0017-cms-managed-about-contact-and-site-settings.md) | About, Contact and site settings become keyed pages with strict structured `content` and relational `page_media` slots, published like Home; static content is the fallback until first publish; no Contact form | Approved (Phase 3C brief) |
+| [0018](0018-home-composer-with-closed-home-sections.md) | Home is an ordered composition of five closed Home sections (hero first and once, identity once); generic blocks on Home refused pending design review; no data migration | Approved (Phase 3C brief) |
+| [0019](0019-albums-and-collections.md) | Albums: ordered IMAGE sets with contextual alt and captions, a `collection` label for grouping, an optional live related-project link, draft/publish, PUBLIC only; `/albums` and `/albums/<slug>` outside the navigation | Approved (Phase 3C brief) |
+| [0020](0020-private-uploads-and-storage-provider-realignment.md) | Uploads take `audience`; private originals live under `private/` with no public URL; a rehearsed script realigns `storage_provider` on rows and snapshots in one transaction | Approved (Phase 3C brief) |
 
 ADRs 0001–0008 were approved on 2026-09-21; ADR-0009 and ADR-0010 on
 2026-09-22; ADR-0011 to ADR-0015 on 2026-09-24. ADR-0016 was decided on
-2026-09-24 under the owner's Phase 2G-A delegation.
+2026-09-24 under the owner's Phase 2G-A delegation. ADR-0017 to ADR-0020 record
+the owner's Phase 3C brief of 2026-09-24.
 
 **Schema note.** The deferred schema work of ADR-0006, ADR-0007 and ADR-0009 is
 applied, together with ADR-0011 and ADR-0014's additions, in migration

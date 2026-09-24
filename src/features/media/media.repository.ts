@@ -2,8 +2,11 @@ import { and, count, desc, eq, ilike, inArray, isNull, or, sql, type SQL } from 
 import { alias } from "drizzle-orm/pg-core";
 import type { Database } from "@db/client";
 import {
+  albumMedia,
+  albums,
   blockMedia,
   media,
+  pageMedia,
   pages,
   projectBlocks,
   projects,
@@ -48,6 +51,8 @@ export type MediaUsage =
       pageKey: string | null;
     }
   | { kind: "ASSET_POSTER"; mediaId: string }
+  | { kind: "PAGE_MEDIA"; pageKey: string; slot: string }
+  | { kind: "ALBUM_ITEM" | "ALBUM_COVER" | "PUBLISHED_ALBUM"; albumId: string; albumTitle: string }
   | { kind: "PUBLISHED_PROJECT"; projectId: string; projectTitle: string }
   | { kind: "PUBLISHED_PAGE"; pageKey: string };
 
@@ -119,10 +124,15 @@ export function createMediaRepository(db: Database) {
       type?: MediaRow["type"];
       status?: MediaRow["status"];
       search?: string;
+      audience?: "PUBLIC" | "PRIVATE";
       page: number;
       pageSize: number;
     }): Promise<{ rows: MediaRow[]; total: number }> {
       const conditions: SQL[] = [live];
+      // The key prefix decides the audience (ADR-0014 §4, ADR-0020).
+      const privateKey = sql`${media.storageKey} like 'private/%'`;
+      if (filter.audience === "PRIVATE") conditions.push(privateKey);
+      if (filter.audience === "PUBLIC") conditions.push(sql`not coalesce(${privateKey}, false)`);
       if (filter.type) conditions.push(eq(media.type, filter.type));
       if (filter.status) conditions.push(eq(media.status, filter.status));
       if (filter.search) {
@@ -176,13 +186,22 @@ export function createMediaRepository(db: Database) {
     // provider adapter reports later.
     async markUploaded(
       id: string,
-      stored: { fileSizeBytes: number; checksumSha256: string | null; mimeType: string | null },
+      stored: {
+        fileSizeBytes: number;
+        checksumSha256: string | null;
+        mimeType: string | null;
+        width: number | null;
+        height: number | null;
+        durationMs: number | null;
+      },
     ): Promise<MediaRow> {
+      // An image is usable at once; a video once its frame size is known.
+      const measured = stored.width !== null && stored.height !== null;
       const [row] = await db
         .update(media)
         .set({
           ...stored,
-          status: sql`case when ${media.type} = 'IMAGE' then 'READY'::media_status else 'PROCESSING'::media_status end`,
+          status: sql`case when ${media.type} = 'IMAGE' or ${measured} then 'READY'::media_status else 'PROCESSING'::media_status end`,
           updatedAt: sql`now()`,
         })
         .where(eq(media.id, id))
@@ -204,7 +223,7 @@ export function createMediaRepository(db: Database) {
       const ownerProjectId = sql`coalesce(${projectBlocks.projectId}, ${parent.projectId})`;
       const ownerPageId = sql`coalesce(${projectBlocks.pageId}, ${parent.pageId})`;
 
-      const [covers, previews, placements, posters, snapshots] = await Promise.all([
+      const [covers, previews, placements, posters, snapshots, pageSlots, albumItems, albumCovers] = await Promise.all([
         db
           .select({ projectId: projects.id, projectTitle: projects.title })
           .from(projects)
@@ -238,11 +257,34 @@ export function createMediaRepository(db: Database) {
           .from(media)
           .where(and(eq(media.posterMediaId, mediaId), live)),
         db
-          .select({ projectId: projects.id, projectTitle: projects.title, pageKey: pages.key })
+          .select({
+            projectId: projects.id,
+            projectTitle: projects.title,
+            pageKey: pages.key,
+            albumId: albums.id,
+            albumTitle: albums.title,
+          })
           .from(publicationMedia)
           .leftJoin(projects, eq(projects.id, publicationMedia.projectId))
           .leftJoin(pages, eq(pages.id, publicationMedia.pageId))
+          .leftJoin(albums, eq(albums.id, publicationMedia.albumId))
           .where(eq(publicationMedia.mediaId, mediaId)),
+        // A structured page's image slots (ADR-0017).
+        db
+          .select({ pageKey: pages.key, slot: pageMedia.slot })
+          .from(pageMedia)
+          .innerJoin(pages, eq(pages.id, pageMedia.pageId))
+          .where(eq(pageMedia.mediaId, mediaId)),
+        // An album's images and cover (ADR-0019); a deleted album holds none.
+        db
+          .select({ albumId: albums.id, albumTitle: albums.title })
+          .from(albumMedia)
+          .innerJoin(albums, eq(albums.id, albumMedia.albumId))
+          .where(and(eq(albumMedia.mediaId, mediaId), isNull(albums.deletedAt))),
+        db
+          .select({ albumId: albums.id, albumTitle: albums.title })
+          .from(albums)
+          .where(and(eq(albums.coverMediaId, mediaId), isNull(albums.deletedAt))),
       ]);
 
       return [
@@ -253,11 +295,16 @@ export function createMediaRepository(db: Database) {
           ...(posterMediaId === mediaId ? [{ kind: "PLACEMENT_POSTER" as const, ...owner }] : []),
         ]),
         ...posters.map((row) => ({ kind: "ASSET_POSTER" as const, ...row })),
+        ...pageSlots.map((row) => ({ kind: "PAGE_MEDIA" as const, ...row })),
         ...snapshots.map((row) =>
           row.projectId
             ? { kind: "PUBLISHED_PROJECT" as const, projectId: row.projectId, projectTitle: row.projectTitle! }
-            : { kind: "PUBLISHED_PAGE" as const, pageKey: row.pageKey! },
+            : row.albumId
+              ? { kind: "PUBLISHED_ALBUM" as const, albumId: row.albumId, albumTitle: row.albumTitle! }
+              : { kind: "PUBLISHED_PAGE" as const, pageKey: row.pageKey! },
         ),
+        ...[...new Map(albumItems.map((row) => [row.albumId, row])).values()].map((row) => ({ kind: "ALBUM_ITEM" as const, ...row })),
+        ...albumCovers.map((row) => ({ kind: "ALBUM_COVER" as const, ...row })),
       ];
     },
   };

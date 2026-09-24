@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { BlockDto } from "@/features/project-builder/composition.mapper";
+import { PATTERNS } from "@/features/project-builder/patterns";
 import { PRESETS } from "@/features/project-builder/presets";
 import { markupToParagraphs } from "@/features/project-builder/inline-markup";
 import { openingSeed } from "@/features/project-builder/templates";
@@ -10,6 +11,7 @@ import { ErrorLine } from "../../../../_components/composition";
 import { useAction } from "../../../../_components/useAction";
 import studio from "../../../../studio.module.css";
 import styles from "./composer.module.css";
+import type { ComposerOwner } from "./owner";
 import { RichTextField } from "./RichTextField";
 
 // Inserting a block (ADR-0005: at a position, siblings shift in one
@@ -24,7 +26,9 @@ type Choice = {
   hint: string;
   // Text blocks ask for their words first.
   needsText?: "text" | "caption";
-  body: (text?: string) => Record<string, unknown>;
+  // Sections that need several short texts ask for all of them first.
+  fields?: { label: string; multiline?: boolean }[];
+  body: (text?: string, values?: string[]) => Record<string, unknown>;
 };
 
 const col = (colStart: number, colSpan: number) => ({ placement: { desktop: { colStart, colSpan } } });
@@ -76,6 +80,90 @@ const PRESET_CHOICES: Choice[] = [
   },
 ];
 
+// Home's closed sections (ADR-0018), created whole. The hero opens the page,
+// so it is created first; the others go where the author asked.
+const HOME_CHOICES: Choice[] = [
+  {
+    key: "hero",
+    label: "Hero",
+    hint: "A silent ambient film across the top, over its poster, with a caption. Always first; choose the film next.",
+    needsText: "caption",
+    body: (text = "") => ({
+      type: "HERO",
+      position: 0,
+      content: { caption: text.trim() },
+      config: { playback: { mode: "AUTOPLAY_AMBIENT" }, fit: "COVER" },
+    }),
+  },
+  {
+    key: "identity",
+    label: PRESETS.homeIdentity.label,
+    hint: "The page's name in display type, a lead sentence and an aside. Home shows it once.",
+    fields: [{ label: "Display" }, { label: "Lead", multiline: true }, { label: "Aside", multiline: true }],
+    body: (_text, [display = "", lead = "", aside = ""] = []) => ({
+      type: "GRID",
+      config: { preset: "homeIdentity" },
+      children: [
+        { type: "TEXT", content: { kind: "richText", paragraphs: [[display.trim()]] }, config: { role: "display", ...col(1, 12) } },
+        { type: "TEXT", content: { kind: "richText", paragraphs: [[lead.trim()]] }, config: { role: "lead", ...col(1, 5) } },
+        { type: "TEXT", content: { kind: "richText", paragraphs: [[aside.trim()]] }, config: { role: "aside", ...col(9, 4) } },
+      ],
+    }),
+  },
+  {
+    key: "wall",
+    label: PRESETS.homeWall.label,
+    hint: "Stills and silent loops that play while visible, three across. Add the tiles next.",
+    fields: [{ label: "Label" }],
+    body: (_text, [label = ""] = []) => ({
+      type: "GALLERY",
+      content: { label: label.trim() },
+      config: {
+        mode: "VIDEO_GRID",
+        columns: { desktop: 3, tablet: 2, mobile: 2 },
+        playback: { mode: "AUTOPLAY_VISIBLE" },
+        fit: "COVER",
+        preset: "homeWall",
+      },
+    }),
+  },
+  {
+    key: "about",
+    label: PRESETS.homeAbout.label,
+    hint: "A paragraph, a link on to About and a portrait. Choose the portrait next.",
+    fields: [{ label: "Paragraph", multiline: true }, { label: "Link text" }, { label: "Link to (for example /about)" }],
+    body: (_text, [body = "", linkText = "", href = ""] = []) => ({
+      type: "GRID",
+      config: { preset: "homeAbout" },
+      children: [
+        { type: "TEXT", content: { kind: "richText", paragraphs: [[body.trim()]] }, config: { role: "body", ...col(1, 6) } },
+        {
+          type: "TEXT",
+          content: { kind: "richText", paragraphs: [[{ link: { href: href.trim(), text: linkText.trim() } }]] },
+          config: { role: "more", ...col(1, 6) },
+        },
+        { type: "IMAGE", config: col(10, 3) },
+      ],
+    }),
+  },
+  {
+    key: "frames",
+    label: "Frames",
+    hint: "Stills in justified rows, at their own proportions. Add the stills next.",
+    fields: [{ label: "Label" }],
+    body: (_text, [label = ""] = []) => ({ type: "GALLERY", content: { label: label.trim() }, config: { mode: "JUSTIFIED_ROWS" } }),
+  },
+];
+
+// Reusable patterns (3C-9): ordinary blocks, inserted once, never linked.
+const PATTERN_CHOICES: Choice[] = PATTERNS.map((pattern) => ({
+  key: `pattern-${pattern.key}`,
+  label: pattern.label,
+  hint: pattern.description,
+  ...(pattern.fields.length ? { fields: pattern.fields } : {}),
+  body: (_text, values = []) => pattern.build(values),
+}));
+
 const ROOT_CHOICES: Choice[] = [
   { key: "text", label: "Text", hint: "Paragraphs in the page's text column.", needsText: "text", body: (text = "") => ({ type: "TEXT", content: { kind: "richText", paragraphs: paragraphs(text) }, config: { role: "body" } }) },
   { key: "image", label: "Image", hint: "One image at its own proportions, with an optional caption.", body: () => ({ type: "IMAGE", config: { fit: "CONTAIN" } }) },
@@ -96,7 +184,7 @@ const CHILD_CHOICES: Choice[] = [
 ];
 
 export function AddBlock({
-  projectId,
+  owner,
   parentBlockId,
   position,
   hasOpening,
@@ -105,11 +193,12 @@ export function AddBlock({
   onCreated,
   onCancel,
 }: {
-  projectId: string;
+  owner: ComposerOwner;
   // null: the page's top level; a GRID's id: inside its columns.
   parentBlockId: string | null;
   // Where the new block goes; omitted appends.
   position?: number;
+  // A project: whether it has its opening. Home: whether it has its hero.
   hasOpening: boolean;
   label?: string;
   initiallyOpen?: boolean;
@@ -119,6 +208,7 @@ export function AddBlock({
   const [open, setOpen] = useState(initiallyOpen);
   const [asking, setAsking] = useState<Choice | null>(null);
   const [text, setText] = useState("");
+  const [values, setValues] = useState<string[]>([]);
   const close = () => {
     setOpen(false);
     setAsking(null);
@@ -126,28 +216,33 @@ export function AddBlock({
   };
   const { run, pending, error } = useAction();
   const nested = parentBlockId !== null;
+  const home = owner.kind === "page";
 
-  const create = (choice: Choice, words?: string) =>
+  const create = (choice: Choice, words?: string, fields?: string[]) =>
     run(async () => {
-      const block = await api<BlockDto>("POST", `/projects/${projectId}/blocks`, {
-        ...choice.body(words),
+      const body = choice.body(words, fields);
+      const block = await api<BlockDto>("POST", `${owner.path}/blocks`, {
+        ...body,
         ...(nested ? { parentBlockId } : {}),
-        ...(position === undefined ? {} : { position }),
+        // A choice that names its own place (the hero) keeps it.
+        ...(position === undefined || "position" in body ? {} : { position }),
       });
       setOpen(false);
       setAsking(null);
       setText("");
+      setValues([]);
       onCreated?.(block);
     });
 
   const addOpening = () =>
     run(async () => {
-      const block = await api<BlockDto>("POST", `/projects/${projectId}/blocks`, { ...openingSeed(true), position: 0 });
+      const block = await api<BlockDto>("POST", `${owner.path}/blocks`, { ...openingSeed(true), position: 0 });
       setOpen(false);
       onCreated?.(block);
     });
 
-  const pick = (choice: Choice) => (choice.needsText ? setAsking(choice) : create(choice));
+  const pick = (choice: Choice) => (choice.needsText || choice.fields ? setAsking(choice) : create(choice));
+  const setValue = (i: number, value: string) => setValues((current) => Object.assign([...current], { [i]: value }));
 
   const choiceButton = (choice: Choice) => (
     <button key={choice.key} type="button" className={styles.choice} disabled={pending} onClick={() => pick(choice)}>
@@ -166,9 +261,44 @@ export function AddBlock({
     );
   }
 
+  const backButton = (
+    <button type="button" className={`${studio.button} ${studio.small}`} onClick={() => setAsking(null)}>
+      Back
+    </button>
+  );
+
   return (
     <div className={styles.addPanel} role="group" aria-label={label}>
-      {asking ? (
+      {asking?.fields ? (
+        <form
+          className={styles.stack}
+          onSubmit={(event) => {
+            event.preventDefault();
+            void create(asking, undefined, asking.fields!.map((_, i) => values[i] ?? ""));
+          }}
+        >
+          {asking.fields.map((field, i) => (
+            <label key={field.label} className={studio.field}>
+              <span>{field.label}</span>
+              {field.multiline ? (
+                <textarea className={studio.textarea} rows={3} value={values[i] ?? ""} maxLength={5000} autoFocus={i === 0} onChange={(event) => setValue(i, event.target.value)} />
+              ) : (
+                <input className={studio.input} value={values[i] ?? ""} maxLength={500} autoFocus={i === 0} onChange={(event) => setValue(i, event.target.value)} />
+              )}
+            </label>
+          ))}
+          <div className={studio.row}>
+            <button
+              type="submit"
+              className={`${studio.button} ${studio.small} ${studio.primary}`}
+              disabled={pending || asking.fields.some((_, i) => !(values[i] ?? "").trim())}
+            >
+              Add {asking.label.toLowerCase()}
+            </button>
+            {backButton}
+          </div>
+        </form>
+      ) : asking ? (
         <form
           className={styles.stack}
           onSubmit={(event) => {
@@ -188,29 +318,38 @@ export function AddBlock({
             <button type="submit" className={`${studio.button} ${studio.small} ${studio.primary}`} disabled={pending || !text.trim() || (asking.needsText === "text" && !markupToParagraphs(text).ok)}>
               Add {asking.label.toLowerCase()}
             </button>
-            <button type="button" className={`${studio.button} ${studio.small}`} onClick={() => setAsking(null)}>
-              Back
-            </button>
+            {backButton}
           </div>
         </form>
       ) : (
         <>
-          {!nested && (
+          {home ? (
             <>
-              <p className={styles.groupLabel}>Project Detail presets</p>
-              <div className={styles.choices}>
-                {!hasOpening && (
-                  <button type="button" className={styles.choice} disabled={pending} onClick={addOpening}>
-                    <strong>Opening</strong>
-                    <span>A film or image under the title, always first.</span>
-                  </button>
-                )}
-                {PRESET_CHOICES.map(choiceButton)}
-              </div>
-              <p className={styles.groupLabel}>Blocks</p>
+              <p className={styles.groupLabel}>Home sections</p>
+              <div className={styles.choices}>{HOME_CHOICES.filter((choice) => choice.key !== "hero" || !hasOpening).map(choiceButton)}</div>
+            </>
+          ) : (
+            <>
+              {!nested && (
+                <>
+                  <p className={styles.groupLabel}>Project Detail presets</p>
+                  <div className={styles.choices}>
+                    {!hasOpening && (
+                      <button type="button" className={styles.choice} disabled={pending} onClick={addOpening}>
+                        <strong>Opening</strong>
+                        <span>A film or image under the title, always first.</span>
+                      </button>
+                    )}
+                    {PRESET_CHOICES.map(choiceButton)}
+                  </div>
+                  <p className={styles.groupLabel}>Patterns</p>
+                  <div className={styles.choices}>{PATTERN_CHOICES.map(choiceButton)}</div>
+                  <p className={styles.groupLabel}>Blocks</p>
+                </>
+              )}
+              <div className={styles.choices}>{(nested ? CHILD_CHOICES : ROOT_CHOICES).map(choiceButton)}</div>
             </>
           )}
-          <div className={styles.choices}>{(nested ? CHILD_CHOICES : ROOT_CHOICES).map(choiceButton)}</div>
           <div className={studio.row}>
             <button type="button" className={`${studio.button} ${studio.small}`} onClick={close}>
               Cancel

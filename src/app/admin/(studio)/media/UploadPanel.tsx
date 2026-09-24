@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { api, ApiRequestError, describeError } from "../../_components/api";
+import { useUnsavedGuard } from "../../_components/useUnsavedGuard";
 import styles from "../../studio.module.css";
 
 // Direct browser-to-storage upload (CLAUDE.md §12, ADR-0020). For each file:
@@ -79,10 +80,20 @@ function put(auth: UploadAuthorisation, file: File, onProgress: (fraction: numbe
   });
 }
 
+const SPOKEN: Record<Item["state"], string> = {
+  measuring: "preparing",
+  uploading: "uploading",
+  completing: "checking the stored file",
+  done: "in the library",
+  failed: "failed",
+  duplicate: "already in the library",
+};
+
 export function UploadPanel({ onDone, onShow }: { onDone: () => void; onShow: (mediaId: string) => void }) {
   const [audience, setAudience] = useState<Audience>("PUBLIC");
   const [items, setItems] = useState<Item[]>([]);
   const busy = items.some((item) => !["done", "failed", "duplicate"].includes(item.state));
+  useUnsavedGuard(busy);
 
   const update = (id: number, patch: Partial<Item>) =>
     setItems((current) => current.map((item) => (item.id === id ? { ...item, ...patch } : item)));
@@ -163,8 +174,15 @@ export function UploadPanel({ onDone, onShow }: { onDone: () => void; onShow: (m
             }}
           />
         </div>
+        {/* Always present, so the first change is heard; it names each file's
+            state, not every percent (3D-8). */}
+        <p role="status" className={styles.srOnly}>
+          {items
+            .map((item) => `${item.name}: ${SPOKEN[item.state]}${item.message ? ` ${item.message}` : ""}`)
+            .join(". ")}
+        </p>
         {items.length > 0 && (
-          <ul className={styles.uploadList} aria-live="polite">
+          <ul className={styles.uploadList}>
             {items.map((item) => (
               <li key={item.id} data-state={item.state}>
                 <span className={styles.uploadName}>{item.name}</span>

@@ -9,6 +9,7 @@ import { ChooseMediaButton, ErrorLine } from "../../../_components/composition";
 import { PublishingPanel } from "../../../_components/PublishingPanel";
 import { Thumb, thumbnailUrl } from "../../../_components/Thumb";
 import { useAction } from "../../../_components/useAction";
+import { useUnsavedGuard } from "../../../_components/useUnsavedGuard";
 import styles from "../../../studio.module.css";
 import { StatusBadge } from "../ProjectsBoard";
 import { labelOf } from "./composer/blockInfo";
@@ -48,6 +49,11 @@ const DETAIL_FIELDS = [
   ["runtime", "Runtime", 100],
 ] as const;
 
+// The saved values the Details panel edits. It remounts only when they change,
+// so saving the cover, Featured or the credits never wipes edits typed there.
+const detailsKey = (project: Project) =>
+  JSON.stringify([...DETAIL_FIELDS.map(([key]) => project[key]), project.shortDescription, project.seoTitle, project.seoDescription]);
+
 function DetailsPanel({ project }: { project: Project }) {
   const { run, pending, error } = useAction();
   const initial = {
@@ -64,6 +70,7 @@ function DetailsPanel({ project }: { project: Project }) {
   };
   const [values, setValues] = useState(initial);
   const changed = (Object.keys(values) as (keyof typeof values)[]).filter((key) => values[key] !== initial[key]);
+  useUnsavedGuard(changed.length > 0);
 
   function submit(event: FormEvent) {
     event.preventDefault();
@@ -171,6 +178,7 @@ function CreditsPanel({ project }: { project: Project }) {
   const { run, pending, error } = useAction();
   const [rows, setRows] = useState(project.credits);
   const dirty = JSON.stringify(rows) !== JSON.stringify(project.credits);
+  useUnsavedGuard(dirty);
   const update = (index: number, key: "role" | "name", value: string) =>
     setRows(rows.map((row, i) => (i === index ? { ...row, [key]: value } : row)));
 
@@ -179,12 +187,12 @@ function CreditsPanel({ project }: { project: Project }) {
       {rows.length === 0 && <p className={styles.hint}>No credits.</p>}
       {rows.map((row, index) => (
         <div key={index} className={styles.row} style={{ marginBottom: 8 }}>
-          <input className={styles.input} style={{ flex: 1 }} aria-label="Role" placeholder="Role" value={row.role} maxLength={120} onChange={(e) => update(index, "role", e.target.value)} />
-          <input className={styles.input} style={{ flex: 2 }} aria-label="Name" placeholder="Name" value={row.name} maxLength={200} onChange={(e) => update(index, "name", e.target.value)} />
+          <input className={styles.input} style={{ flex: 1 }} aria-label={`Credit ${index + 1} role`} placeholder="Role" value={row.role} maxLength={120} onChange={(e) => update(index, "role", e.target.value)} />
+          <input className={styles.input} style={{ flex: 2 }} aria-label={`Credit ${index + 1} name`} placeholder="Name" value={row.name} maxLength={200} onChange={(e) => update(index, "name", e.target.value)} />
           <button type="button" className={`${styles.button} ${styles.small} ${styles.icon}`} aria-label="Move credit up" disabled={index === 0} onClick={() => setRows([...rows.slice(0, index - 1), row, rows[index - 1], ...rows.slice(index + 1)])}>
             ↑
           </button>
-          <button type="button" className={`${styles.button} ${styles.small} ${styles.danger}`} onClick={() => setRows(rows.filter((_, i) => i !== index))}>
+          <button type="button" className={`${styles.button} ${styles.small} ${styles.danger}`} aria-label={`Remove credit ${index + 1}`} onClick={() => setRows(rows.filter((_, i) => i !== index))}>
             Remove
           </button>
         </div>
@@ -258,8 +266,9 @@ function AccessPanel({ project }: { project: Project }) {
             });
           }}
         >
-          <span>Project password {project.hasPassword ? "— set" : "— not set"}</span>
+          <label htmlFor={`password-${project.id}`}>Project password {project.hasPassword ? "— set" : "— not set"}</label>
           <input
+            id={`password-${project.id}`}
             className={styles.input}
             type="password"
             autoComplete="new-password"
@@ -337,12 +346,12 @@ export function ProjectEditor({ project }: { project: Project }) {
         live={project.visibility === "PRIVATE" ? `/works/${project.slug} (password)` : `/works/${project.slug}`}
         blockLabels={blockLabels(project.blocks)}
       />
-      <DetailsPanel key={`details-${project.updatedAt}`} project={project} />
+      <DetailsPanel key={detailsKey(project)} project={project} />
       <MediaPanel project={project} />
       <Panel title="Page composition">
         <ProjectComposer projectId={project.id} blocks={project.blocks} previewHref={`/api/v1/projects/${project.id}/preview`} />
       </Panel>
-      <CreditsPanel key={`credits-${project.updatedAt}`} project={project} />
+      <CreditsPanel key={JSON.stringify(project.credits)} project={project} />
       <AccessPanel project={project} />
     </>
   );

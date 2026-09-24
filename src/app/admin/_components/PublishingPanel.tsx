@@ -57,7 +57,10 @@ export function PublishingPanel({
     <section className={styles.panel}>
       <div className={styles.panelHead}>
         <h2>Publishing</h2>
-        <span className={`${styles.badge} ${status.className}`}>{status.text}</span>
+        {/* A polite status: publishing, or unpublishing, is announced. */}
+        <span role="status" className={`${styles.badge} ${status.className}`}>
+          {status.text}
+        </span>
       </div>
       <div className={styles.panelBody}>
         <p className={styles.hint}>

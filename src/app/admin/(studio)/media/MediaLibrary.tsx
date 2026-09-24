@@ -363,7 +363,7 @@ export function MediaLibrary({ initial, total: initialTotal }: { initial: MediaD
         <UploadPanel onDone={() => void reload()} onShow={(id) => void show(id)} />
         <ExternalPanel onDone={() => void reload()} />
       </div>
-      {error && <p className={styles.error}>{error}</p>}
+      {error && <p className={styles.error} role="alert">{error}</p>}
       <div className={styles.split}>
         <div className={styles.tiles}>
           {items.map((media) => {

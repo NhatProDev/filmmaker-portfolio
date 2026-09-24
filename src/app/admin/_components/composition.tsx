@@ -177,7 +177,11 @@ export function PlacementEditor({
               type="button"
               className={`${styles.button} ${styles.small} ${styles.danger}`}
               disabled={pending}
-              onClick={() => run(onRemove)}
+              onClick={() => {
+                if (confirm("Remove this media from the block? Its description and poster choice here are lost. The file stays in the Media Library.")) {
+                  void run(onRemove);
+                }
+              }}
             >
               Remove
             </button>
@@ -416,7 +420,7 @@ export function PlacementList({
               <button
                 type="button"
                 className={`${styles.button} ${styles.small} ${styles.icon}`}
-                aria-label="Move earlier"
+                aria-label={`Move item ${index + 1} earlier`}
                 disabled={pending || index === 0}
                 onClick={() => move(index, -1)}
               >
@@ -425,7 +429,7 @@ export function PlacementList({
               <button
                 type="button"
                 className={`${styles.button} ${styles.small} ${styles.icon}`}
-                aria-label="Move later"
+                aria-label={`Move item ${index + 1} later`}
                 disabled={pending || index === ids.length - 1}
                 onClick={() => move(index, 1)}
               >

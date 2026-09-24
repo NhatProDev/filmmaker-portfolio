@@ -51,10 +51,11 @@ export function MediaPicker({
           <input
             className={styles.input}
             type="search"
+            aria-label="Search media"
             placeholder="Search by file name or alt text"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            style={{ width: 260 }}
+            style={{ width: "min(260px, 100%)" }}
           />
           <button type="button" className={styles.button} onClick={() => dialog.current?.close()}>
             Close
@@ -62,7 +63,7 @@ export function MediaPicker({
         </div>
       </div>
       <div className={styles.dialogBody}>
-        {error && <p className={styles.error}>{error}</p>}
+        {error && <p className={styles.error} role="alert">{error}</p>}
         {!items && !error && <p className={styles.hint}>Loading…</p>}
         {items && items.length === 0 && <p className={styles.hint}>No ready {types.join(" or ").toLowerCase()} in the library.</p>}
         {items && items.length > 0 && (

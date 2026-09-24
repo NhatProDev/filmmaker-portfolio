@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+// Zod 4 probes `new Function` to compile fast object parsers. The site's CSP
+// forbids eval, and Firefox reports even the caught probe as a violation in
+// the Studio (which parses rich text with these schemas in the browser).
+// Interpreted parsing is all this project needs, on server and browser alike.
+z.config({ jitless: true });
+
 // The persistent block contract (ADR-0006, ADR-0008, ADR-0010, ADR-0011,
 // ADR-0013). Every block is validated as a discriminated union on its type:
 // `content` is editorial data, `config` presentation and layout. Objects are

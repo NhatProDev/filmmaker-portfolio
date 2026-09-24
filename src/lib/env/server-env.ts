@@ -90,6 +90,10 @@ const serverEnvSchema = z
     S3_ACCESS_KEY_ID: z.preprocess(emptyAsUnset, z.string().min(1).optional()),
     S3_SECRET_ACCESS_KEY: z.preprocess(emptyAsUnset, z.string().min(1).optional()),
     S3_FORCE_PATH_STYLE: z.preprocess(emptyAsUnset, z.enum(["true", "false"]).default("true")),
+    // Have the provider verify each upload's SHA-256 (x-amz-checksum-sha256
+    // on the signed PUT). Turn on only after both buckets' CORS allow that
+    // header, or browsers cannot upload (docs/operations/media-lifecycle.md).
+    S3_UPLOAD_CHECKSUMS: z.preprocess(emptyAsUnset, z.enum(["true", "false"]).default("false")),
     // Lifetime of a signed private delivery or upload URL.
     MEDIA_SIGNED_URL_TTL_SECONDS: z.preprocess(emptyAsUnset, z.coerce.number().int().min(30).max(3600).default(300)),
 

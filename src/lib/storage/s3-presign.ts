@@ -4,7 +4,10 @@ import { createHash, createHmac } from "node:crypto";
 // (AWS S3, Cloudflare R2, MinIO), with no SDK: a presigned URL lets a browser
 // upload or fetch one object directly for a bounded time, so large media
 // never pass through the application server (CLAUDE.md §12, ADR-0014).
-// Only the host header is signed; the payload is UNSIGNED-PAYLOAD.
+// The host header is always signed, plus any headers the caller names (the
+// requester must then send exactly those values). The payload is
+// UNSIGNED-PAYLOAD: a signed x-amz-checksum-sha256 header is how the store is
+// asked to verify the body (R2 refuses a mismatch with 400 BadDigest).
 
 export type S3Location = {
   // e.g. https://<account>.r2.cloudflarestorage.com or https://s3.amazonaws.com
@@ -32,6 +35,8 @@ export function presignS3(input: {
   location: S3Location;
   credentials: S3Credentials;
   expiresInSeconds: number;
+  // Extra headers bound into the signature, by lower-case name.
+  headers?: Record<string, string>;
   now?: Date;
 }): string {
   const { method, location, credentials, expiresInSeconds } = input;
@@ -48,12 +53,19 @@ export function presignS3(input: {
   const timestamp = amzDate(input.now ?? new Date());
   const day = timestamp.slice(0, 8);
   const scope = `${day}/${location.region}/s3/aws4_request`;
+  const signed: Record<string, string> = { host };
+  for (const [name, value] of Object.entries(input.headers ?? {})) {
+    if (name !== name.toLowerCase() || name === "host") throw new Error(`Not a signable header name: ${name}`);
+    signed[name] = value.trim();
+  }
+  const names = Object.keys(signed).sort();
+  const signedHeaders = names.join(";");
   const query: [string, string][] = [
     ["X-Amz-Algorithm", "AWS4-HMAC-SHA256"],
     ["X-Amz-Credential", `${credentials.accessKeyId}/${scope}`],
     ["X-Amz-Date", timestamp],
     ["X-Amz-Expires", String(expiresInSeconds)],
-    ["X-Amz-SignedHeaders", "host"],
+    ["X-Amz-SignedHeaders", signedHeaders],
   ];
   const canonicalQuery = query
     .map(([k, v]) => [encode(k), encode(v)])
@@ -61,7 +73,8 @@ export function presignS3(input: {
     .map(([k, v]) => `${k}=${v}`)
     .join("&");
 
-  const canonicalRequest = [method, canonicalUri, canonicalQuery, `host:${host}\n`, "host", "UNSIGNED-PAYLOAD"].join("\n");
+  const canonicalHeaders = names.map((name) => `${name}:${signed[name]}\n`).join("");
+  const canonicalRequest = [method, canonicalUri, canonicalQuery, canonicalHeaders, signedHeaders, "UNSIGNED-PAYLOAD"].join("\n");
   const stringToSign = ["AWS4-HMAC-SHA256", timestamp, scope, sha256(canonicalRequest)].join("\n");
   const signingKey = hmac(hmac(hmac(hmac(`AWS4${credentials.secretAccessKey}`, day), location.region), "s3"), "aws4_request");
   const signature = createHmac("sha256", signingKey).update(stringToSign, "utf8").digest("hex");

@@ -1592,7 +1592,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
-          description: '`INVALID_STATE` (object missing or not finalizable), `UPLOAD_MISMATCH` (stored size differs from the authorised size) or `MEDIA_DUPLICATE`.'
+          description: '`INVALID_STATE` (object missing or not finalizable), `UPLOAD_MISMATCH` (stored size differs from the authorised size, or the provider SHA-256 differs from the declared one) or `MEDIA_DUPLICATE`.'
           content:
             application/json:
               schema:

@@ -158,7 +158,7 @@ export function createMediaService(db: Database) {
           altText: input.altText ?? null,
         });
         const upload = await withStorage(() =>
-          storage.createUpload({ key, mimeType: input.mimeType, byteSize: input.fileSizeBytes }),
+          storage.createUpload({ key, mimeType: input.mimeType, byteSize: input.fileSizeBytes, checksumSha256: input.checksumSha256 }),
         );
         return {
           mediaId: id,
@@ -209,7 +209,15 @@ async function completeInTransaction(db: Database, id: string, declared: Complet
         stored: stored.byteSize,
       });
     }
-    // The provider's checksum when it keeps one, otherwise the browser's.
+    // The provider's checksum when it keeps one, otherwise the browser's
+    // (docs/operations/media-lifecycle.md, "Upload integrity"). A browser
+    // that declares other bytes than the provider stored is refused.
+    if (stored.checksumSha256 && declared.checksumSha256 && stored.checksumSha256 !== declared.checksumSha256) {
+      throw conflict("UPLOAD_MISMATCH", "The stored file is not the file that was declared.", {
+        expected: declared.checksumSha256,
+        stored: stored.checksumSha256,
+      });
+    }
     const checksum = stored.checksumSha256 ?? declared.checksumSha256 ?? null;
     if (checksum) await assertNotDuplicate(media, checksum);
     const updated = await media.markUploaded(id, {

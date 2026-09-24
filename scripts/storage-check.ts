@@ -104,6 +104,22 @@ async function main() {
         `OPTIONS ${preflight.status} allow-origin=${allowed ?? "none"}`,
       );
     }
+    // Provider-verified upload checksums (S3_UPLOAD_CHECKSUMS) need the
+    // x-amz-checksum-sha256 request header allowed by both buckets' CORS.
+    const checksums = env.S3_UPLOAD_CHECKSUMS === "true";
+    for (const probe of [probes.public, probes.private]) {
+      const preflight = await status(sign("PUT", probe), {
+        method: "OPTIONS",
+        headers: {
+          origin: env.SITE_URL,
+          "access-control-request-method": "PUT",
+          "access-control-request-headers": "content-type,x-amz-checksum-sha256",
+        },
+      });
+      const allowed = preflight.status < 300 && preflight.headers.get("access-control-allow-origin") !== null;
+      if (checksums) check(`CORS allows x-amz-checksum-sha256 on ${probe.bucket}`, allowed, `OPTIONS ${preflight.status}`);
+      else console.log(`info  CORS ${allowed ? "allows" : "does not allow"} x-amz-checksum-sha256 on ${probe.bucket} (S3_UPLOAD_CHECKSUMS is off)`);
+    }
     for (const probe of [probes.public, probes.private]) {
       const read = await status(sign("GET", probe), { headers: { origin: env.SITE_URL } });
       const exposed = (read.headers.get("access-control-expose-headers") ?? "").toLowerCase();

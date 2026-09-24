@@ -1,15 +1,11 @@
 import type { Metadata } from "next";
-import styles from "../../studio.module.css";
+import { getDatabase } from "@db/client";
+import { services } from "@/app/api/v1/_lib/services";
+import { HomeEditor } from "./HomeEditor";
 
 export const metadata: Metadata = { title: "Home page" };
 
-export default function HomeEditorPage() {
-  return (
-    <>
-      <div className={styles.pageHead}>
-        <h1>Home page</h1>
-      </div>
-      <p className={styles.notice}>Home page editing is not available yet.</p>
-    </>
-  );
+export default async function HomeEditorPage() {
+  const page = await services(getDatabase()).pages.get("HOME");
+  return <HomeEditor blocks={page.blocks} publication={page.publication} />;
 }

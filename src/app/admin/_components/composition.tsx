@@ -31,6 +31,7 @@ export function Slot({
   absentAction,
   children,
   removable = true,
+  fixed = false,
 }: {
   number: number;
   title: string;
@@ -39,6 +40,9 @@ export function Slot({
   absentAction?: ReactNode;
   children?: ReactNode;
   removable?: boolean;
+  // A slot the template always renders: it can be edited, never hidden or
+  // removed (Home's five blocks, ADR-0007).
+  fixed?: boolean;
 }) {
   const { run, pending, error } = useAction();
   const className = [styles.slot, !block && styles.slotAbsent, block?.isHidden && styles.slotHidden]
@@ -50,7 +54,7 @@ export function Slot({
         <span className={styles.slotNumber}>{String(number).padStart(2, "0")}</span>
         <h3>{title}</h3>
         {block?.isHidden && <span className={styles.badge}>Hidden</span>}
-        {block ? (
+        {block && fixed ? null : block ? (
           <div className={styles.row}>
             <button
               type="button"
@@ -367,6 +371,147 @@ export function NewParagraphs({
         >
           {submitLabel}
         </button>
+      </div>
+      <ErrorLine error={error} />
+    </div>
+  );
+}
+
+// A single short field of a block's content, such as a caption or a label.
+// Saving replaces the content whole with that field set.
+export function ContentFieldEditor({
+  block,
+  field,
+  label,
+  max,
+}: {
+  block: BlockDto;
+  field: string;
+  label: string;
+  max: number;
+}) {
+  const initial = String((block.content as Record<string, unknown>)[field] ?? "");
+  const [value, setValue] = useState(initial);
+  const { run, pending, error } = useAction();
+  return (
+    <div style={{ display: "grid", gap: 8, marginTop: 10 }}>
+      <label className={styles.field}>
+        <span>{label}</span>
+        <input className={styles.input} value={value} maxLength={max} onChange={(event) => setValue(event.target.value)} />
+      </label>
+      <div className={styles.row}>
+        <button
+          type="button"
+          className={`${styles.button} ${styles.small} ${styles.primary}`}
+          disabled={pending || !value.trim() || value === initial}
+          onClick={() =>
+            run(() => api("PATCH", `/blocks/${block.id}`, { content: { ...(block.content as object), [field]: value.trim() } }))
+          }
+        >
+          Save {label.toLowerCase()}
+        </button>
+      </div>
+      <ErrorLine error={error} />
+    </div>
+  );
+}
+
+// A text block holding one link line: its label and destination.
+export function LinkEditor({ block }: { block: BlockDto }) {
+  const paragraph = (block.content as { paragraphs?: unknown[][] }).paragraphs?.[0] ?? [];
+  const run0 = paragraph[0] as { link?: { href: string; text: string } } | undefined;
+  const [text, setText] = useState(run0?.link?.text ?? "");
+  const [href, setHref] = useState(run0?.link?.href ?? "");
+  const { run, pending, error } = useAction();
+  const dirty = text !== (run0?.link?.text ?? "") || href !== (run0?.link?.href ?? "");
+  return (
+    <div style={{ display: "grid", gap: 8, marginTop: 10 }}>
+      <div className={styles.grid2}>
+        <label className={styles.field}>
+          <span>Link text</span>
+          <input className={styles.input} value={text} maxLength={500} onChange={(event) => setText(event.target.value)} />
+        </label>
+        <label className={styles.field}>
+          <span>Link to — a site path, https or mailto</span>
+          <input className={styles.input} value={href} maxLength={2000} onChange={(event) => setHref(event.target.value)} />
+        </label>
+      </div>
+      <div className={styles.row}>
+        <button
+          type="button"
+          className={`${styles.button} ${styles.small} ${styles.primary}`}
+          disabled={pending || !dirty || !text.trim() || !href.trim()}
+          onClick={() =>
+            run(() =>
+              api("PATCH", `/blocks/${block.id}`, {
+                content: { kind: "richText", paragraphs: [[{ link: { href: href.trim(), text: text.trim() } }]] },
+              }),
+            )
+          }
+        >
+          Save link
+        </button>
+      </div>
+      <ErrorLine error={error} />
+    </div>
+  );
+}
+
+// An ordered list of media placements in one block: reorder, remove, add.
+export function PlacementList({
+  block,
+  types,
+  addLabel,
+}: {
+  block: BlockDto;
+  types: MediaType[];
+  addLabel: string;
+}) {
+  const { run, pending, error } = useAction();
+  const ids = block.media.map((item) => item.id);
+  const move = (index: number, delta: number) =>
+    run(() => api("PUT", `/blocks/${block.id}/media/order`, { blockMediaIds: reorderIds(ids, index, delta) }));
+  return (
+    <div>
+      {block.media.map((item, index) => (
+        <PlacementEditor
+          key={item.id + block.updatedAt + item.position}
+          blockId={block.id}
+          item={item}
+          replaceTypes={types}
+          onRemove={() => api("DELETE", `/blocks/${block.id}/media/${item.id}`)}
+          extra={
+            <>
+              <button
+                type="button"
+                className={`${styles.button} ${styles.small} ${styles.icon}`}
+                aria-label="Move earlier"
+                disabled={pending || index === 0}
+                onClick={() => move(index, -1)}
+              >
+                ↑
+              </button>
+              <button
+                type="button"
+                className={`${styles.button} ${styles.small} ${styles.icon}`}
+                aria-label="Move later"
+                disabled={pending || index === ids.length - 1}
+                onClick={() => move(index, 1)}
+              >
+                ↓
+              </button>
+            </>
+          }
+        />
+      ))}
+      <div className={styles.row} style={{ marginTop: 8 }}>
+        <ChooseMediaButton
+          label={addLabel}
+          title={addLabel}
+          types={types}
+          onSelect={(media) => api("POST", `/blocks/${block.id}/media`, { mediaId: media.id })}
+        />
+        <span className={styles.hint}>{block.media.length} item(s)</span>
       </div>
       <ErrorLine error={error} />
     </div>

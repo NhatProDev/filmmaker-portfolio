@@ -15,7 +15,15 @@ export type DatabaseHandle = {
 };
 
 export function createDatabase(url: string, options: { max?: number; prepare?: boolean } = {}): DatabaseHandle {
-  const client = postgres(url, { max: options.max ?? 10, prepare: options.prepare ?? true });
+  const client = postgres(url, {
+    max: options.max ?? 10,
+    prepare: options.prepare ?? true,
+    // Fail fast when the database is unreachable, release idle connections
+    // (serverless instances freeze), and recycle long-lived ones.
+    connect_timeout: 10,
+    idle_timeout: 20,
+    max_lifetime: 30 * 60,
+  });
   return {
     db: drizzle(client, { schema }) as unknown as Database,
     close: () => client.end(),

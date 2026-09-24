@@ -10,8 +10,8 @@ implemented and reads all content through a content gateway. By default it
 serves the committed static content and needs no database; a
 PostgreSQL-backed adapter serves the same pages from the database model.
 
-The Studio at `/admin` (projects, the template-shaped project editor, the
-Media Library) works over the REST API in `src/app/api/v1`, with Argon2id
+The Studio at `/admin` (projects, the template-shaped project and Home
+editors, the Media Library) works over the REST API in `src/app/api/v1`, with Argon2id
 sign-in, revocable server-side sessions and CSRF-checked mutations. It needs a
 database; the public site does not. Uploads stay unavailable until a storage
 provider is chosen (ADR-0014).
@@ -125,10 +125,14 @@ are deliberately not repeated here; a second copy would drift.
 | `npm run db:migrate` | Applies migrations — **local development database only**. |
 | `npm run db:import` | Dry run of the static-content import; add `-- --apply` to write (local database only). |
 | `npm run db:seed-admin` | Creates the admin from `ADMIN_EMAIL` / `ADMIN_PASSWORD`, or resets its password and sessions (local database only). |
+| `npm run db:verify` | Read-only: every public route served from the database compared with the committed content (local database only). |
 
 To use the Studio locally: set `DATABASE_URL` to a local PostgreSQL, then run
 `db:migrate`, `db:import -- --apply` and `db:seed-admin`, start the site, and
-sign in at `/admin/login`.
+sign in at `/admin/login`. To serve the public site from the database, verify
+with `db:verify` and build with `SITE_CONTENT_ADAPTER=db`; the full procedure is
+in `scripts/README.md`. The static adapter remains the default and the test
+fixture.
 
 Configuration is in `.env.local`; see `.env.example`. No database is needed to
 run the site.

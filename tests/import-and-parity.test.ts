@@ -7,36 +7,11 @@ import { createDbGateway } from "@/features/site-content/db-gateway";
 import { ContentProjectionError } from "@/features/site-content/db-projection";
 import type { ContentGateway } from "@/features/site-content/site-content.types";
 import { staticGateway } from "@/features/site-content/static-gateway";
-import { mediaKeyFromUrl } from "@/lib/storage/media-url";
+import { byContent as byContentOf, compareGateways, diffs } from "../scripts/lib/content-parity";
 import { applyImportPlan, buildImportPlan, type ImportPlan } from "../scripts/lib/static-import";
 import { createTestDatabase } from "./helpers/test-database";
 
-// Replaces every media URL with the SHA-256 of the file it serves, so that the
-// comparison is by content: deduplication legitimately serves a shared asset
-// from one copy's URL.
-function byContent(value: unknown, plan: ImportPlan): unknown {
-  if (typeof value === "string") {
-    const key = mediaKeyFromUrl(value);
-    const file = key ? plan.inventory.files.get(key) : undefined;
-    return file?.exists ? `sha256:${file.sha256}` : value;
-  }
-  if (Array.isArray(value)) return value.map((v) => byContent(v, plan));
-  if (value && typeof value === "object") {
-    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, byContent(v, plan)]));
-  }
-  return value;
-}
-
-function diffs(a: unknown, b: unknown, path = ""): string[] {
-  if (Object.is(a, b)) return [];
-  if (!a || !b || typeof a !== "object" || typeof b !== "object" || Array.isArray(a) !== Array.isArray(b)) {
-    return [path || "(root)"];
-  }
-  const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
-  return [...keys].flatMap((k) =>
-    diffs((a as Record<string, unknown>)[k], (b as Record<string, unknown>)[k], path ? `${path}.${k}` : k),
-  );
-}
+const byContent = (value: unknown, plan: ImportPlan) => byContentOf(value, plan.inventory.files);
 
 describe("static content → database: import and adapter parity", () => {
   let database: Awaited<ReturnType<typeof createTestDatabase>>;
@@ -145,6 +120,12 @@ describe("static content → database: import and adapter parity", () => {
     } finally {
       await q("update projects set deleted_at = null where slug = 'court'");
     }
+  });
+
+  test("every public route is identical by content, as db:verify reports it", async () => {
+    const results = await compareGateways(db, staticGateway, plan.inventory.files);
+    assert.equal(results.length, 14);
+    assert.deepEqual(results.filter((r) => r.diffs.length), []);
   });
 
   test("About and Contact stay static", async () => {

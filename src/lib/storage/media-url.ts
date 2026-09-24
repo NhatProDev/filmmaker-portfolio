@@ -19,7 +19,8 @@ export function mediaUrl(key: string): string {
 
 // The key behind a URL that mediaUrl produced; null for any other URL.
 export function mediaKeyFromUrl(url: string): string | null {
-  const prefix = getMediaStorage().publicUrl("");
+  // The prefix comes from a real key: adapters may refuse an empty one (s3).
+  const prefix = getMediaStorage().publicUrl("k").slice(0, -1);
   if (!url.startsWith(prefix)) return null;
   const key = url.slice(prefix.length);
   try {

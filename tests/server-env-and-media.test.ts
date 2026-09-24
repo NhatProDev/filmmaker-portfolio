@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 import { parseServerEnv } from "@/lib/env/server-env";
-import { createLocalMediaStorage, mediaKeys, MediaStorageUnsupportedError } from "@/lib/storage/media-storage";
+import {
+  createLocalMediaStorage,
+  createS3MediaStorage,
+  mediaKeys,
+  MediaStorageUnsupportedError,
+  setMediaStorageForTesting,
+} from "@/lib/storage/media-storage";
 import { assertMediaKey, mediaKeyFromUrl, mediaUrl } from "@/lib/storage/media-url";
 
 describe("server environment", () => {
@@ -38,6 +44,29 @@ describe("media URL resolution", () => {
   test("mediaKeyFromUrl inverts mediaUrl and ignores foreign URLs", () => {
     assert.equal(mediaKeyFromUrl(mediaUrl("works/desk-01.jpg")), "works/desk-01.jpg");
     assert.equal(mediaKeyFromUrl("https://example.com/a.jpg"), null);
+  });
+  test("mediaKeyFromUrl works with the s3 adapter, which refuses an empty key", () => {
+    setMediaStorageForTesting(
+      createS3MediaStorage({
+        endpoint: "https://acct.r2.cloudflarestorage.com",
+        region: "auto",
+        publicBucket: "portfolio-public",
+        privateBucket: "portfolio-private",
+        accessKeyId: "id",
+        secretAccessKey: "secret",
+        pathStyle: true,
+        publicBaseUrl: "https://pub-0123.r2.dev",
+        uploadTtlSeconds: 300,
+      }),
+    );
+    try {
+      assert.equal(mediaKeyFromUrl("https://pub-0123.r2.dev/home/n1.mp4"), "home/n1.mp4");
+      assert.equal(mediaKeyFromUrl(mediaUrl("works/desk-01.jpg")), "works/desk-01.jpg");
+      assert.equal(mediaKeyFromUrl("https://pub-0123.r2.dev/"), null);
+      assert.equal(mediaKeyFromUrl("/media/home/n1.mp4"), null);
+    } finally {
+      setMediaStorageForTesting(undefined);
+    }
   });
   test("a configured base changes only the root", () => {
     const storage = createLocalMediaStorage("https://cdn.example.com/media");

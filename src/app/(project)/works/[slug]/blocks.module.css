@@ -1,0 +1,343 @@
+/* Generic Project Detail blocks (Phase 3A): every block the composer can place
+   that is not one of the locked presets. They are drawn in the page's own
+   system, from project.module.css's tiers (--edge, --gut, --band, measured on
+   the `page` container), its 12 columns, its type values and its dark room.
+   Nothing here is authored: placement arrives as logical columns, sizes as
+   closed names. The locked presets keep project.module.css unchanged.
+
+   Breakpoints are the composer's fixed set, on the page container: desktop
+   1024 and above, tablet 700–1023, mobile below 700 — the page's own tiers. */
+
+/* ---- Rhythm ---- */
+
+/* A block opens one band below the previous one, inside the page edges. */
+.section {
+  padding: var(--band) var(--edge) 0;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gut);
+}
+
+/* ---- GRID: logical placement ---- */
+
+/* Desktop is authored; tablet derives from desktop unless overridden; mobile
+   stacks full width in document order unless overridden (ADR-0006 §5). A
+   cell without placement spans the row. */
+.grid {
+  row-gap: calc(var(--gut) * 3);
+  align-items: start;
+}
+
+.cell {
+  grid-column: var(--d-start, 1) / span var(--d-span, 12);
+  justify-self: var(--align, stretch);
+  align-self: var(--valign, start);
+  min-width: 0;
+}
+
+@container page (width < 1024px) {
+  .cell {
+    grid-column: var(--t-start, var(--d-start, 1)) / span var(--t-span, var(--d-span, 12));
+  }
+}
+
+@container page (width < 700px) {
+  .cell {
+    grid-column: var(--m-start, 1) / span var(--m-span, 12);
+    justify-self: stretch;
+  }
+}
+
+/* ---- TEXT ---- */
+
+/* At the top level a text block reads in the statement's column: 5–10, 6–12
+   below 1024, full width below 700. */
+.textColumn {
+  grid-column: 5 / 11;
+}
+
+@container page (width < 1024px) {
+  .textColumn {
+    grid-column: 6 / 13;
+  }
+}
+
+@container page (width < 700px) {
+  .textColumn {
+    grid-column: 1 / -1;
+  }
+}
+
+.text p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+.text p + p {
+  margin-top: 1em;
+}
+
+/* Roles are the page's existing type values, not new ones. */
+.text[data-role="body"] {
+  max-width: 46ch;
+  font-size: 17px;
+  line-height: 1.74;
+  color: var(--muted-dark);
+}
+
+.text[data-role="lead"],
+.text[data-role="statement"] {
+  max-width: 24ch;
+  font-size: 26px;
+  line-height: 1.32;
+}
+
+.text[data-role="aside"],
+.text[data-role="caption"] {
+  max-width: 36ch;
+  font-size: 15px;
+  line-height: 1.74;
+  color: var(--muted-dark);
+}
+
+.text[data-role="display"] {
+  font-family: var(--font-display-title);
+  font-weight: 400;
+  font-size: clamp(27px, 6.913cqw, 53px);
+  line-height: 1.02;
+  letter-spacing: var(--display-track);
+  text-transform: uppercase;
+  color: #f4efe6;
+  text-wrap: balance;
+}
+
+.text[data-role="more"] {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+@container page (width < 600px) {
+  .text[data-role="lead"],
+  .text[data-role="statement"] {
+    font-size: 22px;
+  }
+}
+
+.inlineLink,
+.inlineLink:hover {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--rule-dark);
+  text-underline-offset: 4px;
+}
+
+/* Derived facts and credits outside their presets: the preset rows. */
+.facts,
+.credits {
+  margin: 0;
+  max-width: 360px;
+  font-size: 15px;
+}
+
+.credits {
+  line-height: 1.95;
+}
+
+/* ---- IMAGE, VIDEO, HERO ---- */
+
+.figure {
+  margin: 0;
+}
+
+/* Native aspect, the full width of what holds it. */
+.native {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: var(--frame);
+}
+
+.caption {
+  margin: 12px 0 0;
+  max-width: 36ch;
+  font-size: 15px;
+  line-height: 1.74;
+  color: var(--muted-dark);
+  text-wrap: pretty;
+}
+
+/* A media frame at the media's own aspect ratio. */
+.frame {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: var(--aspect, 16 / 9);
+  background: var(--frame);
+}
+
+.fill {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.contain {
+  object-fit: contain;
+}
+
+/* A HERO below the opening: full bleed, like the coda — the media's own
+   height at full width, held between 0.375 × width and 0.78 × the screen. */
+.hero {
+  margin: var(--band) 0 0;
+}
+
+.heroFrame {
+  position: relative;
+  overflow: hidden;
+  height: max(37.5cqw, min(100cqw / var(--aspect, 1.778), 78svh));
+  background: var(--frame);
+}
+
+.heroCaption {
+  margin-left: var(--edge);
+  margin-right: var(--edge);
+}
+
+/* ---- CLICK_TO_PLAY outside the opening ---- */
+
+.clickVideo {
+  background: #000;
+  opacity: 0;
+}
+
+.clickVideo[data-started] {
+  opacity: 1;
+}
+
+/* The opening's affordance, at its smallest size. */
+.play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: content-box;
+  width: 56px;
+  height: 56px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid rgba(237, 231, 221, 0.78);
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.24);
+  color: inherit;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+}
+
+.play:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.playMark {
+  width: 0;
+  height: 0;
+  margin-left: 4px;
+  border-left: 11px solid rgba(237, 231, 221, 0.94);
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+}
+
+/* ---- SPACER ---- */
+
+.spacer[data-size="S"] {
+  height: calc(var(--band) / 2);
+}
+
+.spacer[data-size="M"] {
+  height: var(--band);
+}
+
+.spacer[data-size="L"] {
+  height: calc(var(--band) * 2);
+}
+
+/* ---- GALLERY ---- */
+
+.galleryLabel {
+  margin: 0 0 16px;
+  font-size: 15px;
+  font-style: italic;
+  color: var(--muted-dark);
+}
+
+/* VIDEO_GRID: a column flow per breakpoint, falling at narrower widths. */
+.wall {
+  display: grid;
+  grid-template-columns: repeat(var(--cols-d, 3), minmax(0, 1fr));
+  gap: 4px;
+}
+
+@container page (width < 1024px) {
+  .wall {
+    grid-template-columns: repeat(var(--cols-t, 2), minmax(0, 1fr));
+  }
+}
+
+@container page (width < 700px) {
+  .wall {
+    grid-template-columns: repeat(var(--cols-m, 1), minmax(0, 1fr));
+  }
+}
+
+.tile {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  background: var(--frame);
+}
+
+/* HORIZONTAL_STRIP: one row at a common height, scrolled sideways.
+   SLIDESHOW: one item per view, snapping. */
+.strip,
+.slides {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+}
+
+.strip:focus-visible,
+.slides:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.slide {
+  position: relative;
+  flex: none;
+  overflow: hidden;
+  scroll-snap-align: start;
+  background: var(--frame);
+}
+
+.strip .slide {
+  height: clamp(200px, 36cqw, 520px);
+  aspect-ratio: var(--aspect, 1.5);
+}
+
+.slides .slide {
+  width: 100%;
+  aspect-ratio: var(--aspect, 1.5);
+  max-height: 78svh;
+}

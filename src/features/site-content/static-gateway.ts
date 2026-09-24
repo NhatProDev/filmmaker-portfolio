@@ -4,6 +4,7 @@ import { home } from "@/content/home";
 import { projectDetails } from "@/content/projects";
 import { works } from "@/content/works";
 import type { ContentGateway } from "./site-content.types";
+import { staticProjectContent } from "./static-project-blocks";
 
 // Serves the content committed with the code (src/content/*) unchanged. Works
 // order is array order, which stands for displayPosition.
@@ -22,13 +23,15 @@ export const staticGateway: ContentGateway = {
     if (index < 0) return null;
     const { title, year, cover } = projects[index];
     const next = projects[(index + 1) % projects.length];
+    const detail = projectDetails[slug] ?? null;
     return {
       slug,
       title,
       year,
       cover,
       displayPosition: index,
-      detail: projectDetails[slug] ?? null,
+      ...staticProjectContent(year, cover, detail),
+      detail,
       next: { slug: next.slug, title: next.title },
     };
   },

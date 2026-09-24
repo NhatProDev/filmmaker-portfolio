@@ -29,7 +29,7 @@ import type {
 
 export class ContentProjectionError extends Error {}
 
-function fail(where: string, message: string): never {
+export function fail(where: string, message: string): never {
   throw new ContentProjectionError(`${where}: ${message}`);
 }
 
@@ -53,7 +53,7 @@ export function createMediaIndex(records: readonly MediaRecord[], url: MediaInde
   return { get: (id) => byId.get(id), url };
 }
 
-type ParsedBlock = {
+export type ParsedBlock = {
   id: string;
   data: BlockData;
   media: BlockMediaRecord[];
@@ -91,7 +91,7 @@ export { treeMediaIds } from "@/features/project-builder/snapshot";
 
 // ---- Media ----
 
-function liveMedia(index: MediaIndex, id: string, where: string): MediaRecord & { storageKey: string } {
+export function liveMedia(index: MediaIndex, id: string, where: string): MediaRecord & { storageKey: string } {
   const asset = index.get(id);
   if (!asset) fail(where, `media ${id} is missing or deleted`);
   if (asset.status !== "READY") fail(where, `media ${id} is ${asset.status}, not READY`);
@@ -99,14 +99,14 @@ function liveMedia(index: MediaIndex, id: string, where: string): MediaRecord & 
   return asset as MediaRecord & { storageKey: string };
 }
 
-function image(index: MediaIndex, id: string, alt: string, where: string): HomeImage & ProjectImage {
+export function image(index: MediaIndex, id: string, alt: string, where: string): HomeImage & ProjectImage {
   const asset = liveMedia(index, id, where);
   if (asset.type !== "IMAGE") fail(where, `media ${id} is ${asset.type}, not IMAGE`);
   if (!asset.width || !asset.height) fail(where, `image ${id} has no dimensions`);
   return { src: index.url(asset), width: asset.width, height: asset.height, alt };
 }
 
-function videoSrc(index: MediaIndex, id: string, where: string): string {
+export function videoSrc(index: MediaIndex, id: string, where: string): string {
   const asset = liveMedia(index, id, where);
   // The locked pages play hosted video only; EXTERNAL_VIDEO has no renderer yet.
   if (asset.type !== "VIDEO") fail(where, `media ${id} is ${asset.type}, not a hosted VIDEO`);
@@ -117,7 +117,7 @@ function videoSrc(index: MediaIndex, id: string, where: string): string {
 // asset's default. The locked pages always draw a poster image, so the next
 // steps of the chain — a provider thumbnail, then an empty frame — cannot be
 // rendered here, and a video with neither poster is refused.
-function poster(index: MediaIndex, item: BlockMediaRecord, alt: string, where: string) {
+export function poster(index: MediaIndex, item: BlockMediaRecord, alt: string, where: string) {
   const video = liveMedia(index, item.mediaId, where);
   const posterId = item.posterMediaId ?? video.posterMediaId;
   if (!posterId) fail(where, `video ${video.id} has no poster`);
@@ -125,11 +125,11 @@ function poster(index: MediaIndex, item: BlockMediaRecord, alt: string, where: s
 }
 
 // Placement override, then the asset's default, then decorative (ADR-0011).
-function altFor(index: MediaIndex, item: BlockMediaRecord): string {
+export function altFor(index: MediaIndex, item: BlockMediaRecord): string {
   return item.altText ?? index.get(item.mediaId)?.altText ?? "";
 }
 
-function onlyMedia(block: ParsedBlock, where: string): BlockMediaRecord {
+export function onlyMedia(block: ParsedBlock, where: string): BlockMediaRecord {
   if (block.media.length !== 1) fail(where, `a ${block.data.type} needs exactly one media item, found ${block.media.length}`);
   return block.media[0];
 }
@@ -141,7 +141,7 @@ function plain(paragraph: Paragraph, where: string): string {
   return paragraph.join("");
 }
 
-function richText(block: ParsedBlock, role: string, paragraphs: number, where: string): Paragraph[] {
+export function richText(block: ParsedBlock, role: string, paragraphs: number, where: string): Paragraph[] {
   const { data } = block;
   if (data.type !== "TEXT" || data.content.kind !== "richText") fail(where, "expected a rich-text TEXT block");
   if (data.config.role !== role) fail(where, `expected the "${role}" text role, found "${data.config.role ?? "none"}"`);

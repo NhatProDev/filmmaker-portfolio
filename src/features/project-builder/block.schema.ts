@@ -84,6 +84,9 @@ export const GRID_PRESETS = [
 export const GALLERY_PRESETS = ["homeWall"] as const;
 export const IMAGE_PRESETS = ["projectCoda"] as const;
 
+// Each preset belongs to one kind of page (presets.ts describes them).
+const PAGE_PRESETS: readonly string[] = ["homeIdentity", "homeAbout", "homeWall"];
+
 // ---- Per-type content and config ----
 
 // The bounded title overlay (ADR-0010): a closed object with no authored text;
@@ -237,6 +240,12 @@ function contextIssues(block: BlockData, context: BlockContext): string[] {
   }
   if (block.type === "TEXT" && block.content.kind !== "richText" && context.owner !== "project") {
     issues.push(`content.kind: ${block.content.kind} is derived from a project and needs a project owner`);
+  }
+  const preset = "preset" in block.config ? block.config.preset : undefined;
+  if (preset) {
+    const presetOwner = PAGE_PRESETS.includes(preset) ? "page" : "project";
+    if (presetOwner !== context.owner) issues.push(`config.preset: ${preset} belongs to ${presetOwner === "page" ? "Home" : "Project Detail"}`);
+    if (context.parentType !== null) issues.push(`config.preset: a ${preset} block sits at the top level of its page, not inside a GRID`);
   }
   return issues;
 }

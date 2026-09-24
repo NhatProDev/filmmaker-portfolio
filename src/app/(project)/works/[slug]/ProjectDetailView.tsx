@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 import { AutoplayVideo } from "@/components/media/AutoplayVideo";
 import type { ProjectPage } from "@/features/site-content/site-content.types";
+import { ProjectBlocksView } from "./ProjectBlocksView";
 import { ProjectOpening } from "./ProjectOpening";
 import { titleBootstrap } from "./titlePlacement";
 import styles from "./project.module.css";
@@ -23,6 +24,9 @@ function Fact({ label, value }: { label: string; value: string | number }) {
 // is visual order at every width. Rendered for a public project, a private
 // project after access is verified, and an admin's preview.
 export function ProjectDetailView({ project }: { project: ProjectPage }) {
+  // Temporary, for the Phase 3A parity check: the generic block renderer draws
+  // the page when PROJECT_DETAIL_RENDERER=blocks at build time.
+  if (process.env.PROJECT_DETAIL_RENDERER === "blocks") return <ProjectBlocksView project={project} />;
   const { title, year, cover, detail, next } = project;
   const film = detail?.film;
 

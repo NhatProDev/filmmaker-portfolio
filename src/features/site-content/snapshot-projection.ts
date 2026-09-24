@@ -11,6 +11,7 @@ import {
   worksProject,
   type MediaIndex,
 } from "./db-projection";
+import { projectPageContent, type ProjectPageContent } from "./project-blocks";
 import type { HomeContent, ProjectDetail, WorksProject } from "./site-content.types";
 
 // The published snapshots (ADR-0012) and their projection onto the locked
@@ -85,14 +86,14 @@ export function projectRecord(snapshot: ProjectSnapshot, slug: string): PublicPr
   };
 }
 
-export type RenderedProject = { works: WorksProject; detail: ProjectDetail | null };
+export type RenderedProject = { works: WorksProject; detail: ProjectDetail | null; page: ProjectPageContent };
 
 export function renderProject(snapshot: ProjectSnapshot, slug: string, url?: MediaIndex["url"]): RenderedProject {
   const record = projectRecord(snapshot, slug);
   const index = createMediaIndex(snapshot.media, url);
   const works = worksProject(record, index);
   const tree = parseTree(snapshot.blocks, "project", `project ${slug}`);
-  return { works, detail: projectDetail(record, tree, index) };
+  return { works, detail: projectDetail(record, tree, index), page: projectPageContent(record, tree, index, works.cover) };
 }
 
 export function renderHome(snapshot: PageSnapshot, footer: HomeContent["footer"], url?: MediaIndex["url"]): HomeContent {

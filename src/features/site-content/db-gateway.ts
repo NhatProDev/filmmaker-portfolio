@@ -48,7 +48,7 @@ export function createDbGateway(db: Database): ContentGateway {
     next: { slug: string; title: string },
     url?: MediaIndex["url"],
   ): ProjectPage {
-    const { works, detail } = renderProject(snapshot, slug, url);
+    const { works, detail, page: content } = renderProject(snapshot, slug, url);
     const { seoTitle, seoDescription, shortDescription } = snapshot.project;
     const description = seoDescription ?? shortDescription;
     const seo = {
@@ -62,6 +62,7 @@ export function createDbGateway(db: Database): ContentGateway {
       cover: works.cover,
       displayPosition,
       ...(Object.keys(seo).length ? { seo } : {}),
+      ...content,
       detail,
       next,
     };

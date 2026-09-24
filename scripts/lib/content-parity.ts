@@ -4,7 +4,9 @@ import type { ProbedMedia } from "./media-probe";
 
 // Compares what two content gateways serve, route by route, by content: every
 // media URL is replaced by the SHA-256 of the file it serves, because
-// de-duplication legitimately serves a shared asset from one copy's URL.
+// de-duplication legitimately serves a shared asset from one copy's URL. Block
+// ids are dropped: they are the renderer's keys (a database id or a static
+// name), not content.
 
 export function byContent(value: unknown, files: ReadonlyMap<string, ProbedMedia>): unknown {
   if (typeof value === "string") {
@@ -14,7 +16,11 @@ export function byContent(value: unknown, files: ReadonlyMap<string, ProbedMedia
   }
   if (Array.isArray(value)) return value.map((v) => byContent(v, files));
   if (value && typeof value === "object") {
-    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, byContent(v, files)]));
+    return Object.fromEntries(
+      Object.entries(value)
+        .filter(([k]) => k !== "id")
+        .map(([k, v]) => [k, byContent(v, files)]),
+    );
   }
   return value;
 }

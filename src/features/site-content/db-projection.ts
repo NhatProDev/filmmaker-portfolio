@@ -9,23 +9,22 @@ import {
   type Paragraph,
 } from "@/features/project-builder/block.schema";
 import type { PublicProjectRecord } from "@/features/projects/project.repository";
-import { projectCreditsSchema } from "@/features/projects/project.schema";
 import { isPrivateKey } from "@/lib/storage/media-storage";
 import { mediaUrl } from "@/lib/storage/media-url";
 import type {
   HomeContent,
   HomeImage,
-  ProjectDetail,
   ProjectImage,
   WallItem,
   WorksCover,
   WorksProject,
 } from "./site-content.types";
 
-// Maps stored rows into the view models the locked public pages consume.
-// Until a generic block renderer exists, the pages are fixed templates, so a
-// stored composition either fits the template or is refused: nothing is
-// silently reordered, dropped or invented (ADR-0013 §4).
+// Maps stored rows into the view models the public pages consume: the shared
+// validation and media resolution, Art Works, and Home's fixed template.
+// Project Detail is composed by the generic block projection
+// (project-blocks.ts). A stored composition a page cannot draw is refused:
+// nothing is silently reordered, dropped or invented (ADR-0013 §4).
 
 export class ContentProjectionError extends Error {}
 
@@ -170,133 +169,6 @@ export function worksProject(project: PublicProjectRecord, index: MediaIndex): W
     cover: worksCover(project, index),
     ...(project.previewMediaId ? { preview: videoSrc(index, project.previewMediaId, where) } : {}),
   };
-}
-
-// ---- Project Detail: the 1B template ----
-
-const PROJECT_SLOTS = ["hero", "meta", "stills", "loop", "credits", "coda"] as const;
-type ProjectSlot = (typeof PROJECT_SLOTS)[number];
-
-function projectSlot({ data }: ParsedBlock): ProjectSlot | null {
-  if (data.type === "HERO") return "hero";
-  if (data.type === "GRID" && data.config.preset === "projectMeta") return "meta";
-  if (data.type === "GRID" && data.config.preset === "projectStills") return "stills";
-  if (data.type === "GRID" && data.config.preset === "projectLoop") return "loop";
-  if (data.type === "GRID" && data.config.preset === "projectCredits") return "credits";
-  if (data.type === "IMAGE" && data.config.preset === "projectCoda") return "coda";
-  return null;
-}
-
-// null when the project has no composition: its page shows its identity only.
-export function projectDetail(
-  project: PublicProjectRecord,
-  tree: ParsedBlock[],
-  index: MediaIndex,
-): ProjectDetail | null {
-  if (!tree.length) return null;
-  const where = `project ${project.slug}`;
-  const detail: ProjectDetail = {
-    ...(project.client !== null ? { client: project.client } : {}),
-    ...(project.runtime !== null ? { runtime: project.runtime } : {}),
-    ...(project.role !== null ? { role: project.role } : {}),
-    credits: [],
-    stills: [],
-  };
-
-  let previous = -1;
-  const seen = new Set<ProjectSlot>();
-  for (const block of tree) {
-    const slot = projectSlot(block);
-    const at = `${where}, block ${block.id}`;
-    if (!slot) fail(at, `a ${block.data.type} of this kind has no place in the Project Detail template`);
-    const order = PROJECT_SLOTS.indexOf(slot);
-    if (order <= previous) fail(at, `the "${slot}" block is out of the template's order or repeated`);
-    previous = order;
-    seen.add(slot);
-    const { data } = block;
-
-    if (slot === "hero" && data.type === "HERO") {
-      const { overlay, playback } = data.config;
-      if (data.content.caption) fail(at, "the project HERO carries no caption");
-      if (
-        !overlay?.enabled ||
-        overlay.anchor !== "bottom-start" ||
-        overlay.colStart !== 1 ||
-        overlay.colSpan !== 8 ||
-        !overlay.showBackToWorks
-      ) {
-        fail(at, "the Project Detail HERO renders its title overlay bottom-start on columns 1–8, with Back to works");
-      }
-      const item = onlyMedia(block, at);
-      const asset = liveMedia(index, item.mediaId, at);
-      if (asset.type === "VIDEO") {
-        if (playback?.mode !== "CLICK_TO_PLAY") fail(at, "the Project Detail film is CLICK_TO_PLAY");
-        if (!asset.width || !asset.height) fail(at, `video ${asset.id} has no dimensions`);
-        detail.film = {
-          src: videoSrc(index, asset.id, at),
-          width: asset.width,
-          height: asset.height,
-          poster: poster(index, item, altFor(index, item), at),
-        };
-      } else if (asset.id !== project.coverMediaId) {
-        fail(at, "an IMAGE HERO shows the project's cover");
-      }
-    }
-
-    if (slot === "meta") {
-      const [facts, statement, ...rest] = block.children;
-      if (!facts || facts.data.type !== "TEXT" || facts.data.content.kind !== "projectFacts") {
-        fail(at, "projectMeta starts with the derived projectFacts text");
-      }
-      if (rest.length) fail(at, "projectMeta holds the facts and at most one statement");
-      if (statement) {
-        const [lead, body] = richText(statement, "statement", 2, `${at}, statement`);
-        detail.statement = { lead: plain(lead, at), body: plain(body, at) };
-      }
-    }
-
-    if (slot === "stills") {
-      for (const child of block.children) {
-        if (child.data.type !== "IMAGE") fail(at, "projectStills holds IMAGE blocks only");
-        const item = onlyMedia(child, at);
-        detail.stills.push(image(index, item.mediaId, altFor(index, item), at));
-      }
-    }
-
-    if (slot === "loop") {
-      const [video, caption, ...rest] = block.children;
-      if (!video || video.data.type !== "VIDEO" || video.data.config.playback.mode !== "AUTOPLAY_VISIBLE") {
-        fail(at, "projectLoop starts with an AUTOPLAY_VISIBLE VIDEO");
-      }
-      if (!caption || rest.length) fail(at, "projectLoop holds the video and its caption");
-      const item = onlyMedia(video, at);
-      detail.loop = {
-        src: videoSrc(index, item.mediaId, at),
-        poster: poster(index, item, altFor(index, item), at),
-        caption: plain(richText(caption, "caption", 1, `${at}, caption`)[0], at),
-      };
-    }
-
-    if (slot === "credits") {
-      const [credits, ...rest] = block.children;
-      if (!credits || rest.length || credits.data.type !== "TEXT" || credits.data.content.kind !== "projectCredits") {
-        fail(at, "projectCredits holds the derived projectCredits text");
-      }
-      const parsed = projectCreditsSchema.safeParse(project.credits);
-      if (!parsed.success) fail(at, "projects.credits is not a valid credit list");
-      detail.credits = parsed.data;
-    }
-
-    if (slot === "coda") {
-      const item = onlyMedia(block, at);
-      detail.coda = image(index, item.mediaId, altFor(index, item), at);
-    }
-  }
-
-  // The locked page always shows the facts, so a composition without them
-  // cannot be rendered faithfully.
-  if (!seen.has("meta")) fail(where, "the Project Detail template needs its projectMeta block");
-  return detail;
 }
 
 // ---- Home ----

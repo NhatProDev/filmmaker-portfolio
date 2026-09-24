@@ -14,8 +14,9 @@
   - its visible blocks (hidden blocks are never published);
   - a record of every media asset they reference.
 
-  The snapshot must pass its Zod schema, and it must render exactly on the
-  locked templates (`renderProject` / `renderHome`). If either fails, publish
+  The snapshot must pass its Zod schema, and it must render: a project on the
+  generic block renderer (`renderProject`, Phase 3A), Home on its locked
+  template (`renderHome`). If either fails, publish
   answers `422 PROJECT_NOT_PUBLISHABLE` or `422 PAGE_NOT_PUBLISHABLE` with the
   reasons, and nothing is written.
 - **One snapshot per owner.** Snapshots live in `project_publications` and

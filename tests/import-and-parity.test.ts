@@ -5,13 +5,19 @@ import { createMediaRepository } from "@/features/media/media.repository";
 import { createProjectPublicationService } from "@/features/projects/publication.service";
 import { createDbGateway } from "@/features/site-content/db-gateway";
 import { ContentProjectionError } from "@/features/site-content/db-projection";
-import type { ContentGateway } from "@/features/site-content/site-content.types";
+import type { ContentGateway, ProjectBlock, ProjectPage } from "@/features/site-content/site-content.types";
 import { staticGateway } from "@/features/site-content/static-gateway";
 import { byContent as byContentOf, compareGateways, diffs } from "../scripts/lib/content-parity";
 import { applyImportPlan, buildImportPlan, type ImportPlan } from "../scripts/lib/static-import";
 import { createTestDatabase } from "./helpers/test-database";
 
 const byContent = (value: unknown, plan: ImportPlan) => byContentOf(value, plan.inventory.files);
+
+// The rendered page's blocks of one type.
+const blocksOf = <T extends ProjectBlock["type"]>(page: ProjectPage | null | undefined, type: T) =>
+  (page?.blocks ?? []).filter((block): block is Extract<ProjectBlock, { type: T }> => block.type === type);
+const codaOf = (page: ProjectPage | null | undefined) => blocksOf(page, "projectCoda")[0];
+const stillsOf = (page: ProjectPage | null | undefined) => blocksOf(page, "projectStills")[0]?.stills ?? [];
 
 describe("static content → database: import and adapter parity", () => {
   let database: Awaited<ReturnType<typeof createTestDatabase>>;
@@ -166,27 +172,43 @@ describe("static content → database: import and adapter parity", () => {
     await q(`update project_blocks set is_hidden = true where id in (${coda}, ${still})`);
     try {
       // Live: unchanged until publish.
-      assert.ok((await db.getProjectPage("made-to-measure"))?.detail?.coda);
+      assert.ok(codaOf(await db.getProjectPage("made-to-measure")));
       // Preview: the working copy, without the hidden blocks.
-      const preview = (await db.previewProjectPage("made-to-measure")).value?.detail;
-      assert.equal(preview?.coda, undefined);
-      assert.equal(preview?.stills.length, 3);
+      const preview = (await db.previewProjectPage("made-to-measure")).value;
+      assert.equal(codaOf(preview), undefined);
+      assert.equal(stillsOf(preview).length, 3);
       await publisher().publish(await projectId(), null);
-      const live = (await db.getProjectPage("made-to-measure"))?.detail;
-      assert.equal(live?.coda, undefined);
-      assert.equal(live?.stills.length, 3);
+      const live = await db.getProjectPage("made-to-measure");
+      assert.equal(codaOf(live), undefined);
+      assert.equal(stillsOf(live).length, 3);
     } finally {
       await q("update project_blocks set is_hidden = false");
       await publisher().publish(await projectId(), null);
     }
-    assert.ok((await db.getProjectPage("made-to-measure"))?.detail?.coda);
+    assert.ok(codaOf(await db.getProjectPage("made-to-measure")));
   });
 
-  test("a composition the locked page cannot render is refused at publish, not reshuffled", async () => {
+  test("the author's block order is published as it is", async () => {
     const stills = `(select id from project_blocks where config->>'preset' = 'projectStills')`;
     const coda = `(select id from project_blocks where config->>'preset' = 'projectCoda')`;
-    await q(`update project_blocks set position = 99 where id = ${coda}`);
-    await q(`update project_blocks set position = 100 where id = ${stills}`);
+    await q(`update project_blocks set position = 2 where id = ${coda}`);
+    await q(`update project_blocks set position = 5 where id = ${stills}`);
+    try {
+      await publisher().publish(await projectId(), null);
+      const types = (await db.getProjectPage("made-to-measure"))!.blocks.map((block) => block.type);
+      assert.deepEqual(types, ["opening", "projectMeta", "projectCoda", "projectLoop", "projectCredits", "projectStills"]);
+    } finally {
+      await q(`update project_blocks set position = 2 where id = ${stills}`);
+      await q(`update project_blocks set position = 5 where id = ${coda}`);
+      await publisher().publish(await projectId(), null);
+    }
+  });
+
+  test("a composition the renderer cannot draw is refused at publish, not reshuffled", async () => {
+    const hero = `(select id from project_blocks where type = 'HERO' and project_id is not null)`;
+    const coda = `(select id from project_blocks where config->>'preset' = 'projectCoda')`;
+    await q(`update project_blocks set position = 99 where id = ${hero}`);
+    await q(`update project_blocks set position = 0 where id = ${coda}`);
     try {
       await assert.rejects(publisher().publish(await projectId(), null), (error: Error & { code?: string }) => {
         assert.equal(error.code, "PROJECT_NOT_PUBLISHABLE");
@@ -194,11 +216,11 @@ describe("static content → database: import and adapter parity", () => {
       });
       const preview = await db.previewProjectPage("made-to-measure");
       assert.equal(preview.value, null);
-      assert.match(preview.issue!, /out of the template's order/);
+      assert.match(preview.issue!, /opens the page, so it comes first/);
       // What is live is untouched.
-      assert.ok((await db.getProjectPage("made-to-measure"))?.detail?.coda);
+      assert.ok(codaOf(await db.getProjectPage("made-to-measure")));
     } finally {
-      await q(`update project_blocks set position = 2 where id = ${stills}`);
+      await q(`update project_blocks set position = 0 where id = ${hero}`);
       await q(`update project_blocks set position = 5 where id = ${coda}`);
     }
   });

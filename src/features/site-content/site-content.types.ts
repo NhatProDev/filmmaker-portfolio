@@ -72,6 +72,9 @@ export type ProjectCredit = {
   name: string;
 };
 
+// The committed Project Detail content (src/content/projects.ts), in the shape
+// of the locked 1B page it was written from. The static adapter serves it as
+// blocks (static-project-blocks.ts) and the import stores it as blocks.
 export type ProjectDetail = {
   client?: string;
   runtime?: string;
@@ -174,9 +177,6 @@ export type ProjectPage = {
   facts: ProjectFacts;
   credits: ProjectCredit[];
   blocks: ProjectBlock[];
-  // The fixed 1B template's view model, drawn by the legacy view until the
-  // block renderer's cutover (Phase 3A).
-  detail: ProjectDetail | null;
   // The next project in the public listing's displayPosition order, wrapping
   // after the last. Only listed projects can be next, so a PRIVATE project is
   // never named here (ADR-0003).

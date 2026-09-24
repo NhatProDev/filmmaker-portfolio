@@ -76,7 +76,7 @@ describe("publishing: one current snapshot, public reads only it (ADR-0012)", ()
     await ctx.as("DELETE", `/blocks/${coda.id}`);
     const usages = (await ctx.as("GET", `/media/${still.id}/usages`)).body.data;
     assert.ok(usages.some((u: { kind: string; projectId: string }) => u.kind === "PUBLISHED_PROJECT" && u.projectId === projectId));
-    assert.ok((await createDbGateway(ctx.database.db).getProjectPage("rehearsal"))?.detail?.coda);
+    assert.ok((await createDbGateway(ctx.database.db).getProjectPage("rehearsal"))?.blocks.some((b) => b.type === "projectCoda"));
   });
 
   test("unpublish removes the snapshot; archive and delete do too", async () => {
@@ -221,7 +221,8 @@ describe("private projects (CLAUDE.md §11, ADR-0003; §17.1–3)", () => {
     assert.ok(!text.match(/argon2|passwordHash/));
 
     const page = await createDbGateway(ctx.database.db).getPrivateProjectPage("client-cut", id);
-    assert.equal(page?.detail?.coda?.src, `/api/v1/public/projects/client-cut/media/${secretStill}`);
+    const coda = page?.blocks.find((b) => b.type === "projectCoda");
+    assert.equal(coda?.type === "projectCoda" && coda.image.src, `/api/v1/public/projects/client-cut/media/${secretStill}`);
 
     // The cookie is for this project: another slug's cookie name does not match.
     const other = await api("GET", "/public/projects/client-cut", { cookie: cookie.replace("client-cut=", "other=") });

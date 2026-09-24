@@ -7,6 +7,7 @@ import { createPagePublicationService } from "@/features/project-builder/page-pu
 import { createPublicationRepository } from "@/features/project-builder/publication.repository";
 import { createProjectPublicationService } from "@/features/projects/publication.service";
 import type { ContentGateway, HomeContent, ProjectDetail, WorksProject } from "@/features/site-content/site-content.types";
+import { staticProjectDetail } from "@/features/site-content/static-gateway";
 import { mediaKeyFromUrl } from "@/lib/storage/media-url";
 import { probeMediaFile, type ProbedMedia } from "./media-probe";
 
@@ -114,7 +115,7 @@ async function collectPlacements(gateway: ContentGateway, issues: string[]) {
 
   const details = new Map<string, ProjectDetail>();
   for (const slug of await gateway.listPublicProjectSlugs()) {
-    const detail = (await gateway.getProjectPage(slug))?.detail;
+    const detail = staticProjectDetail(slug);
     if (!detail) continue;
     details.set(slug, detail);
     const at = `projects/${slug}`;

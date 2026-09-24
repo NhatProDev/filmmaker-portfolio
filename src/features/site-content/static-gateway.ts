@@ -3,7 +3,7 @@ import { contact } from "@/content/contact";
 import { home } from "@/content/home";
 import { projectDetails } from "@/content/projects";
 import { works } from "@/content/works";
-import type { ContentGateway } from "./site-content.types";
+import type { ContentGateway, ProjectDetail } from "./site-content.types";
 import { staticProjectContent } from "./static-project-blocks";
 
 // Serves the content committed with the code (src/content/*) unchanged. Works
@@ -31,7 +31,6 @@ export const staticGateway: ContentGateway = {
       cover,
       displayPosition: index,
       ...staticProjectContent(year, cover, detail),
-      detail,
       next: { slug: next.slug, title: next.title },
     };
   },
@@ -73,3 +72,9 @@ export const staticGateway: ContentGateway = {
     return { value: home, issue: null };
   },
 };
+
+// The committed Project Detail content in its authored shape, for the import
+// (scripts/lib/static-import.ts), which stores it as blocks.
+export function staticProjectDetail(slug: string): ProjectDetail | null {
+  return projectDetails[slug] ?? null;
+}

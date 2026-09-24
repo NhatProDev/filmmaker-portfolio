@@ -10,11 +10,13 @@
 // nothing. A non-local database needs --confirm-remote=<host>/<database>.
 
 import { createDatabase } from "@db/client";
-import { pagePublications, pages, projectPublications, projects } from "@db/schema";
+import { albumPublications, albums, pagePublications, pages, projectPublications, projects } from "@db/schema";
 import { eq } from "drizzle-orm";
 import { checkHealth } from "@/features/operations/health.service";
 import { pageSnapshotIssues } from "@/features/project-builder/page-publication.service";
+import type { PageKey } from "@/features/project-builder/page.service";
 import { projectSnapshotIssues } from "@/features/projects/publication.service";
+import { albumIssues } from "@/features/site-content/album-projection";
 import { staticGateway } from "@/features/site-content/static-gateway";
 import { serverEnv } from "@/lib/env/server-env";
 import { createMediaStorageFromEnv } from "@/lib/storage/media-storage";
@@ -48,10 +50,19 @@ async function main() {
       .select({ key: pages.key, snapshot: pagePublications.snapshot })
       .from(pagePublications)
       .innerJoin(pages, eq(pages.id, pagePublications.pageId));
+    // Each page by its own contract: HOME a composition, ABOUT, CONTACT and
+    // SITE structured content (ADR-0017).
     for (const row of pageRows) {
-      for (const issue of pageSnapshotIssues(row.snapshot)) failures.push(`page ${row.key}: ${issue}`);
+      for (const issue of pageSnapshotIssues(row.snapshot, row.key as PageKey)) failures.push(`page ${row.key}: ${issue}`);
     }
-    console.log(`published snapshots: ${published.length} project(s), ${pageRows.length} page(s)`);
+    const albumRows = await handle.db
+      .select({ slug: albums.slug, snapshot: albumPublications.snapshot })
+      .from(albumPublications)
+      .innerJoin(albums, eq(albums.id, albumPublications.albumId));
+    for (const row of albumRows) {
+      for (const issue of albumIssues(row.snapshot, row.slug)) failures.push(`album ${row.slug}: ${issue}`);
+    }
+    console.log(`published snapshots: ${published.length} project(s), ${pageRows.length} page(s), ${albumRows.length} album(s)`);
 
     if (env.MEDIA_STORAGE_PROVIDER === "local") {
       const storage = createMediaStorageFromEnv(env);

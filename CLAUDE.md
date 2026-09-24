@@ -514,8 +514,11 @@ One-off CSS scaling is not an acceptable production solution and must not ship.
 **The method is decided by ADR-0016:** clean masters first (upload the active
 picture, without bars); for a file that cannot be re-exported, a stored,
 closed-enum active area on the asset, applied by the renderer to each layer from
-its own asset; no automatic detection in V1. Implementation is additive and
-pending; until then assets render as encoded.
+its own asset; no automatic detection in V1. It is implemented (Phase 3B,
+migration `0008`: `media.active_picture`) for surfaces drawn by the generic
+block renderer. The locked opening, presets, Home and `JUSTIFIED_ROWS` still
+render assets as encoded; applying it there is a design review (ADR-0016
+Decision 4).
 
 Whichever method is chosen must apply **identically to a poster and its video**,
 or the poster-to-video swap produces a visible scale jump (ADR-0009 §5).

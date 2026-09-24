@@ -7,8 +7,9 @@ permission. Nothing reads the confirmation from the environment, so it cannot
 be left switched on. **Take a backup (§4) before any remote write.**
 
 The commands below are written for the production target
-`<host>/<database>`; substitute the real values. In Phase 2G-A none of them was
-run against a remote database.
+`<host>/<database>`; substitute the real values. In production they run with
+the Git-ignored `.env.prod-ops` (`environment.md`, Secrets handling), not
+`.env.local`: `npx tsx --env-file=.env.prod-ops scripts/db-migrate.ts --confirm-remote=…`.
 
 ## 1. Migrate
 

@@ -29,7 +29,7 @@ build-time variables for both.
 | Variable | Default | Production | Purpose |
 |---|---|---|---|
 | `SITE_CONTENT_ADAPTER` | `static` | `db` | Where public content comes from. |
-| `DATABASE_URL` | — | required | `postgres://…`. Behind a transaction pooler (Neon's pooled URL) also set `DATABASE_PREPARE=false`. |
+| `DATABASE_URL` | — | required | `postgres://…?sslmode=verify-full`. Behind a transaction pooler (Neon's pooled URL) also set `DATABASE_PREPARE=false`. postgres.js verifies the server certificate only with `sslmode=verify-full` (`require` encrypts without verifying), and it does not support `channel_binding`: remove that parameter from a provider's copy-paste string. |
 | `DATABASE_POOL_MAX` | 10 | 1–5 on serverless | Connections per instance. |
 | `DATABASE_PREPARE` | `true` | `false` behind a pooler | Named prepared statements. |
 | `SITE_URL` | `http://localhost:3000` (fallback) | required, https | Bare public origin. Enables HSTS and `upgrade-insecure-requests` in production. Also accepted by the CSRF origin check. |
@@ -49,6 +49,13 @@ build-time variables for both.
 | `VIDEO_PROVIDER` | `none` | `none` | Reserved for Mux / Cloudflare Stream; any other value is refused until implemented. |
 
 ## Secrets handling
+
+- Run production scripts from a separate, Git-ignored file, never `.env.local`:
+  `npx tsx --env-file=.env.prod-ops scripts/<script>.ts …`. Next.js loads
+  `.env.local` into every `next dev` and `.env.production.local` into every
+  local `next build`, so either name would point local servers at production.
+  Next.js never loads `.env.prod-ops`. For migrations and `pg_dump` it holds the
+  **direct** (non-pooled) `DATABASE_URL`.
 
 - Generate secrets with a CSPRNG, e.g.
   `node -e "console.log(require('crypto').randomBytes(36).toString('base64'))"`.

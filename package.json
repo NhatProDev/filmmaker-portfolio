@@ -2,6 +2,9 @@
   "name": "filmmaker-portfolio",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -17,6 +20,8 @@
     "db:verify": "tsx --env-file-if-exists=.env.local scripts/verify-content.ts",
     "db:health": "tsx --env-file-if-exists=.env.local scripts/db-health.ts",
     "media:manifest": "tsx --env-file-if-exists=.env.local scripts/media-manifest.ts",
+    "media:upload": "tsx --env-file-if-exists=.env.local scripts/media-upload.ts",
+    "storage:check": "tsx --env-file-if-exists=.env.local scripts/storage-check.ts",
     "env:check": "tsx --env-file-if-exists=.env.local scripts/check-env.ts"
   },
   "dependencies": {

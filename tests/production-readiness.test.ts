@@ -19,7 +19,8 @@ import {
 } from "@/lib/storage/media-storage";
 import { presignS3 } from "@/lib/storage/s3-presign";
 import { assertDatabaseTarget } from "../scripts/lib/database-target";
-import { buildMediaManifest } from "../scripts/lib/media-manifest";
+import { buildMediaManifest, type ManifestEntry, type MediaManifest } from "../scripts/lib/media-manifest";
+import { CACHE_CONTROL, decideUpload, uploadItems } from "../scripts/lib/media-upload";
 import { probeMediaFile } from "../scripts/lib/media-probe";
 import { buildImportPlan } from "../scripts/lib/static-import";
 import { api, cookieFrom, createApiTestContext } from "./helpers/api";
@@ -63,7 +64,7 @@ describe("environment contract (docs/operations/environment.md)", () => {
     const ready = parseServerEnv({
       SITE_URL: "https://www.example.com",
       SITE_CONTENT_ADAPTER: "db",
-      DATABASE_URL: "postgres://u@db.example.com/portfolio",
+      DATABASE_URL: "postgres://u@db.example.com/portfolio?sslmode=verify-full",
       PROJECT_ACCESS_SECRET: "x".repeat(40),
       CLIENT_IP_HEADER: "x-real-ip",
       MEDIA_STORAGE_PROVIDER: "s3",
@@ -75,6 +76,79 @@ describe("environment contract (docs/operations/environment.md)", () => {
       S3_SECRET_ACCESS_KEY: "secret",
     });
     assert.deepEqual(productionIssues(ready), []);
+  });
+
+  test("a remote database connection must verify the server certificate", () => {
+    const withUrl = (DATABASE_URL: string) => productionIssues(parseServerEnv({ SITE_CONTENT_ADAPTER: "db", DATABASE_URL }));
+    const tls = /sslmode=verify-full/;
+    assert.ok(withUrl("postgres://u@ep-x-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require").some((i) => tls.test(i)));
+    assert.ok(withUrl("postgres://u@ep-x.ap-southeast-1.aws.neon.tech/neondb").some((i) => tls.test(i)));
+    assert.ok(!withUrl("postgres://u@ep-x.ap-southeast-1.aws.neon.tech/neondb?sslmode=verify-full").some((i) => tls.test(i)));
+    assert.ok(!withUrl("postgres://u@127.0.0.1:5432/portfolio").some((i) => tls.test(i)));
+    // The driver would send channel_binding to the server, which refuses it.
+    assert.throws(
+      () => parseServerEnv({ DATABASE_URL: "postgresql://u@ep-x.aws.neon.tech/neondb?sslmode=require&channel_binding=require" }),
+      /channel_binding/,
+    );
+  });
+});
+
+describe("media upload plan (docs/operations/media-migration.md §3)", () => {
+  const entry = (overrides: Partial<ManifestEntry> & { key: string; sha256: string; bucket?: "public" | "private" }): ManifestEntry => ({
+    id: overrides.id ?? null,
+    origin: "database",
+    type: "IMAGE",
+    status: "READY",
+    deleted: false,
+    checksumSha256: overrides.sha256,
+    source: { provider: "local", key: overrides.key, path: `/media/${overrides.key}`, exists: true, byteSize: 10, sha256: overrides.sha256 },
+    audience: overrides.bucket ?? "public",
+    deploy: overrides.deploy ?? true,
+    target: { bucket: overrides.bucket ?? "public", key: overrides.key },
+    mimeType: "image/jpeg",
+    width: null,
+    height: null,
+    durationMs: null,
+    posters: { defaultPosterId: null, defaultPosterOf: [], placementPosterUses: 0 },
+    usages: [],
+  });
+  const manifest = (entries: ManifestEntry[]) => ({ entries }) as MediaManifest;
+
+  test("only deployed entries upload, once per target, with the bucket's cache policy", () => {
+    const { items, problems } = uploadItems(
+      manifest([
+        entry({ id: "a", key: "home/a.jpg", sha256: "aa" }),
+        entry({ id: "b", key: "home/a.jpg", sha256: "aa" }),
+        entry({ id: "c", key: "private/p.jpg", sha256: "cc", bucket: "private" }),
+        entry({ id: "d", key: "home/d.jpg", sha256: "dd", deploy: false }),
+      ]),
+    );
+    assert.deepEqual(problems, []);
+    assert.deepEqual(
+      items.map((i) => [i.bucket, i.key, i.cacheControl]),
+      [
+        ["public", "home/a.jpg", CACHE_CONTROL.public],
+        ["private", "private/p.jpg", CACHE_CONTROL.private],
+      ],
+    );
+  });
+
+  test("different bytes under one target, or a missing source, block the upload", () => {
+    const missing = entry({ id: "m", key: "home/m.jpg", sha256: "mm" });
+    missing.source = { ...missing.source, exists: false };
+    const { problems } = uploadItems(
+      manifest([entry({ id: "a", key: "home/a.jpg", sha256: "aa" }), entry({ id: "b", key: "home/a.jpg", sha256: "bb" }), missing]),
+    );
+    assert.equal(problems.length, 2);
+  });
+
+  test("an existing object is never overwritten: same bytes are unchanged, other bytes conflict", () => {
+    const local = { byteSize: 10, md5: "0123456789abcdef0123456789abcdef" };
+    assert.equal(decideUpload(local, null), "upload");
+    assert.equal(decideUpload(local, { byteSize: 10, etag: '"0123456789ABCDEF0123456789ABCDEF"' }), "unchanged");
+    assert.equal(decideUpload(local, { byteSize: 11, etag: '"0123456789abcdef0123456789abcdef"' }), "conflict");
+    assert.equal(decideUpload(local, { byteSize: 10, etag: '"ffffffffffffffffffffffffffffffff"' }), "conflict");
+    assert.equal(decideUpload(local, { byteSize: 10, etag: '"0123456789abcdef0123456789abcdef-2"' }), "conflict");
   });
 });
 

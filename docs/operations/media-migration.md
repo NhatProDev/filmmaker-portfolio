@@ -60,8 +60,12 @@ of four stills that are also database assets.
    collisions.
 2. Upload every `deploy: true` entry with `target.bucket = public` to the
    public bucket at `target.key`, with its MIME type as `Content-Type` and a
-   long `Cache-Control` (keys are content-stable).
-3. Verify: object count and sizes match the manifest; spot-check SHA-256.
+   long `Cache-Control` (keys are content-stable):
+   `npm run media:upload -- --manifest=manifest.json` (dry run), then with
+   `--apply`. Create-only: it never overwrites an object with other bytes.
+3. Verify: `npm run media:upload -- --manifest=manifest.json --verify-delivery`
+   reads every public object back through the CDN and compares its SHA-256;
+   a second dry run reports every object `unchanged`.
 4. For `target.bucket = private` entries (none today): upload to the private
    bucket at `target.key`, then update that asset's `storage_key` to the
    `private/` key in one transaction, and republish the projects that use it.

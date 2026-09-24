@@ -15,6 +15,10 @@ const serverEnvSchema = z
       z
         .string()
         .regex(/^postgres(ql)?:\/\//, "must be a postgres:// or postgresql:// connection URL")
+        // postgres.js sends an unknown URL parameter to the server as a
+        // run-time setting, and the server refuses channel_binding as one.
+        // Providers' copy-paste strings include it (Neon).
+        .refine((value) => !/[?&]channel_binding=/.test(value), "must not include channel_binding (postgres.js does not support it)")
         .optional(),
     ),
     DATABASE_POOL_MAX: z.preprocess(emptyAsUnset, z.coerce.number().int().min(1).max(50).optional()),
@@ -131,6 +135,8 @@ export function serverEnv(): ServerEnv {
   return cached;
 }
 
+const isLocalDatabaseUrl = (url: string) => ["", "localhost", "127.0.0.1", "[::1]"].includes(new URL(url).hostname);
+
 // What a public production deployment needs beyond a valid environment
 // (docs/operations/environment.md). Local production builds may leave these
 // unset; `npm run env:check -- --production` refuses to pass without them.
@@ -139,6 +145,11 @@ export function productionIssues(env: ServerEnv): string[] {
   if (!env.SITE_URL) issues.push("SITE_URL is required: canonical links and the sitemap need the public origin");
   else if (!env.SITE_URL.startsWith("https://")) issues.push("SITE_URL must be https in production");
   if (env.SITE_CONTENT_ADAPTER !== "db") issues.push("SITE_CONTENT_ADAPTER must be db: the Studio publishes to the database");
+  // postgres.js encrypts with sslmode=require but verifies the server's
+  // certificate only with verify-full.
+  if (env.DATABASE_URL && !isLocalDatabaseUrl(env.DATABASE_URL) && new URL(env.DATABASE_URL).searchParams.get("sslmode") !== "verify-full") {
+    issues.push("DATABASE_URL must use sslmode=verify-full: other modes do not verify the database server's certificate");
+  }
   if (!env.PROJECT_ACCESS_SECRET) issues.push("PROJECT_ACCESS_SECRET is required: private projects cannot be unlocked without it");
   if (!env.CLIENT_IP_HEADER && env.TRUSTED_PROXY_HOPS === 0) {
     issues.push("CLIENT_IP_HEADER or TRUSTED_PROXY_HOPS is required: without either, every visitor shares one rate-limit address");

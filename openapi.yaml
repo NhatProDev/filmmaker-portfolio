@@ -2134,6 +2134,10 @@ components:
             status:
               type: string
               enum: [ok, degraded, unavailable]
+            release:
+              type: [string, 'null']
+              pattern: '^[0-9a-f]{12}$'
+              description: The first 12 hex digits of the deployed commit, where the platform provides it; otherwise null.
             checks:
               type: object
               additionalProperties: false
